@@ -1,7 +1,7 @@
 // src/constants.js
 export const PLAYER_HEIGHT = 1.8;
 export const PLAYER_SPEED = 5.0;
-export const INTERACTION_DISTANCE = 1.8; // Slightly increased
+export const INTERACTION_DISTANCE = 2.0; // Slightly increased for floor pickup ease
 export const KITCHEN_BOUNDS = { xMin: -4.5, xMax: 4.5, zMin: -4.5, zMax: 4.5 };
 export const COUNTER_HEIGHT = 0.9;
 export const COUNTER_DEPTH = 0.6;
@@ -13,6 +13,7 @@ export const STATION_TYPES = {
     PROCESSOR: 'processor',
     ASSEMBLY: 'assembly',
     SERVING: 'serving',
+    FLOOR: 'floor', // Added type for floor interaction logic
 };
 
 export const ITEM_TYPES = {
@@ -33,3 +34,6 @@ export const GAMEPAD_INTERACT_BUTTON = 0; // Cross (X) / A
 export const GAMEPAD_PAUSE_BUTTON = 9;    // Options / Menu button (common index for PS/Xbox)
 export const GAMEPAD_LOOK_SENSITIVITY_X = 300.0; // Adjust these values to your liking
 export const GAMEPAD_LOOK_SENSITIVITY_Y = 300.0;
+
+// --- ASSEMBLY STATION ---
+export const ASSEMBLY_STATION_CAPACITY = 3; // Max items directly on the station surface

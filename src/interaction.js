@@ -1,145 +1,307 @@
 // src/interaction.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { gsap } from 'gsap'; // Import GSAP
 import { INTERACTION_DISTANCE, STATION_TYPES, ITEM_TYPES, INGREDIENT_STATES } from './constants.js';
 import { createItem, checkPlateCompletion } from './items.js';
-import { removeInteractable } from './world.js'; // To remove items from scene/list
+import { addInteractable, removeInteractable, getAssemblySlotIndex } from './world.js';
 
 export class InteractionManager {
-    constructor(camera, scene, player, stations, interactables, levelManager, uiManager, preloadedModels) {
+    constructor(camera, scene, player, stations, interactables, levelManager, uiManager, preloadedModels, floorMesh) {
         this.camera = camera;
-        this.scene = scene;
+        this.scene = scene; // Store scene reference
         this.player = player;
-        this.stations = stations; // Reference to the stations object from world.js
-        this.interactables = interactables; // Reference to the interactables array from world.js
-        this.levelManager = levelManager; // Store reference
+        this.stations = stations;
+        this.interactables = interactables;
+        this.levelManager = levelManager;
         this.uiManager = uiManager;
-        this.preloadedModels = preloadedModels; // Store reference to preloaded models
+        this.preloadedModels = preloadedModels;
+        this.floorMesh = floorMesh;
         this.raycaster = new THREE.Raycaster();
     }
 
+    // --- Meal Completion Animation ---
+    _animateMealCompletion(plate) {
+        if (!plate || !plate.parent) return;
+
+        const originalScale = plate.scale.clone();
+        const targetScale = originalScale.clone().multiplyScalar(1.15);
+
+        gsap.timeline()
+            .to(plate.scale, { x: targetScale.x, y: targetScale.y, z: targetScale.z, duration: 0.15, ease: "power1.out" })
+            .to(plate.scale, { x: originalScale.x, y: originalScale.y, z: originalScale.z, duration: 0.25, ease: "elastic.out(1, 0.5)" });
+    }
+
     handleInteractionRequest() {
-        const target = this._findTarget();
+        const targetInfo = this._findTarget();
         const heldItem = this.player.getHeldItem();
 
         if (heldItem) {
-            // Try to place or process the item
-            if (target && target.userData.type === 'station') {
-                this._placeOrProcessItem(heldItem, target);
-            } else {
-                // Optional: Implement dropping item on floor
-                console.log("Clicked empty space while holding item. Attempting safe drop.");
-                // Player releases the item logically
+            // --- Placing or Using Held Item ---
+            if (targetInfo) {
+                const targetObject = targetInfo.object;
+                const targetPoint = targetInfo.point;
+
+                // --- Updated Logic ---
+                // Check if the target is specifically the serving counter first
+                if (targetObject.userData?.stationType === STATION_TYPES.SERVING) {
+                    this._placeOrProcessItem(heldItem, targetObject, targetPoint);
+                }
+                // Then check if it's the assembly station (for placing in slots or on plates)
+                else if (targetObject.userData?.stationType === STATION_TYPES.ASSEMBLY) {
+                    this._placeOrProcessItem(heldItem, targetObject, targetPoint);
+                }
+                // Then check if it's a plate *on* the assembly station
+                else if (targetObject.userData?.type === ITEM_TYPES.ITEM &&
+                    this.stations.assembly.userData.slots.includes(targetObject)) {
+                    // Target is the plate itself, but the action context is the assembly station
+                    this._placeOrProcessItem(heldItem, this.stations.assembly, targetPoint, targetObject);
+                }
+                // Then check for other station types (processor, sources etc.)
+                else if (targetObject.userData?.type === 'station') {
+                    this._placeOrProcessItem(heldItem, targetObject, targetPoint);
+                }
+                // Otherwise, drop the item
+                else {
+                    const droppedItem = this.player.place();
+                    if (droppedItem) {
+                        this._dropItem(droppedItem, targetPoint || this.player.getPosition().clone().add(this.camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1.0)));
+                    }
+                }
+                // --- End Updated Logic ---
+
+            } else { // Clicked empty space
                 const droppedItem = this.player.place();
                 if (droppedItem) {
-                    this._dropItem(droppedItem, this.player.getPosition().clone().add(this.camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1.0))); // Drop in front
+                    this._dropItem(droppedItem, this.player.getPosition().clone().add(this.camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1.0)));
                 }
             }
         } else {
-            // Try to pick up an item or use a station
-            if (target) {
-                if (target.userData.type === ITEM_TYPES.INGREDIENT || target.userData.type === ITEM_TYPES.ITEM) {
-                    // Special check: Don't pick up items that are children of a plate on assembly
-                    if (target.parent && target.parent.userData?.itemType === 'plate') {
-                        console.log("Cannot pick up ingredient already on plate. Pick up the plate.");
+            // --- Picking Up or Using Station ---
+            if (targetInfo) {
+                const targetObject = targetInfo.object;
+
+                if (targetObject.userData?.type === ITEM_TYPES.INGREDIENT || targetObject.userData?.type === ITEM_TYPES.ITEM) {
+                    if (targetObject.parent && targetObject.parent.userData?.itemType === 'plate') {
+                        this.uiManager.showTemporaryMessage("Pick up Plate", 1000);
                     } else {
-                        this._pickupItem(target);
+                        this._pickupItem(targetObject);
                     }
-                } else if (target.userData.type === 'station') {
-                    this._useStation(target);
+                }
+                else if (targetObject.userData?.type === 'station') {
+                    this._useStation(targetObject, targetInfo.point);
                 }
             }
         }
     }
 
     _findTarget() {
-        this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera); // Center of screen
-        const potentialTargets = this.interactables.filter(obj => obj !== this.player.getHeldItem()); // Don't target held item
-        const intersects = this.raycaster.intersectObjects(potentialTargets, true); // Check children too (for complex models)
+        this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
+        // Ensure all potential station meshes are included if they aren't in interactables
+        const objectsToCheck = [...this.interactables, this.stations.servingCounter, this.stations.assembly]; // Add key stations
+        const uniqueObjectsToCheck = [...new Set(objectsToCheck)]; // Remove duplicates
 
-        // Find the closest valid intersectable object (not a child mesh unless it's the intended target)
+        const intersects = this.raycaster.intersectObjects(uniqueObjectsToCheck, true);
+
+        let closestInteractable = null;
+        let closestDistance = INTERACTION_DISTANCE;
+        let hitPoint = null;
+
         for (const intersect of intersects) {
-            if (intersect.distance < INTERACTION_DISTANCE) {
-                let object = intersect.object;
-                // Traverse up to find the main interactable object if we hit a child mesh
-                while (object.parent && !this.interactables.includes(object)) {
+            if (intersect.distance > closestDistance) continue;
+
+            let object = intersect.object;
+            // Traverse up to find the object that's actually interactable or a known station
+            while (object.parent && !uniqueObjectsToCheck.includes(object) && object !== this.scene) {
+                // Check if parent is a known station before giving up
+                if (object.parent.userData?.type === 'station' && uniqueObjectsToCheck.includes(object.parent)) {
+                    object = object.parent;
+                    break; // Found the station parent
+                }
+                object = object.parent;
+            }
+
+
+            // Check if it's a valid target (in check list) and not the held item
+            const isValidTarget = uniqueObjectsToCheck.includes(object);
+
+            if (isValidTarget && object !== this.player.getHeldItem()) {
+                // Prioritize plate over ingredient child IF the plate is interactable/in a slot
+                if (object.userData?.type === ITEM_TYPES.INGREDIENT && object.parent?.userData?.itemType === 'plate' && uniqueObjectsToCheck.includes(object.parent)) {
                     object = object.parent;
                 }
-                // Ensure the final object is interactable and not the held item
-                if (this.interactables.includes(object) && object !== this.player.getHeldItem()) {
-                    return object;
+
+                // Check distance again after potential parent swap
+                if (intersect.distance <= INTERACTION_DISTANCE) {
+                    closestInteractable = object;
+                    closestDistance = intersect.distance;
+                    hitPoint = intersect.point;
                 }
             }
         }
-        return null; // No target found
+        // if (closestInteractable) console.log("Target:", closestInteractable.name);
+        return closestInteractable ? { object: closestInteractable, point: hitPoint } : null;
     }
 
 
     _pickupItem(item) {
-        // Check if item is on a station and needs to be taken from there
+        let removedFromStation = false;
         for (const stationName in this.stations) {
             const station = this.stations[stationName];
-            if (station.userData.occupiedBy === item) {
-                station.userData.occupiedBy = null; // Free up the station
+            if (station.userData?.stationType === STATION_TYPES.PROCESSOR && station.userData.occupiedBy === item) {
+                station.userData.occupiedBy = null;
+                removedFromStation = true;
                 break;
             }
         }
-        // Player handles the actual pickup logic
+        const assemblyStation = this.stations.assembly;
+        const slotIndex = assemblyStation.userData.slots.indexOf(item);
+        if (slotIndex > -1) {
+            assemblyStation.userData.slots[slotIndex] = null;
+            removedFromStation = true;
+        }
+
+        if (item.userData?.itemType === 'plate') {
+            // Logs from previous step
+        }
+
         if (this.player.pickup(item)) {
-            // Optional: Add visual cue or sound
+            // Success
         } else {
-            console.log("Cannot pick up item."); // Hands likely full
+            console.log("Cannot pick up item.");
+            this.uiManager.showTemporaryMessage("Hands Full!", 1000);
+            addInteractable(item, this.scene);
+            if (removedFromStation && slotIndex > -1) {
+                assemblyStation.userData.slots[slotIndex] = item;
+            }
         }
     }
 
-    _placeOrProcessItem(item, station) {
-        // Player releases the item *before* we decide what to do with it
+    // This function now correctly routes based on station.userData.stationType
+    _placeOrProcessItem(item, station, targetPoint, targetItemOnStation = null) {
         const itemToPlace = this.player.place();
         if (!itemToPlace || itemToPlace !== item) {
-            console.error("Mismatch between held item and item being placed.");
-            // Attempt to recover - put item back in hand? Or just drop?
-            if (itemToPlace) this._dropItem(itemToPlace, station.position); // Drop near station
+            console.error("Mismatch placing item.");
+            if (itemToPlace) this._dropItem(itemToPlace, station.position);
             return;
         }
 
-        console.log(`Trying to use ${item.name} on ${station.name}`);
         const stationData = station.userData;
 
-        // --- Specific Station Logic ---
+        // --- Route based on the actual station type ---
         switch (stationData.stationType) {
+            case STATION_TYPES.ASSEMBLY:
+                // Pass targetItemOnStation if we were aiming at a plate specifically
+                this._handleAssemblyPlacement(itemToPlace, station, targetPoint, targetItemOnStation);
+                break;
             case STATION_TYPES.PROCESSOR:
-                this._handleProcessorStation(item, station);
+                this._handleProcessorStation(itemToPlace, station);
                 break;
             case STATION_TYPES.SERVING:
-                this._handleServingStation(item, station);
+                // Pass the hit point for accurate placement if serving fails
+                this._handleServingStation(itemToPlace, station, targetPoint);
                 break;
-            case STATION_TYPES.ASSEMBLY:
-                this._handleAssemblyStation(item, station);
-                break;
-            // Add cases for other station types (e.g., trash)
+            // Add cases for ITEM_SOURCE, INGREDIENT_SOURCE if needed (usually just drop)
             default:
-                console.log(`Cannot place ${item.name} on ${station.name}. Invalid station type or action.`);
-                // Item was already released by player.place(), drop it nearby.
-                this._dropItem(item, station.position);
+                // Includes generic counters or unknown station types
+                console.log(`Cannot perform action with ${item.name} on ${station.name}. Dropping.`);
+                // Use the hit point for a more accurate drop location on the surface
+                this._placeItemOnSurfaceVisual(itemToPlace, station, targetPoint);
+                addInteractable(itemToPlace, this.scene); // Make sure it's interactable after dropping
                 break;
         }
     }
 
+
+    _handleAssemblyPlacement(item, station, targetPoint, targetItemOnStation) {
+        const stationData = station.userData;
+        const itemData = item.userData;
+
+        // Case 1: Placing onto a PLATE in a slot
+        if (targetItemOnStation && targetItemOnStation.userData?.itemType === 'plate' && itemData.type === ITEM_TYPES.INGREDIENT) {
+            const plate = targetItemOnStation;
+            const ingredientId = item.name;
+
+            if (plate.userData.contents.includes(ingredientId)) {
+                this.uiManager.showTemporaryMessage("Already Added!", 1000);
+                this._dropItem(item, plate.position); // Drop near plate
+                return;
+            }
+
+            if (!Array.isArray(plate.userData.contents)) {
+                plate.userData.contents = [];
+            }
+            plate.userData.contents.push(ingredientId);
+
+            // Visual Addition
+            const contentCount = plate.children.length;
+            const plateBox = new THREE.Box3().setFromObject(plate);
+            const itemBox = new THREE.Box3().setFromObject(item);
+            const itemHeight = itemBox.max.y - itemBox.min.y;
+            const offsetY = (plateBox.max.y - plateBox.min.y) / 2 + itemHeight / 2 + (contentCount * 0.01);
+            const offsetX = (Math.random() - 0.5) * 0.08;
+            const offsetZ = (Math.random() - 0.5) * 0.08;
+
+            item.position.set(offsetX, offsetY, offsetZ);
+            item.rotation.set(0, Math.random() * Math.PI * 2, 0);
+            plate.add(item);
+
+            if (checkPlateCompletion(plate)) {
+                this.uiManager.showTemporaryMessage(`${plate.userData.mealName} Ready!`, 1500);
+                this._animateMealCompletion(plate);
+            } else {
+                this.uiManager.showTemporaryMessage("Ingredient Added", 1000);
+            }
+            return;
+        }
+
+        // Case 2: Placing directly into an assembly SLOT
+        if (!targetItemOnStation && station.userData.stationType === STATION_TYPES.ASSEMBLY) {
+            const slotIndex = getAssemblySlotIndex(station, targetPoint.x);
+
+            if (stationData.slots[slotIndex] === null) {
+                stationData.slots[slotIndex] = item;
+
+                const slotPosition = stationData.slotPositions[slotIndex];
+                const itemBox = new THREE.Box3().setFromObject(item);
+                const itemHeight = itemBox.max.y - itemBox.min.y;
+                item.position.copy(slotPosition);
+                item.position.y += itemHeight / 2 + 0.005;
+                item.rotation.set(0, Math.random() * Math.PI * 2, 0);
+
+                addInteractable(item, this.scene);
+                this.scene.add(item);
+
+                this.uiManager.showTemporaryMessage("Item Placed", 1000);
+                return;
+            } else {
+                this.uiManager.showTemporaryMessage("Slot Full!", 1000);
+                this._dropItem(item, station.position); // Drop near station center if slot full
+                return;
+            }
+        }
+
+        // Case 3: Invalid placement
+        console.log(`Invalid assembly placement: Cannot place ${item.name} onto ${targetItemOnStation ? targetItemOnStation.name : 'surface/slot'}.`);
+        this.uiManager.showTemporaryMessage("Cannot Place Here", 1000);
+        this._dropItem(item, station.position); // Drop near station center
+    }
+
+
     _dropItem(item, nearPosition) {
-        // Simple drop: place slightly above the ground near the target position
         const dropPos = nearPosition.clone();
-        dropPos.y = 0.1; // Adjust Y to be just above floor
-        // Add small random offset to prevent perfect stacking if dropped repeatedly
+        const itemBox = new THREE.Box3().setFromObject(item);
+        const itemHeight = itemBox.max.y - itemBox.min.y;
+        dropPos.y = Math.max(itemHeight / 2 + 0.01, 0.01);
+
         dropPos.x += (Math.random() - 0.5) * 0.1;
         dropPos.z += (Math.random() - 0.5) * 0.1;
 
         item.position.copy(dropPos);
-        item.rotation.set(0, Math.random() * Math.PI * 2, 0); // Random rotation on floor
-        console.log(`Dropped ${item.name} near ${nearPosition.x.toFixed(1)}, ${nearPosition.z.toFixed(1)}`);
-        // Ensure it's interactable again if it wasn't (e.g., if place failed mid-process)
-        if (!this.interactables.includes(item)) {
-            addInteractable(item);
-        }
-        // Re-enable raycasting if it was disabled
+        item.rotation.set(0, Math.random() * Math.PI * 2, 0);
+
+        addInteractable(item, this.scene);
+        this.scene.add(item);
+
         if (item.userData.originalRaycast) {
             item.raycast = item.userData.originalRaycast;
             delete item.userData.originalRaycast;
@@ -148,255 +310,176 @@ export class InteractionManager {
 
 
     _handleProcessorStation(item, station) {
-        const itemData = item.userData;
         const stationData = station.userData;
 
         if (stationData.occupiedBy) {
-            console.log(`${station.name} is busy.`);
-            this._dropItem(item, station.position); // Drop item nearby
+            this.uiManager.showTemporaryMessage("Station Busy", 1000);
+            this._dropItem(item, station.position);
             return;
         }
 
-        // Determine the correct type to check against station's processes/results
-        // Use the item's unique name for lookup consistency
-        let processLookupType = item.name; // e.g., 'potato', 'raw_fries', 'patty'
+        let processLookupType = item.name;
 
         if (processLookupType && stationData.processes?.includes(processLookupType)) {
-            console.log(`Placing ${item.name} on ${station.name} for processing.`);
-            this._placeItemOnStation(item, station);
+            this._placeItemOnStationVisual(item, station);
             stationData.occupiedBy = item;
-            // Make item non-interactable while processing
             removeInteractable(item);
 
             if (stationData.processingTime) {
-                item.visible = false; // Hide during timed processing
-                console.log(`Processing ${item.name}...`);
+                item.visible = false;
                 setTimeout(() => {
-                    // Ensure the item is still the one processing before finishing
                     if (station.userData.occupiedBy === item) {
                         this._finishProcessing(item, station);
                     } else {
                         console.warn(`Processing finished for ${item.name}, but station ${station.name} is no longer occupied by it.`);
+                        if (item.parent) item.parent.remove(item);
                     }
                 }, stationData.processingTime);
             } else {
-                // Immediate processing (like cutting)
                 this._finishProcessing(item, station);
             }
         } else {
             console.log(`Cannot process ${item.name} (${processLookupType}) on ${station.name}.`);
-            this._dropItem(item, station.position); // Drop item nearby
+            this.uiManager.showTemporaryMessage("Cannot Process", 1000);
+            this._dropItem(item, station.position);
         }
     }
 
     _finishProcessing(processedItem, station) {
         const stationData = station.userData;
-
-        // Determine the result based on the *original* item name used for lookup
-        let resultLookupType = processedItem.name; // e.g., 'potato', 'raw_fries', 'patty'
-
+        let resultLookupType = processedItem.name;
         const resultType = stationData.result?.[resultLookupType];
+
+        const newItemPosition = new THREE.Vector3();
+        processedItem.getWorldPosition(newItemPosition);
+
+        removeInteractable(processedItem);
 
         if (!resultType) {
             console.error(`Processing error: No result defined for ${resultLookupType} on ${station.name}`);
-            processedItem.visible = true; // Make item visible again
-            addInteractable(processedItem); // Make interactable again
-            stationData.occupiedBy = processedItem; // Leave it on the station (or should it be dropped?)
-            // Drop it instead? _dropItem(processedItem, station.position); stationData.occupiedBy = null;
+            stationData.occupiedBy = null;
             return;
         }
 
-        console.log(`${processedItem.name} processed into ${resultType}`);
-        const newItemPosition = processedItem.position.clone(); // Get position before removing original
-
-        // Remove old item completely (was already removed from interactables)
-        if (processedItem.parent) {
-            processedItem.parent.remove(processedItem);
-        }
-        // Optionally dispose geometry/material here if needed
-
-        // Create new item
         const newItem = createItem(this.scene, resultType, this.preloadedModels, undefined, newItemPosition);
         if (newItem) {
-            stationData.occupiedBy = newItem; // Station now holds the result
-            this._placeItemOnStation(newItem, station); // Position it correctly
-            // newItem is added to interactables by createItem
+            stationData.occupiedBy = newItem;
+            this._placeItemOnStationVisual(newItem, station);
+            addInteractable(newItem, this.scene);
         } else {
             console.error(`Failed to create result item: ${resultType}`);
-            stationData.occupiedBy = null; // Processing failed to create item
+            stationData.occupiedBy = null;
         }
     }
 
+    _handleServingStation(item, station, targetPoint) {
+        // Logs from previous step are still useful here
+        console.log(`--- Attempting to Serve ---`);
+        console.log(`Item Name: ${item.name}, Type: ${item.userData?.itemType}, Meal Name on Plate: ${item.userData?.mealName}`);
+        console.log(`LevelManager State: isOrderActive=${this.levelManager.isOrderActive}, Current Order=${this.levelManager.getCurrentOrderName()}`);
 
-    _handleServingStation(item, station) {
         const itemData = item.userData;
 
-        // Check if it's a completed meal (mealName is set on the plate)
         if (itemData.itemType === 'plate' && itemData.mealName) {
-            // --- Call LevelManager to complete order ---
             const success = this.levelManager.completeOrder(itemData.mealName);
+
             if (success) {
-                console.log(`Successfully served ${itemData.mealName}!`);
-                // Remove the plate *and its contents* from the world
-                item.traverse((child) => {
-                    // If children ingredients were added to the plate mesh, remove them too
-                    if (child !== item && child.userData?.type === ITEM_TYPES.INGREDIENT) {
-                        removeInteractable(child); // Remove from logic
-                        // child.parent.remove(child); // Removed by plate removal below
-                    }
-                });
-                removeInteractable(item); // Remove the plate itself from logic and scene
+                console.log(`   ✅ Successfully served ${itemData.mealName}!`);
+                removeInteractable(item);
                 this.uiManager.showTemporaryMessage("Order Served!", 1500);
             } else {
-                // Order was wrong or not active - LevelManager handles logging
+                console.log(`   ❌ Serving failed (LevelManager rejected).`);
                 this.uiManager.showTemporaryMessage("Wrong / No Order!", 1500);
-                this._dropItem(item, station.position); // Drop the plate back
+                this._placeItemOnSurfaceVisual(item, station, targetPoint); // Place visually on counter
+                addInteractable(item, this.scene); // Make interactable again
             }
-            // --- End Call ---
         } else {
-            console.log("This isn't a completed meal on a plate to serve.");
+            console.log("   ❌ This isn't a completed meal on a plate to serve.");
             this.uiManager.showTemporaryMessage("Not a Meal!", 1500);
-            this._dropItem(item, station.position); // Drop the item
+            this._placeItemOnSurfaceVisual(item, station, targetPoint); // Place visually on counter
+            addInteractable(item, this.scene); // Make interactable again
         }
+        console.log(`---------------------------`);
     }
 
-    _handleAssemblyStation(item, station) {
-        const itemData = item.userData;
-        const stationData = station.userData;
 
-        // Placing an empty plate
-        if (itemData.itemType === 'plate' && !stationData.occupiedBy) {
-            console.log(`Placing ${item.name} on assembly area.`);
-            this._placeItemOnStation(item, station);
-            stationData.occupiedBy = item;
-        }
-        // Adding an ingredient to the plate on the station
-        else if (stationData.occupiedBy?.userData.itemType === 'plate' && (itemData.type === ITEM_TYPES.INGREDIENT || itemData.type === ITEM_TYPES.ITEM /* like bun */)) {
-            const plate = stationData.occupiedBy;
-            const ingredientId = item.name; // Use the unique item name
-
-            // Check if this specific ingredient is already on the plate
-            if (plate.userData.contents.includes(ingredientId)) {
-                console.log(`${ingredientId} is already on the plate.`);
-                this.uiManager.showTemporaryMessage("Already Added!", 1000);
-                this._dropItem(item, station.position); // Drop the duplicate item
-                return; // Stop here
-            }
-
-            console.log(`Adding ${ingredientId} to the plate.`);
-            plate.userData.contents.push(ingredientId); // Add to plate's contents
-
-            // --- Visual Addition (Optional but recommended) ---
-            // Make the ingredient a child of the plate mesh for easier management
-            // Calculate offset based on number of items already on plate? Or random placement?
-            const contentCount = plate.children.filter(c => c.userData?.type === ITEM_TYPES.INGREDIENT).length; // Count existing ingredient children
-            const offsetX = (Math.random() - 0.5) * 0.1;
-            const offsetZ = (Math.random() - 0.5) * 0.1;
-            const offsetY = (plate.geometry.parameters.height / 2) + 0.01 + (contentCount * 0.02); // Stack slightly
-
-            // Position relative to plate center BEFORE adding as child
-            item.position.set(offsetX, offsetY, offsetZ);
-            item.rotation.set(0, Math.random() * Math.PI * 2, 0); // Random rotation on plate
-            plate.add(item); // Make it a child
-
-            // IMPORTANT: Item is now physically part of the plate.
-            // It should NOT be in the main 'interactables' list anymore,
-            // as interaction should happen with the plate itself.
-            removeInteractable(item);
-            // Note: Raycasting against the plate will now hit the children too.
-            // _findTarget logic might need adjustment if this causes issues. (Updated _findTarget above)
-            // --- End Visual Addition ---
-
-
-            // --- Check if plate is now a complete meal ---
-            if (checkPlateCompletion(plate)) {
-                this.uiManager.showTemporaryMessage(`${plate.userData.mealName} Ready!`, 1500);
-            } else {
-                this.uiManager.showTemporaryMessage("Ingredient Added", 1000);
-            }
-            // --- End Check ---
-
-            // DO NOT REMOVE THE ITEM HERE - Handled by player.place() earlier
-            // removeInteractable(item); // <<< REMOVED THIS LINE
-
-        } else if (stationData.occupiedBy?.userData.itemType === 'plate') {
-            console.log("Assembly: Cannot add this type of item to the plate.");
-            this.uiManager.showTemporaryMessage("Cannot Add!", 1000);
-            this._dropItem(item, station.position); // Drop item if invalid action
-        }
-        else {
-            console.log("Assembly: Need to place an empty plate first, or add ingredients to an existing plate.");
-            this.uiManager.showTemporaryMessage("Place Plate First!", 1000);
-            this._dropItem(item, station.position); // Drop item if invalid action
-        }
-    }
-
-    _useStation(station) {
+    _useStation(station, hitPoint) {
         const stationData = station.userData;
 
         // 1. Source Stations
         if (stationData.stationType === STATION_TYPES.INGREDIENT_SOURCE || stationData.stationType === STATION_TYPES.ITEM_SOURCE) {
-            if (this.player.getHeldItem()) { console.log("Hands full."); this.uiManager.showTemporaryMessage("Hands Full!", 1000); return; }
+            if (this.player.getHeldItem()) { this.uiManager.showTemporaryMessage("Hands Full!", 1000); return; }
             const itemTypeToCreate = stationData.ingredient || stationData.item;
             if (!itemTypeToCreate) return;
 
-            console.log(`Getting ${itemTypeToCreate}`);
             const newItem = createItem(this.scene, itemTypeToCreate, this.preloadedModels);
             if (newItem) {
-                // Pick up immediately - player handles position update
                 this.player.pickup(newItem);
             } else {
                 console.error(`Failed to create item from source: ${itemTypeToCreate}`);
             }
         }
-        // 2. Pickup from Occupied Stations (Processor, Assembly)
-        else if ((stationData.stationType === STATION_TYPES.PROCESSOR || stationData.stationType === STATION_TYPES.ASSEMBLY) && stationData.occupiedBy) {
-            if (this.player.getHeldItem()) { console.log("Hands full."); this.uiManager.showTemporaryMessage("Hands Full!", 1000); return; }
-
+        // 2. Pickup from Processor Station
+        else if (stationData.stationType === STATION_TYPES.PROCESSOR && stationData.occupiedBy) {
+            if (this.player.getHeldItem()) { this.uiManager.showTemporaryMessage("Hands Full!", 1000); return; }
             const itemToPickup = stationData.occupiedBy;
-
-            // Check if item is visible (relevant for timed processing)
             if (itemToPickup.visible === false) {
-                console.log("Item is still processing.");
                 this.uiManager.showTemporaryMessage("Still Processing...", 1000);
                 return;
             }
-
-            // Log pickup message
-            if (itemToPickup.userData.itemType === 'plate' && itemToPickup.userData.mealName) {
-                console.log(`Picking up completed ${itemToPickup.userData.mealName} plate.`);
-            } else {
-                console.log(`Picking up ${itemToPickup.name} from ${station.name}`);
-            }
-
-            stationData.occupiedBy = null; // Clear station first
-            // If the item was on assembly and had children, they remain children.
-            // Player pickup logic will handle positioning.
-            this.player.pickup(itemToPickup); // Then pickup
+            stationData.occupiedBy = null;
+            this.player.pickup(itemToPickup);
         }
+        // 3. Pickup from Assembly Station Slot
+        else if (stationData.stationType === STATION_TYPES.ASSEMBLY) {
+            if (this.player.getHeldItem()) { this.uiManager.showTemporaryMessage("Hands Full!", 1000); return; }
+
+            const slotIndex = getAssemblySlotIndex(station, hitPoint.x);
+            const itemInSlot = stationData.slots[slotIndex];
+
+            if (itemInSlot) {
+                stationData.slots[slotIndex] = null;
+                this._pickupItem(itemInSlot);
+            } else {
+                this.uiManager.showTemporaryMessage("Slot Empty", 1000);
+            }
+        }
+        // 4. Other station types or empty stations
         else {
-            console.log(`Used station ${station.name}, but no action defined or possible.`);
-            // Provide feedback if station is empty or unusable in this state
-            if (stationData.stationType === STATION_TYPES.PROCESSOR || stationData.stationType === STATION_TYPES.ASSEMBLY) {
+            if (stationData.stationType === STATION_TYPES.PROCESSOR) {
                 this.uiManager.showTemporaryMessage("Station Empty", 1000);
             }
         }
     }
 
-    // Helper to position an item correctly on top of a station mesh
-    _placeItemOnStation(item, station) {
-        // Calculate heights more reliably using bounding boxes
+    _placeItemOnStationVisual(item, station) {
         const stationBox = new THREE.Box3().setFromObject(station);
         const itemBox = new THREE.Box3().setFromObject(item);
-        const stationHeight = stationBox.max.y - stationBox.min.y;
         const itemHeight = itemBox.max.y - itemBox.min.y;
 
-        // Calculate target position
         const targetPos = new THREE.Vector3();
-        stationBox.getCenter(targetPos); // Get center of the station's bounding box
-        targetPos.y = stationBox.max.y + itemHeight / 2 + 0.01; // Place on top surface
+        stationBox.getCenter(targetPos);
+        targetPos.y = stationBox.max.y + itemHeight / 2 + 0.01;
 
         item.position.copy(targetPos);
-        item.rotation.set(0, Math.random() * Math.PI * 2, 0); // Random rotation
+        item.rotation.set(0, Math.random() * Math.PI * 2, 0);
+
+        this.scene.add(item);
+    }
+
+    _placeItemOnSurfaceVisual(item, surfaceMesh, hitPoint) {
+        const itemBox = new THREE.Box3().setFromObject(item);
+        const itemHeight = itemBox.max.y - itemBox.min.y;
+
+        const targetPos = hitPoint.clone();
+        // Ensure Y position is slightly above the hit surface
+        targetPos.y = Math.max(hitPoint.y + itemHeight / 2 + 0.01, itemHeight / 2 + 0.01); // Prevent going below floor if hit point is low
+
+        item.position.copy(targetPos);
+        item.rotation.set(0, Math.random() * Math.PI * 2, 0);
+
+        // console.log(`Placed ${item.name} visually on surface at ${targetPos.x.toFixed(2)}, ${targetPos.y.toFixed(2)}, ${targetPos.z.toFixed(2)}`);
+
+        this.scene.add(item);
     }
 }

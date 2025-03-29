@@ -1,9 +1,7 @@
 // src/main.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-// --- Add Loaders ---
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // Optional: import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-// --- End Add ---
 import { setupScene, setupCamera, setupRenderer, setupLighting, setupResizeHandler } from './setup.js';
 import { PlayerControls } from './controls.js';
 import { Player } from './player.js';
@@ -22,18 +20,13 @@ let preloadedModels = {}; // Store loaded model templates
 const loadingManager = new THREE.LoadingManager();
 const gltfLoader = new GLTFLoader(loadingManager);
 
-// Optional: Setup DRACOLoader if your models use it
-// const dracoLoader = new DRACOLoader(loadingManager);
-// dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/'); // Use correct path
-// gltfLoader.setDRACOLoader(dracoLoader);
-
 const assetsToLoad = {
-    // Add model paths here - MUST match keys used in createItem
-    tomato: 'models/tomato.glb', // <<< IMPORTANT: Create 'models' folder and place 'tomato.glb' here
-    potato: 'models/potato.glb', // <<< IMPORTANT: Create 'models' folder and place 'potato.glb' here
+    tomato: 'models/tomato.glb',
+    potato: 'models/potato.glb',
     chopped_tomato: 'models/chopped_tomato.glb',
     lettuce: 'models/lettuce.glb',
-    // potato: 'models/potato.glb', // Example for future
+    // Add paths for other models if you have them (bun, patty, plate etc.)
+    // 'plate': 'models/plate.glb',
 };
 
 async function preloadAssets() {
@@ -45,20 +38,25 @@ async function preloadAssets() {
             gltfLoader.loadAsync(assetsToLoad[key]).then(gltf => {
                 console.log(`Loaded ${key}`);
                 const model = gltf.scene;
-                // --- Basic processing for template ---
                 model.visible = false; // Hide template
-                // You might need to adjust scale here if model is too big/small
-                // model.scale.set(0.1, 0.1, 0.1);
-                // --- End Basic processing ---
+                // Apply necessary transformations/settings to the template model
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        // Optional: Adjust material properties if needed
+                    }
+                });
+                // Example scale adjustment (uncomment and adjust if needed)
+                // if (key === 'tomato') model.scale.set(0.5, 0.5, 0.5);
+
                 preloadedModels[key] = model; // Store the template scene
             }).catch(error => {
                 console.error(`Failed to load ${key}:`, error);
-                // Decide how to handle errors - skip model, use primitive?
             })
         );
     }
 
-    // Handle Loading Manager events (optional: for progress bar)
     loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
         console.log(`Loading file: ${url} (${itemsLoaded}/${itemsTotal})`);
         // Update loading bar UI here
@@ -70,8 +68,8 @@ async function preloadAssets() {
 
     await Promise.all(promises);
     console.log("Asset preloading complete.");
-    document.getElementById('loading-screen').style.display = 'none'; // Hide loading screen
-    document.getElementById('instructions').style.display = 'block'; // Show instructions
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('instructions').style.display = 'block';
 }
 // --- End Asset Loading ---
 
@@ -87,18 +85,19 @@ function initializeGameComponents() {
     setupResizeHandler(camera, renderer);
 
     playerControls = new PlayerControls(camera, renderer.domElement);
-    scene.add(playerControls.object);
+    scene.add(playerControls.object); // Add camera rig to scene
 
     player = new Player(playerControls);
+    player.setScene(scene); // Give player reference to the scene
+
     uiManager = new UIManager();
     levelManager = new LevelManager(uiManager);
-    const { stations, interactables } = buildKitchen(scene); // Build kitchen *after* scene setup
+    // Build kitchen returns stations, interactables list, and floor mesh
+    const { stations, interactables, floorMesh } = buildKitchen(scene);
 
-    // --- Pass preloadedModels to InteractionManager ---
-    interactionManager = new InteractionManager(camera, scene, player, stations, interactables, levelManager, uiManager, preloadedModels);
-    // --- End Pass ---
+    // Pass preloadedModels and floorMesh to InteractionManager
+    interactionManager = new InteractionManager(camera, scene, player, stations, interactables, levelManager, uiManager, preloadedModels, floorMesh);
 
-    // Add UI element references after DOM is ready and components exist
     setupUIEventListeners();
 
     // Ensure initial label state matches checkbox
@@ -109,7 +108,7 @@ function initializeGameComponents() {
 // --- End Initialization ---
 
 
-// --- UI Elements & Listeners (Setup moved to function) ---
+// --- UI Elements & Listeners ---
 let settingsMenu, resumeButton, toggleLabelsCheckbox, levelEndScreen, nextLevelButton, restartLevelButton, instructionsScreen;
 
 function setupUIEventListeners() {
@@ -127,49 +126,59 @@ function setupUIEventListeners() {
     });
     nextLevelButton.addEventListener('click', () => {
         const currentLevel = parseInt(levelEndScreen.dataset.levelIndex, 10);
-        uiManager.hideLevelEndScreen();
-        levelManager.loadLevel(currentLevel + 1);
-        playerControls.lock();
+        if (!isNaN(currentLevel) && currentLevel >= 0) {
+            uiManager.hideLevelEndScreen();
+            levelManager.loadLevel(currentLevel + 1); // Load next level
+            // No need to lock here, lock happens on resume/start
+        }
     });
     restartLevelButton.addEventListener('click', () => {
         const currentLevel = parseInt(levelEndScreen.dataset.levelIndex, 10);
+        uiManager.hideLevelEndScreen();
         if (restartLevelButton.textContent.includes('Play Again')) {
-            uiManager.hideLevelEndScreen();
-            levelManager.loadLevel(0);
+            levelManager.loadLevel(0); // Restart from level 1
+        } else if (!isNaN(currentLevel) && currentLevel >= 0) {
+            levelManager.loadLevel(currentLevel); // Restart current level
         } else {
-            uiManager.hideLevelEndScreen();
-            levelManager.loadLevel(currentLevel);
+            levelManager.loadLevel(0); // Fallback: start level 0
         }
-        playerControls.lock();
+        // No need to lock here, lock happens on resume/start
     });
-    instructionsScreen.addEventListener('click', startGame);
+    instructionsScreen.addEventListener('click', startGame); // Use named function
 }
 // --- End UI Elements & Listeners ---
 
 
 // --- Game State Logic ---
 function startGame() {
-    if (gameHasStarted || !levelManager) return; // Ensure levelManager exists
+    // Ensure components are initialized and game hasn't started
+    if (!levelManager || !playerControls || gameHasStarted) return;
+
+    console.log("Starting game...");
     gameHasStarted = true;
+    isPaused = false; // Ensure not paused
     instructionsScreen.style.display = 'none';
-    levelManager.loadLevel(0);
-    playerControls.lock();
+    settingsMenu.style.display = 'none'; // Ensure settings menu is hidden
+    levelManager.loadLevel(0); // Load the first level
+    playerControls.lock(); // Lock controls to start playing
 }
 
 function togglePause(forceState = null) {
-    if (!levelManager || (!levelManager.isRunning() && forceState !== false)) return;
-    // ... (rest of togglePause remains the same) ...
+    // Allow pausing only if the game has started and a level is running or paused
+    if (!gameHasStarted || (!levelManager.isRunning() && !isPaused && forceState !== false)) return;
+
     const newState = forceState !== null ? forceState : !isPaused;
-    if (newState === isPaused) return;
+    if (newState === isPaused) return; // No change
 
     console.log(`Toggling pause. Current: ${isPaused}, New: ${newState}`);
     isPaused = newState;
 
     if (isPaused) {
         settingsMenu.style.display = 'flex';
-        playerControls.unlock();
+        playerControls.unlock(); // Unlock mouse when paused
     } else {
         settingsMenu.style.display = 'none';
+        // Only lock controls if a level is actually running
         if (levelManager.isRunning()) {
             playerControls.lock();
         }
@@ -186,9 +195,14 @@ function animate() {
     requestAnimationFrame(animate);
 
     // Ensure components are initialized before running loop logic
-    if (!renderer || !levelManager) return;
+    if (!renderer || !levelManager || !player || !interactionManager || !playerControls || !uiManager) {
+        // console.log("Waiting for components..."); // Debug log
+        return;
+    }
 
+    // Handle Pause Request (Keyboard or Gamepad)
     if (playerControls.consumePauseToggleRequest()) {
+        // Allow pause toggle even from instructions screen if game has started logic is adjusted
         togglePause();
     }
 
@@ -200,37 +214,50 @@ function animate() {
     for (const gp of gamepads) { if (gp && gp.connected) { activeGamepad = gp; break; } }
 
     if (activeGamepad) {
-        playerControls.handleGamepadInput(activeGamepad, delta); // Pass delta for look sensitivity
-        if (!gameHasStarted && playerControls.consumeInteractionRequest()) {
+        playerControls.handleGamepadInput(activeGamepad, delta);
+        // Handle starting game with gamepad from instructions screen
+        if (!gameHasStarted && instructionsScreen.style.display !== 'none' && playerControls.consumeInteractionRequest()) {
             startGame();
         }
     } else {
-        playerControls.handleGamepadInput(null, delta);
+        playerControls.handleGamepadInput(null, delta); // Handle disconnection
     }
-    if (uiManager) uiManager.updateGamepadStatus(playerControls.gamepadConnected);
+    uiManager.updateGamepadStatus(playerControls.gamepadConnected);
     // --- End Gamepad ---
 
 
-    if (isPaused || !levelManager.isRunning()) {
+    // If paused, only render the scene and return
+    if (isPaused) {
         renderer.render(scene, camera);
         return;
     }
 
-    // --- Game Logic ---
-    levelManager.update(delta);
+    // --- Game Logic (Runs only if not paused) ---
 
+    // Update level state (timers, orders) only if a level is running
+    if (levelManager.isRunning()) {
+        levelManager.update(delta);
+    }
+
+    // Update player movement and interactions only if controls are locked
     if (playerControls.isLocked) {
         const movementInput = playerControls.getMovementInput();
-        player.update(delta, movementInput);
+        player.update(delta, movementInput); // Update player position, held item visuals
 
+        // Handle interaction requests (mouse click or gamepad button)
         if (playerControls.consumeInteractionRequest()) {
             interactionManager.handleInteractionRequest();
         }
-        if (uiManager) uiManager.updateHolding(player.getHeldItem()?.name);
+        // Update UI holding status based on player state
+        uiManager.updateHolding(player.getHeldItem()?.name);
     } else {
+        // If controls are not locked (e.g., menu open, instructions visible)
+        // Ensure holding UI is cleared
         if (uiManager) uiManager.updateHolding(null);
+        // Player update is skipped, no movement or interaction checks needed
     }
 
+    // Render the scene regardless of pause state (unless returned earlier)
     renderer.render(scene, camera);
 }
 // --- End Main Loop ---
@@ -238,9 +265,17 @@ function animate() {
 
 // --- Start Execution ---
 async function runGame() {
-    await preloadAssets(); // Wait for models to load
-    initializeGameComponents(); // Setup scene, managers, UI listeners etc.
-    animate(); // Start the main loop
+    try {
+        await preloadAssets(); // Wait for models to load
+        initializeGameComponents(); // Setup scene, managers, UI listeners etc.
+        animate(); // Start the main loop
+    } catch (error) {
+        console.error("Failed to initialize or run the game:", error);
+        // Display error message to the user?
+        document.getElementById('loading-screen').innerHTML = `<h2>Error loading game. Please check console.</h2><p>${error.message}</p>`;
+        document.getElementById('loading-screen').style.display = 'flex';
+        document.getElementById('instructions').style.display = 'none';
+    }
 }
 
 runGame(); // Initiate the game loading and startup
