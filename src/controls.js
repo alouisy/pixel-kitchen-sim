@@ -1,13 +1,13 @@
 // src/controls.js
 import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
-import { GAMEPAD_DEADZONE, GAMEPAD_INTERACT_BUTTON, GAMEPAD_PAUSE_BUTTON, GAMEPAD_LOOK_SENSITIVITY_X, GAMEPAD_LOOK_SENSITIVITY_Y } from './constants.js'; // Import new constant
+import { GAMEPAD_DEADZONE, GAMEPAD_INTERACT_BUTTON, GAMEPAD_PAUSE_BUTTON, GAMEPAD_LOOK_SENSITIVITY_X, GAMEPAD_LOOK_SENSITIVITY_Y } from './constants.js';
 
 export class PlayerControls {
     constructor(camera, domElement) {
         this._pointerLockControls = new PointerLockControls(camera, domElement);
-        this._domElement = domElement; // Store reference to the element controls listen on
+        this._domElement = domElement;
 
-        // Keyboard states        
+        // Keyboard states
         this.kbMovingForward = false;
         this.kbMovingBackward = false;
         this.kbMovingLeft = false;
@@ -20,63 +20,65 @@ export class PlayerControls {
         this.gpMovingRight = false;
 
         this.gamepadConnected = false;
-        this.prevGamepadButtons = []; // Store previous frame's button states
+        this.prevGamepadButtons = [];
 
-        this.interactRequested = false; // Flag for interaction requests
+        this.interactRequested = false;
+        this.pauseToggleRequested = false; // Added flag for pause toggle
 
-        this.instructions = document.getElementById('instructions');
-        this.crosshair = document.getElementById('crosshair');
+        // Remove reference to instructions element
+        // this.instructions = document.getElementById('instructions');
+        this.crosshair = document.getElementById('crosshair'); // Keep crosshair reference
 
         this._addEventListeners();
     }
 
     _addEventListeners() {
-        this.instructions.addEventListener('click', () => {
-            this._pointerLockControls.lock();
-        });
+        // Remove listener for instructions element
+        // this.instructions.addEventListener('click', () => {
+        //     this._pointerLockControls.lock();
+        // });
 
         this._pointerLockControls.addEventListener('lock', () => {
-            this.instructions.style.display = 'none';
-            this.crosshair.style.display = 'block';
+            // Don't show instructions on lock anymore
+            // this.instructions.style.display = 'none';
+            if (this.crosshair) this.crosshair.style.display = 'block'; // Show crosshair on lock
         });
 
         this._pointerLockControls.addEventListener('unlock', () => {
-            // Don't show instructions automatically on unlock if pausing
-            if (!document.getElementById('settings-menu').style.display || document.getElementById('settings-menu').style.display === 'none') {
-                this.instructions.style.display = ''; // Show only if not paused
-            }
-            this.crosshair.style.display = 'none';
-            // Reset movement keys on unlock to prevent sticky movement
+            // Don't show instructions on unlock
+            // if (!document.getElementById('settings-menu').style.display || document.getElementById('settings-menu').style.display === 'none') {
+            //     this.instructions.style.display = '';
+            // }
+            if (this.crosshair) this.crosshair.style.display = 'none'; // Hide crosshair on unlock
+            // Reset movement keys on unlock
             this.kbMovingForward = this.kbMovingBackward = this.kbMovingLeft = this.kbMovingRight = false;
-            this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false; // Reset flags
+            this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
         });
 
         document.addEventListener('keydown', (event) => this._onKeyDown(event));
         document.addEventListener('keyup', (event) => this._onKeyUp(event));
+        // Keep click listener for in-game interaction
         document.addEventListener('click', () => this._onClick());
 
-        // --- Optional: Listen for gamepad connection/disconnection ---
         window.addEventListener('gamepadconnected', (event) => {
             console.log('Gamepad connected:', event.gamepad.id);
             this.gamepadConnected = true;
-            // You could store the specific gamepad index here if needed
         });
 
         window.addEventListener('gamepaddisconnected', (event) => {
             console.log('Gamepad disconnected:', event.gamepad.id);
             this.gamepadConnected = false;
-            // Reset gamepad-specific states if necessary
             this.prevGamepadButtons = [];
-            this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false; // Reset flags
+            this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
         });
     }
 
     handleGamepadInput(gamepad, delta) {
         const wasConnected = this.gamepadConnected;
-        this.gamepadConnected = !!gamepad; // Update connection status based on presence
+        this.gamepadConnected = !!gamepad;
 
         if (!gamepad) {
-            if (wasConnected) { // Only clear if it *was* connected
+            if (wasConnected) {
                 this.prevGamepadButtons = [];
                 this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
             }
@@ -84,88 +86,72 @@ export class PlayerControls {
         }
 
         // --- Movement (Left Stick) ---
-        const leftStickX = gamepad.axes[0] ?? 0; // Axis 0: Left (-1) to Right (+1)
-        const leftStickY = gamepad.axes[1] ?? 0; // Axis 1: Up (-1) to Down (+1)
-
-        // Apply deadzone and update movement flags (don't overwrite keyboard)
-        const moveZ = Math.abs(leftStickY) > GAMEPAD_DEADZONE ? -leftStickY : 0; // Invert Y-axis
+        const leftStickX = gamepad.axes[0] ?? 0;
+        const leftStickY = gamepad.axes[1] ?? 0;
+        const moveZ = Math.abs(leftStickY) > GAMEPAD_DEADZONE ? -leftStickY : 0;
         const moveX = Math.abs(leftStickX) > GAMEPAD_DEADZONE ? leftStickX : 0;
-
-        // Set flags based on gamepad input - these will be combined with keyboard later
         this.gpMovingForward = moveZ > 0;
         this.gpMovingBackward = moveZ < 0;
         this.gpMovingLeft = moveX < 0;
         this.gpMovingRight = moveX > 0;
 
-
         // --- Interaction (Button 0 - Cross/A) ---
         const interactButtonPressed = gamepad.buttons[GAMEPAD_INTERACT_BUTTON]?.pressed ?? false;
         const prevInteractButtonPressed = this.prevGamepadButtons[GAMEPAD_INTERACT_BUTTON] ?? false;
 
+        // --- Pause (Button 9 - Options/Menu) ---
         const pauseButtonPressed = gamepad.buttons[GAMEPAD_PAUSE_BUTTON]?.pressed ?? false;
         const prevPauseButtonPressed = this.prevGamepadButtons[GAMEPAD_PAUSE_BUTTON] ?? false;
 
-        // Check if instructions are visible (game not started/locked)
-        const isInstructionsVisible = this.instructions.style.display !== 'none';
-        if (isInstructionsVisible && interactButtonPressed && !prevInteractButtonPressed) {
-            this._pointerLockControls.lock(); // Lock pointer to start
-        }
-
+        // --- Request Flags ---
+        // Request interaction only if pointer is locked (in game)
         if (this._pointerLockControls.isLocked && interactButtonPressed && !prevInteractButtonPressed) {
-            this.interactRequested = true; // Trigger interaction on button press
+            this.interactRequested = true;
         }
-
+        // Request pause toggle if button pressed
         if (pauseButtonPressed && !prevPauseButtonPressed) {
-            this.pauseToggleRequested = true; // Signal pause toggle
-            console.log("Pause toggle requested via gamepad."); // Debug log
+            this.pauseToggleRequested = true;
+            // console.log("Pause toggle requested via gamepad.");
         }
 
-        // Store current button states for next frame comparison
+        // Store current button states
         this.prevGamepadButtons = gamepad.buttons.map(b => b.pressed);
 
-        // --- Right Stick Look (Deferred) ---
-        // const rightStickX = gamepad.axes[2] ?? 0;
-        // const rightStickY = gamepad.axes[3] ?? 0;
-        // if (Math.abs(rightStickX) > GAMEPAD_DEADZONE) { /* Rotate camera horizontally */ }
-        // if (Math.abs(rightStickY) > GAMEPAD_DEADZONE) { /* Rotate camera vertically */ }
         // --- Right Stick Look (Synthetic Mouse Events) ---
-        if (this._pointerLockControls.isLocked) { // Only look if locked
-            const rightStickX = gamepad.axes[2] ?? 0; // Axis 2: Horizontal
-            const rightStickY = gamepad.axes[3] ?? 0; // Axis 3: Vertical
-
+        if (this._pointerLockControls.isLocked) {
+            const rightStickX = gamepad.axes[2] ?? 0;
+            const rightStickY = gamepad.axes[3] ?? 0;
             let movementX = 0;
             let movementY = 0;
 
             if (Math.abs(rightStickX) > GAMEPAD_DEADZONE) {
-                // Stick right (+X) should cause positive movementX
                 movementX = rightStickX * GAMEPAD_LOOK_SENSITIVITY_X * delta;
             }
             if (Math.abs(rightStickY) > GAMEPAD_DEADZONE) {
-                // Stick down (+Y) should cause positive movementY
                 movementY = rightStickY * GAMEPAD_LOOK_SENSITIVITY_Y * delta;
             }
 
             if (movementX !== 0 || movementY !== 0) {
-                // Dispatch a synthetic mousemove event
                 const event = new MouseEvent('mousemove', {
                     movementX: movementX,
                     movementY: movementY,
-                    bubbles: true, // Necessary for event to propagate
+                    bubbles: true,
                     cancelable: true
                 });
-                // Dispatch on the element PointerLockControls is listening to
                 this._domElement.dispatchEvent(event);
             }
         }
     }
 
     _onKeyDown(event) {
+        // Handle pause key first
         if (event.code === 'KeyP') {
             this.pauseToggleRequested = true;
-            console.log("Pause toggle requested via keyboard."); // Debug log
-            return; // Don't process movement keys if pause is pressed
+            // console.log("Pause toggle requested via keyboard.");
+            return; // Don't process movement if pause is pressed
         }
 
+        // Only process movement if pointer is locked
         if (!this._pointerLockControls.isLocked) return;
         switch (event.code) {
             case 'KeyW': case 'ArrowUp': this.kbMovingForward = true; break;
@@ -176,7 +162,7 @@ export class PlayerControls {
     }
 
     _onKeyUp(event) {
-        // No need to check isLocked here, always reset keys
+        // Always reset keys on keyup, regardless of lock state
         switch (event.code) {
             case 'KeyW': case 'ArrowUp': this.kbMovingForward = false; break;
             case 'KeyA': case 'ArrowLeft': this.kbMovingLeft = false; break;
@@ -186,15 +172,15 @@ export class PlayerControls {
     }
 
     _onClick() {
+        // Request interaction only if pointer is locked
         if (this._pointerLockControls.isLocked) {
-            this.interactRequested = true; // Set flag on click
+            this.interactRequested = true;
         }
+        // If not locked, clicks are handled by the menu system (handleMenuAction in main.js)
     }
 
-    // Method to get movement input vector (direction only)
     getMovementInput() {
         const direction = { x: 0, z: 0 };
-
         const forward = this.kbMovingForward || this.gpMovingForward;
         const backward = this.kbMovingBackward || this.gpMovingBackward;
         const left = this.kbMovingLeft || this.gpMovingLeft;
@@ -205,16 +191,15 @@ export class PlayerControls {
         if (left) direction.x -= 1;
         if (right) direction.x += 1;
 
-        // Reset gamepad flags each time input is read, as they are set fresh each frame
+        // Reset gamepad flags each frame after reading
         this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
 
-        return direction; // Not normalized here, handled in Player update
+        return direction;
     }
 
-    // Method to check and consume the interaction request
     consumeInteractionRequest() {
         if (this.interactRequested) {
-            this.interactRequested = false; // Reset flag after checking
+            this.interactRequested = false;
             return true;
         }
         return false;
@@ -232,11 +217,11 @@ export class PlayerControls {
         return this._pointerLockControls.isLocked;
     }
 
-    // Expose the underlying PointerLockControls object if needed
     get object() {
         return this._pointerLockControls.getObject();
     }
 
+    // Explicit lock/unlock methods called by main.js state changes
     lock() {
         this._pointerLockControls.lock();
     }
@@ -245,7 +230,6 @@ export class PlayerControls {
         this._pointerLockControls.unlock();
     }
 
-    // Expose moveForward/moveRight methods for player movement
     moveForward(distance) {
         this._pointerLockControls.moveForward(distance);
     }

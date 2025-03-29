@@ -43,18 +43,18 @@ export const LEVEL_DATABASE = [
         ]
     },
     // --- Level 2 ---
-    // {
-    //     levelId: 2,
-    //     name: "Salad Prep",
-    //     duration: 180,
-    //     starThresholds: [150, 300, 500],
-    //     orders: [
-    //         { mealName: 'Salad', timeLimit: 90, baseScore: 75, penalty: 40 },
-    //         { mealName: 'French Fries', timeLimit: 70, baseScore: 65, penalty: 35 },
-    //         { mealName: 'Salad', timeLimit: 80, baseScore: 80, penalty: 40 },
-    //         // ...
-    //     ]
-    // },
+    {
+        levelId: 2,
+        name: "Salad Prep",
+        duration: 180,
+        starThresholds: [150, 300, 500],
+        orders: [
+            { mealName: 'Salad', timeLimit: 90, baseScore: 75, penalty: 40 },
+            { mealName: 'French Fries', timeLimit: 70, baseScore: 65, penalty: 35 },
+            { mealName: 'Salad', timeLimit: 80, baseScore: 80, penalty: 40 },
+            // ...
+        ]
+    },
     // Add more levels...
 ];
 

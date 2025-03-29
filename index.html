@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Kitchen Simulator</title>
+    <title>Pixel Kitchen Simulator</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Add link to your chosen pixel font here if using Google Fonts -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"> -->
     <script type="importmap">
         {
             "imports": {
@@ -18,53 +20,115 @@
 </head>
 
 <body>
-    <!-- Loading Indicator -->
-    <div id="loading-screen" class="overlay" style="display: flex; z-index: 30; background-color: #222;">
-        <h2>Loading Assets...</h2>
-        <!-- Optional: Add a progress bar here later -->
-    </div>
-
-    <!-- Initial Instructions Screen -->
-    <div id="instructions">
-        Click or Press [X] on Gamepad to Start<br>
-        (W/A/S/D/Stick to Move, Mouse to Look, Click/[X] to Interact, P/[Options] to Pause)
-    </div>
-
-    <!-- In-Game UI -->
-    <div id="ui">
-        Order: <span id="order">None</span><br>
-        Holding: <span id="holding">Nothing</span><br>
-        <!-- Gamepad Status Indicator -->
-        <span id="gamepad-status" style="font-size: 0.8em;"></span>
-        <br>
-        Score: <span id="score">0</span><br>
-        Level Time: <span id="level-timer">0:00</span><br>
-        Order Time: <span id="order-timer">0:00</span>
-    </div>
-    <div id="crosshair"></div>
-
-    <!-- Settings/Pause Menu -->
-    <div id="settings-menu" class="overlay" style="display: none;">
-        <h2>Paused</h2>
-        <div class="setting">
-            <label for="toggle-labels">Show Station Labels:</label>
-            <input type="checkbox" id="toggle-labels" checked>
-        </div>
-        <button id="resume-button">Resume (P / Options)</button>
-    </div>
-
-    <!-- Temporary Message Area -->
-    <div id="temp-message"></div>
-
-    <div id="level-end-screen" class="overlay" style="display: none;">
-        <h2>Level Complete!</h2>
-        <p>Score: <span id="final-score">0</span></p>
-        <p>Stars: <span id="final-stars">☆☆☆</span></p>
-        <button id="next-level-button">Next Level</button>
-        <button id="restart-level-button">Restart Level</button>
-    </div>
-
+    <!-- Game Canvas -->
     <canvas id="gameCanvas"></canvas>
+
+    <!-- Loading Indicator -->
+    <div id="loading-screen" class="overlay active"> <!-- Start visible -->
+        <h2>Loading Assets...</h2>
+    </div>
+
+    <!-- Main Menu -->
+    <div id="main-menu" class="overlay menu-screen">
+        <h1>Pixel Kitchen Sim</h1>
+        <div class="menu-container">
+            <button id="play-button" class="menu-button" data-action="play">Play</button>
+            <button id="settings-button" class="menu-button" data-action="settings">Settings</button>
+            <div id="credits">
+                <p>A Game By [Your Name/Studio]</p>
+                <p>
+                    <a href="https://twitter.com/your_twitter" target="_blank" rel="noopener noreferrer"
+                        class="menu-link" data-action="link">X (Twitter)</a> |
+                    <a href="https://instagram.com/your_instagram" target="_blank" rel="noopener noreferrer"
+                        class="menu-link" data-action="link">Instagram</a> |
+                    <a href="https://github.com/your_github" target="_blank" rel="noopener noreferrer" class="menu-link"
+                        data-action="link">GitHub</a>
+                </p>
+            </div>
+        </div>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="settings-screen" class="overlay menu-screen">
+        <h1>Settings</h1>
+        <div class="menu-container">
+            <div class="setting-group">
+                <label id="language-label">Language:</label>
+                <div id="language-options" class="button-group">
+                    <button class="menu-button lang-button" data-lang="en" data-action="set-language">English</button>
+                    <button class="menu-button lang-button" data-lang="fr" data-action="set-language">Français</button>
+                    <button class="menu-button lang-button" data-lang="es" data-action="set-language">Español</button>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label for="toggle-labels-setting">Show Station Labels:</label>
+                <input type="checkbox" id="toggle-labels-setting" class="menu-toggle" data-action="toggle-labels"
+                    checked>
+                <!-- We need JS to link this checkbox state to the actual label toggling -->
+            </div>
+            <p id="game-version">Version: 1.0 Beta</p>
+            <button id="back-to-main-button" class="menu-button" data-action="back-to-main">Back</button>
+            <!-- Resume button only visible when paused -->
+            <button id="resume-button-settings" class="menu-button" data-action="resume" style="display: none;">Resume
+                Game</button>
+        </div>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
+    </div>
+
+    <!-- Level Select Screen -->
+    <div id="level-select-screen" class="overlay menu-screen">
+        <h1>Select Level</h1>
+        <div id="level-list" class="menu-container level-grid">
+            <!-- Level buttons will be added here by JS -->
+            <!-- Example: <button class="menu-button level-button" data-level="0" data-action="start-level">Level 1: Fry Cook</button> -->
+        </div>
+        <button id="back-to-main-from-level-select" class="menu-button" data-action="back-to-main">Back</button>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
+    </div>
+
+    <!-- In-Game HUD -->
+    <div id="game-hud" style="display: none;"> <!-- Hidden initially -->
+        <div id="order-list">
+            <!-- Order cards added here by JS -->
+            <!-- Example Card:
+            <div class="order-card" id="order-123">
+                <span class="order-meal">French Fries</span>
+                <span class="order-timer">1:30</span>
+            </div>
+             -->
+        </div>
+        <div id="game-timer-container">
+            Level Time: <span id="level-timer-display">0:00</span>
+        </div>
+        <div id="bottom-hud">
+            Holding: <span id="holding-display">Nothing</span> |
+            Score: <span id="score-display">0</span> |
+            <span id="gamepad-status"></span>
+        </div>
+        <div id="crosshair"></div>
+        <div id="temp-message"></div> <!-- Re-use temp message area -->
+    </div>
+
+    <!-- Pause Overlay (Simple version if Settings isn't the pause menu) -->
+    <!-- <div id="pause-overlay" class="overlay menu-screen">
+         <h1>Paused</h1>
+         <button id="resume-button-pause" class="menu-button" data-action="resume">Resume</button>
+         <button id="settings-button-pause" class="menu-button" data-action="settings">Settings</button>
+     </div> -->
+
+    <!-- Level End Screen -->
+    <div id="level-end-screen" class="overlay menu-screen">
+        <h1>Level Complete!</h1>
+        <div class="menu-container">
+            <p>Score: <span id="final-score">0</span></p>
+            <p>Stars: <span id="final-stars">☆☆☆</span></p>
+            <button id="next-level-button" class="menu-button" data-action="next-level">Next Level</button>
+            <button id="restart-level-button" class="menu-button" data-action="restart-level">Restart Level</button>
+            <button id="level-end-main-menu-button" class="menu-button" data-action="back-to-main">Main Menu</button>
+        </div>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+    </div>
 
     <!-- Import the main script as a module -->
     <script type="module" src="src/main.js"></script>

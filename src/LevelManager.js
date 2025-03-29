@@ -10,6 +10,7 @@ export class LevelManager {
         this.currentLevelData = null;
         this.currentOrderIndex = -1;
         this.currentOrderData = null;
+        this.activeOrderCardId = null; // Track the ID for UI updates
 
         this.levelTimer = 0;
         this.orderTimer = 0;
@@ -17,57 +18,58 @@ export class LevelManager {
 
         this.isLevelRunning = false;
         this.isOrderActive = false;
+
+        // Callbacks to signal main game loop
+        this.onLevelEnd = null;
+        this.onGameEnd = null;
     }
 
     loadLevel(levelIndex) {
         if (levelIndex < 0 || levelIndex >= this.levels.length) {
-            console.error(`Invalid level index: ${levelIndex}. Ending game.`);
-            // Maybe show a "Game Complete" screen or loop back?
-            this.isLevelRunning = false; // Stop game logic
+            console.log(`Invalid level index: ${levelIndex}. Triggering game end.`);
+            this.isLevelRunning = false;
             this.isOrderActive = false;
-            this.uiManager.showGameEndScreen(); // <<< ADDED CALL HERE
-            return;
+            if (this.onGameEnd) this.onGameEnd(); // Signal game end
+            else console.error("onGameEnd callback not set in LevelManager");
+            return false; // Indicate loading failed
         }
 
         this.currentLevelIndex = levelIndex;
         this.currentLevelData = this.levels[this.currentLevelIndex];
-        this.currentOrderIndex = -1; // Will be incremented by nextOrder
+        this.currentOrderIndex = -1;
         this.currentScore = 0;
         this.levelTimer = this.currentLevelData.duration;
         this.isLevelRunning = true;
-        this.isOrderActive = false; // No order active initially
+        this.isOrderActive = false;
+        this.activeOrderCardId = null;
 
         console.log(`Loading Level ${this.currentLevelData.levelId}: ${this.currentLevelData.name}`);
         this.uiManager.updateScore(this.currentScore);
         this.uiManager.updateLevelTimer(this.levelTimer);
-        this.uiManager.updateOrder('None'); // Clear order initially
-        this.uiManager.updateOrderTimer(0); // Clear order timer initially
-        this.uiManager.hideLevelEndScreen(); // Ensure end screen is hidden
+        this.uiManager.clearOrderList(); // Clear previous orders
 
-        // Delay starting the first order slightly? Optional.
-        // setTimeout(() => this.nextOrder(), 500);
         this.nextOrder(); // Start the first order
+        return true; // Indicate success
     }
 
     nextOrder() {
         if (!this.isLevelRunning) return;
 
-        // If previous order was active, clear UI for it
-        if (this.isOrderActive) {
-            this.uiManager.updateOrder('None');
-            this.uiManager.updateOrderTimer(0);
+        // If previous order was active, maybe remove its card or mark as missed?
+        // For now, we just replace it. Consider multiple cards later.
+        if (this.activeOrderCardId) {
+            // Optionally remove the old card immediately or let it fade
+            // this.uiManager.removeOrderCard(this.activeOrderCardId);
+            this.activeOrderCardId = null;
         }
+
 
         this.currentOrderIndex++;
         if (this.currentOrderIndex >= this.currentLevelData.orders.length) {
-            // Level complete - all orders issued
-            console.log("All orders for level issued. Level continues until timer runs out.");
-            // Don't end level here, wait for level timer.
+            console.log("All orders for level issued.");
             this.isOrderActive = false;
-            this.currentOrderData = null; // No current order
-            this.uiManager.updateOrder("No More Orders"); // Or ""
-            this.uiManager.updateOrderTimer(0);
-            // Maybe trigger endLevel check here if timer is also low?
+            this.currentOrderData = null;
+            // Maybe show "No More Orders" in UI? Handled by not adding a new card.
             return;
         }
 
@@ -75,9 +77,16 @@ export class LevelManager {
         this.orderTimer = this.currentOrderData.timeLimit;
         this.isOrderActive = true;
 
-        console.log(`New Order: ${this.currentOrderData.mealName}`);
-        this.uiManager.updateOrder(this.currentOrderData.mealName);
-        this.uiManager.updateOrderTimer(this.orderTimer);
+        // Generate a unique ID for the order card (e.g., using level and order index)
+        this.activeOrderCardId = `l${this.currentLevelIndex}-o${this.currentOrderIndex}`;
+
+        console.log(`New Order: ${this.currentOrderData.mealName} (ID: ${this.activeOrderCardId})`);
+        // Add the new order card to the UI
+        this.uiManager.addOrderCard(
+            this.activeOrderCardId,
+            this.currentOrderData.mealName,
+            this.orderTimer
+        );
     }
 
     update(delta) {
@@ -89,14 +98,13 @@ export class LevelManager {
 
         if (this.levelTimer <= 0) {
             this.endLevel(); // End level due to time out
-            return; // Stop further processing this frame
+            return;
         }
 
         // Update Order Timer
-        if (this.isOrderActive) {
+        if (this.isOrderActive && this.activeOrderCardId) {
             this.orderTimer -= delta;
-            // Ensure timer doesn't visually go negative in UI
-            this.uiManager.updateOrderTimer(Math.max(0, this.orderTimer));
+            this.uiManager.updateOrderCardTimer(this.activeOrderCardId, this.orderTimer);
 
             if (this.orderTimer <= 0) {
                 this.failOrder(); // Order timed out
@@ -107,95 +115,91 @@ export class LevelManager {
     completeOrder(servedMealName) {
         if (!this.isOrderActive || !this.currentOrderData || servedMealName !== this.currentOrderData.mealName) {
             console.warn(`Attempted to complete invalid order. Active: ${this.isOrderActive}, Expected: ${this.currentOrderData?.mealName}, Served: ${servedMealName}`);
-            // Optional: Add penalty for serving wrong meal?
-            if (this.isOrderActive && this.currentOrderData) { // If there was an active order they got wrong
-                this.currentScore -= Math.floor(this.currentOrderData.penalty / 2); // Smaller penalty for wrong item?
+            if (this.isOrderActive && this.currentOrderData) {
+                this.currentScore -= Math.floor(this.currentOrderData.penalty / 2);
                 this.currentScore = Math.max(0, this.currentScore);
                 this.uiManager.updateScore(this.currentScore);
+                this.uiManager.showTemporaryMessage('wrongOrder'); // Use key for translation
+            } else {
+                this.uiManager.showTemporaryMessage('wrongOrder');
             }
-            return false; // Indicate failure
+            return false;
         }
 
         console.log(`Order ${this.currentOrderData.mealName} completed successfully.`);
-        // --- Scoring ---
-        // Basic score + time bonus maybe?
         let scoreGained = this.currentOrderData.baseScore;
-        // Example time bonus: +1 point per 2 seconds remaining, max 20 bonus
         let timeBonus = Math.min(20, Math.floor(Math.max(0, this.orderTimer) / 2));
         scoreGained += timeBonus;
 
         this.currentScore += scoreGained;
         this.uiManager.updateScore(this.currentScore);
-        this.uiManager.showTemporaryMessage(`+${scoreGained} Points!`, 1500);
-        // --- End Scoring ---
+        // Show score gain message - maybe needs specific text handling in UIManager
+        this.uiManager.showTemporaryMessage(`+${scoreGained} Points!`, 1500); // Keep specific message for score
 
-        const completedOrderName = this.currentOrderData.mealName; // Store before moving next
-        this.isOrderActive = false; // Mark order as inactive
+        // Remove the completed order card
+        if (this.activeOrderCardId) {
+            this.uiManager.removeOrderCard(this.activeOrderCardId);
+            this.activeOrderCardId = null;
+        }
+
+        this.isOrderActive = false;
         this.currentOrderData = null;
-
         this.nextOrder(); // Move to the next order
-        return true; // Indicate success
+        return true;
     }
 
     failOrder() {
-        if (!this.isOrderActive || !this.currentOrderData) return;
+        if (!this.isOrderActive || !this.currentOrderData || !this.activeOrderCardId) return;
 
         const failedOrderName = this.currentOrderData.mealName;
         console.log(`Order ${failedOrderName} FAILED (Timeout).`);
-        this.uiManager.showTemporaryMessage(`Order Failed! -${this.currentOrderData.penalty}`, 2000);
-        // --- Scoring Penalty ---
-        this.currentScore -= this.currentOrderData.penalty;
-        this.currentScore = Math.max(0, this.currentScore); // Don't go below zero
-        this.uiManager.updateScore(this.currentScore);
-        // --- End Scoring Penalty ---
+        // Show penalty message - maybe needs specific text handling in UIManager
+        this.uiManager.showTemporaryMessage(`Order Failed! -${this.currentOrderData.penalty}`, 2000); // Keep specific message
 
-        this.isOrderActive = false; // Mark order as inactive
+        this.currentScore -= this.currentOrderData.penalty;
+        this.currentScore = Math.max(0, this.currentScore);
+        this.uiManager.updateScore(this.currentScore);
+
+        // Remove the failed order card
+        this.uiManager.removeOrderCard(this.activeOrderCardId);
+        this.activeOrderCardId = null;
+
+        this.isOrderActive = false;
         this.currentOrderData = null;
         this.nextOrder(); // Move to the next order
     }
 
     endLevel() {
-        if (!this.isLevelRunning) return; // Prevent double execution
+        if (!this.isLevelRunning) return;
 
         console.log(`Level ${this.currentLevelData.levelId} ended. Final Score: ${this.currentScore}`);
         this.isLevelRunning = false;
         this.isOrderActive = false;
 
-        // Clear timers visually
-        this.uiManager.updateLevelTimer(0);
-        this.uiManager.updateOrderTimer(0);
-        this.uiManager.updateOrder("Level Over");
+        // Clear any remaining order card
+        if (this.activeOrderCardId) {
+            this.uiManager.removeOrderCard(this.activeOrderCardId);
+            this.activeOrderCardId = null;
+        }
+        this.uiManager.updateLevelTimer(0); // Ensure timer shows 0
 
-
-        // --- Calculate Stars ---
         let stars = 0;
-        // Ensure thresholds are sorted ascending if not already guaranteed
         const thresholds = this.currentLevelData.starThresholds.sort((a, b) => a - b);
         if (this.currentScore >= thresholds[0]) stars = 1;
         if (thresholds.length > 1 && this.currentScore >= thresholds[1]) stars = 2;
         if (thresholds.length > 2 && this.currentScore >= thresholds[2]) stars = 3;
         console.log(`Stars Earned: ${stars}`);
-        // --- End Calculate Stars ---
 
-        // Display results
-        this.uiManager.showLevelEndScreen(this.currentScore, stars, this.currentLevelIndex);
+        // Signal the main loop to show the end screen
+        if (this.onLevelEnd) {
+            this.onLevelEnd(this.currentScore, stars, this.currentLevelIndex);
+        } else {
+            console.error("onLevelEnd callback not set in LevelManager");
+        }
     }
 
-    // --- Getters for UI ---
-    getCurrentOrderName() {
+    getCurrentOrderName() { // Still useful for internal checks maybe
         return this.isOrderActive ? this.currentOrderData?.mealName : "";
-    }
-
-    getLevelTimer() {
-        return this.levelTimer;
-    }
-
-    getOrderTimer() {
-        return this.isOrderActive ? this.orderTimer : 0;
-    }
-
-    getCurrentScore() {
-        return this.currentScore;
     }
 
     isRunning() {
