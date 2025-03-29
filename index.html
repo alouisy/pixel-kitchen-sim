@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Kitchen Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Loading Indicator -->
+    <div id="loading-screen" class="overlay" style="display: flex; z-index: 30; background-color: #222;">
+        <h2>Loading Assets...</h2>
+        <!-- Optional: Add a progress bar here later -->
+    </div>
+
+    <!-- Initial Instructions Screen -->
+    <div id="instructions">
+        Click or Press [X] on Gamepad to Start<br>
+        (W/A/S/D/Stick to Move, Mouse to Look, Click/[X] to Interact, P/[Options] to Pause)
+    </div>
+
+    <!-- In-Game UI -->
+    <div id="ui">
+        Order: <span id="order">None</span><br>
+        Holding: <span id="holding">Nothing</span><br>
+        <!-- Gamepad Status Indicator -->
+        <span id="gamepad-status" style="font-size: 0.8em;"></span>
+        <br>
+        Score: <span id="score">0</span><br>
+        Level Time: <span id="level-timer">0:00</span><br>
+        Order Time: <span id="order-timer">0:00</span>
+    </div>
+    <div id="crosshair"></div>
+
+    <!-- Settings/Pause Menu -->
+    <div id="settings-menu" class="overlay" style="display: none;">
+        <h2>Paused</h2>
+        <div class="setting">
+            <label for="toggle-labels">Show Station Labels:</label>
+            <input type="checkbox" id="toggle-labels" checked>
+        </div>
+        <button id="resume-button">Resume (P / Options)</button>
+    </div>
+
+    <!-- Temporary Message Area -->
+    <div id="temp-message"></div>
+
+    <div id="level-end-screen" class="overlay" style="display: none;">
+        <h2>Level Complete!</h2>
+        <p>Score: <span id="final-score">0</span></p>
+        <p>Stars: <span id="final-stars">☆☆☆</span></p>
+        <button id="next-level-button">Next Level</button>
+        <button id="restart-level-button">Restart Level</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Import the main script as a module -->
+    <script type="module" src="src/main.js"></script>
+</body>
+
+</html>
