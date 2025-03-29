@@ -1,6 +1,7 @@
 // src/world.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { COUNTER_HEIGHT, COUNTER_DEPTH, LABEL_Y_OFFSET, STATION_TYPES } from './constants.js';
+// Import ITEM_TYPES if needed for checks within this file (though reset logic moved)
+import { COUNTER_HEIGHT, COUNTER_DEPTH, LABEL_Y_OFFSET, STATION_TYPES, ITEM_TYPES } from './constants.js';
 
 const interactables = []; // Keep track of items player can interact with
 const stations = {};      // References to specific station meshes
@@ -164,10 +165,10 @@ export function buildKitchen(scene) {
     stations.cheeseFridge = createStation(scene, 'Cheese', 4.1, backCounterZ - 0.8, 0.4, 0.4, 0.6, 0xe0ffff,
         { stationType: STATION_TYPES.INGREDIENT_SOURCE, ingredient: 'cheese_slice' });
 
-    // Assembly Station (Wider for 3 slots)
-    const assemblyWidth = 1.8; // Increased width
+    // Assembly Station
+    const assemblyWidth = 1.8;
     stations.assembly = createStation(scene, 'Assembly', 0, -1.5, assemblyWidth, 0.8, 0.05, 0xd3d3d3,
-        { stationType: STATION_TYPES.ASSEMBLY }); // slots and slotPositions added in createStation
+        { stationType: STATION_TYPES.ASSEMBLY });
 
     // Serving Counter
     const servingCounterMesh = createCounter(scene, 0, 3.9 + COUNTER_DEPTH / 2, 5);
@@ -178,45 +179,41 @@ export function buildKitchen(scene) {
     const servingLabel = createLabel("Serve Here", servingLabelPos, COUNTER_HEIGHT / 2 + LABEL_Y_OFFSET);
     scene.add(servingLabel);
 
+    // IMPORTANT: Return the interactables array reference created in this module scope
     return { stations, interactables, floorMesh };
 }
 
 // Function to add a newly created item to the list
-// NOW ACCEPTS SCENE ARGUMENT
-export function addInteractable(item, scene) {
-    if (!item || !scene) { // Added null check for scene
-        console.warn("addInteractable called with null item or scene");
+export function addInteractable(item, scene) { // scene might not be needed here anymore
+    if (!item) {
+        console.warn("addInteractable called with null item");
         return;
     }
     if (!interactables.includes(item)) {
         if (!item.name) {
             item.name = item.userData?.type + "_" + item.id;
         }
-        // Simplified check: Add if not already interactable, unless it's a child of a plate
-        // (More complex parenting rules might need adjustments here)
         const isChildOfPlate = item.parent?.userData?.itemType === 'plate';
-
         if (!isChildOfPlate) {
             interactables.push(item);
-            // console.log("Added Interactable:", item.name, item.id);
-        } else {
-            // console.log("Skipped adding child item to interactables:", item.name);
         }
     }
 }
 
-
 // Function to remove an item
 export function removeInteractable(item) {
+    if (!item) return;
     const index = interactables.indexOf(item);
     if (index > -1) {
         interactables.splice(index, 1);
-        // console.log("Removed Interactable:", item.name, item.id);
     }
     // Always try to remove from scene graph if it has a parent
     if (item.parent) {
         item.parent.remove(item);
     }
+    // Optional: Dispose geometry/material here if needed
+    // item.geometry?.dispose();
+    // item.material?.dispose();
 }
 
 // Helper to get the slot index based on world X coordinate
@@ -224,13 +221,9 @@ export function getAssemblySlotIndex(station, worldX) {
     const stationX = station.position.x;
     const stationWidth = station.geometry.parameters.width;
     const slotWidth = stationWidth / 3;
-    const relativeX = worldX - stationX; // X relative to station center
+    const relativeX = worldX - stationX;
 
-    if (relativeX < -slotWidth / 2) {
-        return 0; // Left slot
-    } else if (relativeX > slotWidth / 2) {
-        return 2; // Right slot
-    } else {
-        return 1; // Center slot
-    }
+    if (relativeX < -slotWidth / 2) return 0; // Left
+    if (relativeX > slotWidth / 2) return 2; // Right
+    return 1; // Center
 }

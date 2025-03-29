@@ -1,7 +1,7 @@
 // src/player.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { PLAYER_HEIGHT, PLAYER_SPEED, KITCHEN_BOUNDS } from './constants.js';
-import { removeInteractable, addInteractable } from './world.js'; // Keep addInteractable import for safety, though not used here
+import { removeInteractable, addInteractable } from './world.js';
 
 export class Player {
     constructor(controls) {
@@ -9,7 +9,7 @@ export class Player {
         this.cameraObject = controls.object;
         this.velocity = new THREE.Vector3();
         this.holdingItem = null;
-        this.scene = null; // Initialize scene reference
+        this.scene = null;
 
         this.holdPositionHelper = new THREE.Object3D();
         this.holdPositionHelper.position.set(0, -0.3, -0.8);
@@ -56,20 +56,15 @@ export class Player {
         if (this.holdingItem || !this.scene) return false;
 
         this.holdingItem = item;
+        removeInteractable(item); // Remove from world list/scene temporarily
+        this.scene.add(item); // Re-add to scene directly for positioning
 
-        // Remove from world interactables list WHILE holding
-        removeInteractable(item); // This now also removes from scene graph if parented
-
-        // Ensure item is added back to the scene directly for positioning relative to player
-        this.scene.add(item);
-
-        // Disable raycasting
         if (typeof item.raycast === 'function') {
             item.userData.originalRaycast = item.raycast;
         }
         item.raycast = () => { };
 
-        console.log("Player picked up:", item.name);
+        // console.log("Player picked up:", item.name);
         return true;
     }
 
@@ -77,23 +72,37 @@ export class Player {
         if (!this.holdingItem) return null;
 
         const item = this.holdingItem;
-
-        // Re-enable raycasting
         if (item.userData.originalRaycast) {
             item.raycast = item.userData.originalRaycast;
             delete item.userData.originalRaycast;
-        } else {
-            // Restore default raycast if needed (less critical for simple meshes)
-            // item.raycast = THREE.Mesh.prototype.raycast;
         }
-
-        // DO NOT add back to interactables here. InteractionManager handles it
-        // upon successful placement (slot, floor, etc.) or processing.
-
+        // InteractionManager handles adding back to interactables/scene on placement/drop
         this.holdingItem = null;
-        console.log("Player released:", item.name);
+        // console.log("Player released:", item.name);
         return item;
     }
+
+    // --- NEW METHOD ---
+    // Forcefully drops the item without placing logic, optionally removing from scene
+    forceDropItem() {
+        if (!this.holdingItem) return;
+
+        console.log(`Player force dropping: ${this.holdingItem.name}`);
+        const item = this.holdingItem;
+
+        // Re-enable raycasting just in case
+        if (item.userData.originalRaycast) {
+            item.raycast = item.userData.originalRaycast;
+            delete item.userData.originalRaycast;
+        }
+
+        // Remove the item completely - it shouldn't be placed anywhere
+        removeInteractable(item); // Removes from list and scene graph
+
+        this.holdingItem = null;
+    }
+    // --- END NEW METHOD ---
+
 
     getHeldItem() {
         return this.holdingItem;
