@@ -48,27 +48,19 @@ export function toggleLabels(visible) {
 // --- Station Creation (Builds one station based on definition) ---
 function createStation(scene, definition) {
     const { name, type, position, size, color, config } = definition;
-    // Use default size values if not provided
-    const stationSize = {
-        width: size?.width ?? 0.5,
-        height: size?.height ?? 0.3,
-        depth: size?.depth ?? 0.5,
-    };
-    const stationColor = color ?? 0x808080; // Default grey
+    const stationSize = { width: size?.width ?? 0.5, height: size?.height ?? 0.3, depth: size?.depth ?? 0.5 };
+    const stationColor = color ?? 0x808080;
 
     const stationGeo = new THREE.BoxGeometry(stationSize.width, stationSize.height, stationSize.depth);
     const stationMat = new THREE.MeshStandardMaterial({ color: stationColor });
     const stationMesh = new THREE.Mesh(stationGeo, stationMat);
 
-    // Position based on center defined in layout, Y adjusted for station height ON TOP of counter height
+    // Position Y assumes it sits ON TOP of the standard counter height
     stationMesh.position.set(position.x, COUNTER_HEIGHT + stationSize.height / 2, position.z);
-
-    stationMesh.castShadow = true;
-    stationMesh.receiveShadow = true;
+    stationMesh.castShadow = true; stationMesh.receiveShadow = true;
     stationMesh.name = name;
-    stationMesh.userData = { ...(config || {}), type: 'station', stationType: type, name: name }; // Ensure config is an object
+    stationMesh.userData = { ...(config || {}), type: 'station', stationType: type, name: name };
 
-    // Special setup for Assembly station slots
     if (type === STATION_TYPES.ASSEMBLY) {
         stationMesh.userData.slots = [null, null, null];
         stationMesh.userData.slotPositions = [];
@@ -84,8 +76,7 @@ function createStation(scene, definition) {
         stationMesh.userData.slotPositions.push(new THREE.Vector3(rightSlotX, stationTopY, centerZ));
 
         // Add Visual Dividers
-        const dividerHeight = 0.01;
-        const dividerDepth = stationSize.depth * 0.95;
+        const dividerHeight = 0.01; const dividerDepth = stationSize.depth * 0.95;
         const dividerMat = new THREE.MeshBasicMaterial({ color: 0x555555, side: THREE.DoubleSide });
         const dividerGeo1 = new THREE.BoxGeometry(0.01, dividerHeight, dividerDepth);
         const divider1 = new THREE.Mesh(dividerGeo1, dividerMat);
@@ -101,30 +92,20 @@ function createStation(scene, definition) {
 
     scene.add(stationMesh);
     currentKitchenObjects.push(stationMesh); // Track static station mesh
-
-    // Add label
     createLabel(scene, name, stationMesh.position, stationSize.height / 2 + LABEL_Y_OFFSET);
-
     return stationMesh;
 }
 
 // --- Counter Creation (Builds one counter based on definition) ---
 function createCounter(scene, definition) {
     const { name, position, size, isServing } = definition;
-    // Use default size values if not provided
-    const counterSize = {
-        width: size?.width ?? 4,
-        height: size?.height ?? COUNTER_HEIGHT,
-        depth: size?.depth ?? 0.6,
-    };
-
+    const counterSize = { width: size?.width ?? 4, height: size?.height ?? COUNTER_HEIGHT, depth: size?.depth ?? 0.6 };
     const counterGeo = new THREE.BoxGeometry(counterSize.width, counterSize.height, counterSize.depth);
     const counterMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.2, roughness: 0.8 });
     const counter = new THREE.Mesh(counterGeo, counterMat);
 
     counter.position.set(position.x, counterSize.height / 2, position.z);
-    counter.castShadow = true;
-    counter.receiveShadow = true;
+    counter.castShadow = true; counter.receiveShadow = true;
     counter.name = name;
 
     if (isServing) {
@@ -145,24 +126,20 @@ export function clearKitchen(scene) {
     currentKitchenObjects.forEach(obj => {
         if (obj.parent) obj.parent.remove(obj);
         obj.geometry?.dispose();
-        // Dispose materials carefully, only if they are unique per object
-        // If materials are shared, disposing them here will break other objects.
+        // Only dispose material if known to be unique, otherwise skip
         // obj.material?.dispose();
     });
     currentLabels.forEach(label => {
         if (label.parent) label.parent.remove(label);
-        label.material.map?.dispose(); // Dispose canvas texture
+        label.material.map?.dispose();
         label.material?.dispose();
     });
-    if (currentFloor && currentFloor.parent) {
+    if (currentFloor?.parent) {
         currentFloor.parent.remove(currentFloor);
         currentFloor.geometry?.dispose();
-        // currentFloor.material?.dispose(); // Floor material might be reused
+        // currentFloor.material?.dispose();
     }
-
-    currentKitchenObjects = [];
-    currentLabels = [];
-    currentFloor = null;
+    currentKitchenObjects = []; currentLabels = []; currentFloor = null;
     console.log("Kitchen cleared.");
 }
 
@@ -171,27 +148,23 @@ export function clearKitchen(scene) {
 export function buildKitchen(scene, levelLayout) {
     console.log("Building kitchen for level layout...");
     if (!levelLayout || !Array.isArray(levelLayout)) {
-        console.error("Invalid or missing levelLayout data provided to buildKitchen.");
+        console.error("Invalid levelLayout data provided to buildKitchen.");
         return { stations: {}, stationInteractables: [], floorMesh: null };
     }
-
-    // Ensure previous kitchen is cleared
     if (currentKitchenObjects.length > 0 || currentLabels.length > 0 || currentFloor) {
         console.warn("buildKitchen called while previous objects exist. Clearing now.");
         clearKitchen(scene);
     }
 
-    const newStations = {}; // Holds references to functional stations by name
-    const newStationInteractables = []; // Holds only station meshes that player interacts with
+    const newStations = {}; // Holds functional stations by name
+    const newStationInteractables = []; // Holds station meshes that player interacts with
 
     // --- Build Floor ---
     const floorGeometry = new THREE.PlaneGeometry(10, 10);
     const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.9 });
     currentFloor = new THREE.Mesh(floorGeometry, floorMaterial);
-    currentFloor.rotation.x = -Math.PI / 2;
-    currentFloor.receiveShadow = true;
-    currentFloor.name = "Floor";
-    currentFloor.userData = { type: STATION_TYPES.FLOOR };
+    currentFloor.rotation.x = -Math.PI / 2; currentFloor.receiveShadow = true;
+    currentFloor.name = "Floor"; currentFloor.userData = { type: STATION_TYPES.FLOOR };
     scene.add(currentFloor);
 
     // --- Build from Layout Data ---
@@ -200,15 +173,15 @@ export function buildKitchen(scene, levelLayout) {
             if (definition.type === STATION_TYPES.COUNTER) {
                 const counterMesh = createCounter(scene, definition);
                 if (definition.isServing) {
-                    newStations[definition.name] = counterMesh; // Store serving counter ref
-                    newStationInteractables.push(counterMesh); // Serving counter is interactable
+                    newStations[definition.name] = counterMesh;
+                    newStationInteractables.push(counterMesh);
                 }
             }
-            // Check for functional station types that are NOT counter/floor/wall
+            // Check for functional station types (excluding structural types)
             else if (definition.type && definition.type !== STATION_TYPES.COUNTER && definition.type !== STATION_TYPES.FLOOR && definition.type !== STATION_TYPES.WALL) {
                 const stationMesh = createStation(scene, definition);
-                newStations[definition.name] = stationMesh; // Store functional station ref
-                newStationInteractables.push(stationMesh); // Functional stations are interactable
+                newStations[definition.name] = stationMesh;
+                newStationInteractables.push(stationMesh);
             }
         } catch (error) {
             console.error(`Error creating kitchen object "${definition.name}" (type: ${definition.type}):`, error);
@@ -216,46 +189,23 @@ export function buildKitchen(scene, levelLayout) {
     });
 
     console.log(`Kitchen built. ${Object.keys(newStations).length} functional stations created.`);
-    // Return references for the current level
     return { stations: newStations, stationInteractables: newStationInteractables, floorMesh: currentFloor };
 }
 
 
-// --- Dynamic Item Management (Now primarily handled by InteractionManager) ---
+// --- Dynamic Item Management Helpers (Not used directly by world.js anymore) ---
+// These functions are conceptually replaced by InteractionManager's internal helpers
+// export function addInteractableToList(item, list) { /* ... */ }
+// export function removeInteractableFromList(item, list) { /* ... */ }
 
-// Function to add a DYNAMIC item (ingredient, plate) - Called by InteractionManager/createItem
-export function addInteractableToList(item, list) {
-    // Adds item to the provided list (InteractionManager's list)
-    if (item && !list.includes(item)) {
-        // Basic check to avoid adding structural elements
-        if (item.userData?.type !== 'station' && item.userData?.type !== STATION_TYPES.COUNTER && item.userData?.type !== STATION_TYPES.FLOOR) {
-            list.push(item);
-        }
-    }
-}
-
-// Function to remove a DYNAMIC item - Called by InteractionManager
-export function removeInteractableFromList(item, list) {
-    if (!item) return;
-    const index = list.indexOf(item);
-    if (index > -1) {
-        list.splice(index, 1);
-    }
-    // Also remove from scene graph
-    if (item.parent) {
-        item.parent.remove(item);
-    }
-}
-
-// getAssemblySlotIndex remains the same
+// --- getAssemblySlotIndex (Keep as is) ---
 export function getAssemblySlotIndex(station, worldX) {
-    if (!station?.geometry?.parameters?.width) return 1; // Fallback to center if invalid
+    if (!station?.geometry?.parameters?.width) return 1;
     const stationX = station.position.x;
     const stationWidth = station.geometry.parameters.width;
     const slotWidth = stationWidth / 3;
     const relativeX = worldX - stationX;
-
-    if (relativeX < -slotWidth / 2) return 0; // Left
-    if (relativeX > slotWidth / 2) return 2; // Right
-    return 1; // Center
+    if (relativeX < -slotWidth / 2) return 0;
+    if (relativeX > slotWidth / 2) return 2;
+    return 1;
 }

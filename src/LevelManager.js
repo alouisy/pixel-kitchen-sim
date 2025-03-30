@@ -1,24 +1,24 @@
 // src/LevelManager.js
-import { LEVEL_DATABASE, getRecipeDetails } from './gameData.js'; // Import helper
+import { getRecipeDetails } from './gameData.js'; // Keep recipe helper
 
 export class LevelManager {
-    constructor(uiManager, saveManager) {
+    constructor(uiManager, saveManager, levelDatabaseRef) { // Accept levelDatabase reference
         this.uiManager = uiManager;
         this.saveManager = saveManager;
-        this.levels = LEVEL_DATABASE;
+        this.levels = levelDatabaseRef; // Store reference to the fetched data
 
         this.currentLevelIndex = -1;
-        this.currentLevelData = null;
+        this.currentLevelData = null; // This will hold the specific level object from the database
 
-        // Level parameters
+        // Level parameters (will be set in loadLevel)
         this.availableMeals = [];
         this.maxActiveOrders = 1;
-        this.newOrderDelay = 15; // Default delay
-        this.newOrderTimer = 0; // Timer to track delay
+        this.newOrderDelay = 15;
+        this.newOrderTimer = 0;
 
         // Active state
-        this.activeOrders = new Map(); // Use Map: orderId -> orderData { id, mealName, timer, baseScore, penalty }
-        this.nextOrderId = 0; // Simple counter for unique IDs
+        this.activeOrders = new Map(); // Map: orderId -> orderData { id, mealName, timer, baseScore, penalty }
+        this.nextOrderId = 0; // Simple counter for unique IDs per level load
 
         this.levelTimer = 0;
         this.currentScore = 0;
@@ -28,24 +28,29 @@ export class LevelManager {
         this.onGameEnd = null;
     }
 
-    loadLevel(levelIndex) {
-        if (levelIndex < 0 || levelIndex >= this.levels.length) {
-            console.log(`Invalid level index: ${levelIndex}. Triggering game end.`);
+    // Accepts the specific levelData object for the level being loaded
+    loadLevel(levelIndex, levelData) {
+        if (!levelData) {
+            console.error(`No level data provided for index ${levelIndex}`);
             this.isLevelRunning = false;
             if (this.onGameEnd) this.onGameEnd();
             return false;
         }
+        // Optional sanity check
+        // if (levelData.levelId !== levelIndex + 1) {
+        //      console.warn(`Level index ${levelIndex} does not match levelId ${levelData.levelId} in data.`);
+        // }
 
-        // Reset state for new level
+        // Reset internal state
         this.currentLevelIndex = levelIndex;
-        this.currentLevelData = this.levels[this.currentLevelIndex];
+        this.currentLevelData = levelData; // Store the specific level object
         this.currentScore = 0;
         this.levelTimer = this.currentLevelData.duration;
         this.isLevelRunning = true;
-        this.activeOrders.clear(); // Clear previous active orders
+        this.activeOrders.clear();
         this.nextOrderId = 0;
 
-        // Load level-specific parameters
+        // Load parameters from the passed levelData
         this.availableMeals = this.currentLevelData.availableMeals || [];
         this.maxActiveOrders = this.currentLevelData.maxActiveOrders || 1;
         this.newOrderDelay = this.currentLevelData.newOrderDelay || 15;
@@ -59,49 +64,37 @@ export class LevelManager {
         this.uiManager.updateLevelTimer(this.levelTimer);
         this.uiManager.clearOrderList();
 
-        // Attempt to generate initial orders
+        // Attempt to generate initial orders up to the max allowed
         for (let i = 0; i < this.maxActiveOrders; i++) {
             this.generateNewOrder();
         }
         // Start the cooldown timer after initial generation
         this.newOrderTimer = this.newOrderDelay;
 
-
-        return true;
+        return true; // Indicate success
     }
 
     generateNewOrder() {
-        // Check if max orders reached or no meals available
         if (this.activeOrders.size >= this.maxActiveOrders || this.availableMeals.length === 0) {
-            return;
+            return; // Don't generate if max reached or no meals possible
         }
 
-        // Select a random meal
         const randomIndex = Math.floor(Math.random() * this.availableMeals.length);
         const mealName = this.availableMeals[randomIndex];
         const recipeDetails = getRecipeDetails(mealName);
 
         if (!recipeDetails) {
             console.error(`Could not find recipe details for "${mealName}"`);
-            return;
+            return; // Skip if recipe details are missing
         }
 
-        // Create unique ID
         const orderId = `order-${this.currentLevelIndex}-${this.nextOrderId++}`;
-
-        // Create order data object
         const newOrder = {
-            id: orderId,
-            mealName: mealName,
-            timer: recipeDetails.timeLimit,
-            baseScore: recipeDetails.baseScore,
-            penalty: recipeDetails.penalty
+            id: orderId, mealName: mealName, timer: recipeDetails.timeLimit,
+            baseScore: recipeDetails.baseScore, penalty: recipeDetails.penalty
         };
 
-        // Add to active orders map
         this.activeOrders.set(orderId, newOrder);
-
-        // Add card to UI
         this.uiManager.addOrderCard(orderId, mealName, newOrder.timer);
         console.log(`Generated new order: ${mealName} (ID: ${orderId})`);
 
@@ -116,101 +109,69 @@ export class LevelManager {
         // 1. Update Level Timer & Check End Condition
         this.levelTimer -= delta;
         this.uiManager.updateLevelTimer(this.levelTimer);
-        if (this.levelTimer <= 0) {
-            this.endLevel();
-            return; // Stop processing if level ended
-        }
+        if (this.levelTimer <= 0) { this.endLevel(); return; }
 
         // 2. Update Active Order Timers & Check Failures
-        const failedOrderIds = []; // Collect IDs of failed orders
+        const failedOrderIds = [];
         this.activeOrders.forEach((order, orderId) => {
             order.timer -= delta;
             this.uiManager.updateOrderCardTimer(orderId, order.timer);
-            if (order.timer <= 0) {
-                failedOrderIds.push(orderId); // Mark for failure
-            }
+            if (order.timer <= 0) failedOrderIds.push(orderId);
         });
-
-        // Process failures outside the loop to avoid modifying map during iteration
-        failedOrderIds.forEach(orderId => {
-            this.failOrder(orderId);
-        });
+        failedOrderIds.forEach(orderId => this.failOrder(orderId)); // Process failures
 
         // 3. Check if New Order Should Be Generated
         this.newOrderTimer -= delta;
         if (this.activeOrders.size < this.maxActiveOrders && this.newOrderTimer <= 0) {
             this.generateNewOrder();
-            // generateNewOrder resets the timer internally
         }
     }
 
     completeOrder(servedMealName) {
-        let completedOrderId = null;
-        let completedOrderData = null;
-
-        // Find the first active order matching the served meal
+        let completedOrderId = null, completedOrderData = null;
         for (const [orderId, orderData] of this.activeOrders.entries()) {
             if (orderData.mealName === servedMealName) {
-                completedOrderId = orderId;
-                completedOrderData = orderData;
-                break; // Found a match, stop searching
+                completedOrderId = orderId; completedOrderData = orderData; break;
             }
         }
 
-        if (!completedOrderId || !completedOrderData) {
-            console.warn(`Attempted to complete invalid order: ${servedMealName}. No active order found.`);
-            // Apply penalty only if there *are* active orders they could have matched
-            if (this.activeOrders.size > 0) {
-                // Simple penalty: average penalty of active orders? Or fixed?
-                let penalty = 25; // Fixed penalty for wrong item
-                this.currentScore -= penalty;
+        if (!completedOrderId) { // No matching active order found
+            console.warn(`Attempted to complete invalid order: ${servedMealName}.`);
+            if (this.activeOrders.size > 0) { // Penalize only if other orders were active
+                let penalty = 25; this.currentScore -= penalty;
                 this.currentScore = Math.max(0, this.currentScore);
                 this.uiManager.updateScore(this.currentScore);
                 this.uiManager.showTemporaryMessage('wrongOrder');
-            } else {
-                this.uiManager.showTemporaryMessage('wrongOrder'); // Or "No Active Order"
-            }
+            } else { this.uiManager.showTemporaryMessage('wrongOrder'); }
             return false;
         }
 
-        // Order completed successfully
-        console.log(`Order ${completedOrderData.mealName} (ID: ${completedOrderId}) completed.`);
+        // Success
         let scoreGained = completedOrderData.baseScore;
-        let timeBonus = Math.min(20, Math.floor(Math.max(0, completedOrderData.timer) / 2)); // Use timer from completed order
+        let timeBonus = Math.min(20, Math.floor(Math.max(0, completedOrderData.timer) / 2));
         scoreGained += timeBonus;
-
         this.currentScore += scoreGained;
         this.uiManager.updateScore(this.currentScore);
         this.uiManager.showTemporaryMessage(`+${scoreGained} Points!`, 1500);
 
-        // Remove the completed order
-        this.activeOrders.delete(completedOrderId);
-        this.uiManager.removeOrderCard(completedOrderId);
-
-        // Reset cooldown to potentially allow faster next order after success? Optional.
-        // this.newOrderTimer = Math.min(this.newOrderTimer, 5); // e.g., min 5s cooldown
+        this.activeOrders.delete(completedOrderId); // Remove from map
+        this.uiManager.removeOrderCard(completedOrderId); // Remove from UI
 
         return true;
     }
 
-    // Fail a specific order by ID
     failOrder(orderId) {
         const orderData = this.activeOrders.get(orderId);
-        if (!orderData) return; // Already removed or doesn't exist
+        if (!orderData) return; // Already removed
 
         console.log(`Order ${orderData.mealName} (ID: ${orderId}) FAILED (Timeout).`);
         this.uiManager.showTemporaryMessage(`Order Failed! -${orderData.penalty}`, 2000);
-
         this.currentScore -= orderData.penalty;
         this.currentScore = Math.max(0, this.currentScore);
         this.uiManager.updateScore(this.currentScore);
 
-        // Remove the failed order
-        this.activeOrders.delete(orderId);
-        this.uiManager.removeOrderCard(orderId);
-
-        // Reset cooldown to potentially allow faster next order after failure? Optional.
-        // this.newOrderTimer = Math.min(this.newOrderTimer, 5);
+        this.activeOrders.delete(orderId); // Remove from map
+        this.uiManager.removeOrderCard(orderId); // Remove from UI
     }
 
     endLevel() {
@@ -218,8 +179,7 @@ export class LevelManager {
         console.log(`Level ${this.currentLevelData.levelId} ended. Final Score: ${this.currentScore}`);
         this.isLevelRunning = false;
 
-        // Clear any remaining orders from map and UI
-        this.activeOrders.clear();
+        this.activeOrders.clear(); // Clear remaining orders
         this.uiManager.clearOrderList();
         this.uiManager.updateLevelTimer(0);
 
@@ -236,9 +196,6 @@ export class LevelManager {
         if (this.onLevelEnd) this.onLevelEnd(this.currentScore, stars, this.currentLevelIndex);
         else console.error("onLevelEnd callback not set in LevelManager");
     }
-
-    // No longer needed / relevant with new system
-    // getCurrentOrderName() { return ""; }
 
     isRunning() { return this.isLevelRunning; }
 }
