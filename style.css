@@ -227,21 +227,91 @@ canvas {
 /* Level Select Screen */
 .level-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    /* Responsive grid */
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    /* Wider columns */
+    gap: 15px;
+    /* Increased gap */
     max-height: 60vh;
-    /* Limit height and allow scrolling */
     overflow-y: auto;
-    padding: 10px;
-    /* Padding inside the scrollable area */
+    padding: 15px;
+    /* Increased padding */
     background-color: rgba(0, 0, 0, 0.3);
     border: 2px solid #666;
 }
 
 .level-button {
+    font-size: 0.9em;
+    /* Slightly smaller base font */
+    padding: 10px;
+    /* Adjust padding */
+    display: flex;
+    /* Use flexbox for layout */
+    flex-direction: column;
+    /* Stack elements vertically */
+    align-items: center;
+    /* Center align items */
+    justify-content: center;
+    min-height: 80px;
+    /* Ensure consistent height */
+    text-align: center;
+    position: relative;
+    /* For potential absolute positioning inside */
+}
+
+.level-button .level-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+    /* Make name slightly larger */
+}
+
+.level-button .level-stars {
+    color: #FFD700;
+    /* Gold */
+    font-size: 1.2em;
+    /* Larger stars */
+    margin-bottom: 3px;
+    height: 1.2em;
+    /* Reserve space even if no stars */
+}
+
+.level-button .level-score {
+    font-size: 0.8em;
+    color: #CCC;
+    height: 1em;
+    /* Reserve space */
+}
+
+.level-button .level-status {
+    /* Placeholder for alignment when not completed */
+    height: 2.2em;
+    /* Match height of stars + score */
+    display: block;
+}
+
+
+.level-button.locked {
+    background-color: #444;
+    /* Darker background for locked */
+    border-color: #222;
+    cursor: default;
+    opacity: 0.6;
+}
+
+.level-button.locked:hover,
+.level-button.locked.selected {
+    /* Prevent hover/selected styles on locked */
+    background-color: #444;
+    transform: none;
+    box-shadow: none;
+    border-color: #222;
+}
+
+.level-button .level-locked {
     font-size: 1em;
-    padding: 15px 10px;
+    color: #F00;
+    /* Red */
+    font-weight: bold;
 }
 
 /* In-Game HUD */

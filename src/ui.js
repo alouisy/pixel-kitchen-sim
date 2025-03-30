@@ -1,5 +1,5 @@
 // src/ui.js
-import { LEVEL_DATABASE } from './gameData.js'; // To populate level select
+import { LEVEL_DATABASE } from './gameData.js';
 
 // Helper to format time
 function formatTime(seconds) {
@@ -9,7 +9,10 @@ function formatTime(seconds) {
 }
 
 export class UIManager {
-    constructor() {
+    // --- Updated Constructor ---
+    constructor(saveManager) { // <<< Accept SaveManager
+        this.saveManager = saveManager; // <<< Store SaveManager
+
         // Screen Elements
         this.loadingScreen = document.getElementById('loading-screen');
         this.mainMenu = document.getElementById('main-menu');
@@ -35,7 +38,7 @@ export class UIManager {
         this.languageButtons = this.settingsScreen.querySelectorAll('.lang-button');
         this.toggleLabelsCheckbox = document.getElementById('toggle-labels-setting');
         this.resumeButtonSettings = document.getElementById('resume-button-settings');
-        this.languageLabel = document.getElementById('language-label'); // Get by ID
+        this.languageLabel = document.getElementById('language-label');
 
         // Level Select Elements
         this.levelListContainer = document.getElementById('level-list');
@@ -45,13 +48,12 @@ export class UIManager {
 
         // --- Language ---
         this.currentLanguage = 'en';
-        this.uiText = {
-            en: { title: "Pixel Kitchen Sim", play: "Play", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", orderServed: "Order Served!", wrongOrder: "Wrong / No Order!", notAMeal: "Not a Meal!", handsFull: "Hands Full!", slotFull: "Slot Full!", itemPlaced: "Item Placed", cannotPlace: "Cannot Place Here", stationBusy: "Station Busy", cannotProcess: "Cannot Process", stillProcessing: "Still Processing...", slotEmpty: "Slot Empty", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", order: "Order", levelTime: "Level Time" },
-            fr: { title: "Pixel Cuisine Sim", play: "Jouer", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher Étiquettes:", version: "Version:", selectLevel: "Choisir Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", orderServed: "Commande Servie!", wrongOrder: "Mauvaise Commande!", notAMeal: "Pas un Plat!", handsFull: "Mains Pleines!", slotFull: "Emplacement Plein!", itemPlaced: "Objet Placé", cannotPlace: "Impossible Placer Ici", stationBusy: "Station Occupée", cannotProcess: "Impossible Traiter", stillProcessing: "En Cours...", slotEmpty: "Emplacement Vide", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous Niveaux Finis!", playAgain: "Rejouer?", loading: "Chargement...", order: "Commande", levelTime: "Temps Niveau" },
-            es: { title: "Pixel Cocina Sim", play: "Jugar", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menú Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", version: "Versión:", selectLevel: "Elegir Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", orderServed: "¡Pedido Servido!", wrongOrder: "¡Pedido Incorrecto!", notAMeal: "¡No es Comida!", handsFull: "¡Manos Llenas!", slotFull: "¡Espacio Lleno!", itemPlaced: "Objeto Colocado", cannotPlace: "No se puede Colocar", stationBusy: "Estación Ocupada", cannotProcess: "No se puede Procesar", stillProcessing: "Procesando...", slotEmpty: "Espacio Vacío", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos Niveles Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", order: "Pedido", levelTime: "Tiempo Nivel" }
+        this.uiText = { /* ... language data ... */
+            en: { title: "Pixel Kitchen Sim", play: "Play", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", orderServed: "Order Served!", wrongOrder: "Wrong / No Order!", notAMeal: "Not a Meal!", handsFull: "Hands Full!", slotFull: "Slot Full!", itemPlaced: "Item Placed", cannotPlace: "Cannot Place Here", stationBusy: "Station Busy", cannotProcess: "Cannot Process", stillProcessing: "Still Processing...", slotEmpty: "Slot Empty", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", order: "Order", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked" },
+            fr: { title: "Pixel Cuisine Sim", play: "Jouer", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher Étiquettes:", version: "Version:", selectLevel: "Choisir Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", orderServed: "Commande Servie!", wrongOrder: "Mauvaise Commande!", notAMeal: "Pas un Plat!", handsFull: "Mains Pleines!", slotFull: "Emplacement Plein!", itemPlaced: "Objet Placé", cannotPlace: "Impossible Placer Ici", stationBusy: "Station Occupée", cannotProcess: "Impossible Traiter", stillProcessing: "En Cours...", slotEmpty: "Emplacement Vide", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous Niveaux Finis!", playAgain: "Rejouer?", loading: "Chargement...", order: "Commande", levelTime: "Temps Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé" },
+            es: { title: "Pixel Cocina Sim", play: "Jugar", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menú Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", version: "Versión:", selectLevel: "Elegir Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", orderServed: "¡Pedido Servido!", wrongOrder: "¡Pedido Incorrecto!", notAMeal: "¡No es Comida!", handsFull: "¡Manos Llenas!", slotFull: "¡Espacio Lleno!", itemPlaced: "Objeto Colocado", cannotPlace: "No se puede Colocar", stationBusy: "Estación Ocupada", cannotProcess: "No se puede Procesar", stillProcessing: "Procesando...", slotEmpty: "Espacio Vacío", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos Niveles Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", order: "Pedido", levelTime: "Tiempo Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado" }
         };
-        // Apply default language during construction AFTER elements are found
-        if (this.languageLabel) { // Check if element exists before setting language
+        if (this.languageLabel) {
             this.setLanguage(this.currentLanguage);
         } else {
             console.error("Language label element not found during UIManager construction!");
@@ -59,7 +61,6 @@ export class UIManager {
     }
 
     // --- Screen Management ---
-
     _setActiveScreen(screenElement) {
         if (this.activeScreen && this.activeScreen !== screenElement) {
             this.activeScreen.classList.remove('active');
@@ -69,7 +70,6 @@ export class UIManager {
         }
         this.activeScreen = screenElement;
     }
-
     showLoading() { this._setActiveScreen(this.loadingScreen); }
     hideLoading() { if (this.activeScreen === this.loadingScreen) this.loadingScreen.classList.remove('active'); }
     showMainMenu() { this._setActiveScreen(this.mainMenu); this.hideGameUI(); }
@@ -85,11 +85,12 @@ export class UIManager {
         this.levelEndScreen.dataset.levelIndex = levelIndex;
 
         const nextButton = document.getElementById('next-level-button');
-        if (nextButton) nextButton.style.display = canContinue ? 'block' : 'none';
+        // Unlock based on save data? Or just existence of next level?
+        const isNextLevelUnlocked = this.saveManager.isLevelUnlocked(levelIndex + 1);
+        if (nextButton) nextButton.style.display = (canContinue && isNextLevelUnlocked) ? 'block' : 'none';
 
         const restartButton = document.getElementById('restart-level-button');
         if (restartButton) restartButton.textContent = this.uiText[this.currentLanguage].restartLevel || "Restart Level";
-
 
         this._setActiveScreen(this.levelEndScreen);
         this.hideGameUI();
@@ -108,7 +109,6 @@ export class UIManager {
         this._setActiveScreen(this.levelEndScreen);
         this.hideGameUI();
     }
-
     showGameUI() {
         if (this.activeScreen && this.activeScreen !== this.gameHud) {
             this.activeScreen.classList.remove('active');
@@ -123,30 +123,15 @@ export class UIManager {
     }
 
     // --- In-Game HUD Updates ---
-
-    updateLevelTimer(seconds) {
-        this.levelTimerDisplay.textContent = formatTime(seconds);
-    }
-
-    updateScore(score) {
-        this.scoreDisplay.textContent = score;
-    }
-
-    updateHolding(itemName) {
-        this.holdingDisplay.textContent = itemName || (this.uiText[this.currentLanguage].nothing || "Nothing");
-    }
-
-    updateGamepadStatus(isConnected) {
-        this.gamepadStatusElement.textContent = isConnected ? '🎮' : '';
-    }
-
+    updateLevelTimer(seconds) { this.levelTimerDisplay.textContent = formatTime(seconds); }
+    updateScore(score) { this.scoreDisplay.textContent = score; }
+    updateHolding(itemName) { this.holdingDisplay.textContent = itemName || (this.uiText[this.currentLanguage].nothing || "Nothing"); }
+    updateGamepadStatus(isConnected) { this.gamepadStatusElement.textContent = isConnected ? '🎮' : ''; }
     showTemporaryMessage(messageKey, duration = 2000) {
         const messageText = this.uiText[this.currentLanguage][messageKey] || messageKey;
         this.tempMessageElement.textContent = messageText;
         this.tempMessageElement.classList.add('visible');
-
         if (this.messageTimeout) clearTimeout(this.messageTimeout);
-
         this.messageTimeout = setTimeout(() => {
             this.tempMessageElement.classList.remove('visible');
             this.messageTimeout = null;
@@ -158,69 +143,71 @@ export class UIManager {
         const card = document.createElement('div');
         card.className = 'order-card';
         card.id = `order-${orderId}`;
-
         const mealSpan = document.createElement('span');
         mealSpan.className = 'order-meal';
         mealSpan.textContent = mealName;
-
         const timerSpan = document.createElement('span');
         timerSpan.className = 'order-timer';
         timerSpan.textContent = formatTime(timeLimit);
-
         card.appendChild(mealSpan);
         card.appendChild(timerSpan);
-
         this.orderListElement.appendChild(card);
         return card;
     }
-
     updateOrderCardTimer(orderId, seconds) {
         const card = document.getElementById(`order-${orderId}`);
         if (card) {
             const timerSpan = card.querySelector('.order-timer');
             if (timerSpan) {
                 timerSpan.textContent = formatTime(seconds);
-                if (seconds <= 15 && seconds > 0) {
-                    timerSpan.classList.add('low-time');
-                } else {
-                    timerSpan.classList.remove('low-time');
-                }
-                if (seconds <= 0) {
-                    timerSpan.style.color = 'red';
-                    timerSpan.classList.remove('low-time');
-                } else {
-                    timerSpan.style.color = '';
-                }
+                timerSpan.classList.toggle('low-time', seconds <= 15 && seconds > 0);
+                timerSpan.style.color = seconds <= 0 ? 'red' : '';
             }
         }
     }
-
     removeOrderCard(orderId) {
         const card = document.getElementById(`order-${orderId}`);
         if (card) {
             card.style.transition = 'opacity 0.3s ease-out';
             card.style.opacity = '0';
-            setTimeout(() => {
-                card.remove();
-            }, 300);
+            setTimeout(() => card.remove(), 300);
         }
     }
-
-    clearOrderList() {
-        this.orderListElement.innerHTML = '';
-    }
+    clearOrderList() { this.orderListElement.innerHTML = ''; }
 
 
-    // --- Level Select Population ---
-    populateLevelSelect(levelData) {
+    // --- Level Select Population (Updated) ---
+    populateLevelSelect(levelData, saveManager) { // <<< Accept SaveManager
         this.levelListContainer.innerHTML = '';
         levelData.forEach((level, index) => {
             const button = document.createElement('button');
             button.className = 'menu-button level-button';
             button.dataset.action = 'start-level';
             button.dataset.levelIndex = index;
-            const levelText = this.uiText[this.currentLanguage].level || "Level";
-            button.textContent = `${levelText} ${level.levelId}: ${level.name}`;
+
+            const levelProgress = saveManager.getLevelProgress(index); // <<< Get progress
+            const isUnlocked = saveManager.isLevelUnlocked(index); // <<< Check if unlocked
+
+            let buttonHTML = `
+                <span class="level-name">${this.uiText[this.currentLanguage].level || "Level"} ${level.levelId}: ${level.name}</span>
+            `;
+
+            if (isUnlocked) {
+                if (levelProgress.completed) {
+                    buttonHTML += `
+                        <span class="level-stars">${'★'.repeat(levelProgress.stars)}${'☆'.repeat(3 - levelProgress.stars)}</span>
+                        <span class="level-score">${this.uiText[this.currentLanguage].highScore || "High Score"}: ${levelProgress.highScore}</span>
+                    `;
+                } else {
+                    buttonHTML += `<span class="level-status"></span>`; // Placeholder for alignment
+                }
+            } else {
+                buttonHTML += `<span class="level-locked">${this.uiText[this.currentLanguage].levelLocked || "Locked"}</span>`;
+                button.disabled = true; // Disable button if locked
+                button.classList.add('locked'); // Add class for styling locked state
+            }
+
+            button.innerHTML = buttonHTML;
             this.levelListContainer.appendChild(button);
         });
     }
@@ -234,28 +221,12 @@ export class UIManager {
         this.currentLanguage = lang;
         console.log(`Setting language to: ${lang}`);
 
-        // Update all UI elements with text
-        document.querySelectorAll('[data-lang-key]').forEach(el => {
-            const key = el.dataset.langKey;
-            if (this.uiText[lang][key]) {
-                el.textContent = this.uiText[lang][key];
-            }
-        });
-
-        // Update specific elements not using data-lang-key
+        // Update specific elements
         this.mainMenu.querySelector('h1').textContent = this.uiText[lang].title;
         document.getElementById('play-button').textContent = this.uiText[lang].play;
         document.getElementById('settings-button').textContent = this.uiText[lang].settings;
         this.settingsScreen.querySelector('h1').textContent = this.uiText[lang].settings;
-
-        // **** UPDATED SELECTOR ****
-        if (this.languageLabel) {
-            this.languageLabel.textContent = this.uiText[lang].language + ":";
-        } else {
-            console.error("Language label element not found when setting language text.");
-        }
-        // **** END UPDATED SELECTOR ****
-
+        if (this.languageLabel) this.languageLabel.textContent = this.uiText[lang].language + ":";
         this.settingsScreen.querySelector('label[for="toggle-labels-setting"]').textContent = this.uiText[lang].showLabels;
         document.getElementById('back-to-main-button').textContent = this.uiText[lang].back;
         document.getElementById('resume-button-settings').textContent = this.uiText[lang].resume;
@@ -263,8 +234,8 @@ export class UIManager {
         this.levelSelectScreen.querySelector('h1').textContent = this.uiText[lang].selectLevel;
         document.getElementById('back-to-main-from-level-select').textContent = this.uiText[lang].back;
         this.levelEndScreen.querySelector('h1').textContent = this.uiText[lang].levelComplete;
-        this.levelEndScreen.querySelector('p:nth-of-type(1)').firstChild.textContent = this.uiText[lang].score + ": ";
-        this.levelEndScreen.querySelector('p:nth-of-type(2)').firstChild.textContent = this.uiText[lang].stars + ": ";
+        this.levelEndScreen.querySelector('#final-score').parentNode.firstChild.textContent = this.uiText[lang].score + ": ";
+        this.levelEndScreen.querySelector('#final-stars').parentNode.firstChild.textContent = this.uiText[lang].stars + ": ";
         document.getElementById('next-level-button').textContent = this.uiText[lang].nextLevel;
         document.getElementById('restart-level-button').textContent = this.uiText[lang].restartLevel;
         document.getElementById('level-end-main-menu-button').textContent = this.uiText[lang].mainMenu;
@@ -272,26 +243,16 @@ export class UIManager {
         document.querySelector('#bottom-hud').firstChild.textContent = this.uiText[lang].holding + ": ";
         this.loadingScreen.querySelector('h2').textContent = this.uiText[lang].loading;
 
-
         // Update language button selection state
         this.languageButtons.forEach(btn => {
-            if (btn.dataset.lang === lang) {
-                btn.classList.add('active-lang');
-            } else {
-                btn.classList.remove('active-lang');
-            }
+            btn.classList.toggle('active-lang', btn.dataset.lang === lang);
         });
 
+        // Re-populate level select if visible (to update potential "High Score" text)
         if (this.activeScreen === this.levelSelectScreen) {
-            this.populateLevelSelect(LEVEL_DATABASE);
+            this.populateLevelSelect(LEVEL_DATABASE, this.saveManager);
         }
     }
-
-    getLabelToggleState() {
-        return this.toggleLabelsCheckbox.checked;
-    }
-
-    setLabelToggleState(isChecked) {
-        this.toggleLabelsCheckbox.checked = isChecked;
-    }
+    getLabelToggleState() { return this.toggleLabelsCheckbox.checked; }
+    setLabelToggleState(isChecked) { this.toggleLabelsCheckbox.checked = isChecked; }
 }
