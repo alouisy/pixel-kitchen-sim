@@ -1,7 +1,7 @@
 // src/items.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { ITEM_TYPES, INGREDIENT_STATES } from './constants.js';
-import { addInteractable } from './world.js'; // To add newly created items
+// import { addInteractable } from './world.js'; // To add newly created items
 import { RECIPES } from './gameData.js'; // Import recipes
 
 export function checkPlateCompletion(plate) {
@@ -91,7 +91,7 @@ export function createItem(scene, type, preloadedModels, state = INGREDIENT_STAT
         mesh.name = finalName;
 
         scene.add(mesh);
-        addInteractable(mesh, scene);
+        // addInteractable(mesh, scene);
         return mesh;
     }
 
@@ -161,7 +161,7 @@ export function createItem(scene, type, preloadedModels, state = INGREDIENT_STAT
     mesh.userData = userData;
 
     scene.add(mesh);
-    addInteractable(mesh, scene);
+    // addInteractable(mesh, scene);
 
     return mesh;
 }

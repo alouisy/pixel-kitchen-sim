@@ -2,10 +2,9 @@
 import { LEVEL_DATABASE } from './gameData.js';
 
 export class LevelManager {
-    // --- Updated Constructor ---
-    constructor(uiManager, saveManager) { // <<< Add saveManager
+    constructor(uiManager, saveManager) { // Accept saveManager
         this.uiManager = uiManager;
-        this.saveManager = saveManager; // <<< Store saveManager
+        this.saveManager = saveManager; // Store saveManager
         this.levels = LEVEL_DATABASE;
 
         this.currentLevelIndex = -1;
@@ -25,17 +24,17 @@ export class LevelManager {
         this.onGameEnd = null;
     }
 
-    // World reset is handled BEFORE this is called
+    // World reset is handled BEFORE this is called by main.js
     loadLevel(levelIndex) {
         if (levelIndex < 0 || levelIndex >= this.levels.length) {
             console.log(`Invalid level index: ${levelIndex}. Triggering game end.`);
-            this.isLevelRunning = false;
-            this.isOrderActive = false;
+            this.isLevelRunning = false; this.isOrderActive = false;
             if (this.onGameEnd) this.onGameEnd();
             else console.error("onGameEnd callback not set in LevelManager");
             return false;
         }
 
+        // Reset internal level state
         this.currentLevelIndex = levelIndex;
         this.currentLevelData = this.levels[this.currentLevelIndex];
         this.currentOrderIndex = -1;
@@ -56,17 +55,12 @@ export class LevelManager {
 
     nextOrder() {
         if (!this.isLevelRunning) return;
-
-        if (this.activeOrderCardId) {
-            this.activeOrderCardId = null;
-        }
+        if (this.activeOrderCardId) this.activeOrderCardId = null; // Clear previous card ID tracker
 
         this.currentOrderIndex++;
         if (this.currentOrderIndex >= this.currentLevelData.orders.length) {
             console.log("All orders for level issued.");
-            this.isOrderActive = false;
-            this.currentOrderData = null;
-            return;
+            this.isOrderActive = false; this.currentOrderData = null; return;
         }
 
         this.currentOrderData = this.currentLevelData.orders[this.currentOrderIndex];
@@ -75,30 +69,20 @@ export class LevelManager {
         this.activeOrderCardId = `l${this.currentLevelIndex}-o${this.currentOrderIndex}`;
 
         this.uiManager.addOrderCard(
-            this.activeOrderCardId,
-            this.currentOrderData.mealName,
-            this.orderTimer
+            this.activeOrderCardId, this.currentOrderData.mealName, this.orderTimer
         );
     }
 
     update(delta) {
         if (!this.isLevelRunning) return;
-
         this.levelTimer -= delta;
         this.uiManager.updateLevelTimer(this.levelTimer);
-
-        if (this.levelTimer <= 0) {
-            this.endLevel();
-            return;
-        }
+        if (this.levelTimer <= 0) { this.endLevel(); return; }
 
         if (this.isOrderActive && this.activeOrderCardId) {
             this.orderTimer -= delta;
             this.uiManager.updateOrderCardTimer(this.activeOrderCardId, this.orderTimer);
-
-            if (this.orderTimer <= 0) {
-                this.failOrder();
-            }
+            if (this.orderTimer <= 0) this.failOrder();
         }
     }
 
@@ -109,16 +93,13 @@ export class LevelManager {
                 this.currentScore = Math.max(0, this.currentScore);
                 this.uiManager.updateScore(this.currentScore);
                 this.uiManager.showTemporaryMessage('wrongOrder');
-            } else {
-                this.uiManager.showTemporaryMessage('wrongOrder');
-            }
+            } else { this.uiManager.showTemporaryMessage('wrongOrder'); }
             return false;
         }
 
         let scoreGained = this.currentOrderData.baseScore;
         let timeBonus = Math.min(20, Math.floor(Math.max(0, this.orderTimer) / 2));
         scoreGained += timeBonus;
-
         this.currentScore += scoreGained;
         this.uiManager.updateScore(this.currentScore);
         this.uiManager.showTemporaryMessage(`+${scoreGained} Points!`, 1500);
@@ -127,41 +108,29 @@ export class LevelManager {
             this.uiManager.removeOrderCard(this.activeOrderCardId);
             this.activeOrderCardId = null;
         }
-
-        this.isOrderActive = false;
-        this.currentOrderData = null;
+        this.isOrderActive = false; this.currentOrderData = null;
         this.nextOrder();
         return true;
     }
 
     failOrder() {
         if (!this.isOrderActive || !this.currentOrderData || !this.activeOrderCardId) return;
-
-        const failedOrderName = this.currentOrderData.mealName;
         this.uiManager.showTemporaryMessage(`Order Failed! -${this.currentOrderData.penalty}`, 2000);
-
         this.currentScore -= this.currentOrderData.penalty;
         this.currentScore = Math.max(0, this.currentScore);
         this.uiManager.updateScore(this.currentScore);
-
         this.uiManager.removeOrderCard(this.activeOrderCardId);
         this.activeOrderCardId = null;
-
-        this.isOrderActive = false;
-        this.currentOrderData = null;
+        this.isOrderActive = false; this.currentOrderData = null;
         this.nextOrder();
     }
 
     endLevel() {
         if (!this.isLevelRunning) return;
-
         console.log(`Level ${this.currentLevelData.levelId} ended. Final Score: ${this.currentScore}`);
-        this.isLevelRunning = false;
-        this.isOrderActive = false;
-
+        this.isLevelRunning = false; this.isOrderActive = false;
         if (this.activeOrderCardId) {
-            this.uiManager.removeOrderCard(this.activeOrderCardId);
-            this.activeOrderCardId = null;
+            this.uiManager.removeOrderCard(this.activeOrderCardId); this.activeOrderCardId = null;
         }
         this.uiManager.updateLevelTimer(0);
 
@@ -171,26 +140,16 @@ export class LevelManager {
         if (thresholds.length > 1 && this.currentScore >= thresholds[1]) stars = 2;
         if (thresholds.length > 2 && this.currentScore >= thresholds[2]) stars = 3;
 
-        // --- Save Progress ---
+        // Save Progress using SaveManager
         if (this.saveManager) {
             this.saveManager.updateLevelCompletion(this.currentLevelIndex, this.currentScore, stars);
-        } else {
-            console.warn("SaveManager not available in LevelManager to save progress.");
-        }
-        // --- End Save Progress ---
+        } else { console.warn("SaveManager not available to save progress."); }
 
-        if (this.onLevelEnd) {
-            this.onLevelEnd(this.currentScore, stars, this.currentLevelIndex);
-        } else {
-            console.error("onLevelEnd callback not set in LevelManager");
-        }
+        // Signal main loop
+        if (this.onLevelEnd) this.onLevelEnd(this.currentScore, stars, this.currentLevelIndex);
+        else console.error("onLevelEnd callback not set in LevelManager");
     }
 
-    getCurrentOrderName() {
-        return this.isOrderActive ? this.currentOrderData?.mealName : "";
-    }
-
-    isRunning() {
-        return this.isLevelRunning;
-    }
+    getCurrentOrderName() { return this.isOrderActive ? this.currentOrderData?.mealName : ""; }
+    isRunning() { return this.isLevelRunning; }
 }

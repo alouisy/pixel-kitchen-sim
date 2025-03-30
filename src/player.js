@@ -1,7 +1,7 @@
 // src/player.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { PLAYER_HEIGHT, PLAYER_SPEED, KITCHEN_BOUNDS } from './constants.js';
-import { removeInteractable, addInteractable } from './world.js';
+// No world imports needed
 
 export class Player {
     constructor(controls) {
@@ -17,9 +17,7 @@ export class Player {
     }
 
     update(delta, movementInput) {
-        if (!this.controls.isLocked) {
-            return;
-        }
+        if (!this.controls.isLocked) return;
 
         const speed = PLAYER_SPEED * delta;
         this.velocity.set(movementInput.x, 0, movementInput.z);
@@ -33,6 +31,7 @@ export class Player {
         this.controls.moveRight(this.velocity.x);
         this.controls.moveForward(-this.velocity.z);
 
+        // Apply bounds - consider making bounds dynamic based on level layout later
         this.cameraObject.position.x = Math.max(KITCHEN_BOUNDS.xMin, Math.min(KITCHEN_BOUNDS.xMax, this.cameraObject.position.x));
         this.cameraObject.position.z = Math.max(KITCHEN_BOUNDS.zMin, Math.min(KITCHEN_BOUNDS.zMax, this.cameraObject.position.z));
         this.cameraObject.position.y = PLAYER_HEIGHT;
@@ -53,66 +52,47 @@ export class Player {
     }
 
     pickup(item) {
-        if (this.holdingItem || !this.scene) return false;
+        if (this.holdingItem || !this.scene || !item) return false;
 
         this.holdingItem = item;
-        removeInteractable(item); // Remove from world list/scene temporarily
-        this.scene.add(item); // Re-add to scene directly for positioning
+        // InteractionManager handles removing from its interactables list
+        this.scene.add(item); // Ensure parented to scene for positioning
 
         if (typeof item.raycast === 'function') {
             item.userData.originalRaycast = item.raycast;
         }
-        item.raycast = () => { };
-
-        // console.log("Player picked up:", item.name);
+        item.raycast = () => { }; // Disable raycasting while held
         return true;
     }
 
     place() {
         if (!this.holdingItem) return null;
-
         const item = this.holdingItem;
+        // Restore raycasting
         if (item.userData.originalRaycast) {
             item.raycast = item.userData.originalRaycast;
             delete item.userData.originalRaycast;
         }
-        // InteractionManager handles adding back to interactables/scene on placement/drop
         this.holdingItem = null;
-        // console.log("Player released:", item.name);
+        // Return item for InteractionManager to handle placement/adding back to list
         return item;
     }
 
-    // --- NEW METHOD ---
-    // Forcefully drops the item without placing logic, optionally removing from scene
+    // Force drop - just clear internal state and remove from scene
     forceDropItem() {
         if (!this.holdingItem) return;
-
         console.log(`Player force dropping: ${this.holdingItem.name}`);
         const item = this.holdingItem;
+        this.holdingItem = null; // Clear internal reference
 
-        // Re-enable raycasting just in case
-        if (item.userData.originalRaycast) {
-            item.raycast = item.userData.originalRaycast;
-            delete item.userData.originalRaycast;
+        // Remove from scene graph - InteractionManager handles the list
+        if (item.parent) {
+            item.parent.remove(item);
         }
-
-        // Remove the item completely - it shouldn't be placed anywhere
-        removeInteractable(item); // Removes from list and scene graph
-
-        this.holdingItem = null;
-    }
-    // --- END NEW METHOD ---
-
-
-    getHeldItem() {
-        return this.holdingItem;
+        // Optional: Dispose geometry/material if needed
     }
 
-    getPosition() {
-        return this.cameraObject.position;
-    }
-
-    setScene(scene) {
-        this.scene = scene;
-    }
+    getHeldItem() { return this.holdingItem; }
+    getPosition() { return this.cameraObject.position; }
+    setScene(scene) { this.scene = scene; }
 }

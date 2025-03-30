@@ -4,33 +4,25 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { setupScene, setupCamera, setupRenderer, setupLighting, setupResizeHandler } from './setup.js';
 import { PlayerControls } from './controls.js';
 import { Player } from './player.js';
-import { buildKitchen, toggleLabels, removeInteractable } from './world.js';
+// Import specific world functions needed
+import { buildKitchen, clearKitchen, toggleLabels, removeInteractableFromList } from './world.js'; // Use new list removal helper? No, IM handles its list.
 import { InteractionManager } from './interaction.js';
 import { LevelManager } from './LevelManager.js';
 import { UIManager } from './ui.js';
 import { MenuManager } from './menuManager.js';
-import { SaveManager } from './saveManager.js'; // <<< Import SaveManager
+import { SaveManager } from './saveManager.js';
 import { LEVEL_DATABASE } from './gameData.js';
 import { ITEM_TYPES } from './constants.js';
 
 // --- Game States ---
-const GameState = {
-    LOADING: 'LOADING',
-    MAIN_MENU: 'MAIN_MENU',
-    SETTINGS: 'SETTINGS',
-    LEVEL_SELECT: 'LEVEL_SELECT',
-    GAME_RUNNING: 'GAME_RUNNING',
-    PAUSED: 'PAUSED',
-    LEVEL_END: 'LEVEL_END'
-};
-
+const GameState = { LOADING: 'LOADING', MAIN_MENU: 'MAIN_MENU', SETTINGS: 'SETTINGS', LEVEL_SELECT: 'LEVEL_SELECT', GAME_RUNNING: 'GAME_RUNNING', PAUSED: 'PAUSED', LEVEL_END: 'LEVEL_END' };
 let currentGameState = GameState.LOADING;
 let preloadedModels = {};
 let activeGamepad = null;
 const clock = new THREE.Clock();
 
 // --- Core Components ---
-let scene, camera, renderer, playerControls, player, interactionManager, levelManager, uiManager, menuManager, saveManager; // <<< Add saveManager
+let scene, camera, renderer, playerControls, player, interactionManager, levelManager, uiManager, menuManager, saveManager;
 
 // --- Input Cooldown ---
 let inputCooldownTimer = 0;
@@ -48,9 +40,8 @@ const assetsToLoad = {
 };
 
 async function preloadAssets() {
-    // Create managers needed early
-    saveManager = new SaveManager(); // <<< Create SaveManager
-    uiManager = new UIManager(saveManager); // <<< Pass SaveManager to UIManager
+    if (!saveManager) saveManager = new SaveManager();
+    if (!uiManager) uiManager = new UIManager(saveManager);
     uiManager.showLoading();
     currentGameState = GameState.LOADING;
     const promises = [];
@@ -97,23 +88,17 @@ function initializeGameComponents() {
     player = new Player(playerControls);
     player.setScene(scene);
 
-    // Ensure managers exist (created in preloadAssets or here)
     if (!saveManager) saveManager = new SaveManager();
-    if (!uiManager) uiManager = new UIManager(saveManager); // Pass SaveManager
+    if (!uiManager) uiManager = new UIManager(saveManager);
     menuManager = new MenuManager(uiManager);
+    levelManager = new LevelManager(uiManager, saveManager);
 
-    const { stations, interactables, floorMesh } = buildKitchen(scene);
-
-    // Pass SaveManager to LevelManager
-    levelManager = new LevelManager(uiManager, saveManager); // <<< Pass SaveManager
-
-    interactionManager = new InteractionManager(camera, scene, player, stations, interactables, levelManager, uiManager, preloadedModels, floorMesh);
+    // InteractionManager is created, but world data is set during startGameLevel
+    interactionManager = new InteractionManager(camera, scene, player, {}, [], levelManager, uiManager, preloadedModels, null);
 
     const initialLabelState = uiManager.getLabelToggleState();
-    toggleLabels(initialLabelState);
-    // Load language preference from save data?
-    // uiManager.setLanguage(saveManager.getLanguagePreference() || 'en');
-    uiManager.setLanguage('en'); // Keep default for now
+    toggleLabels(initialLabelState); // Initial toggle based on UI default
+    uiManager.setLanguage('en');
 
     addEventListeners();
 
@@ -131,8 +116,8 @@ function addEventListeners() {
     const labelToggle = document.getElementById('toggle-labels-setting');
     if (labelToggle) {
         labelToggle.addEventListener('change', (event) => {
-            console.log("Label toggle changed:", event.target.checked);
-            toggleLabels(event.target.checked);
+            // console.log("Label toggle changed:", event.target.checked);
+            toggleLabels(event.target.checked); // Directly call world toggle function
             if (menuManager && menuManager.activeMenuElement === uiManager.settingsScreen) {
                 menuManager.setSelectedIndex(menuManager.focusableElements.indexOf(event.target));
             }
@@ -181,8 +166,7 @@ function changeGameState(newState) {
             if (playerControls && playerControls.isLocked) playerControls.unlock();
             break;
         case GameState.LEVEL_SELECT:
-            // Pass level data AND save manager to populate
-            uiManager.populateLevelSelect(LEVEL_DATABASE, saveManager); // <<< Pass saveManager
+            uiManager.populateLevelSelect(LEVEL_DATABASE, saveManager);
             uiManager.showLevelSelect();
             menuManager.activateMenu(uiManager.levelSelectScreen);
             if (playerControls && playerControls.isLocked) playerControls.unlock();
@@ -261,23 +245,26 @@ function handleMenuAction(eventOrAction) {
         case 'back-to-main': changeGameState(GameState.MAIN_MENU); break;
         case 'start-level':
             const levelIndex = parseInt(element.dataset.levelIndex, 10);
-            // Check if level is unlocked before starting
             if (!isNaN(levelIndex) && saveManager.isLevelUnlocked(levelIndex)) {
                 startGameLevel(levelIndex);
             } else if (!isNaN(levelIndex)) {
                 console.log(`Level ${levelIndex + 1} is locked.`);
-                uiManager.showTemporaryMessage("Level Locked!", 1500); // Add translation key if needed
-                actionTaken = false; // Don't apply cooldown if level is locked
-            } else {
+                uiManager.showTemporaryMessage("Level Locked!", 1500);
                 actionTaken = false;
-            }
+            } else { actionTaken = false; }
             break;
         case 'set-language': uiManager.setLanguage(element.dataset.lang); break;
         case 'resume': resumeGame(); break;
         case 'next-level':
             const currentLevel = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
-            if (!isNaN(currentLevel)) startGameLevel(currentLevel + 1);
-            else actionTaken = false;
+            // Ensure next level exists and is unlocked
+            const nextLevelIndex = currentLevel + 1;
+            if (!isNaN(currentLevel) && nextLevelIndex < LEVEL_DATABASE.length && saveManager.isLevelUnlocked(nextLevelIndex)) {
+                startGameLevel(nextLevelIndex);
+            } else {
+                console.log("Next level not available or locked.");
+                actionTaken = false; // Don't set cooldown if button shouldn't have been active
+            }
             break;
         case 'restart-level':
             const levelToRestart = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
@@ -298,79 +285,53 @@ function handleMenuAction(eventOrAction) {
 }
 
 function startGameLevel(levelIndex) {
-    if (!levelManager) {
-        console.error("LevelManager not initialized!");
+    if (!levelManager || !interactionManager || !scene) {
+        console.error("Core components not initialized!");
         changeGameState(GameState.MAIN_MENU); return;
     }
-    // Reset world state is now handled within LevelManager or needs a separate call
-    resetWorldState(); // Call cleanup function here
+    if (levelIndex < 0 || levelIndex >= LEVEL_DATABASE.length) {
+        console.log("Attempted to load invalid level index.");
+        changeGameState(GameState.LEVEL_SELECT); return;
+    }
+
+    // --- World Setup ---
+    resetWorldState(); // Clear dynamic items first
+    clearKitchen(scene); // Clear static kitchen elements
+
+    const levelData = LEVEL_DATABASE[levelIndex];
+    if (!levelData || !levelData.layout) {
+        console.error(`Layout data missing for level index ${levelIndex}!`);
+        changeGameState(GameState.LEVEL_SELECT); return;
+    }
+
+    // Build the new kitchen based on layout data
+    const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout);
+
+    // Update InteractionManager with new world data
+    interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
+
+    // Load the level's internal state
     const loaded = levelManager.loadLevel(levelIndex);
+
     if (loaded && levelManager.isRunning()) {
         changeGameState(GameState.GAME_RUNNING);
-    } else if (!loaded) {
-        console.log("Level loading failed or game ended.");
     } else {
-        console.error("LevelManager loaded but is not running.");
+        console.error("LevelManager failed to load or run after world build.");
         changeGameState(GameState.LEVEL_SELECT);
     }
 }
 
-// Separate function for resetting world state
+// Reset dynamic elements before loading a level
 function resetWorldState() {
-    console.log("Resetting world state...");
+    console.log("Resetting dynamic world state...");
     if (player) player.forceDropItem();
-
-    // Use interactionManager's reference to interactables
-    if (interactionManager && interactionManager.interactables) {
-        const interactables = interactionManager.interactables;
-        for (let i = interactables.length - 1; i >= 0; i--) {
-            const item = interactables[i];
-            if (item.userData?.type === ITEM_TYPES.ITEM || item.userData?.type === ITEM_TYPES.INGREDIENT) {
-                // console.log(`Removing dynamic item: ${item.name}`);
-                removeInteractable(item);
-            }
-        }
-    } else { console.warn("Cannot reset interactables list."); }
-
-    if (interactionManager && interactionManager.stations) {
-        const stations = interactionManager.stations;
-        for (const stationName in stations) {
-            const station = stations[stationName];
-            if (station.userData?.stationType === 'processor') {
-                station.userData.occupiedBy = null;
-            } else if (station.userData?.stationType === 'assembly') {
-                if (Array.isArray(station.userData.slots)) {
-                    // Also remove any children from items in slots (e.g., ingredients on plates)
-                    station.userData.slots.forEach(itemInSlot => {
-                        if (itemInSlot && itemInSlot.userData?.itemType === 'plate') {
-                            // Iterate backwards over children to safely remove
-                            for (let j = itemInSlot.children.length - 1; j >= 0; j--) {
-                                const child = itemInSlot.children[j];
-                                // Assuming only ingredients are added as children
-                                if (child.userData?.type === ITEM_TYPES.INGREDIENT) {
-                                    itemInSlot.remove(child);
-                                    // No need to call removeInteractable, they weren't in the main list
-                                }
-                            }
-                            // Reset plate state
-                            itemInSlot.userData.contents = [];
-                            itemInSlot.userData.mealName = null;
-                        }
-                    });
-                    // Now clear the slots array itself
-                    station.userData.slots = [null, null, null];
-                } else {
-                    station.userData.slots = [null, null, null];
-                }
-            }
-        }
-    } else { console.warn("Cannot reset stations object."); }
-
+    if (interactionManager) interactionManager.clearDynamicItems();
+    // Station states (occupiedBy, slots) are reset implicitly when the kitchen is rebuilt by buildKitchen
     if (uiManager) {
         uiManager.clearOrderList();
         uiManager.updateHolding(null);
     }
-    console.log("World state reset complete.");
+    console.log("Dynamic world state reset complete.");
 }
 
 
@@ -389,11 +350,9 @@ function resumeGame() {
 }
 
 function handleLevelEnd(score, stars, levelIndex) {
-    // Save progress BEFORE showing the end screen
     if (saveManager) {
         saveManager.updateLevelCompletion(levelIndex, score, stars);
     }
-    // Now show the screen
     const hasNextLevel = (levelIndex + 1) < LEVEL_DATABASE.length;
     uiManager.showLevelEnd(score, stars, levelIndex, hasNextLevel);
     changeGameState(GameState.LEVEL_END);
@@ -494,11 +453,10 @@ function animate() {
 // --- Start Execution ---
 async function runGame() {
     try {
-        // Create SaveManager and UIManager first
         saveManager = new SaveManager();
-        uiManager = new UIManager(saveManager); // Pass save manager
+        uiManager = new UIManager(saveManager);
         await preloadAssets();
-        initializeGameComponents(); // Creates other managers
+        initializeGameComponents();
 
         if (levelManager) {
             levelManager.onLevelEnd = handleLevelEnd;

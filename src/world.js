@@ -1,15 +1,14 @@
 // src/world.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-// Import ITEM_TYPES if needed for checks within this file (though reset logic moved)
-import { COUNTER_HEIGHT, COUNTER_DEPTH, LABEL_Y_OFFSET, STATION_TYPES, ITEM_TYPES } from './constants.js';
+import { COUNTER_HEIGHT, LABEL_Y_OFFSET, STATION_TYPES } from './constants.js';
 
-const interactables = []; // Keep track of items player can interact with
-const stations = {};      // References to specific station meshes
-const labelSprites = [];
-let floorMesh = null; // Reference to the floor mesh
+// Module-level arrays to track created objects for cleanup
+let currentKitchenObjects = []; // Tracks static meshes (stations, counters)
+let currentLabels = [];         // Tracks label sprites
+let currentFloor = null;        // Tracks the floor mesh
 
 // --- Label Creation ---
-function createLabel(text, position, yOffset = LABEL_Y_OFFSET, scale = 1.0) {
+function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET, scale = 1.0) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     const fontSize = 40;
@@ -17,8 +16,6 @@ function createLabel(text, position, yOffset = LABEL_Y_OFFSET, scale = 1.0) {
     const textMetrics = context.measureText(text);
     canvas.width = textMetrics.width + 20;
     canvas.height = fontSize + 10;
-
-    // Re-set font and draw after sizing
     context.font = `Bold ${fontSize}px Arial`;
     context.fillStyle = 'rgba(0, 0, 0, 0.7)';
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -26,198 +23,233 @@ function createLabel(text, position, yOffset = LABEL_Y_OFFSET, scale = 1.0) {
     context.textBaseline = 'middle';
     context.fillStyle = 'white';
     context.fillText(text, canvas.width / 2, canvas.height / 2);
-
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
-
     const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false });
     const sprite = new THREE.Sprite(material);
     const aspect = canvas.width / canvas.height;
-    sprite.scale.set(scale * aspect * 0.15, scale * 0.15, 1);
+    sprite.scale.set(scale * aspect * 0.3, scale * 0.3, 1);
     sprite.position.copy(position);
     sprite.position.y += yOffset;
     sprite.renderOrder = 1;
 
-    labelSprites.push(sprite);
+    scene.add(sprite);
+    currentLabels.push(sprite); // Add to tracking array
     return sprite;
 }
 
+// Toggles visibility of currently tracked labels
 export function toggleLabels(visible) {
-    labelSprites.forEach(sprite => {
+    currentLabels.forEach(sprite => {
         sprite.visible = visible;
     });
-    console.log(`Labels set to visible: ${visible}`);
 }
 
-// --- Station Creation ---
-function createStation(scene, name, x, z, width, depth, height, color, userData) {
-    const stationGeo = new THREE.BoxGeometry(width, height, depth);
-    const stationMat = new THREE.MeshStandardMaterial({ color: color });
+// --- Station Creation (Builds one station based on definition) ---
+function createStation(scene, definition) {
+    const { name, type, position, size, color, config } = definition;
+    // Use default size values if not provided
+    const stationSize = {
+        width: size?.width ?? 0.5,
+        height: size?.height ?? 0.3,
+        depth: size?.depth ?? 0.5,
+    };
+    const stationColor = color ?? 0x808080; // Default grey
+
+    const stationGeo = new THREE.BoxGeometry(stationSize.width, stationSize.height, stationSize.depth);
+    const stationMat = new THREE.MeshStandardMaterial({ color: stationColor });
     const stationMesh = new THREE.Mesh(stationGeo, stationMat);
-    stationMesh.position.set(x, COUNTER_HEIGHT + height / 2, z);
+
+    // Position based on center defined in layout, Y adjusted for station height ON TOP of counter height
+    stationMesh.position.set(position.x, COUNTER_HEIGHT + stationSize.height / 2, position.z);
+
     stationMesh.castShadow = true;
     stationMesh.receiveShadow = true;
     stationMesh.name = name;
-    stationMesh.userData = { ...userData, type: 'station', name: name };
+    stationMesh.userData = { ...(config || {}), type: 'station', stationType: type, name: name }; // Ensure config is an object
 
-    // --- Special setup for Assembly station ---
-    if (userData.stationType === STATION_TYPES.ASSEMBLY) {
-        stationMesh.userData.slots = [null, null, null]; // [left, center, right] - holds item mesh or null
-        stationMesh.userData.slotPositions = []; // Holds Vector3 positions for each slot center
-
-        const stationWidth = width;
-        const stationDepth = depth;
-        const stationTopY = stationMesh.position.y + height / 2;
+    // Special setup for Assembly station slots
+    if (type === STATION_TYPES.ASSEMBLY) {
+        stationMesh.userData.slots = [null, null, null];
+        stationMesh.userData.slotPositions = [];
+        const stationWidth = stationSize.width;
+        const stationTopY = stationMesh.position.y + stationSize.height / 2;
         const slotWidth = stationWidth / 3;
-
-        // Calculate center positions for each slot
-        const centerZ = stationMesh.position.z; // Assume items centered depth-wise
+        const centerZ = stationMesh.position.z;
         const leftSlotX = stationMesh.position.x - slotWidth;
         const centerSlotX = stationMesh.position.x;
         const rightSlotX = stationMesh.position.x + slotWidth;
-
         stationMesh.userData.slotPositions.push(new THREE.Vector3(leftSlotX, stationTopY, centerZ));
         stationMesh.userData.slotPositions.push(new THREE.Vector3(centerSlotX, stationTopY, centerZ));
         stationMesh.userData.slotPositions.push(new THREE.Vector3(rightSlotX, stationTopY, centerZ));
 
-        // --- Add Visual Dividers (Optional) ---
-        const dividerHeight = 0.01; // Slightly above surface
-        const dividerDepth = stationDepth * 0.95; // Slightly shorter than station depth
+        // Add Visual Dividers
+        const dividerHeight = 0.01;
+        const dividerDepth = stationSize.depth * 0.95;
         const dividerMat = new THREE.MeshBasicMaterial({ color: 0x555555, side: THREE.DoubleSide });
-
-        // Divider 1 (between left and center)
         const dividerGeo1 = new THREE.BoxGeometry(0.01, dividerHeight, dividerDepth);
         const divider1 = new THREE.Mesh(dividerGeo1, dividerMat);
         divider1.position.set(stationMesh.position.x - slotWidth / 2, stationTopY + dividerHeight / 2, centerZ);
-        stationMesh.add(divider1); // Add as child of station
-
-        // Divider 2 (between center and right)
+        stationMesh.add(divider1);
         const dividerGeo2 = new THREE.BoxGeometry(0.01, dividerHeight, dividerDepth);
         const divider2 = new THREE.Mesh(dividerGeo2, dividerMat);
         divider2.position.set(stationMesh.position.x + slotWidth / 2, stationTopY + dividerHeight / 2, centerZ);
-        stationMesh.add(divider2); // Add as child of station
-        // --- End Visual Dividers ---
-
-    } else if (userData.stationType === STATION_TYPES.PROCESSOR) {
+        stationMesh.add(divider2);
+    } else if (type === STATION_TYPES.PROCESSOR) {
         stationMesh.userData.occupiedBy = null;
     }
 
     scene.add(stationMesh);
-    interactables.push(stationMesh); // Station itself is interactable
+    currentKitchenObjects.push(stationMesh); // Track static station mesh
 
-    const label = createLabel(name, stationMesh.position, height / 2 + LABEL_Y_OFFSET);
-    scene.add(label);
+    // Add label
+    createLabel(scene, name, stationMesh.position, stationSize.height / 2 + LABEL_Y_OFFSET);
 
     return stationMesh;
 }
 
-// --- Counter Creation ---
-function createCounter(scene, x, z, width, depth = COUNTER_DEPTH) {
-    const counterGeo = new THREE.BoxGeometry(width, COUNTER_HEIGHT, depth);
+// --- Counter Creation (Builds one counter based on definition) ---
+function createCounter(scene, definition) {
+    const { name, position, size, isServing } = definition;
+    // Use default size values if not provided
+    const counterSize = {
+        width: size?.width ?? 4,
+        height: size?.height ?? COUNTER_HEIGHT,
+        depth: size?.depth ?? 0.6,
+    };
+
+    const counterGeo = new THREE.BoxGeometry(counterSize.width, counterSize.height, counterSize.depth);
     const counterMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.2, roughness: 0.8 });
     const counter = new THREE.Mesh(counterGeo, counterMat);
-    counter.position.set(x, COUNTER_HEIGHT / 2, z);
+
+    counter.position.set(position.x, counterSize.height / 2, position.z);
     counter.castShadow = true;
     counter.receiveShadow = true;
+    counter.name = name;
+
+    if (isServing) {
+        counter.userData = { type: 'station', stationType: STATION_TYPES.SERVING, name: name };
+        createLabel(scene, "Serve Here", counter.position, counterSize.height / 2 + LABEL_Y_OFFSET);
+    } else {
+        counter.userData = { type: STATION_TYPES.COUNTER };
+    }
+
     scene.add(counter);
+    currentKitchenObjects.push(counter); // Track static counter mesh
     return counter;
 }
 
-// --- Build the Kitchen ---
-export function buildKitchen(scene) {
-    // Floor
+// --- Clear Kitchen Function ---
+export function clearKitchen(scene) {
+    console.log("Clearing existing kitchen objects...");
+    currentKitchenObjects.forEach(obj => {
+        if (obj.parent) obj.parent.remove(obj);
+        obj.geometry?.dispose();
+        // Dispose materials carefully, only if they are unique per object
+        // If materials are shared, disposing them here will break other objects.
+        // obj.material?.dispose();
+    });
+    currentLabels.forEach(label => {
+        if (label.parent) label.parent.remove(label);
+        label.material.map?.dispose(); // Dispose canvas texture
+        label.material?.dispose();
+    });
+    if (currentFloor && currentFloor.parent) {
+        currentFloor.parent.remove(currentFloor);
+        currentFloor.geometry?.dispose();
+        // currentFloor.material?.dispose(); // Floor material might be reused
+    }
+
+    currentKitchenObjects = [];
+    currentLabels = [];
+    currentFloor = null;
+    console.log("Kitchen cleared.");
+}
+
+
+// --- Build the Kitchen (Dynamic) ---
+export function buildKitchen(scene, levelLayout) {
+    console.log("Building kitchen for level layout...");
+    if (!levelLayout || !Array.isArray(levelLayout)) {
+        console.error("Invalid or missing levelLayout data provided to buildKitchen.");
+        return { stations: {}, stationInteractables: [], floorMesh: null };
+    }
+
+    // Ensure previous kitchen is cleared
+    if (currentKitchenObjects.length > 0 || currentLabels.length > 0 || currentFloor) {
+        console.warn("buildKitchen called while previous objects exist. Clearing now.");
+        clearKitchen(scene);
+    }
+
+    const newStations = {}; // Holds references to functional stations by name
+    const newStationInteractables = []; // Holds only station meshes that player interacts with
+
+    // --- Build Floor ---
     const floorGeometry = new THREE.PlaneGeometry(10, 10);
     const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.9 });
-    floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
-    floorMesh.rotation.x = -Math.PI / 2;
-    floorMesh.receiveShadow = true;
-    floorMesh.name = "Floor";
-    floorMesh.userData = { type: STATION_TYPES.FLOOR };
-    scene.add(floorMesh);
+    currentFloor = new THREE.Mesh(floorGeometry, floorMaterial);
+    currentFloor.rotation.x = -Math.PI / 2;
+    currentFloor.receiveShadow = true;
+    currentFloor.name = "Floor";
+    currentFloor.userData = { type: STATION_TYPES.FLOOR };
+    scene.add(currentFloor);
 
-    // Back Counter
-    createCounter(scene, 0, -4.5 + COUNTER_DEPTH / 2, 9);
-    const backCounterZ = -4.5 + COUNTER_DEPTH;
+    // --- Build from Layout Data ---
+    levelLayout.forEach(definition => {
+        try {
+            if (definition.type === STATION_TYPES.COUNTER) {
+                const counterMesh = createCounter(scene, definition);
+                if (definition.isServing) {
+                    newStations[definition.name] = counterMesh; // Store serving counter ref
+                    newStationInteractables.push(counterMesh); // Serving counter is interactable
+                }
+            }
+            // Check for functional station types that are NOT counter/floor/wall
+            else if (definition.type && definition.type !== STATION_TYPES.COUNTER && definition.type !== STATION_TYPES.FLOOR && definition.type !== STATION_TYPES.WALL) {
+                const stationMesh = createStation(scene, definition);
+                newStations[definition.name] = stationMesh; // Store functional station ref
+                newStationInteractables.push(stationMesh); // Functional stations are interactable
+            }
+        } catch (error) {
+            console.error(`Error creating kitchen object "${definition.name}" (type: ${definition.type}):`, error);
+        }
+    });
 
-    // Ingredient Bins
-    stations.potatoBin = createStation(scene, 'Potatoes', -3.75, backCounterZ, 0.5, 0.5, 0.3, 0xffa500,
-        { stationType: STATION_TYPES.INGREDIENT_SOURCE, ingredient: 'potato' });
-    stations.lettuceBin = createStation(scene, 'Lettuce', -2.75, backCounterZ, 0.5, 0.5, 0.3, 0x90ee90,
-        { stationType: STATION_TYPES.INGREDIENT_SOURCE, ingredient: 'lettuce' });
-    stations.tomatoBin = createStation(scene, 'Tomatoes', -1.75, backCounterZ, 0.5, 0.5, 0.3, 0xff6347,
-        { stationType: STATION_TYPES.INGREDIENT_SOURCE, ingredient: 'tomato' });
-    stations.pattyBin = createStation(scene, 'Patties', -0.75, backCounterZ, 0.5, 0.5, 0.3, 0x8B4513,
-        { stationType: STATION_TYPES.INGREDIENT_SOURCE, ingredient: 'patty' });
-    stations.bunRack = createStation(scene, 'Buns', 0.75, backCounterZ, 0.5, 0.5, 0.3, 0xf0d891,
-        { stationType: STATION_TYPES.INGREDIENT_SOURCE, ingredient: 'bun' });
-
-    // Processing Stations
-    stations.cuttingBoard = createStation(scene, 'Cut', 0, backCounterZ, 0.6, 0.4, 0.05, 0xdeb887,
-        { stationType: STATION_TYPES.PROCESSOR, processes: ['potato', 'tomato', 'lettuce'], result: { potato: 'raw_fries', tomato: 'chopped_tomato', lettuce: 'chopped_lettuce' } });
-    stations.fryer = createStation(scene, 'Fry', 2.25, backCounterZ, 0.5, 0.5, 0.4, 0x444444,
-        { stationType: STATION_TYPES.PROCESSOR, processes: ['raw_fries'], result: { raw_fries: 'cooked_fries' }, processingTime: 3000 });
-    stations.grill = createStation(scene, 'Grill', 3.25, backCounterZ, 0.7, 0.5, 0.1, 0x333333,
-        { stationType: STATION_TYPES.PROCESSOR, processes: ['patty'], result: { patty: 'cooked_patty' }, processingTime: 5000 });
-
-    // Item Sources
-    stations.plateStack = createStation(scene, 'Plates', 4.1, backCounterZ, 0.3, 0.3, 0.2, 0xffffff,
-        { stationType: STATION_TYPES.ITEM_SOURCE, item: 'plate' });
-    stations.cheeseFridge = createStation(scene, 'Cheese', 4.1, backCounterZ - 0.8, 0.4, 0.4, 0.6, 0xe0ffff,
-        { stationType: STATION_TYPES.INGREDIENT_SOURCE, ingredient: 'cheese_slice' });
-
-    // Assembly Station
-    const assemblyWidth = 1.8;
-    stations.assembly = createStation(scene, 'Assembly', 0, -1.5, assemblyWidth, 0.8, 0.05, 0xd3d3d3,
-        { stationType: STATION_TYPES.ASSEMBLY });
-
-    // Serving Counter
-    const servingCounterMesh = createCounter(scene, 0, 3.9 + COUNTER_DEPTH / 2, 5);
-    stations.servingCounter = servingCounterMesh;
-    stations.servingCounter.name = "Serving Counter";
-    stations.servingCounter.userData = { type: 'station', stationType: STATION_TYPES.SERVING, name: "Serving Counter" };
-    const servingLabelPos = servingCounterMesh.position.clone();
-    const servingLabel = createLabel("Serve Here", servingLabelPos, COUNTER_HEIGHT / 2 + LABEL_Y_OFFSET);
-    scene.add(servingLabel);
-
-    // IMPORTANT: Return the interactables array reference created in this module scope
-    return { stations, interactables, floorMesh };
+    console.log(`Kitchen built. ${Object.keys(newStations).length} functional stations created.`);
+    // Return references for the current level
+    return { stations: newStations, stationInteractables: newStationInteractables, floorMesh: currentFloor };
 }
 
-// Function to add a newly created item to the list
-export function addInteractable(item, scene) { // scene might not be needed here anymore
-    if (!item) {
-        console.warn("addInteractable called with null item");
-        return;
-    }
-    if (!interactables.includes(item)) {
-        if (!item.name) {
-            item.name = item.userData?.type + "_" + item.id;
-        }
-        const isChildOfPlate = item.parent?.userData?.itemType === 'plate';
-        if (!isChildOfPlate) {
-            interactables.push(item);
+
+// --- Dynamic Item Management (Now primarily handled by InteractionManager) ---
+
+// Function to add a DYNAMIC item (ingredient, plate) - Called by InteractionManager/createItem
+export function addInteractableToList(item, list) {
+    // Adds item to the provided list (InteractionManager's list)
+    if (item && !list.includes(item)) {
+        // Basic check to avoid adding structural elements
+        if (item.userData?.type !== 'station' && item.userData?.type !== STATION_TYPES.COUNTER && item.userData?.type !== STATION_TYPES.FLOOR) {
+            list.push(item);
         }
     }
 }
 
-// Function to remove an item
-export function removeInteractable(item) {
+// Function to remove a DYNAMIC item - Called by InteractionManager
+export function removeInteractableFromList(item, list) {
     if (!item) return;
-    const index = interactables.indexOf(item);
+    const index = list.indexOf(item);
     if (index > -1) {
-        interactables.splice(index, 1);
+        list.splice(index, 1);
     }
-    // Always try to remove from scene graph if it has a parent
+    // Also remove from scene graph
     if (item.parent) {
         item.parent.remove(item);
     }
-    // Optional: Dispose geometry/material here if needed
-    // item.geometry?.dispose();
-    // item.material?.dispose();
 }
 
-// Helper to get the slot index based on world X coordinate
+// getAssemblySlotIndex remains the same
 export function getAssemblySlotIndex(station, worldX) {
+    if (!station?.geometry?.parameters?.width) return 1; // Fallback to center if invalid
     const stationX = station.position.x;
     const stationWidth = station.geometry.parameters.width;
     const slotWidth = stationWidth / 3;
