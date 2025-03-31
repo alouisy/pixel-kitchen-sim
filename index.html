@@ -91,12 +91,6 @@
     <div id="game-hud" style="display: none;"> <!-- Hidden initially -->
         <div id="order-list">
             <!-- Order cards added here by JS -->
-            <!-- Example Card:
-            <div class="order-card" id="order-123">
-                <span class="order-meal">French Fries</span>
-                <span class="order-timer">1:30</span>
-            </div>
-             -->
         </div>
         <div id="game-timer-container">
             Level Time: <span id="level-timer-display">0:00</span>
@@ -110,13 +104,6 @@
         <div id="temp-message"></div> <!-- Re-use temp message area -->
     </div>
 
-    <!-- Pause Overlay (Simple version if Settings isn't the pause menu) -->
-    <!-- <div id="pause-overlay" class="overlay menu-screen">
-         <h1>Paused</h1>
-         <button id="resume-button-pause" class="menu-button" data-action="resume">Resume</button>
-         <button id="settings-button-pause" class="menu-button" data-action="settings">Settings</button>
-     </div> -->
-
     <!-- Level End Screen -->
     <div id="level-end-screen" class="overlay menu-screen">
         <h1>Level Complete!</h1>
@@ -129,6 +116,29 @@
         </div>
         <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
     </div>
+
+    <!-- Level Instructions Screen -->
+    <div id="level-instructions-screen" class="overlay menu-screen">
+        <h1 id="instructions-title">Level Instructions</h1>
+        <div id="instructions-container" class="menu-container instructions-box">
+            <div id="instructions-content">
+                <!-- Recipe instructions will be added here by JS -->
+                <!-- Example Structure:
+                <div class="recipe-instruction">
+                    <h3>Recipe Name</h3>
+                    <ul>
+                        <li>Step 1...</li>
+                        <li>Step 2...</li>
+                    </ul>
+                </div>
+                 -->
+            </div>
+            <button id="start-level-instructions-button" class="menu-button" data-action="start-level-confirm">Start
+                Level</button>
+        </div>
+        <p class="menu-hint">Select: Enter/[X]/[A]</p>
+    </div>
+
 
     <!-- Import the main script as a module -->
     <script type="module" src="src/main.js"></script>

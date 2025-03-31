@@ -13,6 +13,7 @@ export class MenuManager {
         this.selectedIndex = -1;
         this.gamepadNavTimer = 0;
         this.prevGamepadButtons = []; // Store previous frame's buttons
+        this._addEventListeners(); // Add listeners during construction
     }
 
     _addEventListeners() {
@@ -28,7 +29,6 @@ export class MenuManager {
         });
 
         // Clicks are handled by main.js calling handleMenuAction
-        // We don't need a separate click listener here that might conflict
     }
 
     activateMenu(menuElement) {
@@ -38,22 +38,36 @@ export class MenuManager {
         }
         this.activeMenuElement = menuElement;
         this.refreshFocusableElements();
+
         let defaultIndex = 0;
-        const resumeButton = menuElement.querySelector('[data-action="resume"]');
-        if (resumeButton && resumeButton.style.display !== 'none') {
-            const resumeIndex = this.focusableElements.indexOf(resumeButton);
-            if (resumeIndex > -1) defaultIndex = resumeIndex;
-        } else {
-            // Find first non-link element if possible
+        // Prioritize specific buttons like "Resume" or "Start" if they exist and are visible
+        const priorityActions = ['start-level-confirm', 'resume', 'next-level', 'restart-level'];
+        let priorityButtonFound = false;
+        for (const action of priorityActions) {
+            const button = menuElement.querySelector(`[data-action="${action}"]`);
+            if (button && button.offsetParent !== null && !button.disabled) { // Check visibility and enabled
+                const buttonIndex = this.focusableElements.indexOf(button);
+                if (buttonIndex > -1) {
+                    defaultIndex = buttonIndex;
+                    priorityButtonFound = true;
+                    break;
+                }
+            }
+        }
+
+        // Fallback to first non-link element if no priority button found
+        if (!priorityButtonFound) {
             const firstButtonIndex = this.focusableElements.findIndex(el => el.tagName === 'BUTTON' || el.tagName === 'INPUT');
             if (firstButtonIndex > -1) defaultIndex = firstButtonIndex;
         }
+
         this.setSelectedIndex(defaultIndex);
         this.prevGamepadButtons = []; // Reset button history when menu activates
+        this.gamepadNavTimer = GAMEPAD_NAV_DELAY; // Add initial delay
     }
 
     deactivateMenu() {
-        this.setSelectedIndex(-1);
+        this.setSelectedIndex(-1); // Deselect current item visually
         this.activeMenuElement = null;
         this.focusableElements = [];
         this.selectedIndex = -1;
@@ -138,13 +152,17 @@ export class MenuManager {
             const currentElement = this.focusableElements[this.selectedIndex];
             let moved = false;
 
-            // Try horizontal first within specific groups
+            // Try horizontal first within specific groups (like language buttons)
             if (moveHorizontal !== 0) {
-                const parentGroup = currentElement?.closest('.button-group'); // Language buttons
+                const parentGroup = currentElement?.closest('.button-group, .level-grid'); // Add level-grid
                 if (parentGroup) {
                     const groupElements = this.focusableElements.filter(el => parentGroup.contains(el));
                     const currentIndexInGroup = groupElements.indexOf(currentElement);
                     let newIndexInGroup = currentIndexInGroup + moveHorizontal;
+
+                    // Simple horizontal wrapping within the group
+                    if (newIndexInGroup >= groupElements.length) newIndexInGroup = 0;
+                    if (newIndexInGroup < 0) newIndexInGroup = groupElements.length - 1;
 
                     if (newIndexInGroup >= 0 && newIndexInGroup < groupElements.length) {
                         const newElement = groupElements[newIndexInGroup];
@@ -199,12 +217,19 @@ export class MenuManager {
         }
 
         // --- Back Action ---
-        if (buttonJustPressed(GAMEPAD_BACK_BUTTON)) {
-            const backButton = this.focusableElements.find(el => el.dataset.action?.startsWith('back'));
+        // Only allow back if not on main menu
+        if (buttonJustPressed(GAMEPAD_BACK_BUTTON) && this.activeMenuElement !== this.uiManager.mainMenu) {
+            // Find the appropriate back button for the current menu
+            const backButton = this.focusableElements.find(el =>
+                el.dataset.action?.startsWith('back') || // Generic back
+                (this.activeMenuElement === this.uiManager.settingsScreen && el.dataset.action === 'resume' && el.style.display !== 'none') // Resume acts as back if paused
+            );
             if (backButton) {
                 console.log(`Gamepad back action: ${backButton.dataset.action}`);
                 this.prevGamepadButtons = currentButtons; // Update history *before* returning
                 return { action: backButton.dataset.action, element: backButton };
+            } else {
+                console.log("Gamepad back pressed, but no suitable back/resume button found on current menu.");
             }
         }
 

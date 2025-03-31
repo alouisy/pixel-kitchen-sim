@@ -10,11 +10,12 @@ import { LevelManager } from './LevelManager.js';
 import { UIManager } from './ui.js';
 import { MenuManager } from './menuManager.js';
 import { SaveManager } from './saveManager.js';
-// import { LEVEL_DATABASE } from './gameData.js'; // Using JSON now
+import { RECIPES } from './gameData.js'; // Import RECIPES for instructions
 import { ITEM_TYPES } from './constants.js';
 
 // --- Game States ---
-const GameState = { LOADING: 'LOADING', MAIN_MENU: 'MAIN_MENU', SETTINGS: 'SETTINGS', LEVEL_SELECT: 'LEVEL_SELECT', GAME_RUNNING: 'GAME_RUNNING', PAUSED: 'PAUSED', LEVEL_END: 'LEVEL_END' };
+// Added VIEWING_INSTRUCTIONS
+const GameState = { LOADING: 'LOADING', MAIN_MENU: 'MAIN_MENU', SETTINGS: 'SETTINGS', LEVEL_SELECT: 'LEVEL_SELECT', LEVEL_INSTRUCTIONS: 'LEVEL_INSTRUCTIONS', GAME_RUNNING: 'GAME_RUNNING', PAUSED: 'PAUSED', VIEWING_INSTRUCTIONS: 'VIEWING_INSTRUCTIONS', LEVEL_END: 'LEVEL_END' };
 let currentGameState = GameState.LOADING;
 let preloadedModels = {};
 let activeGamepad = null;
@@ -24,10 +25,14 @@ const clock = new THREE.Clock();
 let scene, camera, renderer, playerControls, player, interactionManager, levelManager, uiManager, menuManager, saveManager;
 let levelDatabase = []; // Store fetched level data here
 
+// --- State Variables ---
+let pendingLevelIndex = -1;
+let pendingLevelData = null;
+let currentLevelData = null; // Store the data of the currently running level
+
 // --- Input Cooldown ---
 let inputCooldownTimer = 0;
 const INPUT_COOLDOWN_DURATION = 0.2; // Cooldown duration in seconds
-
 
 // --- Asset Loading ---
 const loadingManager = new THREE.LoadingManager();
@@ -37,8 +42,17 @@ const assetsToLoad = { // Add paths to your 3D models here
     potato: 'models/potato.glb',
     chopped_tomato: 'models/chopped_tomato.glb',
     lettuce: 'models/lettuce.glb',
-    // Add models for new items: onion, chicken, egg, bread, bacon, dough, sauce, cheese, etc.
-    // Add models for new stations: mixer, griddle, oven, blender, toaster, etc.
+    banana: 'models/banana.glb',
+    strawberry: 'models/strawberry.glb',
+    milk: 'models/milk.glb',
+    yogurt: 'models/yogurt.glb',
+    cup: 'models/cup.glb',
+    egg: 'models/egg.glb',
+    pancake_mix: 'models/pancake_mix.glb',
+    syrup: 'models/syrup.glb',
+    bowl: 'models/bowl.glb',
+    granola: 'models/granola.glb',
+    // Add others as needed
 };
 
 async function preloadAssets() {
@@ -118,6 +132,7 @@ function initializeGameComponents() {
     // Ensure managers created during preload exist
     if (!saveManager) saveManager = new SaveManager();
     if (!uiManager) uiManager = new UIManager(saveManager);
+    // Pass UIManager to MenuManager
     menuManager = new MenuManager(uiManager);
     // Pass the loaded levelDatabase reference to LevelManager
     levelManager = new LevelManager(uiManager, saveManager, levelDatabase);
@@ -127,7 +142,10 @@ function initializeGameComponents() {
 
     const initialLabelState = uiManager.getLabelToggleState();
     toggleLabels(initialLabelState);
-    uiManager.setLanguage('en'); // Set default language
+    // Set default language (could load from saveManager later)
+    const savedLang = 'en'; // Replace with saveManager.getSetting('language') || 'en';
+    uiManager.setLanguage(savedLang);
+
 
     addEventListeners(); // <<< Call this AFTER all managers are created
 
@@ -136,28 +154,25 @@ function initializeGameComponents() {
 
 // --- Event Listeners ---
 function addEventListeners() {
-    // --- LOG: Confirm listener attachment ---
     console.log("Attaching input event listeners...");
     document.body.addEventListener('mousedown', (event) => {
-        // --- LOG: Check if listener fires and conditions ---
-        console.log(`Mousedown detected. State: ${currentGameState}, Cooldown: ${inputCooldownTimer.toFixed(2)}`);
         if (isMenuState(currentGameState) && inputCooldownTimer <= 0) {
-            console.log("-> Conditions met, calling handleMenuAction for click.");
             handleMenuAction(event);
-        } else {
-            console.log("-> Conditions NOT met (not menu state or cooldown active).");
         }
     });
 
     const labelToggle = document.getElementById('toggle-labels-setting');
     if (labelToggle) {
         labelToggle.addEventListener('change', (event) => {
-            // console.log("Label toggle changed:", event.target.checked); // Less verbose
-            toggleLabels(event.target.checked); // Directly call world toggle function
+            toggleLabels(event.target.checked);
             if (menuManager?.activeMenuElement === uiManager.settingsScreen) {
                 menuManager.setSelectedIndex(menuManager.focusableElements.indexOf(event.target));
             }
+            // saveManager.saveSetting('showLabels', event.target.checked); // Optional: Save setting
         });
+        // Load saved label state
+        // labelToggle.checked = saveManager.getSetting('showLabels') ?? true;
+        // toggleLabels(labelToggle.checked);
     } else { console.error("Label toggle checkbox not found!"); }
 
     window.addEventListener('gamepadconnected', (event) => { console.log('Gamepad connected:', event.gamepad.id); });
@@ -167,44 +182,85 @@ function addEventListeners() {
 
 // --- State Transitions & Actions ---
 function changeGameState(newState) {
-    console.log(`>>> Changing state from ${currentGameState} to ${newState}`); // <<< LOG State Change
+    console.log(`>>> Changing state from ${currentGameState} to ${newState}`);
     const previousState = currentGameState;
-    if (isMenuState(previousState) && previousState !== newState) menuManager.deactivateMenu();
-    if (previousState === GameState.GAME_RUNNING && newState !== GameState.PAUSED) { if (playerControls) playerControls.unlock(); }
-    if (previousState === GameState.PAUSED && newState !== GameState.GAME_RUNNING) { if (playerControls) playerControls.unlock(); }
+
+    // Deactivate menu if leaving a menu state
+    if (isMenuState(previousState) && !isMenuState(newState)) {
+        menuManager.deactivateMenu();
+    }
+
+    // Unlock controls if leaving a game-active state (unless pausing)
+    if ((previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS) && newState !== GameState.PAUSED && newState !== GameState.VIEWING_INSTRUCTIONS) {
+        if (playerControls) playerControls.unlock();
+    }
+    // Unlock controls if leaving pause (unless going back to game)
+    if (previousState === GameState.PAUSED && newState !== GameState.GAME_RUNNING && newState !== GameState.VIEWING_INSTRUCTIONS) {
+        if (playerControls) playerControls.unlock();
+    }
+
+    // Pause LevelManager timer if entering a non-running state from running
+    if (previousState === GameState.GAME_RUNNING && newState !== GameState.GAME_RUNNING && levelManager) {
+        // levelManager.pauseTimer(); // Assuming LevelManager has pause/resume timer methods
+    }
+    // Resume LevelManager timer if returning to running state
+    if (newState === GameState.GAME_RUNNING && previousState !== GameState.GAME_RUNNING && levelManager) {
+        // levelManager.resumeTimer();
+    }
+
+
     currentGameState = newState;
 
+    // Handle entering the new state
     switch (newState) {
         case GameState.MAIN_MENU:
             uiManager.showMainMenu(); menuManager.activateMenu(uiManager.mainMenu);
-            if (playerControls?.isLocked) playerControls.unlock(); break;
+            break;
         case GameState.SETTINGS:
-            const isPause = previousState === GameState.PAUSED || previousState === GameState.GAME_RUNNING;
+            const isPause = previousState === GameState.PAUSED || previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS;
             uiManager.showSettings(isPause); menuManager.activateMenu(uiManager.settingsScreen);
-            if (playerControls?.isLocked) playerControls.unlock(); break;
+            break;
         case GameState.LEVEL_SELECT:
             uiManager.populateLevelSelect(levelDatabase, saveManager);
             uiManager.showLevelSelect(); menuManager.activateMenu(uiManager.levelSelectScreen);
-            if (playerControls?.isLocked) playerControls.unlock(); break;
-        case GameState.GAME_RUNNING:
-            if (previousState === GameState.PAUSED || previousState === GameState.SETTINGS) {
-                if (uiManager.settingsScreen.classList.contains('active')) uiManager.settingsScreen.classList.remove('active');
+            break;
+        case GameState.LEVEL_INSTRUCTIONS:
+            // Assumes uiManager.showLevelInstructions was called before this state change
+            menuManager.activateMenu(uiManager.levelInstructionsScreen);
+            break;
+        case GameState.VIEWING_INSTRUCTIONS: // New state handling
+            if (currentLevelData) {
+                uiManager.showLevelInstructions(currentLevelData, true); // Show instructions mid-game
+                // No menu activation needed, just the overlay
+            } else {
+                console.error("Cannot view instructions, currentLevelData is missing.");
+                changeGameState(GameState.GAME_RUNNING); // Revert if no data
             }
-            uiManager.showGameUI(); menuManager.deactivateMenu();
-            if (playerControls) playerControls.lock(); break;
+            break;
+        case GameState.GAME_RUNNING:
+            // Hide overlays if coming from pause/settings/instructions
+            if (uiManager.settingsScreen.classList.contains('active')) uiManager.settingsScreen.classList.remove('active');
+            if (uiManager.levelInstructionsScreen.classList.contains('active')) uiManager.levelInstructionsScreen.classList.remove('active');
+            if (uiManager.levelInstructionsScreen.classList.contains('active')) uiManager.levelInstructionsScreen.classList.remove('active'); // Hide instructions overlay too
+
+            uiManager.showGameUI();
+            if (playerControls) playerControls.lock();
+            break;
         case GameState.PAUSED:
             uiManager.showSettings(true); menuManager.activateMenu(uiManager.settingsScreen);
-            if (playerControls) playerControls.unlock(); break;
+            break;
         case GameState.LEVEL_END:
+            currentLevelData = null; // Clear current level data on end
             menuManager.activateMenu(uiManager.levelEndScreen);
-            if (playerControls?.isLocked) playerControls.unlock(); break;
+            break;
         case GameState.LOADING:
             uiManager.showLoading(); menuManager.deactivateMenu();
-            if (playerControls?.isLocked) playerControls.unlock(); break;
+            break;
     }
 }
 
-function isMenuState(state) { return [GameState.MAIN_MENU, GameState.SETTINGS, GameState.LEVEL_SELECT, GameState.PAUSED, GameState.LEVEL_END].includes(state); }
+// Updated to include VIEWING_INSTRUCTIONS
+function isMenuState(state) { return [GameState.MAIN_MENU, GameState.SETTINGS, GameState.LEVEL_SELECT, GameState.LEVEL_INSTRUCTIONS, GameState.PAUSED, GameState.LEVEL_END].includes(state); }
 
 function handleMenuAction(eventOrAction) {
     let action = null, element = null, isGamepadAction = false;
@@ -212,97 +268,177 @@ function handleMenuAction(eventOrAction) {
 
     if (eventOrAction instanceof Event) {
         const target = eventOrAction.target.closest('[data-action]');
-        // --- LOG: Click target ---
-        console.log("handleMenuAction (Click): Target =", target);
         if (!target) return;
         action = target.dataset.action;
         element = target;
         if (element.tagName === 'A' && action !== 'link') eventOrAction.preventDefault();
-        if (action === 'toggle-labels') return; // Handled by change listener
+        if (action === 'toggle-labels') return;
     } else if (eventOrAction?.action) {
         action = eventOrAction.action;
         element = eventOrAction.element;
         isGamepadAction = true;
-        // --- LOG: Gamepad target ---
-        console.log("handleMenuAction (Gamepad): Element =", element);
-        if (action === 'toggle-labels') { inputCooldownTimer = INPUT_COOLDOWN_DURATION; return; } // Handled by MenuManager triggering change
+        if (action === 'toggle-labels') { inputCooldownTimer = INPUT_COOLDOWN_DURATION; return; }
     } else { return; }
 
     if (!action || !element) { console.log("handleMenuAction: No action or element found."); return; }
 
     let actionTaken = true;
-    console.log(`--> Processing action: ${action} (Gamepad: ${isGamepadAction})`); // <<< LOG Action Processing
+    console.log(`--> Processing action: ${action} (Gamepad: ${isGamepadAction})`);
 
     switch (action) {
         case 'play': changeGameState(GameState.LEVEL_SELECT); break;
         case 'settings': changeGameState(GameState.SETTINGS); break;
         case 'back-to-main': changeGameState(GameState.MAIN_MENU); break;
-        case 'start-level':
+        case 'start-level': // Action from Level Select screen
             const levelIndex = parseInt(element.dataset.levelIndex, 10);
-            if (!isNaN(levelIndex) && saveManager.isLevelUnlocked(levelIndex)) startGameLevel(levelIndex);
-            else { if (!isNaN(levelIndex)) uiManager.showTemporaryMessage("Level Locked!", 1500); actionTaken = false; }
+            if (!isNaN(levelIndex) && saveManager.isLevelUnlocked(levelIndex)) {
+                prepareStartLevel(levelIndex); // Go to instructions first
+            } else {
+                if (!isNaN(levelIndex)) uiManager.showTemporaryMessage("Level Locked!", 1500);
+                actionTaken = false;
+            }
             break;
-        case 'set-language': uiManager.setLanguage(element.dataset.lang); break; // Action taken, no state change
+        case 'start-level-confirm': // Action from Instructions screen (pre-game)
+            if (currentGameState === GameState.LEVEL_INSTRUCTIONS) { // Only works in this state
+                confirmStartLevel();
+            } else {
+                actionTaken = false; // Ignore if not in the right state
+            }
+            break;
+        case 'set-language':
+            const lang = element.dataset.lang;
+            uiManager.setLanguage(lang);
+            // saveManager.saveSetting('language', lang); // Optional: Save setting
+            break;
         case 'resume': resumeGame(); break;
         case 'next-level':
-            const currentLevel = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
-            const nextLevelIndex = currentLevel + 1;
-            if (!isNaN(currentLevel) && nextLevelIndex < levelDatabase.length && saveManager.isLevelUnlocked(nextLevelIndex)) startGameLevel(nextLevelIndex);
-            else { console.log("Next level not available or locked."); actionTaken = false; }
+            const currentLevelIdx = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
+            const nextLevelIndex = currentLevelIdx + 1;
+            if (!isNaN(currentLevelIdx) && nextLevelIndex < levelDatabase.length && saveManager.isLevelUnlocked(nextLevelIndex)) {
+                prepareStartLevel(nextLevelIndex); // Go to instructions
+            } else {
+                console.log("Next level not available or locked.");
+                actionTaken = false;
+            }
             break;
         case 'restart-level':
             const levelToRestart = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
-            if (!isNaN(levelToRestart) && levelToRestart >= 0) startGameLevel(levelToRestart);
-            else startGameLevel(0);
+            if (!isNaN(levelToRestart) && levelToRestart >= 0) {
+                prepareStartLevel(levelToRestart); // Go to instructions
+            } else {
+                prepareStartLevel(0); // Default to first level if index invalid
+            }
             break;
         case 'link': if (isGamepadAction) window.open(element.href, '_blank'); break; // Action taken
         default: console.warn(`Unhandled menu action: ${action}`); actionTaken = false;
     }
 
     if (actionTaken) {
-        console.log(`Action ${action} processed, setting cooldown.`); // <<< LOG Cooldown Set
         inputCooldownTimer = INPUT_COOLDOWN_DURATION;
     }
 }
 
-// --- startGameLevel, resetWorldState, pauseGame, resumeGame, handleLevelEnd, handleGameEnd (Keep as is) ---
-function startGameLevel(levelIndex) {
-    if (!levelManager || !interactionManager || !scene) { console.error("Core components not initialized!"); changeGameState(GameState.MAIN_MENU); return; }
+// --- Modified Level Start Flow ---
+
+// Step 1: Prepare level, show instructions
+function prepareStartLevel(levelIndex) {
+    if (!levelManager || !interactionManager || !scene || !uiManager) { console.error("Core components not initialized!"); changeGameState(GameState.MAIN_MENU); return; }
     if (levelIndex < 0 || levelIndex >= levelDatabase.length) { console.log("Attempted to load invalid level index."); changeGameState(GameState.LEVEL_SELECT); return; }
-    resetWorldState(); clearKitchen(scene);
+
+    resetWorldState();
+    clearKitchen(scene);
+
     const levelData = levelDatabase[levelIndex];
     if (!levelData || !levelData.layout) { console.error(`Layout data missing for level index ${levelIndex}!`); changeGameState(GameState.LEVEL_SELECT); return; }
+
     const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout);
     interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
-    const loaded = levelManager.loadLevel(levelIndex, levelData);
-    if (loaded && levelManager.isRunning()) changeGameState(GameState.GAME_RUNNING);
-    else { console.error("LevelManager failed to load or run after world build."); changeGameState(GameState.LEVEL_SELECT); }
+
+    // Store data needed after instructions
+    pendingLevelIndex = levelIndex;
+    pendingLevelData = levelData;
+    currentLevelData = null; // Clear current level data until confirmed
+
+    // Show instructions screen (pre-game version)
+    uiManager.showLevelInstructions(levelData, false);
+    changeGameState(GameState.LEVEL_INSTRUCTIONS);
 }
+
+// Step 2: Confirm start from instructions, load LevelManager, start game
+function confirmStartLevel() {
+    if (pendingLevelIndex < 0 || !pendingLevelData || !levelManager) {
+        console.error("Cannot confirm start level: Missing pending level data or LevelManager.");
+        changeGameState(GameState.LEVEL_SELECT); // Go back if data is lost
+        return;
+    }
+
+    // Store current level data for in-game instruction access
+    currentLevelData = pendingLevelData;
+
+    const loaded = levelManager.loadLevel(pendingLevelIndex, pendingLevelData);
+
+    // Clear pending data
+    pendingLevelIndex = -1;
+    pendingLevelData = null;
+
+    if (loaded && levelManager.isRunning()) {
+        changeGameState(GameState.GAME_RUNNING);
+    } else {
+        console.error("LevelManager failed to load or run after instructions.");
+        currentLevelData = null; // Clear if failed
+        changeGameState(GameState.LEVEL_SELECT);
+    }
+}
+
+
+// --- resetWorldState, pauseGame, resumeGame, handleLevelEnd, handleGameEnd (Keep as is, but check resetWorldState) ---
 function resetWorldState() {
     console.log("Resetting dynamic world state...");
     if (player) player.forceDropItem();
-    if (interactionManager) interactionManager.clearDynamicItems();
+    if (interactionManager) {
+        // Ensure highlight is removed before clearing items
+        if (interactionManager.currentlyHighlighted) {
+            interactionManager.revertHighlight(interactionManager.currentlyHighlighted);
+            interactionManager.currentlyHighlighted = null;
+        }
+        interactionManager.clearDynamicItems();
+    }
     if (uiManager) { uiManager.clearOrderList(); uiManager.updateHolding(null); }
+    // Reset pending level data if reset happens unexpectedly
+    pendingLevelIndex = -1;
+    pendingLevelData = null;
+    // Don't clear currentLevelData here, only on level end or failed start
     console.log("Dynamic world state reset complete.");
 }
 function pauseGame() { if (currentGameState === GameState.GAME_RUNNING) changeGameState(GameState.PAUSED); }
 function resumeGame() {
-    if (currentGameState !== GameState.PAUSED && currentGameState !== GameState.SETTINGS) return;
-    if (levelManager?.isRunning()) changeGameState(GameState.GAME_RUNNING);
-    else changeGameState(GameState.MAIN_MENU);
+    // Resume should go back to GAME_RUNNING, not MAIN_MENU if level was running
+    if (currentGameState === GameState.PAUSED || currentGameState === GameState.SETTINGS || currentGameState === GameState.VIEWING_INSTRUCTIONS) {
+        if (levelManager?.isRunning()) {
+            changeGameState(GameState.GAME_RUNNING);
+        } else {
+            // If somehow paused but level not running, go back to menu
+            changeGameState(GameState.MAIN_MENU);
+        }
+    }
 }
 function handleLevelEnd(score, stars, levelIndex) {
+    currentLevelData = null; // Clear current level data
     if (saveManager) saveManager.updateLevelCompletion(levelIndex, score, stars);
     const hasNextLevel = (levelIndex + 1) < levelDatabase.length;
     uiManager.showLevelEnd(score, stars, levelIndex, hasNextLevel);
     changeGameState(GameState.LEVEL_END);
 }
-function handleGameEnd() { uiManager.showGameEnd(); changeGameState(GameState.LEVEL_END); }
+function handleGameEnd() {
+    currentLevelData = null; // Clear current level data
+    uiManager.showGameEnd();
+    changeGameState(GameState.LEVEL_END);
+}
 
 // --- Main Loop ---
 function animate() {
     requestAnimationFrame(animate);
-    if (!renderer || !uiManager || !menuManager || !playerControls) return;
+    if (!renderer || !uiManager || !menuManager || !playerControls || !player || !interactionManager) return; // Added interactionManager check
     const delta = clock.getDelta();
     if (inputCooldownTimer > 0) inputCooldownTimer -= delta;
 
@@ -312,40 +448,101 @@ function animate() {
     for (const gp of gamepads) { if (gp?.connected) { activeGamepad = gp; break; } }
     if (uiManager) uiManager.updateGamepadStatus(!!activeGamepad);
 
-    if (inputCooldownTimer <= 0) { // Process input only if cooldown is over
-        if (activeGamepad) {
-            if (isMenuState(currentGameState)) {
-                const menuAction = menuManager.handleGamepadNav(activeGamepad, delta);
-                if (menuAction) handleMenuAction(menuAction); // Cooldown set inside if action taken
-            } else if (currentGameState === GameState.GAME_RUNNING) {
-                playerControls.handleGamepadInput(activeGamepad, delta);
-                if (playerControls.consumePauseToggleRequest()) { pauseGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
-            }
-        } else { // No gamepad
-            playerControls.handleGamepadInput(null, delta);
-            if (isMenuState(currentGameState)) menuManager.prevGamepadButtons = [];
-        }
-        // Keyboard Pause
-        if (currentGameState === GameState.GAME_RUNNING && playerControls.consumePauseToggleRequest()) { pauseGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
-    } else { // Cooldown Active
-        if (activeGamepad) {
-            if (currentGameState === GameState.GAME_RUNNING) { playerControls.handleGamepadInput(activeGamepad, delta); playerControls.consumePauseToggleRequest(); playerControls.consumeInteractionRequest(); }
-            else if (isMenuState(currentGameState)) { menuManager.handleGamepadNav(activeGamepad, delta); }
-        } else { playerControls.handleGamepadInput(null, delta); }
-        playerControls.consumePauseToggleRequest();
+    // Process button presses regardless of cooldown for state changes
+    let pausePressed = false;
+    let instructionPressed = false;
+    if (activeGamepad) {
+        playerControls.handleGamepadInput(activeGamepad, delta); // Handle movement/look always
+        pausePressed = playerControls.consumePauseToggleRequest();
+        instructionPressed = playerControls.consumeInstructionToggleRequest();
+    } else {
+        playerControls.handleGamepadInput(null, delta); // Clear gamepad states if disconnected
+        pausePressed = playerControls.consumePauseToggleRequest(); // Check keyboard
+        instructionPressed = playerControls.consumeInstructionToggleRequest(); // Check keyboard
     }
+
+    // --- State-Based Input Handling ---
+    if (currentGameState === GameState.GAME_RUNNING) {
+        if (pausePressed) {
+            pauseGame();
+            inputCooldownTimer = INPUT_COOLDOWN_DURATION;
+            renderer.render(scene, camera); return;
+        }
+        if (instructionPressed) {
+            changeGameState(GameState.VIEWING_INSTRUCTIONS);
+            inputCooldownTimer = INPUT_COOLDOWN_DURATION;
+            renderer.render(scene, camera); return;
+        }
+        // Interaction check happens later in GAME_RUNNING logic
+    }
+    else if (currentGameState === GameState.PAUSED) {
+        if (pausePressed) {
+            resumeGame();
+            inputCooldownTimer = INPUT_COOLDOWN_DURATION;
+            renderer.render(scene, camera); return;
+        }
+        if (inputCooldownTimer <= 0 && isMenuState(currentGameState)) {
+            if (activeGamepad) {
+                const menuAction = menuManager.handleGamepadNav(activeGamepad, delta);
+                if (menuAction) handleMenuAction(menuAction);
+            }
+        }
+    }
+    else if (currentGameState === GameState.VIEWING_INSTRUCTIONS) {
+        if (instructionPressed || pausePressed) {
+            resumeGame();
+            inputCooldownTimer = INPUT_COOLDOWN_DURATION;
+            renderer.render(scene, camera); return;
+        }
+    }
+    else if (isMenuState(currentGameState)) {
+        if (inputCooldownTimer <= 0) {
+            if (activeGamepad) {
+                const menuAction = menuManager.handleGamepadNav(activeGamepad, delta);
+                if (menuAction) handleMenuAction(menuAction);
+            }
+        }
+    }
+
 
     // --- Game Logic ---
     if (currentGameState === GameState.GAME_RUNNING) {
         if (levelManager && interactionManager && player) {
-            levelManager.update(delta);
+            levelManager.update(delta); // Update timers, orders etc.
             if (playerControls.isLocked) {
                 const movementInput = playerControls.getMovementInput();
-                player.update(delta, movementInput);
-                if (inputCooldownTimer <= 0 && playerControls.consumeInteractionRequest()) { interactionManager.handleInteractionRequest(); }
-                if (uiManager) uiManager.updateHolding(player.getHeldItem()?.name);
-            } else { if (uiManager) uiManager.updateHolding(null); }
+                player.update(delta, movementInput); // Update player position/held item visuals
+
+                // *** NEW: Update Aim Highlight ***
+                interactionManager.updateAimHighlight();
+
+                // Process interaction request only if cooldown is over
+                if (inputCooldownTimer <= 0 && playerControls.consumeInteractionRequest()) {
+                    interactionManager.handleInteractionRequest();
+                    // Optional: Add a small cooldown after interaction?
+                    // inputCooldownTimer = 0.1;
+                }
+                // Update HUD holding display using the new player method
+                if (uiManager) uiManager.updateHolding(player.getHeldItemName());
+
+            } else {
+                // If controls somehow get unlocked during GAME_RUNNING, maybe pause?
+                if (uiManager) uiManager.updateHolding(null);
+                // Ensure highlight is removed if controls unlock unexpectedly
+                if (interactionManager.currentlyHighlighted) {
+                    interactionManager.revertHighlight(interactionManager.currentlyHighlighted);
+                    interactionManager.currentlyHighlighted = null;
+                }
+            }
         } else { console.error("Missing core component during GAME_RUNNING update!"); }
+    } else if (currentGameState === GameState.PAUSED || currentGameState === GameState.VIEWING_INSTRUCTIONS) {
+        // Game logic is paused, but keep updating held item position if player moved camera before unlock
+        if (player) player._updateHeldItemPosition();
+        // Ensure highlight is removed when paused or viewing instructions
+        if (interactionManager.currentlyHighlighted) {
+            interactionManager.revertHighlight(interactionManager.currentlyHighlighted);
+            interactionManager.currentlyHighlighted = null;
+        }
     }
 
     // --- Rendering ---

@@ -1,6 +1,10 @@
 // src/controls.js
 import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
-import { GAMEPAD_DEADZONE, GAMEPAD_INTERACT_BUTTON, GAMEPAD_PAUSE_BUTTON, GAMEPAD_LOOK_SENSITIVITY_X, GAMEPAD_LOOK_SENSITIVITY_Y } from './constants.js';
+import {
+    GAMEPAD_DEADZONE, GAMEPAD_INTERACT_BUTTON, GAMEPAD_PAUSE_BUTTON,
+    GAMEPAD_LOOK_SENSITIVITY_X, GAMEPAD_LOOK_SENSITIVITY_Y,
+    GAMEPAD_INSTRUCTIONS_BUTTON, KEYBOARD_INSTRUCTIONS_KEY // Import new constants
+} from './constants.js';
 
 export class PlayerControls {
     constructor(camera, domElement) {
@@ -23,32 +27,20 @@ export class PlayerControls {
         this.prevGamepadButtons = [];
 
         this.interactRequested = false;
-        this.pauseToggleRequested = false; // Added flag for pause toggle
+        this.pauseToggleRequested = false;
+        this.instructionToggleRequested = false; // Added flag for instructions
 
-        // Remove reference to instructions element
-        // this.instructions = document.getElementById('instructions');
         this.crosshair = document.getElementById('crosshair'); // Keep crosshair reference
 
         this._addEventListeners();
     }
 
     _addEventListeners() {
-        // Remove listener for instructions element
-        // this.instructions.addEventListener('click', () => {
-        //     this._pointerLockControls.lock();
-        // });
-
         this._pointerLockControls.addEventListener('lock', () => {
-            // Don't show instructions on lock anymore
-            // this.instructions.style.display = 'none';
             if (this.crosshair) this.crosshair.style.display = 'block'; // Show crosshair on lock
         });
 
         this._pointerLockControls.addEventListener('unlock', () => {
-            // Don't show instructions on unlock
-            // if (!document.getElementById('settings-menu').style.display || document.getElementById('settings-menu').style.display === 'none') {
-            //     this.instructions.style.display = '';
-            // }
             if (this.crosshair) this.crosshair.style.display = 'none'; // Hide crosshair on unlock
             // Reset movement keys on unlock
             this.kbMovingForward = this.kbMovingBackward = this.kbMovingLeft = this.kbMovingRight = false;
@@ -57,7 +49,6 @@ export class PlayerControls {
 
         document.addEventListener('keydown', (event) => this._onKeyDown(event));
         document.addEventListener('keyup', (event) => this._onKeyUp(event));
-        // Keep click listener for in-game interaction
         document.addEventListener('click', () => this._onClick());
 
         window.addEventListener('gamepadconnected', (event) => {
@@ -95,27 +86,26 @@ export class PlayerControls {
         this.gpMovingLeft = moveX < 0;
         this.gpMovingRight = moveX > 0;
 
-        // --- Interaction (Button 0 - Cross/A) ---
-        const interactButtonPressed = gamepad.buttons[GAMEPAD_INTERACT_BUTTON]?.pressed ?? false;
-        const prevInteractButtonPressed = this.prevGamepadButtons[GAMEPAD_INTERACT_BUTTON] ?? false;
-
-        // --- Pause (Button 9 - Options/Menu) ---
-        const pauseButtonPressed = gamepad.buttons[GAMEPAD_PAUSE_BUTTON]?.pressed ?? false;
-        const prevPauseButtonPressed = this.prevGamepadButtons[GAMEPAD_PAUSE_BUTTON] ?? false;
+        // --- Button Presses (Edge Detection) ---
+        const currentButtons = gamepad.buttons.map(b => b.pressed);
+        const buttonJustPressed = (index) => currentButtons[index] && !(this.prevGamepadButtons[index] ?? false);
 
         // --- Request Flags ---
-        // Request interaction only if pointer is locked (in game)
-        if (this._pointerLockControls.isLocked && interactButtonPressed && !prevInteractButtonPressed) {
+        // Interaction (Cross/A) - only if pointer locked
+        if (this._pointerLockControls.isLocked && buttonJustPressed(GAMEPAD_INTERACT_BUTTON)) {
             this.interactRequested = true;
         }
-        // Request pause toggle if button pressed
-        if (pauseButtonPressed && !prevPauseButtonPressed) {
+        // Pause (Options/Menu)
+        if (buttonJustPressed(GAMEPAD_PAUSE_BUTTON)) {
             this.pauseToggleRequested = true;
-            // console.log("Pause toggle requested via gamepad.");
+        }
+        // Instructions (Triangle/Y)
+        if (buttonJustPressed(GAMEPAD_INSTRUCTIONS_BUTTON)) {
+            this.instructionToggleRequested = true;
         }
 
-        // Store current button states
-        this.prevGamepadButtons = gamepad.buttons.map(b => b.pressed);
+        // Store current button states for next frame's edge detection
+        this.prevGamepadButtons = currentButtons;
 
         // --- Right Stick Look (Synthetic Mouse Events) ---
         if (this._pointerLockControls.isLocked) {
@@ -144,11 +134,14 @@ export class PlayerControls {
     }
 
     _onKeyDown(event) {
-        // Handle pause key first
-        if (event.code === 'KeyP') {
+        // Handle non-movement keys first, regardless of lock state
+        if (event.code === 'KeyP') { // Pause
             this.pauseToggleRequested = true;
-            // console.log("Pause toggle requested via keyboard.");
-            return; // Don't process movement if pause is pressed
+            return;
+        }
+        if (event.code === KEYBOARD_INSTRUCTIONS_KEY) { // Instructions
+            this.instructionToggleRequested = true;
+            return;
         }
 
         // Only process movement if pointer is locked
@@ -191,7 +184,7 @@ export class PlayerControls {
         if (left) direction.x -= 1;
         if (right) direction.x += 1;
 
-        // Reset gamepad flags each frame after reading
+        // Reset gamepad flags each frame after reading (movement only)
         this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
 
         return direction;
@@ -212,6 +205,15 @@ export class PlayerControls {
         }
         return false;
     }
+
+    consumeInstructionToggleRequest() { // New consumer method
+        if (this.instructionToggleRequested) {
+            this.instructionToggleRequested = false;
+            return true;
+        }
+        return false;
+    }
+
 
     get isLocked() {
         return this._pointerLockControls.isLocked;

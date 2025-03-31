@@ -1253,13 +1253,20 @@
                 },
                 "color": "#708090",
                 "config": {
-                    "processes": [
-                        "blender_cup_smoothie"
+                    "processes": [],
+                    "requiredIngredients": [
+                        "banana",
+                        "strawberry",
+                        "milk"
                     ],
-                    "result": {
-                        "blender_cup_smoothie": "smoothie_ready"
-                    },
-                    "processingTime": 5000
+                    "acceptsIngredients": [
+                        "banana",
+                        "strawberry",
+                        "milk",
+                        "yogurt"
+                    ],
+                    "acceptsContainer": "cup",
+                    "outputItem": "smoothie_ready"
                 }
             },
             {
@@ -2064,13 +2071,20 @@
                 },
                 "color": "#708090",
                 "config": {
-                    "processes": [
-                        "blender_cup_smoothie"
+                    "processes": [],
+                    "requiredIngredients": [
+                        "banana",
+                        "strawberry",
+                        "milk"
                     ],
-                    "result": {
-                        "blender_cup_smoothie": "smoothie_ready"
-                    },
-                    "processingTime": 5000
+                    "acceptsIngredients": [
+                        "sliced_banana",
+                        "sliced_strawberry",
+                        "milk",
+                        "yogurt"
+                    ],
+                    "acceptsContainer": "cup",
+                    "outputItem": "smoothie_ready"
                 }
             },
             {
@@ -2589,13 +2603,20 @@
                 },
                 "color": "#708090",
                 "config": {
-                    "processes": [
-                        "blender_cup_smoothie"
+                    "processes": [],
+                    "requiredIngredients": [
+                        "banana",
+                        "strawberry",
+                        "milk"
                     ],
-                    "result": {
-                        "blender_cup_smoothie": "smoothie_ready"
-                    },
-                    "processingTime": 5000
+                    "acceptsIngredients": [
+                        "sliced_banana",
+                        "sliced_strawberry",
+                        "milk",
+                        "yogurt"
+                    ],
+                    "acceptsContainer": "cup",
+                    "outputItem": "smoothie_ready"
                 }
             },
             {

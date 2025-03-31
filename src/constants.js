@@ -22,21 +22,36 @@ export const STATION_TYPES = {
 
 export const ITEM_TYPES = {
     INGREDIENT: 'ingredient',
-    ITEM: 'item', // For things like plates
+    ITEM: 'item', // For things like plates, bowls, cups
 };
 
 export const INGREDIENT_STATES = {
     RAW: 'raw',
     CHOPPED: 'chopped',
     COOKED: 'cooked',
+    // Add more specific states as needed
+    MIXED: 'mixed',
+    BATTER: 'batter',
+    SLICED: 'sliced',
+    TOASTED: 'toasted',
+    COATED: 'coated',
+    BASE: 'base', // e.g., pizza base
+    READY: 'ready', // Generic ready state for things like syrup, yogurt
+    DRY: 'dry', // e.g., pancake mix
+    SHREDDED: 'shredded', // e.g., cheese
 };
 
 // --- GAMEPAD ---
 export const GAMEPAD_DEADZONE = 0.15;
 export const GAMEPAD_INTERACT_BUTTON = 0; // Cross (X) / A
+export const GAMEPAD_BACK_BUTTON = 1;     // Circle / B (Used in MenuManager)
+export const GAMEPAD_INSTRUCTIONS_BUTTON = 3; // Triangle / Y
 export const GAMEPAD_PAUSE_BUTTON = 9;    // Options / Menu button (common index for PS/Xbox)
 export const GAMEPAD_LOOK_SENSITIVITY_X = 300.0;
 export const GAMEPAD_LOOK_SENSITIVITY_Y = 300.0;
+
+// --- KEYBOARD ---
+export const KEYBOARD_INSTRUCTIONS_KEY = 'KeyI'; // 'I' key for Instructions
 
 // --- ASSEMBLY STATION ---
 export const ASSEMBLY_STATION_CAPACITY = 3; // Max items directly on the station surface (now managed by slots)

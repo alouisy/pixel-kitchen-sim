@@ -1,6 +1,5 @@
 // src/ui.js
-// --- REMOVE THIS LINE ---
-// import { LEVEL_DATABASE } from './gameData.js'; // To populate level select
+import { getRecipeDetails } from './gameData.js'; // Import helper to get recipe details
 
 // Helper to format time
 function formatTime(seconds) {
@@ -20,6 +19,7 @@ export class UIManager {
         this.levelSelectScreen = document.getElementById('level-select-screen');
         this.levelEndScreen = document.getElementById('level-end-screen');
         this.gameHud = document.getElementById('game-hud');
+        this.levelInstructionsScreen = document.getElementById('level-instructions-screen'); // New
 
         // In-Game HUD Elements
         this.orderListElement = document.getElementById('order-list');
@@ -43,15 +43,22 @@ export class UIManager {
         // Level Select Elements
         this.levelListContainer = document.getElementById('level-list');
 
+        // Level Instructions Elements (New)
+        this.instructionsTitle = document.getElementById('instructions-title');
+        this.instructionsContent = document.getElementById('instructions-content');
+        this.startLevelInstructionsButton = document.getElementById('start-level-instructions-button');
+        this.instructionsHint = this.levelInstructionsScreen.querySelector('.menu-hint'); // Get hint element
+
+
         this.activeScreen = null;
         this.messageTimeout = null;
 
         // --- Language ---
         this.currentLanguage = 'en';
         this.uiText = {
-            en: { title: "Pixel Kitchen Sim", play: "Play", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", orderServed: "Order Served!", wrongOrder: "Wrong / No Order!", notAMeal: "Not a Meal!", handsFull: "Hands Full!", slotFull: "Slot Full!", itemPlaced: "Item Placed", cannotPlace: "Cannot Place Here", stationBusy: "Station Busy", cannotProcess: "Cannot Process", stillProcessing: "Still Processing...", slotEmpty: "Slot Empty", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", order: "Order", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked" },
-            fr: { title: "Pixel Cuisine Sim", play: "Jouer", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher Étiquettes:", version: "Version:", selectLevel: "Choisir Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", orderServed: "Commande Servie!", wrongOrder: "Mauvaise Commande!", notAMeal: "Pas un Plat!", handsFull: "Mains Pleines!", slotFull: "Emplacement Plein!", itemPlaced: "Objet Placé", cannotPlace: "Impossible Placer Ici", stationBusy: "Station Occupée", cannotProcess: "Impossible Traiter", stillProcessing: "En Cours...", slotEmpty: "Emplacement Vide", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous Niveaux Finis!", playAgain: "Rejouer?", loading: "Chargement...", order: "Commande", levelTime: "Temps Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé" },
-            es: { title: "Pixel Cocina Sim", play: "Jugar", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menú Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", version: "Versión:", selectLevel: "Elegir Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", orderServed: "¡Pedido Servido!", wrongOrder: "¡Pedido Incorrecto!", notAMeal: "¡No es Comida!", handsFull: "¡Manos Llenas!", slotFull: "¡Espacio Lleno!", itemPlaced: "Objeto Colocado", cannotPlace: "No se puede Colocar", stationBusy: "Estación Ocupada", cannotProcess: "No se puede Procesar", stillProcessing: "Procesando...", slotEmpty: "Espacio Vacío", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos Niveles Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", order: "Pedido", levelTime: "Tiempo Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado" }
+            en: { title: "Pixel Kitchen Sim", play: "Play", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", orderServed: "Order Served!", wrongOrder: "Wrong / No Order!", notAMeal: "Not a Meal!", handsFull: "Hands Full!", slotFull: "Slot Full!", itemPlaced: "Item Placed", cannotPlace: "Cannot Place Here", stationBusy: "Station Busy", cannotProcess: "Cannot Process", stillProcessing: "Still Processing...", slotEmpty: "Slot Empty", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", order: "Order", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked", levelInstructions: "Level Instructions", startLevel: "Start Level", recipe: "Recipe", close: "Close", hintToggleInstructions: "Toggle: [I] / [△/Y]" },
+            fr: { title: "Pixel Cuisine Sim", play: "Jouer", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher Étiquettes:", version: "Version:", selectLevel: "Choisir Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", orderServed: "Commande Servie!", wrongOrder: "Mauvaise Commande!", notAMeal: "Pas un Plat!", handsFull: "Mains Pleines!", slotFull: "Emplacement Plein!", itemPlaced: "Objet Placé", cannotPlace: "Impossible Placer Ici", stationBusy: "Station Occupée", cannotProcess: "Impossible Traiter", stillProcessing: "En Cours...", slotEmpty: "Emplacement Vide", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous Niveaux Finis!", playAgain: "Rejouer?", loading: "Chargement...", order: "Commande", levelTime: "Temps Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé", levelInstructions: "Instructions du Niveau", startLevel: "Commencer Niveau", recipe: "Recette", close: "Fermer", hintToggleInstructions: "Basculer: [I] / [△/Y]" },
+            es: { title: "Pixel Cocina Sim", play: "Jugar", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menú Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", version: "Versión:", selectLevel: "Elegir Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", orderServed: "¡Pedido Servido!", wrongOrder: "¡Pedido Incorrecto!", notAMeal: "¡No es Comida!", handsFull: "¡Manos Llenas!", slotFull: "¡Espacio Lleno!", itemPlaced: "Objeto Colocado", cannotPlace: "No se puede Colocar", stationBusy: "Estación Ocupada", cannotProcess: "No se puede Procesar", stillProcessing: "Procesando...", slotEmpty: "Espacio Vacío", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos Niveles Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", order: "Pedido", levelTime: "Tiempo Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado", levelInstructions: "Instrucciones del Nivel", startLevel: "Empezar Nivel", recipe: "Receta", close: "Cerrar", hintToggleInstructions: "Alternar: [I] / [△/Y]" }
         };
         if (this.languageLabel) {
             this.setLanguage(this.currentLanguage);
@@ -115,10 +122,64 @@ export class UIManager {
         this.crosshair.style.display = 'none';
     }
 
+    // --- Show Level Instructions ---
+    // Added 'isMidGame' flag
+    showLevelInstructions(levelData, isMidGame = false) {
+        if (!levelData || !this.instructionsTitle || !this.instructionsContent || !this.startLevelInstructionsButton || !this.instructionsHint) {
+            console.error("Cannot show level instructions: Missing data or elements.");
+            return;
+        }
+        const lang = this.currentLanguage;
+        this.instructionsTitle.textContent = `${this.uiText[lang].level || "Level"} ${levelData.levelId}: ${levelData.name}`;
+        this.instructionsContent.innerHTML = ''; // Clear previous
+
+        levelData.availableMeals.forEach(mealName => {
+            const details = getRecipeDetails(mealName);
+            if (details && details.instructions && details.instructions[lang]) {
+                const recipeDiv = document.createElement('div');
+                recipeDiv.className = 'recipe-instruction';
+
+                const title = document.createElement('h3');
+                title.textContent = mealName; // Use the actual meal name
+                recipeDiv.appendChild(title);
+
+                const stepList = document.createElement('ul');
+                details.instructions[lang].forEach(step => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = step;
+                    stepList.appendChild(listItem);
+                });
+                recipeDiv.appendChild(stepList);
+                this.instructionsContent.appendChild(recipeDiv);
+            } else {
+                console.warn(`No instructions found for recipe "${mealName}" in language "${lang}".`);
+            }
+        });
+
+        // Show/Hide Start button and adjust hint based on context
+        if (isMidGame) {
+            this.startLevelInstructionsButton.style.display = 'none'; // Hide start button
+            this.instructionsHint.textContent = this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]";
+        } else {
+            this.startLevelInstructionsButton.style.display = 'block'; // Show start button
+            this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
+            this.instructionsHint.textContent = this.uiText[lang].select || "Select: Enter/[X]/[A]"; // Original hint
+        }
+
+        this._setActiveScreen(this.levelInstructionsScreen);
+        this.hideGameUI();
+    }
+
+
     // --- In-Game HUD Updates ---
     updateLevelTimer(seconds) { this.levelTimerDisplay.textContent = formatTime(seconds); }
     updateScore(score) { this.scoreDisplay.textContent = score; }
-    updateHolding(itemName) { this.holdingDisplay.textContent = itemName || (this.uiText[this.currentLanguage].nothing || "Nothing"); }
+
+    // Modified updateHolding to use player.getHeldItemName()
+    updateHolding(heldItemName) {
+        this.holdingDisplay.textContent = heldItemName || (this.uiText[this.currentLanguage].nothing || "Nothing");
+    }
+
     updateGamepadStatus(isConnected) { this.gamepadStatusElement.textContent = isConnected ? '🎮' : ''; }
     showTemporaryMessage(messageKey, duration = 2000) {
         const messageText = this.uiText[this.currentLanguage][messageKey] || messageKey;
@@ -134,7 +195,7 @@ export class UIManager {
     // --- Order Card Management ---
     addOrderCard(orderId, mealName, timeLimit) {
         const card = document.createElement('div');
-        card.className = 'order-card'; card.id = `order-${orderId}`;
+        card.className = 'order-card'; card.id = orderId; // Use full ID from LevelManager
         const mealSpan = document.createElement('span');
         mealSpan.className = 'order-meal'; mealSpan.textContent = mealName;
         const timerSpan = document.createElement('span');
@@ -144,7 +205,7 @@ export class UIManager {
         return card;
     }
     updateOrderCardTimer(orderId, seconds) {
-        const card = document.getElementById(`order-${orderId}`);
+        const card = document.getElementById(orderId); // Use full ID
         if (card) {
             const timerSpan = card.querySelector('.order-timer');
             if (timerSpan) {
@@ -155,7 +216,7 @@ export class UIManager {
         }
     }
     removeOrderCard(orderId) {
-        const card = document.getElementById(`order-${orderId}`);
+        const card = document.getElementById(orderId); // Use full ID
         if (card) {
             card.style.transition = 'opacity 0.3s ease-out'; card.style.opacity = '0';
             setTimeout(() => card.remove(), 300);
@@ -164,7 +225,6 @@ export class UIManager {
     clearOrderList() { this.orderListElement.innerHTML = ''; }
 
     // --- Level Select Population ---
-    // Now accepts the actual level data array fetched in main.js
     populateLevelSelect(levelDataArray, saveManager) {
         this.levelListContainer.innerHTML = '';
         if (!levelDataArray || !saveManager) {
@@ -219,15 +279,30 @@ export class UIManager {
         document.querySelector('#game-timer-container').firstChild.textContent = this.uiText[lang].levelTime + ": ";
         document.querySelector('#bottom-hud').firstChild.textContent = this.uiText[lang].holding + ": ";
         this.loadingScreen.querySelector('h2').textContent = this.uiText[lang].loading;
+        // Update instruction screen elements if they exist
+        if (this.instructionsTitle) this.instructionsTitle.textContent = this.uiText[lang].levelInstructions || "Level Instructions";
+        if (this.startLevelInstructionsButton) this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
+        // Update hint text based on whether start button is visible
+        if (this.instructionsHint) {
+            const startButtonVisible = this.startLevelInstructionsButton && this.startLevelInstructionsButton.style.display !== 'none';
+            this.instructionsHint.textContent = startButtonVisible
+                ? (this.uiText[lang].select || "Select: Enter/[X]/[A]")
+                : (this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]");
+        }
+
+
         // Update language button selection state
         this.languageButtons.forEach(btn => btn.classList.toggle('active-lang', btn.dataset.lang === lang));
+
         // Re-populate level select if visible
-        if (this.activeScreen === this.levelSelectScreen && this.saveManager) {
-            // Need the actual level data array here, which UIManager doesn't store.
-            // This indicates populateLevelSelect should ideally be called from main.js
-            // when the state changes TO level select, rather than here.
-            // For now, it won't update dynamically on language change unless re-entering the screen.
-            console.warn("Level select text won't update dynamically on language change unless screen is re-entered.");
+        // Use global levelDatabase if available (defined in main.js)
+        if (this.activeScreen === this.levelSelectScreen && this.saveManager && typeof levelDatabase !== 'undefined') {
+            this.populateLevelSelect(levelDatabase, this.saveManager);
+        }
+        // Re-populate instructions if visible (requires currentLevelData from main.js)
+        // Use global currentLevelData if available (defined in main.js)
+        if (this.activeScreen === this.levelInstructionsScreen && typeof currentLevelData !== 'undefined' && currentLevelData) {
+            this.showLevelInstructions(currentLevelData, true); // Assume mid-game if already active
         }
     }
     getLabelToggleState() { return this.toggleLabelsCheckbox.checked; }

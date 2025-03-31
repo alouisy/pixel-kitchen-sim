@@ -466,3 +466,106 @@ canvas {
     color: #FFF;
     font-size: 1.5em;
 }
+
+
+/* --- NEW: Level Instructions Screen --- */
+#level-instructions-screen h1 {
+    font-size: 2em;
+    /* Slightly smaller title */
+    margin-bottom: 20px;
+}
+
+.instructions-box {
+    max-width: 700px;
+    /* Wider container */
+    width: 90%;
+    max-height: 75vh;
+    /* Limit height */
+    background-color: rgba(20, 40, 60, 0.8);
+    /* Bluish background */
+    border-color: #ADD8E6;
+    /* Light blue border */
+    padding: 20px;
+    gap: 20px;
+    /* More spacing */
+}
+
+#instructions-content {
+    flex-grow: 1;
+    /* Allow content to take space */
+    overflow-y: auto;
+    /* Enable scrolling if needed */
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 2px dashed #668;
+    /* Inner dashed border */
+    text-align: left;
+    /* Align text left */
+    display: flex;
+    /* Use flexbox for columns */
+    flex-wrap: wrap;
+    /* Allow wrapping */
+    gap: 20px;
+    /* Space between recipe columns */
+    justify-content: center;
+    /* Center columns if space allows */
+}
+
+.recipe-instruction {
+    border: 1px solid #88a;
+    padding: 15px;
+    background-color: rgba(0, 0, 10, 0.3);
+    min-width: 250px;
+    /* Minimum width for a recipe block */
+    flex: 1;
+    /* Allow recipes to grow */
+}
+
+.recipe-instruction h3 {
+    font-size: 1.3em;
+    color: #FFD700;
+    margin-bottom: 10px;
+    text-align: center;
+    border-bottom: 1px solid #88a;
+    padding-bottom: 5px;
+}
+
+.recipe-instruction ul {
+    list-style: none;
+    /* Remove default bullets */
+    padding-left: 0;
+}
+
+.recipe-instruction li {
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    padding-left: 1.5em;
+    /* Indent steps */
+    position: relative;
+}
+
+.recipe-instruction li::before {
+    content: '»';
+    /* Use a different bullet */
+    color: #87CEEB;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+#start-level-instructions-button {
+    margin-top: 15px;
+    /* Space above button */
+    font-size: 1.3em;
+    padding: 12px 20px;
+    background-color: #4CAF50;
+    /* Green start button */
+    border-color: #FFF;
+}
+
+#start-level-instructions-button.selected {
+    background-color: #66BB6A;
+    /* Lighter green highlight */
+    box-shadow: 0 0 12px rgba(102, 255, 102, 0.7);
+}
