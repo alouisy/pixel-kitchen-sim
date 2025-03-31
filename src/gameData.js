@@ -40,12 +40,12 @@ export const RECIPES = {
         ingredients: ['grilled_cheese_cooked'].sort(),
         timeLimit: 85, baseScore: 80, penalty: 40
     },
-    'Pancakes': { // Requires 'cooked_pancakes', 'syrup' items
-        ingredients: ['cooked_pancakes', 'syrup'].sort(),
+    'Pancakes': { // Requires 'cooked_pancakes', 'syrup' items (served on plate)
+        ingredients: ['cooked_pancakes', 'syrup'].sort(), // Changed: No bowl involved in recipe itself
         timeLimit: 120, baseScore: 90, penalty: 45
     },
-    'Omelette': { // Requires 'cooked_omelette' item
-        ingredients: ['cooked_omelette'].sort(),
+    'Omelette': { // Requires 'cooked_omelette' item (served on plate)
+        ingredients: ['cooked_omelette'].sort(), // Changed: No bowl involved
         timeLimit: 90, baseScore: 80, penalty: 40
     },
     'Fruit & Yogurt Bowl': { // Requires 'yogurt', 'sliced_banana', 'sliced_strawberry', 'granola' items (served in 'bowl')

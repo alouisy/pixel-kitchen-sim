@@ -914,23 +914,6 @@
                 }
             },
             {
-                "name": "bowlSource",
-                "type": "item_source",
-                "position": {
-                    "x": -0.5,
-                    "z": -3.9
-                },
-                "size": {
-                    "width": 0.4,
-                    "depth": 0.4,
-                    "height": 0.2
-                },
-                "color": "#D2B48C",
-                "config": {
-                    "item": "mixing_bowl"
-                }
-            },
-            {
                 "name": "robotMixer",
                 "type": "processor",
                 "position": {
@@ -945,12 +928,12 @@
                 "color": "#778899",
                 "config": {
                     "processes": [
-                        "mixing_bowl_pancake",
-                        "mixing_bowl_omelette"
+                        "egg",
+                        "pancake_mix"
                     ],
                     "result": {
-                        "mixing_bowl_pancake": "bowl_pancake_batter",
-                        "mixing_bowl_omelette": "bowl_omelette_mix"
+                        "egg": "omelette_mix",
+                        "pancake_mix": "pancake_batter"
                     },
                     "processingTime": 4000
                 }
@@ -970,12 +953,12 @@
                 "color": "#333333",
                 "config": {
                     "processes": [
-                        "bowl_pancake_batter",
-                        "bowl_omelette_mix"
+                        "omelette_mix",
+                        "pancake_batter"
                     ],
                     "result": {
-                        "bowl_pancake_batter": "cooked_pancakes",
-                        "bowl_omelette_mix": "cooked_omelette"
+                        "omelette_mix": "cooked_omelette",
+                        "pancake_batter": "cooked_pancakes"
                     },
                     "processingTime": 6000
                 }

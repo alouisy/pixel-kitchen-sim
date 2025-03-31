@@ -59,8 +59,10 @@ function createStation(scene, definition) {
     stationMesh.position.set(position.x, COUNTER_HEIGHT + stationSize.height / 2, position.z);
     stationMesh.castShadow = true; stationMesh.receiveShadow = true;
     stationMesh.name = name;
+    // Copy config into userData, adding type info
     stationMesh.userData = { ...(config || {}), type: 'station', stationType: type, name: name };
 
+    // Initialize specific userData based on type or config
     if (type === STATION_TYPES.ASSEMBLY) {
         stationMesh.userData.slots = [null, null, null];
         stationMesh.userData.slotPositions = [];
@@ -88,6 +90,10 @@ function createStation(scene, definition) {
         stationMesh.add(divider2);
     } else if (type === STATION_TYPES.PROCESSOR) {
         stationMesh.userData.occupiedBy = null;
+        // Initialize internal contents if requiredIngredients are defined (for Blender-like stations)
+        if (stationMesh.userData.requiredIngredients) {
+            stationMesh.userData.internalContents = [];
+        }
     }
 
     scene.add(stationMesh);

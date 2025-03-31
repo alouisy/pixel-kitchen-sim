@@ -25,6 +25,12 @@ export class InteractionManager {
         this.stations = newStations || {};
         this.interactables = newStationInteractables ? [...newStationInteractables] : [];
         this.floorMesh = newFloorMesh;
+        // Ensure internal contents for relevant stations are reset
+        Object.values(this.stations).forEach(station => {
+            if (station.userData?.internalContents) {
+                station.userData.internalContents = [];
+            }
+        });
         console.log("Stations refs updated:", Object.keys(this.stations));
         console.log("Initial Interactables for level:", this.interactables.map(i => i.name));
     }
@@ -39,6 +45,13 @@ export class InteractionManager {
             // Check if it's a dynamic item (not a station or counter)
             if (item.userData && (item.userData.type === ITEM_TYPES.ITEM || item.userData.type === ITEM_TYPES.INGREDIENT)) {
                 if (item.parent) item.parent.remove(item); // Remove from scene
+                // Dispose geometry/material if they are unique to this item
+                item.geometry?.dispose();
+                if (Array.isArray(item.material)) {
+                    item.material.forEach(m => m.dispose());
+                } else {
+                    item.material?.dispose();
+                }
                 this.interactables.splice(i, 1); // Remove from list
                 removedCount++;
             }
@@ -66,6 +79,9 @@ export class InteractionManager {
         if (item.parent) {
             item.parent.remove(item);
         }
+        // Optional: Dispose geometry/material here if not done elsewhere
+        // item.geometry?.dispose();
+        // item.material?.dispose(); // Be careful with shared materials
     }
 
     _animateMealCompletion(plate) {
@@ -91,11 +107,9 @@ export class InteractionManager {
                     // Pass the specific station hit
                     this._placeOrProcessItem(heldItem, targetObject, targetPoint);
                 }
-                // Check if target is an ITEM (plate, bowl, cup) currently in an assembly slot or on a processor (mixer/blender)
+                // Check if target is an ITEM (plate, bowl, cup) currently in an assembly slot
                 else if (targetObject.userData?.type === ITEM_TYPES.ITEM &&
-                    (this.stations.assembly?.userData?.slots?.includes(targetObject) || // On assembly
-                        (this.stations.robotMixer && this.stations.robotMixer.userData?.occupiedBy === targetObject) || // On Mixer
-                        (this.stations.blender && this.stations.blender.userData?.occupiedBy === targetObject)) // On Blender
+                    (this.stations.assembly?.userData?.slots?.includes(targetObject))
                 ) {
                     // The target is the container item itself (plate, bowl, cup)
                     console.log(`Attempting to place ${heldItem.name} onto container ${targetObject.name}`);
@@ -105,7 +119,7 @@ export class InteractionManager {
                     const droppedItem = this.player.place();
                     if (droppedItem) this._dropItem(droppedItem, targetPoint);
                 }
-                else { // Clicked something else
+                else { // Clicked something else (could be another dynamic item)
                     const droppedItem = this.player.place();
                     if (droppedItem) this._dropItem(droppedItem, targetPoint || this.player.getPosition().clone().add(this.camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1.0)));
                 }
@@ -118,7 +132,7 @@ export class InteractionManager {
                 const targetObject = targetInfo.object;
                 if (targetObject.userData?.type === ITEM_TYPES.INGREDIENT || targetObject.userData?.type === ITEM_TYPES.ITEM) {
                     // Prevent picking up ingredients attached to plates/bowls/cups
-                    if (targetObject.parent && targetObject.parent.userData?.itemType && ['plate', 'bowl', 'mixing_bowl', 'cup'].includes(targetObject.parent.userData.itemType)) {
+                    if (targetObject.parent && targetObject.parent.userData?.itemType && ['plate', 'bowl', 'cup'].includes(targetObject.parent.userData.itemType)) {
                         this.uiManager.showTemporaryMessage("Pick up Container", 1000); // Adjust message key
                     } else {
                         this._pickupItem(targetObject);
@@ -136,7 +150,7 @@ export class InteractionManager {
         const objectsToCheck = [...this.interactables];
         if (this.floorMesh) objectsToCheck.push(this.floorMesh);
 
-        const intersects = this.raycaster.intersectObjects(objectsToCheck, true);
+        const intersects = this.raycaster.intersectObjects(objectsToCheck, true); // Check children too
 
         let closestInteractable = null;
         let closestDistance = INTERACTION_DISTANCE;
@@ -144,21 +158,39 @@ export class InteractionManager {
 
         for (const intersect of intersects) {
             if (intersect.distance > closestDistance) continue;
+
             let object = intersect.object;
+            let parentInteractable = null;
+
             // Traverse up to find the object that's in our interactables list or the floor
-            while (object.parent && !this.interactables.includes(object) && object !== this.floorMesh && object !== this.scene) {
-                if (this.interactables.includes(object.parent)) { object = object.parent; break; }
-                object = object.parent;
-            }
-            const isValidTarget = this.interactables.includes(object) || object === this.floorMesh;
-            if (isValidTarget && object !== this.player.getHeldItem()) {
-                // Prioritize container over its ingredient children
-                if (object.userData?.type === ITEM_TYPES.INGREDIENT && object.parent?.userData?.itemType && ['plate', 'bowl', 'mixing_bowl', 'cup'].includes(object.parent.userData.itemType) && this.interactables.includes(object.parent)) {
-                    object = object.parent;
+            let tempObj = object;
+            while (tempObj.parent && tempObj !== this.scene) {
+                if (this.interactables.includes(tempObj)) {
+                    parentInteractable = tempObj;
+                    break;
                 }
-                if (intersect.distance <= INTERACTION_DISTANCE) {
-                    if (object === this.floorMesh && !this.player.getHeldItem()) continue;
-                    closestInteractable = object;
+                tempObj = tempObj.parent;
+            }
+
+            // Decide which object to target (prioritize container over content, interactable over child mesh)
+            const targetObject = parentInteractable || (this.interactables.includes(object) ? object : null);
+
+            // If the direct hit is the floor, target it only if holding something
+            if (object === this.floorMesh && !this.player.getHeldItem()) continue;
+            if (object === this.floorMesh && this.player.getHeldItem()) {
+                if (intersect.distance < closestDistance) {
+                    closestInteractable = object; // Target the floor
+                    closestDistance = intersect.distance;
+                    hitPoint = intersect.point;
+                }
+                continue; // Don't check other conditions if floor is hit while holding
+            }
+
+
+            // If we found a valid interactable target (or its child)
+            if (targetObject && targetObject !== this.player.getHeldItem()) {
+                if (intersect.distance < closestDistance) {
+                    closestInteractable = targetObject; // Target the interactable object itself
                     closestDistance = intersect.distance;
                     hitPoint = intersect.point;
                 }
@@ -166,6 +198,7 @@ export class InteractionManager {
         }
         return closestInteractable ? { object: closestInteractable, point: hitPoint } : null;
     }
+
 
     _pickupItem(item) {
         let removedFromStation = false;
@@ -176,6 +209,12 @@ export class InteractionManager {
         for (const name in this.stations) {
             const station = this.stations[name];
             if (station.userData?.stationType === STATION_TYPES.PROCESSOR && station.userData.occupiedBy === item) {
+                // Clear timeout if picking up item mid-process
+                if (item.userData.processTimeoutId) {
+                    clearTimeout(item.userData.processTimeoutId);
+                    delete item.userData.processTimeoutId;
+                    console.log(`Cancelled processing for ${item.name}`);
+                }
                 station.userData.occupiedBy = null; removedFromStation = true; stationNameFound = name; break;
             }
         }
@@ -189,7 +228,7 @@ export class InteractionManager {
         }
 
         // Remove from internal interactables list BEFORE player pickup attempt
-        this._removeDynamicInteractable(item);
+        this._removeDynamicInteractable(item); // This now also removes from scene
 
         if (this.player.pickup(item)) { /* Success */ }
         else { // Pickup failed
@@ -197,11 +236,20 @@ export class InteractionManager {
             this.uiManager.showTemporaryMessage("Hands Full!", 1000);
             // Add back to list and potentially station
             this._addDynamicInteractable(item);
+            this.scene.add(item); // Add back to scene
             if (removedFromStation && stationNameFound) {
                 if (stationNameFound === 'assembly' && slotIndex > -1) {
                     this.stations.assembly.userData.slots[slotIndex] = item; // Put back in slot
+                    // Reposition in slot visually
+                    const slotPosition = this.stations.assembly.userData.slotPositions[slotIndex];
+                    const itemBox = new THREE.Box3().setFromObject(item);
+                    const itemHeight = itemBox.max.y - itemBox.min.y;
+                    item.position.copy(slotPosition);
+                    item.position.y += itemHeight / 2 + 0.005;
+
                 } else if (this.stations[stationNameFound]?.userData?.stationType === STATION_TYPES.PROCESSOR) {
                     this.stations[stationNameFound].userData.occupiedBy = item; // Put back on processor
+                    this._placeItemOnStationVisual(item, this.stations[stationNameFound]); // Reposition
                 }
             }
         }
@@ -209,38 +257,140 @@ export class InteractionManager {
 
     // Main router for placing/using an item ON a station
     _placeOrProcessItem(item, station, targetPoint, targetItemOnStation = null) {
+        const stationData = station.userData;
+        const heldItemName = item.name;
+        const heldItemType = item.userData.type;
+        const heldItemSpecificType = item.userData.itemType; // e.g., 'cup'
+
+        // --- Handle Instant Processors (Mixer) ---
+        if (station.name === 'robotMixer' && stationData.processes?.includes(heldItemName)) {
+            const resultType = stationData.result?.[heldItemName];
+            if (resultType) {
+                const originalItem = this.player.place();
+                if (originalItem && originalItem === item) {
+                    const newItem = createItem(this.scene, resultType, this.preloadedModels);
+                    if (newItem) {
+                        this._addDynamicInteractable(newItem);
+                        if (this.player.pickup(newItem)) {
+                            console.log(`Transformed ${heldItemName} into ${resultType} via ${station.name}`);
+                            this.uiManager.showTemporaryMessage("Mixed!", 1000);
+                            this._removeDynamicInteractable(originalItem);
+                            originalItem.geometry?.dispose();
+                            if (Array.isArray(originalItem.material)) originalItem.material.forEach(m => m.dispose());
+                            else originalItem.material?.dispose();
+                        } else {
+                            this.uiManager.showTemporaryMessage("Hands Full!", 1000);
+                            this._dropItem(newItem, station.position);
+                            this.player.pickup(originalItem);
+                        }
+                    } else {
+                        console.error(`Failed to create result item: ${resultType}`);
+                        this.player.pickup(originalItem);
+                        this.uiManager.showTemporaryMessage("Error!", 1000);
+                    }
+                } else {
+                    console.error("Item mismatch during instant processing.");
+                    if (originalItem) this.player.pickup(originalItem);
+                }
+            } else {
+                console.warn(`No result defined for ${heldItemName} on ${station.name}`);
+                this.uiManager.showTemporaryMessage("Cannot Process", 1000);
+            }
+            return; // Stop further processing
+        }
+        // --- END Mixer ---
+
+        // --- Handle Blender (New Logic) ---
+        if (station.name === 'blender') {
+            // Case 1: Adding an ingredient
+            if (heldItemType === ITEM_TYPES.INGREDIENT && stationData.acceptsIngredients?.includes(heldItemName)) {
+                const originalItem = this.player.place();
+                if (originalItem && originalItem === item) {
+                    if (!Array.isArray(stationData.internalContents)) stationData.internalContents = [];
+                    // Avoid duplicates if necessary
+                    if (!stationData.internalContents.includes(heldItemName)) {
+                        stationData.internalContents.push(heldItemName);
+                        console.log(`Added ${heldItemName} to Blender. Contents: [${stationData.internalContents.join(', ')}]`);
+                        this.uiManager.showTemporaryMessage(`Added ${heldItemName}`, 1000);
+                        // Remove and dispose the ingredient mesh
+                        this._removeDynamicInteractable(originalItem);
+                        originalItem.geometry?.dispose();
+                        if (Array.isArray(originalItem.material)) originalItem.material.forEach(m => m.dispose());
+                        else originalItem.material?.dispose();
+                    } else {
+                        this.uiManager.showTemporaryMessage("Already Added!", 1000);
+                        this.player.pickup(originalItem); // Give item back
+                    }
+                } else {
+                    console.error("Item mismatch adding ingredient to blender.");
+                    if (originalItem) this.player.pickup(originalItem);
+                }
+                return; // Stop further processing
+            }
+            // Case 2: Using a cup to get the smoothie
+            else if (heldItemType === ITEM_TYPES.ITEM && heldItemSpecificType === stationData.acceptsContainer) { // Check if holding the right container ('cup')
+                const required = stationData.requiredIngredients?.slice().sort() || [];
+                const current = stationData.internalContents?.slice().sort() || [];
+                const ingredientsMatch = required.length === current.length && required.every((val, index) => val === current[index]);
+
+                if (ingredientsMatch && stationData.outputItem) {
+                    const originalCup = this.player.place();
+                    if (originalCup && originalCup === item) {
+                        const smoothieItem = createItem(this.scene, stationData.outputItem, this.preloadedModels);
+                        if (smoothieItem) {
+                            this._addDynamicInteractable(smoothieItem);
+                            if (this.player.pickup(smoothieItem)) {
+                                console.log(`Created ${stationData.outputItem} from Blender.`);
+                                this.uiManager.showTemporaryMessage("Smoothie Ready!", 1500);
+                                stationData.internalContents = []; // Clear blender contents
+                                // Remove and dispose the empty cup mesh
+                                this._removeDynamicInteractable(originalCup);
+                                originalCup.geometry?.dispose();
+                                if (Array.isArray(originalCup.material)) originalCup.material.forEach(m => m.dispose());
+                                else originalCup.material?.dispose();
+                            } else {
+                                this.uiManager.showTemporaryMessage("Hands Full!", 1000);
+                                this._dropItem(smoothieItem, station.position); // Drop smoothie
+                                this.player.pickup(originalCup); // Give cup back
+                            }
+                        } else {
+                            console.error(`Failed to create result item: ${stationData.outputItem}`);
+                            this.player.pickup(originalCup); // Give cup back
+                            this.uiManager.showTemporaryMessage("Error!", 1000);
+                        }
+                    } else {
+                        console.error("Item mismatch getting smoothie from blender.");
+                        if (originalCup) this.player.pickup(originalCup);
+                    }
+                } else {
+                    this.uiManager.showTemporaryMessage("Blender Not Ready!", 1000);
+                    // Don't take the cup, player keeps holding it.
+                }
+                return; // Stop further processing
+            }
+            // Case 3: Trying to place something invalid
+            else {
+                this.uiManager.showTemporaryMessage("Cannot Use Here", 1000);
+                // Player keeps holding the item, interaction fails.
+                return; // Stop further processing
+            }
+        }
+        // --- END Blender ---
+
+
+        // --- Existing Logic for Placing/Processing (Non-Mixer/Blender) ---
         const itemToPlace = this.player.place();
         if (!itemToPlace || itemToPlace !== item) {
             console.error("Mismatch placing item.");
             if (itemToPlace) this._dropItem(itemToPlace, station.position); return;
         }
-        const stationData = station.userData;
 
         switch (stationData.stationType) {
             case STATION_TYPES.ASSEMBLY:
                 this._handleAssemblyPlacement(itemToPlace, station, targetPoint, targetItemOnStation);
                 break;
-            case STATION_TYPES.PROCESSOR:
-                // Handle specific processors like Mixer/Blender differently if needed,
-                // otherwise use the generic processor logic.
-                if (station.name === 'robotMixer' || station.name === 'blender') {
-                    // Placing an empty bowl/cup onto the mixer/blender
-                    if ((itemToPlace.userData?.itemType === 'mixing_bowl' || itemToPlace.userData?.itemType === 'cup') && !stationData.occupiedBy) {
-                        this._placeItemOnStationVisual(itemToPlace, station);
-                        stationData.occupiedBy = itemToPlace;
-                        this._addDynamicInteractable(itemToPlace); // Bowl/Cup on station is interactable
-                        this.uiManager.showTemporaryMessage("Container Placed", 1000);
-                    } else if (stationData.occupiedBy) {
-                        this.uiManager.showTemporaryMessage("Station Busy", 1000);
-                        this._dropItem(itemToPlace, station.position); // Drop item if station busy
-                    } else {
-                        this.uiManager.showTemporaryMessage("Place Correct Container", 1000);
-                        this._dropItem(itemToPlace, station.position); // Drop if wrong item type
-                    }
-                } else {
-                    // Generic processor logic (Grill, Fryer, Oven, Toaster, etc.)
-                    this._handleProcessorStation(itemToPlace, station);
-                }
+            case STATION_TYPES.PROCESSOR: // Grill, Fryer, Oven, Toaster, etc.
+                this._handleProcessorStation(itemToPlace, station);
                 break;
             case STATION_TYPES.SERVING:
                 this._handleServingStation(itemToPlace, station, targetPoint);
@@ -262,7 +412,7 @@ export class InteractionManager {
         const itemData = itemToPlace.userData;
 
         // Check if placing a valid ingredient onto a valid container
-        if (itemData.type === ITEM_TYPES.INGREDIENT && ['plate', 'bowl', 'mixing_bowl', 'cup'].includes(containerData.itemType)) {
+        if (itemData.type === ITEM_TYPES.INGREDIENT && ['plate', 'bowl', 'cup'].includes(containerData.itemType)) {
             const ingredientId = itemToPlace.name;
 
             // Initialize contents if needed
@@ -290,22 +440,14 @@ export class InteractionManager {
             itemToPlace.position.set(offsetX, offsetY, offsetZ);
             itemToPlace.rotation.set(0, Math.random() * Math.PI * 2, 0);
             container.add(itemToPlace); // Add as child
+            // Item added to container is no longer directly interactable on its own
+            // this._removeDynamicInteractable(itemToPlace); // Don't remove from list, just make non-raycastable? No, removing is fine.
 
-            // Check if container is now a complete meal (plate/bowl) or ready for processing (mixing_bowl/cup)
-            if (containerData.itemType === 'plate' || containerData.itemType === 'bowl') {
-                if (checkPlateCompletion(container)) { // Use same check function
-                    this.uiManager.showTemporaryMessage(`${containerData.mealName} Ready!`, 1500);
-                    this._animateMealCompletion(container);
-                } else { this.uiManager.showTemporaryMessage("Ingredient Added", 1000); }
-            } else if (containerData.itemType === 'mixing_bowl' || containerData.itemType === 'cup') {
-                // Check if contents match a "ready to process" state defined implicitly by station processes
-                // Example: Check if bowl contents match what mixer expects
-                // This logic might need refinement - maybe add a 'readyToProcess' flag?
-                this.uiManager.showTemporaryMessage("Ingredient Added to Container", 1000);
-                // TODO: Potentially update container name/state if ready for mixer/blender
-                // e.g., if bowl has pancake ingredients, maybe rename bowl to 'mixing_bowl_pancake'
-                // This requires checking against station process inputs.
-            }
+            // Check if container is now a complete meal (plate/bowl/cup)
+            if (checkPlateCompletion(container)) { // Use same check function
+                this.uiManager.showTemporaryMessage(`${containerData.mealName} Ready!`, 1500);
+                this._animateMealCompletion(container);
+            } else { this.uiManager.showTemporaryMessage("Ingredient Added", 1000); }
 
         } else {
             console.log(`Cannot place ${itemToPlace.name} onto ${container.name}.`);
@@ -317,12 +459,10 @@ export class InteractionManager {
 
     // Handles placing items directly into Assembly Station slots
     _handleAssemblyPlacement(item, station, targetPoint, targetItemOnStation) {
-        // This function is now ONLY for placing items DIRECTLY into slots,
-        // as placing onto containers is handled by _handleContainerPlacement
-        if (targetItemOnStation) { // Tried to place onto something already in a slot?
+        if (targetItemOnStation) {
             console.log("Cannot place directly onto item in slot. Aim for empty slot or container.");
             this.uiManager.showTemporaryMessage("Aim for Slot/Container", 1500);
-            this._dropItem(item, station.position); // Drop near station
+            this._dropItem(item, station.position);
             return;
         }
 
@@ -372,23 +512,19 @@ export class InteractionManager {
         if (processLookupType && stationData.processes?.includes(processLookupType)) {
             this._placeItemOnStationVisual(item, station);
             stationData.occupiedBy = item;
-            // Item remains interactable initially, might be removed during timed process
+            this._addDynamicInteractable(item); // Item is interactable while processing (can be picked up early)
 
             if (stationData.processingTime) {
-                item.visible = false;
-                this._removeDynamicInteractable(item); // Make non-interactable during timed process
                 console.log(`Processing ${item.name} for ${stationData.processingTime}ms...`);
-                setTimeout(() => {
-                    // Check if item is still the one processing
+                item.userData.processTimeoutId = setTimeout(() => {
                     if (station.userData.occupiedBy === item) {
                         this._finishProcessing(item, station);
                     } else {
-                        console.warn(`Processing finished for ${item.name}, but station ${station.name} no longer holds it.`);
-                        // Ensure original item mesh is gone if state changed unexpectedly
-                        if (item.parent) item.parent.remove(item);
+                        console.warn(`Processing timer finished for ${item.name}, but station ${station.name} no longer holds it.`);
                     }
+                    delete item.userData.processTimeoutId;
                 }, stationData.processingTime);
-            } else { // Immediate processing
+            } else { // Immediate processing (e.g., cutting board)
                 this._finishProcessing(item, station);
             }
         } else {
@@ -400,43 +536,50 @@ export class InteractionManager {
 
     _finishProcessing(processedItem, station) {
         const stationData = station.userData;
-        let resultLookupType = processedItem.name; // The name of the item that *went in*
-        const resultType = stationData.result?.[resultLookupType]; // Get the name of the item that *comes out*
+        let resultLookupType = processedItem.name;
+        const resultType = stationData.result?.[resultLookupType];
 
-        const newItemPosition = new THREE.Vector3();
-        // Get position from the processedItem *before* removing it,
-        // but ensure visibility is restored if it was hidden for timed processing
-        processedItem.visible = true;
-        processedItem.getWorldPosition(newItemPosition);
+        if (processedItem.userData.processTimeoutId) {
+            clearTimeout(processedItem.userData.processTimeoutId);
+            delete processedItem.userData.processTimeoutId;
+        }
 
-        // Remove original item completely (from list and scene)
         this._removeDynamicInteractable(processedItem);
+        processedItem.geometry?.dispose();
+        if (Array.isArray(processedItem.material)) processedItem.material.forEach(m => m.dispose());
+        else processedItem.material?.dispose();
+
 
         if (!resultType) {
             console.error(`Processing error on ${station.name}: No result defined for input "${resultLookupType}"`);
-            stationData.occupiedBy = null; // Clear station
+            stationData.occupiedBy = null;
             return;
         }
 
         console.log(`${resultLookupType} processed into ${resultType} on ${station.name}`);
-        const newItem = createItem(this.scene, resultType, this.preloadedModels, undefined, newItemPosition);
+        const newItem = createItem(this.scene, resultType, this.preloadedModels);
 
         if (newItem) {
-            stationData.occupiedBy = newItem; // Station now holds the result
-            this._placeItemOnStationVisual(newItem, station); // Position it
-            this._addDynamicInteractable(newItem); // Make the NEW item interactable
+            stationData.occupiedBy = newItem;
+            this._placeItemOnStationVisual(newItem, station);
+            this._addDynamicInteractable(newItem);
         } else {
             console.error(`Failed to create result item: ${resultType}`);
-            stationData.occupiedBy = null; // Clear station if item creation failed
+            stationData.occupiedBy = null;
         }
     }
 
     _handleServingStation(item, station, targetPoint) {
         const itemData = item.userData;
-        if (itemData.itemType === 'plate' && itemData.mealName) { // Can also serve bowls? Add check if needed: || itemData.itemType === 'bowl'
+        if (itemData.type === ITEM_TYPES.ITEM && ['plate', 'bowl', 'cup'].includes(itemData.itemType) && itemData.mealName) {
             const success = this.levelManager.completeOrder(itemData.mealName);
             if (success) {
-                this._removeDynamicInteractable(item); // Removes item and children
+                item.traverse((child) => {
+                    child.geometry?.dispose();
+                    if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                    else child.material?.dispose();
+                });
+                this._removeDynamicInteractable(item);
                 this.uiManager.showTemporaryMessage("Order Served!", 1500);
             } else {
                 this.uiManager.showTemporaryMessage("Wrong / No Order!", 1500);
@@ -464,28 +607,34 @@ export class InteractionManager {
                 const newItem = createItem(this.scene, itemTypeToCreate, this.preloadedModels);
                 if (newItem) {
                     this._addDynamicInteractable(newItem);
-                    this._pickupItem(newItem); // Immediately pick up
+                    this._pickupItem(newItem);
                 } else console.error(`Failed to create item from source: ${itemTypeToCreate}`);
                 break;
 
-            // 2. Pickup from Processor (generic) / Mixer / Blender
+            // 2. Pickup from Processor (generic)
             case STATION_TYPES.PROCESSOR:
+                // Special check for Blender - cannot pick up from it directly
+                if (station.name === 'blender') {
+                    const contents = stationData.internalContents || [];
+                    if (contents.length > 0) {
+                        this.uiManager.showTemporaryMessage(`Blender contains: ${contents.join(', ')}`, 1500);
+                    } else {
+                        this.uiManager.showTemporaryMessage("Blender Empty", 1000);
+                    }
+                    return; // No pickup action
+                }
+
+                // Generic processor pickup
                 const itemToPickup = stationData.occupiedBy;
                 if (itemToPickup) {
-                    if (itemToPickup.visible === false) { // Check for timed processing
-                        this.uiManager.showTemporaryMessage("Still Processing...", 1000); return;
+                    if (itemToPickup.userData.processTimeoutId) {
+                        this.uiManager.showTemporaryMessage("Still Processing...", 1000);
+                        return;
                     }
-                    stationData.occupiedBy = null; // Clear station first
-                    this._pickupItem(itemToPickup); // Handles list removal
+                    stationData.occupiedBy = null;
+                    this._pickupItem(itemToPickup);
                 } else {
-                    // Special case: Activate Mixer/Blender if it has a ready container
-                    if ((station.name === 'robotMixer' || station.name === 'blender') /* && itemToPickup has ready flag? */) {
-                        // TODO: Implement activation logic if container is ready
-                        console.log(`Attempting to activate ${station.name}... (Not implemented)`);
-                        this.uiManager.showTemporaryMessage("Needs Ingredients!", 1000); // Placeholder
-                    } else {
-                        this.uiManager.showTemporaryMessage("Station Empty", 1000);
-                    }
+                    this.uiManager.showTemporaryMessage("Station Empty", 1000);
                 }
                 break;
 
@@ -495,7 +644,7 @@ export class InteractionManager {
                 const itemInSlot = stationData.slots[slotIndex];
                 if (itemInSlot) {
                     stationData.slots[slotIndex] = null;
-                    this._pickupItem(itemInSlot); // Handles list removal
+                    this._pickupItem(itemInSlot);
                 } else this.uiManager.showTemporaryMessage("Slot Empty", 1000);
                 break;
 

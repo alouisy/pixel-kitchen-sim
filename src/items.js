@@ -4,13 +4,13 @@ import { ITEM_TYPES, INGREDIENT_STATES } from './constants.js';
 import { RECIPES, getRecipeIngredients } from './gameData.js'; // Import RECIPES
 
 export function checkPlateCompletion(plate) {
-    // This function now also needs to handle completion in a 'bowl'
-    if (!plate || plate.userData.type !== ITEM_TYPES.ITEM || (plate.userData.itemType !== 'plate' && plate.userData.itemType !== 'bowl')) {
-        // console.log("checkPlateCompletion: Invalid object passed or not a plate/bowl.");
+    // This function now also needs to handle completion in a 'bowl' or 'cup' if needed
+    if (!plate || plate.userData.type !== ITEM_TYPES.ITEM || !['plate', 'bowl', 'cup'].includes(plate.userData.itemType)) {
+        // console.log("checkPlateCompletion: Invalid object passed or not a plate/bowl/cup.");
         return false;
     }
-
-    const contents = plate.userData.contents.slice().sort();
+    // Ensure contents is always an array, even if empty
+    const contents = Array.isArray(plate.userData.contents) ? plate.userData.contents.slice().sort() : [];
     // console.log(`--- Checking Completion [${plate.userData.itemType}] ---`);
     // console.log(`ID: ${plate.id}, Contents: [${contents.join(', ')}]`);
 
@@ -59,25 +59,25 @@ export function createItem(scene, type, preloadedModels, state = INGREDIENT_STAT
             case 'potato': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'potato', state: INGREDIENT_STATES.RAW }; finalName = 'potato'; break;
             case 'lettuce': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'lettuce', state: INGREDIENT_STATES.RAW }; finalName = 'lettuce'; break;
             case 'chopped_tomato': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'tomato', state: INGREDIENT_STATES.CHOPPED }; finalName = 'chopped_tomato'; break;
-            // Add mappings for NEW preloaded models if you have them
-            // case 'banana': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'banana', state: INGREDIENT_STATES.RAW }; finalName = 'banana'; break;
-            // case 'strawberry': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'strawberry', state: INGREDIENT_STATES.RAW }; finalName = 'strawberry'; break;
+            case 'banana': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'banana', state: INGREDIENT_STATES.RAW }; finalName = 'banana'; break;
+            case 'strawberry': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'strawberry', state: INGREDIENT_STATES.RAW }; finalName = 'strawberry'; break;
             // case 'onion': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'onion', state: INGREDIENT_STATES.RAW }; finalName = 'onion'; break;
             // case 'raw_chicken': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'chicken', state: INGREDIENT_STATES.RAW }; finalName = 'raw_chicken'; break;
-            // case 'egg': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'egg', state: INGREDIENT_STATES.RAW }; finalName = 'egg'; break;
+            case 'egg': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'egg', state: INGREDIENT_STATES.RAW }; finalName = 'egg'; break;
             // case 'bread_slice': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'bread', state: INGREDIENT_STATES.RAW }; finalName = 'bread_slice'; break;
             // case 'raw_bacon': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'bacon', state: INGREDIENT_STATES.RAW }; finalName = 'raw_bacon'; break;
             // case 'pizza_dough': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'dough', state: INGREDIENT_STATES.RAW }; finalName = 'pizza_dough'; break;
             // case 'tomato_sauce': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'sauce', state: 'ready' }; finalName = 'tomato_sauce'; break;
             // case 'shredded_mozzarella': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'cheese', state: 'shredded' }; finalName = 'shredded_mozzarella'; break;
-            // case 'pancake_mix': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'mix', state: 'dry' }; finalName = 'pancake_mix'; break;
+            case 'pancake_mix': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'mix', state: 'dry' }; finalName = 'pancake_mix'; break;
             // case 'coating_mix': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'mix', state: 'coating' }; finalName = 'coating_mix'; break;
-            // case 'yogurt': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'yogurt', state: 'ready' }; finalName = 'yogurt'; break;
-            // case 'granola': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'granola', state: 'ready' }; finalName = 'granola'; break;
-            // case 'syrup': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'syrup', state: 'ready' }; finalName = 'syrup'; break;
-            // case 'mixing_bowl': userData = { type: ITEM_TYPES.ITEM, itemType: 'mixing_bowl', contents: [] }; finalName = 'mixing_bowl'; break;
-            // case 'bowl': userData = { type: ITEM_TYPES.ITEM, itemType: 'bowl', contents: [], mealName: null }; finalName = 'bowl'; break;
-            // case 'cup': userData = { type: ITEM_TYPES.ITEM, itemType: 'cup', contents: [], mealName: null }; finalName = 'cup'; break;
+            case 'yogurt': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'yogurt', state: 'ready' }; finalName = 'yogurt'; break;
+            case 'milk': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'milk', state: 'ready' }; finalName = 'milk'; break; // Added mapping if model exists
+            case 'granola': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'granola', state: 'ready' }; finalName = 'granola'; break;
+            case 'syrup': userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'syrup', state: 'ready' }; finalName = 'syrup'; break;
+            // case 'mixing_bowl': userData = { type: ITEM_TYPES.ITEM, itemType: 'mixing_bowl', contents: [] }; finalName = 'mixing_bowl'; break; // No longer needed for mixing
+            case 'bowl': userData = { type: ITEM_TYPES.ITEM, itemType: 'bowl', contents: [], mealName: null }; finalName = 'bowl'; break; // Still needed for serving fruit bowl etc.
+            case 'cup': userData = { type: ITEM_TYPES.ITEM, itemType: 'cup', contents: [], mealName: null }; finalName = 'cup'; break; // Still needed for serving smoothie
             default: console.warn(`Preloaded model found for "${type}" but no userData mapping defined.`); userData = { type: ITEM_TYPES.ITEM }; break;
         }
         mesh.userData = userData;
@@ -124,9 +124,9 @@ export function createItem(scene, type, preloadedModels, state = INGREDIENT_STAT
 
         case 'egg': geometry = new THREE.SphereGeometry(0.04, 8, 6); material.color.setHex(0xFFE4B5); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'egg', state: INGREDIENT_STATES.RAW }; break;
         case 'pancake_mix': geometry = new THREE.BoxGeometry(0.1, 0.15, 0.08); material.color.setHex(0xF5DEB3); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'mix', state: 'dry' }; finalName = 'pancake_mix'; break; // Box of mix
-        case 'mixing_bowl': geometry = new THREE.CylinderGeometry(0.12, 0.08, 0.08, 16, 1, true); material.color.setHex(0xD2B48C); material.side = THREE.DoubleSide; userData = { type: ITEM_TYPES.ITEM, itemType: 'mixing_bowl', contents: [] }; finalName = 'mixing_bowl'; break; // Open top cylinder
-        case 'bowl_pancake_batter': geometry = new THREE.CylinderGeometry(0.12, 0.08, 0.08, 16, 1, true); material.color.setHex(0xD2B48C); material.side = THREE.DoubleSide; userData = { type: ITEM_TYPES.ITEM, itemType: 'mixing_bowl', contents: ['batter'] }; finalName = 'bowl_pancake_batter'; break; // Bowl with conceptual batter
-        case 'bowl_omelette_mix': geometry = new THREE.CylinderGeometry(0.12, 0.08, 0.08, 16, 1, true); material.color.setHex(0xD2B48C); material.side = THREE.DoubleSide; userData = { type: ITEM_TYPES.ITEM, itemType: 'mixing_bowl', contents: ['egg_mix'] }; finalName = 'bowl_omelette_mix'; break; // Bowl with conceptual egg mix
+        // case 'mixing_bowl': geometry = new THREE.CylinderGeometry(0.12, 0.08, 0.08, 16, 1, true); material.color.setHex(0xD2B48C); material.side = THREE.DoubleSide; userData = { type: ITEM_TYPES.ITEM, itemType: 'mixing_bowl', contents: [] }; finalName = 'mixing_bowl'; break; // No longer needed for mixing
+        case 'omelette_mix': geometry = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 16); material.color.setHex(0xFFFFE0); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'egg_mix', state: 'mixed' }; finalName = 'omelette_mix'; break; // Represents the liquid mix
+        case 'pancake_batter': geometry = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 16); material.color.setHex(0xF5F5DC); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'pancake_batter', state: 'mixed' }; finalName = 'pancake_batter'; break; // Represents the liquid batter
         case 'cooked_pancakes': geometry = new THREE.CylinderGeometry(0.1, 0.1, 0.04, 16); material.color.setHex(0xCD853F); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'pancakes', state: INGREDIENT_STATES.COOKED }; finalName = 'cooked_pancakes'; break; // Stack of 3
         case 'cooked_omelette': geometry = new THREE.CylinderGeometry(0.13, 0.13, 0.02, 16, 1, false, 0, Math.PI); material.color.setHex(0xFFE484); material.side = THREE.DoubleSide; userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'omelette', state: INGREDIENT_STATES.COOKED }; finalName = 'cooked_omelette'; break; // Half cylinder
         case 'syrup': geometry = new THREE.CylinderGeometry(0.03, 0.04, 0.1, 12); material.color.setHex(0x8B4513); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'syrup', state: 'ready' }; break; // Syrup bottle
@@ -136,12 +136,13 @@ export function createItem(scene, type, preloadedModels, state = INGREDIENT_STAT
         case 'strawberry': geometry = new THREE.ConeGeometry(0.04, 0.06, 8); material.color.setHex(0xFF6347); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'strawberry', state: INGREDIENT_STATES.RAW }; break;
         case 'sliced_strawberry': geometry = new THREE.BoxGeometry(0.03, 0.01, 0.03); material.color.setHex(0xFF8367); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'strawberry', state: 'sliced' }; finalName = 'sliced_strawberry'; break;
         case 'yogurt': geometry = new THREE.CylinderGeometry(0.05, 0.04, 0.06, 16); material.color.setHex(0xF0FFFF); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'yogurt', state: 'ready' }; break; // Yogurt cup
+        case 'milk': geometry = new THREE.CylinderGeometry(0.04, 0.04, 0.12, 12); material.color.setHex(0xFFFFFF); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'milk', state: 'ready' }; break; // Milk carton/bottle
         case 'granola': geometry = new THREE.BoxGeometry(0.1, 0.12, 0.05); material.color.setHex(0xD2691E); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'granola', state: 'ready' }; break; // Granola box
         case 'bowl': geometry = new THREE.CylinderGeometry(0.13, 0.09, 0.07, 16, 1, true); material.color.setHex(0xE6E6FA); material.side = THREE.DoubleSide; userData = { type: ITEM_TYPES.ITEM, itemType: 'bowl', contents: [], mealName: null }; break; // Serving bowl
 
         case 'cup': geometry = new THREE.CylinderGeometry(0.05, 0.04, 0.1, 16); material.color.setHex(0xADD8E6); material.transparent = true; material.opacity = 0.8; userData = { type: ITEM_TYPES.ITEM, itemType: 'cup', contents: [], mealName: null }; break; // Smoothie cup
-        case 'blender_cup_smoothie': geometry = new THREE.CylinderGeometry(0.05, 0.04, 0.1, 16); material.color.setHex(0xFFC0CB); userData = { type: ITEM_TYPES.ITEM, itemType: 'cup', contents: ['smoothie_mix'] }; finalName = 'blender_cup_smoothie'; break; // Cup with conceptual mix
-        case 'smoothie_ready': geometry = new THREE.CylinderGeometry(0.05, 0.04, 0.1, 16); material.color.setHex(0xFF69B4); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'smoothie', state: 'ready' }; finalName = 'smoothie_ready'; break; // Represents the final smoothie in a cup
+        // case 'blender_cup_smoothie': geometry = new THREE.CylinderGeometry(0.05, 0.04, 0.1, 16); material.color.setHex(0xFFC0CB); userData = { type: ITEM_TYPES.ITEM, itemType: 'cup', contents: ['smoothie_mix'] }; finalName = 'blender_cup_smoothie'; break; // REMOVED - No longer used
+        case 'smoothie_ready': geometry = new THREE.CylinderGeometry(0.05, 0.04, 0.1, 16); material.color.setHex(0xFF69B4); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'smoothie', state: 'ready' }; finalName = 'smoothie_ready'; break; // Represents the final smoothie (conceptually in a cup)
 
         case 'pizza_dough': geometry = new THREE.SphereGeometry(0.1, 16, 12); material.color.setHex(0xF5F5DC); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'dough', state: INGREDIENT_STATES.RAW }; finalName = 'pizza_dough'; break;
         case 'pizza_base': geometry = new THREE.CylinderGeometry(0.2, 0.2, 0.01, 24); material.color.setHex(0xFDF5E6); userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'dough', state: 'base' }; finalName = 'pizza_base'; break; // Flattened dough
