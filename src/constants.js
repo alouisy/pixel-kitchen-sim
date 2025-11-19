@@ -1,22 +1,21 @@
 // src/constants.js
 export const PLAYER_HEIGHT = 1.8;
 export const PLAYER_SPEED = 5.0;
-export const INTERACTION_DISTANCE = 2.5;
-export const KITCHEN_BOUNDS = { xMin: -5, xMax: 5, zMin: -5, zMax: 5 }; 
+export const INTERACTION_DISTANCE = 3.0;
+export const KITCHEN_BOUNDS = { xMin: -8, xMax: 8, zMin: -8, zMax: 8 }; 
 
 // --- GRID & DIMENSIONS ---
-export const GRID_UNIT = 0.5; // The fundamental unit
-export const MODULE_HEIGHT = 0.9; // Standard counter height
-export const LABEL_Y_OFFSET = 0.3; // Height offset for UI labels above objects
+export const GRID_UNIT = 0.5; 
+export const MODULE_HEIGHT = 0.9; 
+export const LABEL_Y_OFFSET = 0.3;
 
 export const STATION_TYPES = {
     INGREDIENT_SOURCE: 'ingredient_source',
     ITEM_SOURCE: 'item_source',
     PROCESSOR: 'processor',
-    ASSEMBLY: 'assembly',
     SERVING: 'serving',
     COUNTER: 'counter', // Solid block
-    TABLE: 'table',     // With legs
+    TABLE: 'table',     // With smart legs
     FLOOR: 'floor',
     TRASH: 'trash'
 };
@@ -35,20 +34,17 @@ export const INGREDIENT_STATES = {
     SLICED: 'sliced',
     TOASTED: 'toasted',
     COATED: 'coated',
-    BASE: 'base',
     READY: 'ready',
-    DRY: 'dry',
-    SHREDDED: 'shredded',
 };
 
-// Inputs
+// --- INPUT ---
 export const GAMEPAD_DEADZONE = 0.15;
-export const GAMEPAD_INTERACT_BUTTON = 0; 
-export const GAMEPAD_BACK_BUTTON = 1;     
-export const GAMEPAD_INSTRUCTIONS_BUTTON = 3; 
-export const GAMEPAD_PAUSE_BUTTON = 9;    
+export const GAMEPAD_INTERACT_BUTTON = 0; // Cross/A
+export const GAMEPAD_BACK_BUTTON = 1;     // Circle/B
+export const GAMEPAD_INSTRUCTIONS_BUTTON = 3; // Triangle/Y
+export const GAMEPAD_PAUSE_BUTTON = 9;    // Options/Start
+// These were missing:
 export const GAMEPAD_LOOK_SENSITIVITY_X = 300.0;
 export const GAMEPAD_LOOK_SENSITIVITY_Y = 300.0;
-export const KEYBOARD_INSTRUCTIONS_KEY = 'KeyI';
 
-export const ASSEMBLY_STATION_CAPACITY = 3;
+export const KEYBOARD_INSTRUCTIONS_KEY = 'KeyI';
