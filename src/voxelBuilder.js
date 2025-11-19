@@ -21,8 +21,6 @@ export const PALETTE = {
     OIL_GOLD: 0xffd700,
     WATER_BLUE: 0x29b6f6,
     FIRE_ORANGE: 0xff5722,
-    
-    // Food Colors
     TOMATO: 0xd32f2f,
     LETTUCE: 0x43a047,
     CHEESE: 0xfbc02d,
@@ -93,8 +91,6 @@ export class VoxelBuilder {
     }
 }
 
-// --- STATION GENERATORS ---
-
 export function createTrashBinMesh() {
     const vb = new VoxelBuilder();
     vb.addBox(3, 0, 3, 12, 10, 12, PALETTE.TRASH_GREEN);
@@ -156,19 +152,14 @@ export function createSinkMesh() {
 
 export function createIngredientBinMesh(ingredientType) {
     const vb = new VoxelBuilder();
-    // Crate
     vb.addBox(1, 0, 1, 14, 6, 14, PALETTE.WOOD_LIGHT);
-    vb.addBox(2, 1, 2, 13, 6, 13, PALETTE.BLACK); // Hollow
-    
-    // Contents based on Type
+    vb.addBox(2, 1, 2, 13, 6, 13, PALETTE.BLACK); 
     const c = getIngredientColor(ingredientType);
     if (c) {
-        // Pile of items
         vb.addBox(3, 2, 3, 6, 5, 6, c);
         vb.addBox(7, 3, 4, 10, 5, 8, c);
         vb.addBox(4, 4, 8, 8, 6, 11, c);
     }
-
     const mesh = vb.buildMesh();
     mesh.position.y = GRID_UNIT/2;
     return mesh;
@@ -176,7 +167,6 @@ export function createIngredientBinMesh(ingredientType) {
 
 export function createPlateStackMesh() {
     const vb = new VoxelBuilder();
-    // Stack of plates
     for(let y=0; y<8; y+=2) {
         vb.addBox(3, y, 3, 12, y+1, 12, PALETTE.PLATE_WHITE);
     }
@@ -184,8 +174,6 @@ export function createPlateStackMesh() {
     mesh.position.y = GRID_UNIT/2;
     return mesh;
 }
-
-// --- ITEM / INGREDIENT GENERATOR ---
 
 function getIngredientColor(type) {
     if(type.includes('tomato')) return PALETTE.TOMATO;
@@ -203,18 +191,16 @@ function getIngredientColor(type) {
 export function createItemMesh(type) {
     const vb = new VoxelBuilder();
     
-    // Logic to build specific food items
     if (type === 'plate') {
         vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.PLATE_WHITE);
-        vb.addBox(2, 1, 2, 13, 2, 3, PALETTE.PLATE_WHITE); // Rim
+        vb.addBox(2, 1, 2, 13, 2, 3, PALETTE.PLATE_WHITE); 
         vb.addBox(2, 1, 12, 13, 2, 13, PALETTE.PLATE_WHITE);
         vb.addBox(2, 1, 3, 3, 2, 12, PALETTE.PLATE_WHITE);
         vb.addBox(12, 1, 3, 13, 2, 12, PALETTE.PLATE_WHITE);
     } 
     else if (type.includes('tomato')) {
-        // Round-ish red shape
         vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.TOMATO);
-        vb.addBox(6, 4, 6, 9, 5, 9, PALETTE.LETTUCE); // Stem
+        vb.addBox(6, 4, 6, 9, 5, 9, PALETTE.LETTUCE);
     }
     else if (type.includes('lettuce')) {
         vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.LETTUCE);
@@ -228,7 +214,6 @@ export function createItemMesh(type) {
         vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_RAW);
     }
     else if (type === 'cooked_fries') {
-        // In container? Or loose pile? Let's do pile
         vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_COOKED);
         vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_COOKED);
         vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_COOKED);
@@ -244,25 +229,16 @@ export function createItemMesh(type) {
         vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.CHEESE);
     }
     else {
-        // Fallback Box
         vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.PLASTIC_BLUE);
     }
 
     const mesh = vb.buildMesh();
-    // Don't shift Y here; items are placed on surfaces using their Bounding Box in interaction.js
-    // But VoxelBuilder centers at (0,0,0).
-    // interaction.js expects center pivot or calc from BB.
-    // If we shift here, BB changes. Let's leave at center (0,0,0).
-    // Wait, our stations were shifted Y=GRID/2 because they sit ON counters.
-    // Items sit ON counters too.
-    // Let's shift items so their bottom is at Y= -height/2?
-    // VoxelBuilder `add` puts 0,0,0 at center of 0.5m block.
-    // So bottom is at -0.25.
-    // interaction.js uses `itemH/2`.
-    // It's safer to normalize geometry so Y=0 is bottom? 
-    // Let's do what we did for stations:
+    
+    // *** KEY FIX: NORMALIZE ORIGIN ***
+    // VoxelBuilder 0,0,0 is center of grid unit.
+    // This shift makes (0,0,0) the BOTTOM of the mesh.
+    // Interaction Manager logic `yBase - minLocalY` relies on this.
     mesh.geometry.translate(0, GRID_UNIT/2, 0); 
-    // Now 0,0,0 is bottom center.
     
     return mesh;
 }

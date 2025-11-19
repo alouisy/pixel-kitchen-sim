@@ -80,6 +80,8 @@ export class InteractionManager {
             .to(plate.scale, { x: originalScale.x, y: originalScale.y, z: originalScale.z, duration: 0.25, ease: "elastic.out(1, 0.5)" });
     }
 
+    // --- Main Logic ---
+
     handleInteractionRequest() {
         const heldItem = this.player.getHeldItem();
         const targetInfo = this._findTarget();
@@ -88,7 +90,7 @@ export class InteractionManager {
         let targetObject = targetInfo.object;
         const targetPoint = targetInfo.point;
 
-        // AIM FIX: Redirect from Grid Slot to Item inside
+        // Redirect from Grid Slot to Item inside
         if (targetObject.userData.grid) {
             const grid = targetObject.userData.grid;
             const { col, row } = grid.worldToGrid(targetPoint);
@@ -97,11 +99,16 @@ export class InteractionManager {
                 targetObject = itemInSlot;
             }
         }
+        // Redirect from Station to Item (e.g. pick up fries from cutting board)
+        if (targetObject.userData.type === 'station' && targetObject.userData.occupiedBy) {
+             // If holding nothing, or if holding something that can't be processed, default to the item on station
+             // This makes clicking the "cutting board with fries" pick up the fries.
+             if (!heldItem || !targetObject.userData.processes?.includes(heldItem.name)) {
+                 targetObject = targetObject.userData.occupiedBy;
+             }
+        }
 
         if (heldItem) {
-            // *** FIX 2: DIRECT ADD CHECK UPDATED ***
-            // Case A: Holding Container, Target is Ingredient (Original)
-            // Case B: Holding Ingredient, Target is Container (New)
             if (this._isDirectAdditionCheck(heldItem, targetObject)) {
                 this._handleDirectAddition(heldItem, targetObject);
                 return;
@@ -110,7 +117,6 @@ export class InteractionManager {
             const type = targetObject.userData.type;
             const stType = targetObject.userData.stationType;
 
-            // Placement
             if (type === 'station' || type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.FLOOR) {
                 if (stType === STATION_TYPES.PROCESSOR) {
                     this._placeOrProcessItem(heldItem, targetObject, targetPoint);
@@ -122,7 +128,6 @@ export class InteractionManager {
                 }
             }
         } else {
-            // Pickup
             if (targetObject.userData.type === ITEM_TYPES.ITEM || targetObject.userData.type === ITEM_TYPES.INGREDIENT) {
                 this._pickupItem(targetObject);
             }
@@ -162,20 +167,10 @@ export class InteractionManager {
         }
 
         if (existingItem) {
-            // Implicit Assembly: Holding Ingredient, Slot has Container
             const heldIsIng = item.userData.type === ITEM_TYPES.INGREDIENT;
             const targetIsContainer = existingItem.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(existingItem.userData.itemType);
-            
             if (heldIsIng && targetIsContainer) {
-                // We reuse the direct addition logic, but we must swap args because
-                // _handleDirectAddition expects (Container, Ingredient)
-                // Here: heldItem = Ing, existingItem = Container
                 this._handleDirectAddition(existingItem, item); 
-                // Player drops held item (it gets consumed inside handleDirectAddition logic)
-                // Wait, _handleDirectAddition doesn't remove from player hand if called directly?
-                // Actually, previous implementation assumed held=container.
-                // We need to be careful.
-                // Let's delegate to the unified handler.
                 return;
             } else {
                 this.uiManager.showTemporaryMessage("Slot Occupied", 1000);
@@ -194,9 +189,13 @@ export class InteractionManager {
             if (surface.userData.stationType === STATION_TYPES.COUNTER || surface.userData.stationType === STATION_TYPES.TABLE || surface.userData.stationType === STATION_TYPES.SERVING) {
                 yBase = 0.9;
             }
-            const itemBox = new THREE.Box3().setFromObject(placedItem);
-            const itemH = itemBox.max.y - itemBox.min.y;
-            placedItem.position.set(worldPos.x, yBase + (itemH/2) + 0.005, worldPos.z);
+            
+            // *** FIX FLOATING PLATE ON COUNTER ***
+            // Voxel items have their origin (0,0,0) at the bottom.
+            // So we simply place them at yBase. 
+            // We remove BB calculation here to avoid issues with invisible children or bounds.
+            placedItem.position.set(worldPos.x, yBase + 0.005, worldPos.z);
+
             placedItem.rotation.set(0, 0, 0);
             this._addDynamicInteractable(placedItem);
             this.scene.add(placedItem);
@@ -222,14 +221,11 @@ export class InteractionManager {
         return false;
     }
 
-    // *** FIX 2: Updated Checks ***
     _isDirectAdditionCheck(heldItem, targetObject) {
-        // Case 1: Held=Container, Target=Ingredient/Source
         if (heldItem.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(heldItem.userData.itemType)) {
              if (targetObject.userData.type === ITEM_TYPES.INGREDIENT) return true;
              if (targetObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) return true;
         }
-        // Case 2: Held=Ingredient, Target=Container
         if (heldItem.userData.type === ITEM_TYPES.INGREDIENT) {
              if (targetObject.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(targetObject.userData.itemType)) {
                  return true;
@@ -238,23 +234,13 @@ export class InteractionManager {
         return false;
     }
 
-    // *** FIX 2: Updated Logic to handle both directions ***
     _handleDirectAddition(itemA, itemB) {
-        // Determine which is container and which is ingredient
         let container, ingredientObject;
-        
-        if (itemA.userData.type === ITEM_TYPES.ITEM) {
-            container = itemA;
-            ingredientObject = itemB;
-        } else {
-            container = itemB;
-            ingredientObject = itemA;
-        }
+        if (itemA.userData.type === ITEM_TYPES.ITEM) { container = itemA; ingredientObject = itemB; } 
+        else { container = itemB; ingredientObject = itemA; }
 
         const containerData = container.userData;
         let ingredientName = ingredientObject.name;
-
-        // If source, get ingredient name from config
         if (ingredientObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) {
             ingredientName = ingredientObject.userData.ingredient;
         }
@@ -266,7 +252,6 @@ export class InteractionManager {
             return;
         }
 
-        // Perform Addition
         containerData.contents.push(ingredientName);
         const ingredientMeshClone = createItem(this.scene, ingredientName, this.preloadedModels);
         if (!ingredientMeshClone) return;
@@ -275,7 +260,7 @@ export class InteractionManager {
         this._removeDynamicInteractable(ingredientMeshClone);
 
         const contentCount = container.children.length;
-        const offsetY = 0.05 + (contentCount * 0.05); 
+        const offsetY = 0.05 + (contentCount * 0.1); 
         ingredientMeshClone.position.set(0, offsetY, 0);
         ingredientMeshClone.rotation.set(0, Math.random() * Math.PI * 2, 0);
         container.add(ingredientMeshClone);
@@ -283,26 +268,17 @@ export class InteractionManager {
         if (typeof ingredientMeshClone.raycast === 'function') ingredientMeshClone.userData.originalRaycast = ingredientMeshClone.raycast;
         ingredientMeshClone.raycast = () => {};
 
-        // CONSUME LOGIC
-        // If the ingredient was the player's held item, we must detach it
         if (ingredientObject === this.player.getHeldItem()) {
-            this.player.place(); // Detach logic
-            // Now destroy the physical object
+            this.player.place(); 
             this._removeDynamicInteractable(ingredientObject);
             this.scene.remove(ingredientObject);
             ingredientObject.traverse(c => { if(c.geometry) c.geometry.dispose(); });
         } 
-        // If the ingredient was a physical object in the world (on a table)
         else if (ingredientObject.userData.type === ITEM_TYPES.INGREDIENT) {
-            // Remove from world
             this._removeDynamicInteractable(ingredientObject);
             this.scene.remove(ingredientObject);
             ingredientObject.traverse(c => { if(c.geometry) c.geometry.dispose(); });
-            
-            // Clear Grid Occupancy
             if (ingredientObject.userData.gridInfo) ingredientObject.userData.gridInfo.grid.vacate(ingredientObject);
-            
-            // Clear Station Occupancy
             for (const name in this.stations) {
                 const station = this.stations[name];
                 if (station.userData?.occupiedBy === ingredientObject) {
@@ -311,7 +287,6 @@ export class InteractionManager {
             }
         }
 
-        // Success
         if (checkPlateCompletion(container)) {
             this.uiManager.showTemporaryMessage(`${containerData.mealName} Ready!`, 1500);
             this._animateMealCompletion(container);
@@ -340,6 +315,27 @@ export class InteractionManager {
         }
     }
 
+    // *** FIX: HELPER TO GET ACCURATE HEIGHT (IGNORING LABELS) ***
+    _getVisualTopY(object) {
+        const box = new THREE.Box3();
+        // Traverse and expand box ONLY for Meshes, excluding children that look like UI (Sprites)
+        object.traverse((child) => {
+            if (child.isMesh && child.visible) {
+                // Optional: Check if it's a helper or overlay
+                // For now, assume all Meshes are physical parts of the station
+                child.updateWorldMatrix(true, false);
+                if (child.geometry) {
+                    child.geometry.computeBoundingBox();
+                    const childBox = child.geometry.boundingBox.clone();
+                    childBox.applyMatrix4(child.matrixWorld);
+                    box.union(childBox);
+                }
+            }
+        });
+        if (box.isEmpty()) return object.position.y; // Fallback
+        return box.max.y;
+    }
+
     _placeOrProcessItem(item, station, targetPoint) {
          if ((station.name === 'robotMixer' || station.name === 'blender')) return; 
         const stationData = station.userData;
@@ -349,8 +345,9 @@ export class InteractionManager {
         if (!itemToPlace) return;
 
         if (stationData.processes?.includes(item.name)) {
-            const box = new THREE.Box3().setFromObject(station);
-            itemToPlace.position.set(station.position.x, box.max.y + 0.05, station.position.z);
+            // Calculate visual top ignoring labels
+            const topY = this._getVisualTopY(station);
+            itemToPlace.position.set(station.position.x, topY + 0.005, station.position.z);
             this.scene.add(itemToPlace);
 
             stationData.occupiedBy = itemToPlace;
@@ -383,9 +380,7 @@ export class InteractionManager {
          this.scene.remove(item);
          
          station.userData.occupiedBy = newItem;
-         const box = new THREE.Box3().setFromObject(station);
-         newItem.position.set(station.position.x, box.max.y + 0.05, station.position.z);
-         this.scene.add(newItem);
+         this._placeItemOnStationVisual(newItem, station);
          this._addDynamicInteractable(newItem);
          
          if(this.audioManager) this.audioManager.play('ding');
@@ -402,11 +397,9 @@ export class InteractionManager {
     }
 
     _placeItemOnStationVisual(item, station) {
-        const stationBox = new THREE.Box3().setFromObject(station);
-        const itemBox = new THREE.Box3().setFromObject(item);
-        const itemH = itemBox.max.y - itemBox.min.y;
-        
-        item.position.set(station.position.x, stationBox.max.y + (itemH/2) + 0.005, station.position.z);
+        // *** FIX: FLOATING ITEM ON STATION ***
+        const topY = this._getVisualTopY(station);
+        item.position.set(station.position.x, topY + 0.005, station.position.z);
         item.rotation.set(0, 0, 0);
         this.scene.add(item);
     }
@@ -421,7 +414,9 @@ export class InteractionManager {
             this.revertObjectHighlight(this.currentlyHighlightedObject);
             this.currentlyHighlightedObject = null;
         }
+
         this.slotHighlight.visible = false;
+
         if (obj) {
             if (obj.userData.grid) {
                 const grid = obj.userData.grid;
@@ -441,7 +436,10 @@ export class InteractionManager {
                 }
             }
             else if (obj.userData.type === ITEM_TYPES.ITEM || obj.userData.type === ITEM_TYPES.INGREDIENT || obj.userData.type === 'station') {
-                if (obj.userData.stationType !== STATION_TYPES.COUNTER && obj.userData.stationType !== STATION_TYPES.TABLE) {
+                if (obj.userData.occupiedBy) {
+                     this.applyObjectHighlight(obj.userData.occupiedBy);
+                     this.currentlyHighlightedObject = obj.userData.occupiedBy;
+                } else if (obj.userData.stationType !== STATION_TYPES.COUNTER && obj.userData.stationType !== STATION_TYPES.TABLE) {
                     this.applyObjectHighlight(obj);
                     this.currentlyHighlightedObject = obj;
                 }
