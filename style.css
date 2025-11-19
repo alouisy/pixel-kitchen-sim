@@ -569,3 +569,104 @@ canvas {
     /* Lighter green highlight */
     box-shadow: 0 0 12px rgba(102, 255, 102, 0.7);
 }
+
+/* --- NEW: Editor UI Panel --- */
+#editor-panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(40, 40, 50, 0.9);
+    border: 3px solid #888;
+    padding: 15px;
+    z-index: 20;
+    /* Above HUD, below overlays */
+    color: white;
+    font-family: 'Press Start 2P', monospace;
+    /* Ensure font */
+    display: flex;
+    /* Arrange controls and palette */
+    gap: 20px;
+    align-items: flex-start;
+    /* Align items top */
+}
+
+#editor-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+#editor-controls h3 {
+    font-size: 1.2em;
+    color: #FFD700;
+    margin-bottom: 5px;
+    text-align: center;
+    width: 100%;
+}
+
+#editor-controls button {
+    font-family: inherit;
+    font-size: 0.9em;
+    color: #FFF;
+    background-color: #555;
+    border: 2px solid #333;
+    padding: 5px 10px;
+    cursor: pointer;
+    min-width: 100px;
+}
+
+#editor-controls button:hover {
+    background-color: #777;
+}
+
+#editor-controls button:active {
+    background-color: #444;
+}
+
+#editor-controls p {
+    font-size: 0.7em;
+    color: #ccc;
+}
+
+
+#object-palette {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid #666;
+    padding: 10px;
+    max-height: 300px;
+    /* Limit height */
+    overflow-y: auto;
+    min-width: 180px;
+}
+
+#object-palette h4 {
+    font-size: 1em;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#object-palette button {
+    display: block;
+    /* Each button on new line */
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.8em;
+    color: #FFF;
+    background-color: #4a4a4a;
+    border: 1px solid #222;
+    padding: 4px 8px;
+    cursor: pointer;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+#object-palette button:hover {
+    background-color: #666;
+}
+
+#object-palette button.selected-for-placement {
+    background-color: #FF8C00;
+    /* Highlight selected type */
+    border-color: #FFF;
+}

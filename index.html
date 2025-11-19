@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Kitchen Simulator</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Add link to your chosen pixel font here if using Google Fonts -->
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"> -->
     <script type="importmap">
         {
             "imports": {
@@ -24,7 +22,7 @@
     <canvas id="gameCanvas"></canvas>
 
     <!-- Loading Indicator -->
-    <div id="loading-screen" class="overlay active"> <!-- Start visible -->
+    <div id="loading-screen" class="overlay active">
         <h2>Loading Assets...</h2>
     </div>
 
@@ -37,12 +35,9 @@
             <div id="credits">
                 <p>A Game By [Your Name/Studio]</p>
                 <p>
-                    <a href="https://twitter.com/your_twitter" target="_blank" rel="noopener noreferrer"
-                        class="menu-link" data-action="link">X (Twitter)</a> |
-                    <a href="https://instagram.com/your_instagram" target="_blank" rel="noopener noreferrer"
-                        class="menu-link" data-action="link">Instagram</a> |
-                    <a href="https://github.com/your_github" target="_blank" rel="noopener noreferrer" class="menu-link"
-                        data-action="link">GitHub</a>
+                    <a href="#" class="menu-link" data-action="link">X (Twitter)</a> |
+                    <a href="#" class="menu-link" data-action="link">Instagram</a> |
+                    <a href="#" class="menu-link" data-action="link">GitHub</a>
                 </p>
             </div>
         </div>
@@ -65,13 +60,10 @@
                 <label for="toggle-labels-setting">Show Station Labels:</label>
                 <input type="checkbox" id="toggle-labels-setting" class="menu-toggle" data-action="toggle-labels"
                     checked>
-                <!-- We need JS to link this checkbox state to the actual label toggling -->
             </div>
             <p id="game-version">Version: 1.0 Beta</p>
             <button id="back-to-main-button" class="menu-button" data-action="back-to-main">Back</button>
-            <!-- Resume button only visible when paused -->
-            <button id="resume-button-settings" class="menu-button" data-action="resume" style="display: none;">Resume
-                Game</button>
+            <button id="resume-button-settings" class="menu-button" data-action="resume" style="display: none;">Resume Game</button>
         </div>
         <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
     </div>
@@ -79,19 +71,14 @@
     <!-- Level Select Screen -->
     <div id="level-select-screen" class="overlay menu-screen">
         <h1>Select Level</h1>
-        <div id="level-list" class="menu-container level-grid">
-            <!-- Level buttons will be added here by JS -->
-            <!-- Example: <button class="menu-button level-button" data-level="0" data-action="start-level">Level 1: Fry Cook</button> -->
-        </div>
+        <div id="level-list" class="menu-container level-grid"></div>
         <button id="back-to-main-from-level-select" class="menu-button" data-action="back-to-main">Back</button>
         <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
     </div>
 
     <!-- In-Game HUD -->
-    <div id="game-hud" style="display: none;"> <!-- Hidden initially -->
-        <div id="order-list">
-            <!-- Order cards added here by JS -->
-        </div>
+    <div id="game-hud" style="display: none;">
+        <div id="order-list"></div>
         <div id="game-timer-container">
             Level Time: <span id="level-timer-display">0:00</span>
         </div>
@@ -101,7 +88,14 @@
             <span id="gamepad-status"></span>
         </div>
         <div id="crosshair"></div>
-        <div id="temp-message"></div> <!-- Re-use temp message area -->
+        <div id="temp-message"></div>
+    </div>
+
+    <!-- EDITOR HUD (New) -->
+    <div id="editor-hud" style="display: none; position: absolute; top: 10px; right: 10px; z-index: 20; background: rgba(0,0,0,0.8); padding: 10px; border: 2px solid orange; text-align: right;">
+        <h3 style="color: orange; margin-bottom: 10px;">LEVEL EDITOR</h3>
+        <p style="font-size: 0.8em; color: #ccc; margin-bottom: 10px;">Click obj to select. 'T' to Translate.</p>
+        <button id="editor-export-btn" style="padding: 5px 10px; background: #444; color: white; border: 1px solid white; cursor: pointer;">Export JSON to Console</button>
     </div>
 
     <!-- Level End Screen -->
@@ -121,27 +115,12 @@
     <div id="level-instructions-screen" class="overlay menu-screen">
         <h1 id="instructions-title">Level Instructions</h1>
         <div id="instructions-container" class="menu-container instructions-box">
-            <div id="instructions-content">
-                <!-- Recipe instructions will be added here by JS -->
-                <!-- Example Structure:
-                <div class="recipe-instruction">
-                    <h3>Recipe Name</h3>
-                    <ul>
-                        <li>Step 1...</li>
-                        <li>Step 2...</li>
-                    </ul>
-                </div>
-                 -->
-            </div>
-            <button id="start-level-instructions-button" class="menu-button" data-action="start-level-confirm">Start
-                Level</button>
+            <div id="instructions-content"></div>
+            <button id="start-level-instructions-button" class="menu-button" data-action="start-level-confirm">Start Level</button>
         </div>
-        <p class="menu-hint">Select: Enter/[X]/[A]</p>
+         <p class="menu-hint">Select: Enter/[X]/[A]</p>
     </div>
 
-
-    <!-- Import the main script as a module -->
     <script type="module" src="src/main.js"></script>
 </body>
-
 </html>

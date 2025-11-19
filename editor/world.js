@@ -1,6 +1,6 @@
 // src/world.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { LABEL_Y_OFFSET, STATION_TYPES } from './constants.js';
+import { LABEL_Y_OFFSET, STATION_TYPES } from './constants.js'; // Removed COUNTER_HEIGHT import
 
 // Module-level arrays to track created objects for cleanup
 let currentKitchenObjects = []; // Tracks static meshes (stations, counters, decorations)
@@ -44,9 +44,6 @@ function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET, scale = 1.
     sprite.position.y += yOffset; // Use provided offset
     sprite.renderOrder = 1; // Ensure labels render on top
 
-    // Store reference to the object this label belongs to
-    sprite.userData.owner = position; // Use position as a temporary link
-
     scene.add(sprite);
     currentLabels.push(sprite); // Add to tracking array
     return sprite;
@@ -60,7 +57,7 @@ export function toggleLabels(visible) {
 }
 
 // --- Station Creation (Builds one functional station) ---
-function createStation(scene, definition) {
+export function createStation(scene, definition) {
     const { name, type, position, size, color, config, yOffset = 0 } = definition; // Use yOffset from definition
     const stationSize = { width: size?.width ?? 0.5, height: size?.height ?? 0.3, depth: size?.depth ?? 0.5 };
     const stationColor = color ?? 0x808080;
@@ -74,8 +71,7 @@ function createStation(scene, definition) {
     stationMesh.castShadow = true; stationMesh.receiveShadow = true;
     stationMesh.name = name;
     // Copy config into userData, adding type info
-    // Store the original definition for saving later
-    stationMesh.userData = { ...(config || {}), type: 'station', stationType: type, name: name, definition: definition };
+    stationMesh.userData = { ...(config || {}), type: 'station', stationType: type, name: name };
 
     // Initialize specific userData based on type
     if (type === STATION_TYPES.ASSEMBLY) {
@@ -98,6 +94,7 @@ function createStation(scene, definition) {
         const dividerMat = new THREE.MeshBasicMaterial({ color: 0x555555, side: THREE.DoubleSide });
         const dividerGeo1 = new THREE.BoxGeometry(0.01, dividerHeight, dividerDepth);
         const divider1 = new THREE.Mesh(dividerGeo1, dividerMat);
+        // Position dividers relative to the station's center (0,0,0 in local space)
         divider1.position.set(-slotWidth / 2, stationSize.height / 2 + dividerHeight / 2, 0);
         stationMesh.add(divider1); // Add as child
         const dividerGeo2 = new THREE.BoxGeometry(0.01, dividerHeight, dividerDepth);
@@ -115,14 +112,12 @@ function createStation(scene, definition) {
     scene.add(stationMesh);
     currentKitchenObjects.push(stationMesh); // Track functional station mesh
     // Create label slightly above the station
-    const label = createLabel(scene, name, stationMesh.position, stationSize.height / 2 + LABEL_Y_OFFSET);
-    label.userData.owner = stationMesh; // Link label to the mesh object itself
-
+    createLabel(scene, name, stationMesh.position, stationSize.height / 2 + LABEL_Y_OFFSET);
     return stationMesh;
 }
 
 // --- Counter Creation (Builds one counter base) ---
-function createCounter(scene, definition) {
+export function createCounter(scene, definition) {
     const { name, position, size, color, isServing } = definition;
     // Use provided height, default to 0.85 for base
     const counterSize = { width: size?.width ?? 4, height: size?.height ?? 0.85, depth: size?.depth ?? 0.6 };
@@ -136,18 +131,17 @@ function createCounter(scene, definition) {
     counter.position.set(position.x, counterSize.height / 2, position.z);
     counter.castShadow = true; counter.receiveShadow = true;
     counter.name = name;
-    // Store the original definition for saving later
-    counter.userData = { type: STATION_TYPES.COUNTER, isBase: true, definition: definition };
 
     if (isServing) {
         // Mark as serving station, but it's primarily the base structure
-        counter.userData.stationType = STATION_TYPES.SERVING;
-        counter.userData.isServing = true; // Add explicit flag
+        counter.userData = { type: 'station', stationType: STATION_TYPES.SERVING, name: name, isBase: true };
         // Label the serving counter area (position slightly higher)
         const labelPos = counter.position.clone();
         labelPos.y = counterSize.height + 0.05 + LABEL_Y_OFFSET; // Position above where countertop would be
-        const label = createLabel(scene, "Serve Here", labelPos);
-        label.userData.owner = counter; // Link label to the mesh
+        createLabel(scene, "Serve Here", labelPos);
+    } else {
+        // Just a structural counter base
+        counter.userData = { type: STATION_TYPES.COUNTER, isBase: true };
     }
 
     scene.add(counter);
@@ -156,7 +150,7 @@ function createCounter(scene, definition) {
 }
 
 // --- Decoration Creation (Builds non-interactive elements) ---
-function createDecoration(scene, definition) {
+export function createDecoration(scene, definition) {
     const { name, position, size, color, yOffset = 0 } = definition;
     const decoSize = { width: size?.width ?? 1, height: size?.height ?? 1, depth: size?.depth ?? 1 };
     const decoColor = color ?? 0x666666;
@@ -169,27 +163,38 @@ function createDecoration(scene, definition) {
     decoMesh.position.set(position.x, yOffset + decoSize.height / 2, position.z);
     decoMesh.castShadow = true; decoMesh.receiveShadow = true;
     decoMesh.name = name;
-    // Store the original definition for saving later
-    decoMesh.userData = { type: 'decoration', definition: definition }; // Mark as decoration
+    decoMesh.userData = { type: 'decoration' }; // Mark as decoration
 
     scene.add(decoMesh);
     currentKitchenObjects.push(decoMesh); // Track decoration mesh for cleanup
     return decoMesh;
 }
 
+// --- NEW: Wall Creation (Basic Wall) ---
+export function createWall(scene, definition) {
+    const { name, position, size, color, yOffset = 0 } = definition;
+    const wallSize = { width: size?.width ?? 1, height: size?.height ?? 2.5, depth: size?.depth ?? 0.2 }; // Default wall size
+    const wallColor = color ?? '#8B4513'; // Default brown color for walls
+
+    const wallGeo = new THREE.BoxGeometry(wallSize.width, wallSize.height, wallSize.depth);
+    const wallMat = new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.8, metalness: 0 });
+    const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+
+    // Position wall - Y offset is from the floor
+    wallMesh.position.set(position.x, yOffset + wallSize.height / 2, position.z);
+    wallMesh.castShadow = true; wallMesh.receiveShadow = true;
+    wallMesh.name = name;
+    wallMesh.userData = { type: 'wall' }; // Mark as wall
+
+    scene.add(wallMesh);
+    currentKitchenObjects.push(wallMesh); // Track wall mesh for cleanup
+    return wallMesh;
+}
+
 
 // --- Clear Kitchen Function ---
 export function clearKitchen(scene) {
     console.log("Clearing existing kitchen objects...");
-    // Remove labels first
-    currentLabels.forEach(label => {
-        if (label.parent) label.parent.remove(label);
-        label.material.map?.dispose();
-        label.material?.dispose();
-    });
-    currentLabels = [];
-
-    // Remove kitchen objects
     currentKitchenObjects.forEach(obj => {
         if (obj.parent) obj.parent.remove(obj);
         // Clean up children (like assembly dividers)
@@ -205,55 +210,18 @@ export function clearKitchen(scene) {
         obj.geometry?.dispose();
         // obj.material?.dispose(); // Cautious disposal
     });
-    currentKitchenObjects = [];
-
-    // Remove floor
-    if (currentFloor?.parent) {
-        currentFloor.parent.remove(currentFloor);
-        currentFloor.geometry?.dispose();
-        currentFloor.material.map?.dispose(); // Dispose texture map
-        currentFloor.material?.dispose();
-    }
-    currentFloor = null;
-    console.log("Kitchen cleared.");
-}
-
-// --- NEW: Remove Single Object Function ---
-export function removeObjectFromWorld(object, scene) {
-    if (!object) return;
-
-    // Find and remove the associated label
-    const labelIndex = currentLabels.findIndex(label => label.userData.owner === object);
-    if (labelIndex > -1) {
-        const label = currentLabels[labelIndex];
+    currentLabels.forEach(label => {
         if (label.parent) label.parent.remove(label);
         label.material.map?.dispose();
         label.material?.dispose();
-        currentLabels.splice(labelIndex, 1);
-    }
-
-    // Find and remove the object from tracking array
-    const objectIndex = currentKitchenObjects.indexOf(object);
-    if (objectIndex > -1) {
-        currentKitchenObjects.splice(objectIndex, 1);
-    }
-
-    // Remove object and its children from scene and dispose resources
-    if (object.parent) object.parent.remove(object);
-    object.traverse(child => {
-        if (child instanceof THREE.Mesh) {
-            child.geometry?.dispose();
-            // Dispose material(s)
-            if (child.material) {
-                if (Array.isArray(child.material)) {
-                    child.material.forEach(m => m.dispose());
-                } else {
-                    child.material.dispose();
-                }
-            }
-        }
     });
-    console.log(`Removed ${object.name} from world.`);
+    if (currentFloor?.parent) {
+        currentFloor.parent.remove(currentFloor);
+        currentFloor.geometry?.dispose();
+        // currentFloor.material?.dispose();
+    }
+    currentKitchenObjects = []; currentLabels = []; currentFloor = null;
+    console.log("Kitchen cleared.");
 }
 
 
@@ -309,7 +277,7 @@ export function buildKitchen(scene, levelLayout) {
                         newStationInteractables.push(counterMesh);
                     }
                     break;
-                case STATION_TYPES.DECORATION: // Use constant
+                case 'decoration': // Handle new decoration type
                     createDecoration(scene, definition);
                     break;
                 case STATION_TYPES.FLOOR: // Ignore floor definitions here, handled above

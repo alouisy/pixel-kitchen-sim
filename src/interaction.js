@@ -450,6 +450,63 @@ export class InteractionManager {
         }
         // --- END Blender ---
 
+        // Handle assembly station for pizza (similar to blender but with different logic if pizza_base + tomato_sauce + shredded_mozzarella so give the player pizza_margherita_raw)
+        if (station.name === 'assemblyPizza') {
+            // Check if the held item is a pizza base and the station accepts it
+            if (heldItemType === ITEM_TYPES.INGREDIENT && stationData.acceptsIngredients?.includes(heldItemName)) {
+                const originalItem = this.player.place();
+                if (originalItem && originalItem === item) {
+                    if (!Array.isArray(stationData.internalContents)) stationData.internalContents = [];
+                    // Avoid duplicates if necessary
+                    if (!stationData.internalContents.includes(heldItemName)) {
+                        stationData.internalContents.push(heldItemName);
+                        console.log(`Added ${heldItemName} to Pizza Assembly. Contents: [${stationData.internalContents.join(', ')}]`);
+                        this.uiManager.showTemporaryMessage(`Added ${heldItemName}`, 1000);
+                        // Remove and dispose the ingredient mesh
+                        this._removeDynamicInteractable(originalItem);
+                        originalItem.traverse(child => {
+                            if (child.geometry) child.geometry.dispose();
+                            if (child.material) {
+                                if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                                else child.material.dispose();
+                            }
+                        });
+                    } else {
+                        this.uiManager.showTemporaryMessage("Already Added!", 1000);
+                        this.player.pickup(originalItem); // Give item back
+                    }
+                }
+                // Check if the station is ready to serve a pizza
+                const required = stationData.requiredIngredients?.slice().sort() || [];
+                const current = stationData.internalContents?.slice().sort() || [];
+                const ingredientsMatch = required.length > 0 && required.length === current.length && required.every((val, index) => val === current[index]);
+                if (ingredientsMatch && stationData.outputItem) { // outputItem is conceptually "pizza_margherita_raw"
+                    // give the player the pizza item
+                    let pizzaItem = createItem(this.scene, stationData.outputItem, this.preloadedModels);
+                    if (pizzaItem) {
+                        this._addDynamicInteractable(pizzaItem);
+                        if (this.player.pickup(pizzaItem)) {
+                            console.log(`Created Pizza Margherita from Assembly. Meal: ${pizzaItem.userData.mealName}`);
+                            this.uiManager.showTemporaryMessage("Pizza Ready!", 1500);
+                            stationData.internalContents = []; // Clear assembly contents
+                            // Ensure it's still interactable (pickup should handle raycast disabling)
+                            this._addDynamicInteractable(pizzaItem);
+                        } else {
+                            this.uiManager.showTemporaryMessage("Hands Full!", 1000);
+                            this._dropItem(pizzaItem, station.position); // Drop the pizza item
+                        }
+                    } else {
+                        console.error(`Failed to create pizza item: ${stationData.outputItem}`);
+                    }
+                }
+
+                return; // Stop further processing
+            }
+
+
+        }
+        // --- END Pizza Assembly ---
+
 
         // --- Existing Logic for Placing/Processing (Non-Mixer/Blender) ---
         const itemToPlace = this.player.place();

@@ -1,9 +1,9 @@
-// src/constants.js
+// editor/constants.js)
 export const PLAYER_HEIGHT = 1.8;
 export const PLAYER_SPEED = 5.0;
 export const INTERACTION_DISTANCE = 2.0;
 export const KITCHEN_BOUNDS = { xMin: -4.5, xMax: 4.5, zMin: -4.5, zMax: 4.5 }; // May need adjustment based on layouts
-export const COUNTER_HEIGHT = 0.9; // Keep standard height reference if needed elsewhere
+export const COUNTER_HEIGHT = 0.9;
 export const COUNTER_DEPTH = 0.6; // Default depth, can be overridden
 export const LABEL_Y_OFFSET = 0.3;
 
@@ -16,9 +16,9 @@ export const STATION_TYPES = {
     SERVING: 'serving',
     // Non-interactable / Structural
     COUNTER: 'counter', // Explicit type for counters
-    DECORATION: 'decoration', // Added decoration type
     FLOOR: 'floor',
-    WALL: 'wall', // For potential future use
+    WALL: 'wall', // For potential future use - ADDED WALL TYPE
+    DECORATION: 'decoration' // Existing decoration type
 };
 
 export const ITEM_TYPES = {
@@ -35,10 +35,10 @@ export const INGREDIENT_STATES = {
     SLICED: 'sliced',
     TOASTED: 'toasted',
     COATED: 'coated',
-    BASE: 'base',
-    READY: 'ready',
-    DRY: 'dry',
-    SHREDDED: 'shredded',
+    BASE: 'base', // e.g., pizza base
+    READY: 'ready', // Generic ready state for things like syrup, yogurt
+    DRY: 'dry', // e.g., pancake mix
+    SHREDDED: 'shredded', // e.g., cheese
 };
 
 // --- GAMEPAD ---
@@ -52,7 +52,6 @@ export const GAMEPAD_LOOK_SENSITIVITY_Y = 300.0;
 
 // --- KEYBOARD ---
 export const KEYBOARD_INSTRUCTIONS_KEY = 'KeyI'; // 'I' key for Instructions
-export const KEYBOARD_EDITOR_TOGGLE_KEY = 'KeyL'; // 'L' key for Editor Mode
 
 // --- ASSEMBLY STATION ---
 export const ASSEMBLY_STATION_CAPACITY = 3; // Max items directly on the station surface (now managed by slots)

@@ -3,7 +3,8 @@ import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/js
 import {
     GAMEPAD_DEADZONE, GAMEPAD_INTERACT_BUTTON, GAMEPAD_PAUSE_BUTTON,
     GAMEPAD_LOOK_SENSITIVITY_X, GAMEPAD_LOOK_SENSITIVITY_Y,
-    GAMEPAD_INSTRUCTIONS_BUTTON, KEYBOARD_INSTRUCTIONS_KEY // Import new constants
+    GAMEPAD_INSTRUCTIONS_BUTTON, KEYBOARD_INSTRUCTIONS_KEY,
+    KEYBOARD_EDITOR_TOGGLE_KEY // Import new constant
 } from './constants.js';
 
 export class PlayerControls {
@@ -28,7 +29,8 @@ export class PlayerControls {
 
         this.interactRequested = false;
         this.pauseToggleRequested = false;
-        this.instructionToggleRequested = false; // Added flag for instructions
+        this.instructionToggleRequested = false;
+        this.editorToggleRequested = false; // Added flag for editor
 
         this.crosshair = document.getElementById('crosshair'); // Keep crosshair reference
 
@@ -103,6 +105,7 @@ export class PlayerControls {
         if (buttonJustPressed(GAMEPAD_INSTRUCTIONS_BUTTON)) {
             this.instructionToggleRequested = true;
         }
+        // Editor Toggle (No standard gamepad button assigned yet)
 
         // Store current button states for next frame's edge detection
         this.prevGamepadButtons = currentButtons;
@@ -143,6 +146,10 @@ export class PlayerControls {
             this.instructionToggleRequested = true;
             return;
         }
+        if (event.code === KEYBOARD_EDITOR_TOGGLE_KEY) { // Editor Toggle
+            this.editorToggleRequested = true;
+            return;
+        }
 
         // Only process movement if pointer is locked
         if (!this._pointerLockControls.isLocked) return;
@@ -165,11 +172,11 @@ export class PlayerControls {
     }
 
     _onClick() {
-        // Request interaction only if pointer is locked
+        // Request interaction only if pointer is locked (GAME_RUNNING state)
+        // Editor clicks are handled differently in main.js
         if (this._pointerLockControls.isLocked) {
             this.interactRequested = true;
         }
-        // If not locked, clicks are handled by the menu system (handleMenuAction in main.js)
     }
 
     getMovementInput() {
@@ -206,9 +213,17 @@ export class PlayerControls {
         return false;
     }
 
-    consumeInstructionToggleRequest() { // New consumer method
+    consumeInstructionToggleRequest() {
         if (this.instructionToggleRequested) {
             this.instructionToggleRequested = false;
+            return true;
+        }
+        return false;
+    }
+
+    consumeEditorToggleRequest() { // New consumer method
+        if (this.editorToggleRequested) {
+            this.editorToggleRequested = false;
             return true;
         }
         return false;
