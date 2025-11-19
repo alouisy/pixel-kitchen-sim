@@ -4,14 +4,14 @@ import { PLAYER_HEIGHT } from './constants.js';
 
 export function setupScene() {
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87ceeb); // Sky blue
-    scene.fog = new THREE.Fog(0x87ceeb, 0, 50);
+    scene.background = new THREE.Color(0x202025); // Darker background to make lights pop
+    scene.fog = new THREE.Fog(0x202025, 5, 20);
     return scene;
 }
 
 export function setupCamera() {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, PLAYER_HEIGHT, 3); // Start position
+    camera.position.set(0, PLAYER_HEIGHT, 3); 
     return camera;
 }
 
@@ -22,30 +22,46 @@ export function setupRenderer() {
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
+    
+    // Shadow Map settings
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
+    
+    // Tone Mapping for better colors
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+
     return renderer;
 }
 
 export function setupLighting(scene) {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Slightly brighter ambient
+    // 1. Ambient Light (Soft fill)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0); // Slightly stronger directional
-    directionalLight.position.set(5, 15, 10); // Higher and further back
-    directionalLight.castShadow = true;
-    // Configure shadow properties for better quality (optional)
-    directionalLight.shadow.mapSize.width = 1024;
-    directionalLight.shadow.mapSize.height = 1024;
-    directionalLight.shadow.camera.near = 0.5;
-    directionalLight.shadow.camera.far = 50;
-    directionalLight.shadow.camera.left = -10;
-    directionalLight.shadow.camera.right = 10;
-    directionalLight.shadow.camera.top = 10;
-    directionalLight.shadow.camera.bottom = -10;
+    // 2. Directional Light (Sun/Main Source)
+    const dirLight = new THREE.DirectionalLight(0xffeeb1, 1.2); // Warm light
+    dirLight.position.set(5, 10, 5);
+    dirLight.castShadow = true;
+    
+    // Optimize Shadow Map
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 0.5;
+    dirLight.shadow.camera.far = 50;
+    const d = 10;
+    dirLight.shadow.camera.left = -d;
+    dirLight.shadow.camera.right = d;
+    dirLight.shadow.camera.top = d;
+    dirLight.shadow.camera.bottom = -d;
+    dirLight.shadow.bias = -0.0005; // Fix shadow acne on voxels
+    
+    scene.add(dirLight);
 
-    scene.add(directionalLight);
-    // scene.add(new THREE.CameraHelper(directionalLight.shadow.camera)); // Debug shadows
+    // 3. Rim Light (Cool blue from back for contrast)
+    const rimLight = new THREE.DirectionalLight(0x4455ff, 0.3);
+    rimLight.position.set(-5, 5, -5);
+    scene.add(rimLight);
 }
 
 export function setupResizeHandler(camera, renderer) {
