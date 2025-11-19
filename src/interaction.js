@@ -18,6 +18,7 @@ export class InteractionManager {
         this.raycaster = new THREE.Raycaster();
         
         this.currentlyHighlightedObject = null;
+        this.audioManager = null;
 
         // Slot Highlight
         const highlightGeo = new THREE.PlaneGeometry(GRID_UNIT * 0.9, GRID_UNIT * 0.9);
@@ -70,7 +71,14 @@ export class InteractionManager {
         if (item.parent) item.parent.remove(item);
     }
 
-    // --- Main Logic ---
+    _animateMealCompletion(plate) {
+        if (!plate || !plate.parent) return;
+        const originalScale = plate.scale.clone();
+        const targetScale = originalScale.clone().multiplyScalar(1.15);
+        gsap.timeline()
+            .to(plate.scale, { x: targetScale.x, y: targetScale.y, z: targetScale.z, duration: 0.15, ease: "power1.out" })
+            .to(plate.scale, { x: originalScale.x, y: originalScale.y, z: originalScale.z, duration: 0.25, ease: "elastic.out(1, 0.5)" });
+    }
 
     handleInteractionRequest() {
         const heldItem = this.player.getHeldItem();
@@ -80,22 +88,20 @@ export class InteractionManager {
         let targetObject = targetInfo.object;
         const targetPoint = targetInfo.point;
 
-        // *** AIMING FIX ***
-        // If we aimed at a grid slot on a surface, verify if there's an object INSIDE that slot.
-        // If so, pretend we aimed at the object instead.
+        // AIM FIX: Redirect from Grid Slot to Item inside
         if (targetObject.userData.grid) {
             const grid = targetObject.userData.grid;
             const { col, row } = grid.worldToGrid(targetPoint);
             const itemInSlot = grid.occupied[col]?.[row];
-            
             if (itemInSlot && itemInSlot !== heldItem) {
-                // Retarget to the item in the slot
                 targetObject = itemInSlot;
             }
         }
 
         if (heldItem) {
-            // A. Direct Add
+            // *** FIX 2: DIRECT ADD CHECK UPDATED ***
+            // Case A: Holding Container, Target is Ingredient (Original)
+            // Case B: Holding Ingredient, Target is Container (New)
             if (this._isDirectAdditionCheck(heldItem, targetObject)) {
                 this._handleDirectAddition(heldItem, targetObject);
                 return;
@@ -104,7 +110,7 @@ export class InteractionManager {
             const type = targetObject.userData.type;
             const stType = targetObject.userData.stationType;
 
-            // B. Surface/Processor Placement
+            // Placement
             if (type === 'station' || type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.FLOOR) {
                 if (stType === STATION_TYPES.PROCESSOR) {
                     this._placeOrProcessItem(heldItem, targetObject, targetPoint);
@@ -145,19 +151,10 @@ export class InteractionManager {
         return null;
     }
 
-    // --- Placement ---
     _attemptGridPlacement(item, surface, hitPoint) {
         const grid = surface.userData.grid;
         if (!grid) return;
         const { col, row } = grid.worldToGrid(hitPoint);
-        
-        // ** NOTE **: Because of the Aiming Fix in handleInteractionRequest,
-        // if the slot was occupied, `targetObject` would have been swapped to the item.
-        // So if we are here inside `_attemptGridPlacement`, it implies we either:
-        // 1. Aimed at an empty slot.
-        // 2. Aimed at a surface that ISN'T handling the retargeting correctly (shouldn't happen).
-        // 3. Aiming at Serving Counter (special case).
-
         const existingItem = grid.occupied[col]?.[row];
 
         if (surface.userData.stationType === STATION_TYPES.SERVING) {
@@ -165,15 +162,24 @@ export class InteractionManager {
         }
 
         if (existingItem) {
-            // Fallback if retargeting failed logic
+            // Implicit Assembly: Holding Ingredient, Slot has Container
             const heldIsIng = item.userData.type === ITEM_TYPES.INGREDIENT;
             const targetIsContainer = existingItem.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(existingItem.userData.itemType);
+            
             if (heldIsIng && targetIsContainer) {
-                this._handleDirectAddition(existingItem, item);
-                this.player.place(); 
+                // We reuse the direct addition logic, but we must swap args because
+                // _handleDirectAddition expects (Container, Ingredient)
+                // Here: heldItem = Ing, existingItem = Container
+                this._handleDirectAddition(existingItem, item); 
+                // Player drops held item (it gets consumed inside handleDirectAddition logic)
+                // Wait, _handleDirectAddition doesn't remove from player hand if called directly?
+                // Actually, previous implementation assumed held=container.
+                // We need to be careful.
+                // Let's delegate to the unified handler.
                 return;
             } else {
                 this.uiManager.showTemporaryMessage("Slot Occupied", 1000);
+                if(this.audioManager) this.audioManager.play('error');
                 return;
             }
         }
@@ -190,15 +196,12 @@ export class InteractionManager {
             }
             const itemBox = new THREE.Box3().setFromObject(placedItem);
             const itemH = itemBox.max.y - itemBox.min.y;
-
-            // Place center of item at Y base + half height
-            // 0.005 epsilon for z-fighting
             placedItem.position.set(worldPos.x, yBase + (itemH/2) + 0.005, worldPos.z);
             placedItem.rotation.set(0, 0, 0);
             this._addDynamicInteractable(placedItem);
             this.scene.add(placedItem);
             if (placedItem.userData.originalRaycast) { placedItem.raycast = placedItem.userData.originalRaycast; delete placedItem.userData.originalRaycast; } else { delete placedItem.raycast; }
-            this.uiManager.showTemporaryMessage("Placed", 500);
+            if(this.audioManager) this.audioManager.play('place');
         }
     }
 
@@ -207,31 +210,53 @@ export class InteractionManager {
         if (itemData.type === ITEM_TYPES.ITEM && ['plate', 'bowl', 'cup'].includes(itemData.itemType) && itemData.mealName) {
             const success = this.levelManager.completeOrder(itemData.mealName);
             if (success) {
-                // *** FIX: SERVING VISUAL ***
-                const servedItem = this.player.place(); // Detach from player
-                this._removeDynamicInteractable(servedItem); // Remove from lists
-                this.scene.remove(servedItem); // Remove from scene
+                const servedItem = this.player.place(); 
+                this._removeDynamicInteractable(servedItem); 
+                this.scene.remove(servedItem); 
                 servedItem.traverse((c) => { if(c.geometry) c.geometry.dispose(); });
-                
                 this.uiManager.showTemporaryMessage("Order Served!", 1500);
+                if(this.audioManager) this.audioManager.play('ding');
                 return true;
             }
         }
         return false;
     }
 
+    // *** FIX 2: Updated Checks ***
     _isDirectAdditionCheck(heldItem, targetObject) {
-        if (heldItem.userData.type !== ITEM_TYPES.ITEM) return false;
-        if (targetObject.userData.type === ITEM_TYPES.INGREDIENT) return true;
-        if (targetObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) return true;
+        // Case 1: Held=Container, Target=Ingredient/Source
+        if (heldItem.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(heldItem.userData.itemType)) {
+             if (targetObject.userData.type === ITEM_TYPES.INGREDIENT) return true;
+             if (targetObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) return true;
+        }
+        // Case 2: Held=Ingredient, Target=Container
+        if (heldItem.userData.type === ITEM_TYPES.INGREDIENT) {
+             if (targetObject.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(targetObject.userData.itemType)) {
+                 return true;
+             }
+        }
         return false;
     }
 
-    _handleDirectAddition(heldContainer, targetIngredientObject) {
-        const containerData = heldContainer.userData;
-        let ingredientName = targetIngredientObject.name;
-        if (targetIngredientObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) {
-            ingredientName = targetIngredientObject.userData.ingredient;
+    // *** FIX 2: Updated Logic to handle both directions ***
+    _handleDirectAddition(itemA, itemB) {
+        // Determine which is container and which is ingredient
+        let container, ingredientObject;
+        
+        if (itemA.userData.type === ITEM_TYPES.ITEM) {
+            container = itemA;
+            ingredientObject = itemB;
+        } else {
+            container = itemB;
+            ingredientObject = itemA;
+        }
+
+        const containerData = container.userData;
+        let ingredientName = ingredientObject.name;
+
+        // If source, get ingredient name from config
+        if (ingredientObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) {
+            ingredientName = ingredientObject.userData.ingredient;
         }
 
         if (!['plate', 'bowl', 'cup'].includes(containerData.itemType)) return;
@@ -241,6 +266,7 @@ export class InteractionManager {
             return;
         }
 
+        // Perform Addition
         containerData.contents.push(ingredientName);
         const ingredientMeshClone = createItem(this.scene, ingredientName, this.preloadedModels);
         if (!ingredientMeshClone) return;
@@ -248,30 +274,51 @@ export class InteractionManager {
         this.scene.remove(ingredientMeshClone);
         this._removeDynamicInteractable(ingredientMeshClone);
 
-        const contentCount = heldContainer.children.length;
-        const offsetY = 0.05 + (contentCount * 0.05); // Increased offset for better visibility
+        const contentCount = container.children.length;
+        const offsetY = 0.05 + (contentCount * 0.05); 
         ingredientMeshClone.position.set(0, offsetY, 0);
         ingredientMeshClone.rotation.set(0, Math.random() * Math.PI * 2, 0);
-        heldContainer.add(ingredientMeshClone);
+        container.add(ingredientMeshClone);
+        
         if (typeof ingredientMeshClone.raycast === 'function') ingredientMeshClone.userData.originalRaycast = ingredientMeshClone.raycast;
         ingredientMeshClone.raycast = () => {};
 
-        if (targetIngredientObject.userData.type === ITEM_TYPES.INGREDIENT) {
-            this._removeDynamicInteractable(targetIngredientObject);
-            targetIngredientObject.traverse(c => { if(c.geometry) c.geometry.dispose(); });
+        // CONSUME LOGIC
+        // If the ingredient was the player's held item, we must detach it
+        if (ingredientObject === this.player.getHeldItem()) {
+            this.player.place(); // Detach logic
+            // Now destroy the physical object
+            this._removeDynamicInteractable(ingredientObject);
+            this.scene.remove(ingredientObject);
+            ingredientObject.traverse(c => { if(c.geometry) c.geometry.dispose(); });
+        } 
+        // If the ingredient was a physical object in the world (on a table)
+        else if (ingredientObject.userData.type === ITEM_TYPES.INGREDIENT) {
+            // Remove from world
+            this._removeDynamicInteractable(ingredientObject);
+            this.scene.remove(ingredientObject);
+            ingredientObject.traverse(c => { if(c.geometry) c.geometry.dispose(); });
+            
+            // Clear Grid Occupancy
+            if (ingredientObject.userData.gridInfo) ingredientObject.userData.gridInfo.grid.vacate(ingredientObject);
+            
+            // Clear Station Occupancy
             for (const name in this.stations) {
                 const station = this.stations[name];
-                if (station.userData?.occupiedBy === targetIngredientObject) {
+                if (station.userData?.occupiedBy === ingredientObject) {
                     station.userData.occupiedBy = null; break;
                 }
             }
         }
 
-        if (checkPlateCompletion(heldContainer)) {
+        // Success
+        if (checkPlateCompletion(container)) {
             this.uiManager.showTemporaryMessage(`${containerData.mealName} Ready!`, 1500);
-            this._animateMealCompletion(heldContainer);
+            this._animateMealCompletion(container);
+            if(this.audioManager) this.audioManager.play('ding');
         } else {
             this.uiManager.showTemporaryMessage("Ingredient Added", 1000);
+            if(this.audioManager) this.audioManager.play('place');
         }
     }
 
@@ -285,7 +332,9 @@ export class InteractionManager {
         }
         if (item.userData.gridInfo) item.userData.gridInfo.grid.vacate(item);
         this._removeDynamicInteractable(item);
-        if (!this.player.pickup(item)) {
+        if (this.player.pickup(item)) {
+             if(this.audioManager) this.audioManager.play('pop');
+        } else {
             this.uiManager.showTemporaryMessage("Hands Full!", 1000);
             this._addDynamicInteractable(item);
         }
@@ -294,26 +343,32 @@ export class InteractionManager {
     _placeOrProcessItem(item, station, targetPoint) {
          if ((station.name === 'robotMixer' || station.name === 'blender')) return; 
         const stationData = station.userData;
-        if (stationData.occupiedBy) { this.uiManager.showTemporaryMessage("Station Busy", 1000); return; }
+        if (stationData.occupiedBy) { this.uiManager.showTemporaryMessage("Station Busy", 1000); if(this.audioManager) this.audioManager.play('error'); return; }
         
         const itemToPlace = this.player.place();
         if (!itemToPlace) return;
 
         if (stationData.processes?.includes(item.name)) {
-            this._placeItemOnStationVisual(itemToPlace, station);
+            const box = new THREE.Box3().setFromObject(station);
+            itemToPlace.position.set(station.position.x, box.max.y + 0.05, station.position.z);
+            this.scene.add(itemToPlace);
+
             stationData.occupiedBy = itemToPlace;
             this._addDynamicInteractable(itemToPlace);
             
             if (stationData.processingTime) {
+                if(this.audioManager) this.audioManager.play('fry'); 
                 itemToPlace.userData.processTimeoutId = setTimeout(() => {
                     if (station.userData.occupiedBy === itemToPlace) this._finishProcessing(itemToPlace, station);
                     delete itemToPlace.userData.processTimeoutId;
                 }, stationData.processingTime);
             } else {
+                if(this.audioManager) this.audioManager.play('chop'); 
                 this._finishProcessing(itemToPlace, station);
             }
         } else {
             this.uiManager.showTemporaryMessage("Cannot Process", 1000);
+            if(this.audioManager) this.audioManager.play('error');
             this.player.pickup(itemToPlace);
         }
     }
@@ -325,36 +380,37 @@ export class InteractionManager {
 
          this._removeDynamicInteractable(item);
          item.traverse(c => { if(c.geometry) c.geometry.dispose(); });
-         this.scene.remove(item); // Remove visually
+         this.scene.remove(item);
          
          station.userData.occupiedBy = newItem;
-         this._placeItemOnStationVisual(newItem, station);
+         const box = new THREE.Box3().setFromObject(station);
+         newItem.position.set(station.position.x, box.max.y + 0.05, station.position.z);
+         this.scene.add(newItem);
          this._addDynamicInteractable(newItem);
+         
+         if(this.audioManager) this.audioManager.play('ding');
     }
 
     _useStation(station, point) {
         if (station.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE || station.userData.stationType === STATION_TYPES.ITEM_SOURCE) {
              const type = station.userData.ingredient || station.userData.item;
              const newItem = createItem(this.scene, type, this.preloadedModels);
-             if(this.player.pickup(newItem)) { /* success */ }
+             if(this.player.pickup(newItem)) { 
+                 if(this.audioManager) this.audioManager.play('pop');
+             }
         }
     }
 
     _placeItemOnStationVisual(item, station) {
-        // *** FIX: FLOATING ITEMS ***
-        // Get the accurate top Y of the station mesh
         const stationBox = new THREE.Box3().setFromObject(station);
         const itemBox = new THREE.Box3().setFromObject(item);
         const itemH = itemBox.max.y - itemBox.min.y;
         
-        // Place item exactly on top of the station bounds
-        // 0.005 epsilon for visual breathing room
         item.position.set(station.position.x, stationBox.max.y + (itemH/2) + 0.005, station.position.z);
         item.rotation.set(0, 0, 0);
         this.scene.add(item);
     }
 
-    // --- Highlight Logic ---
     updateAimHighlight() {
         if (!this.player.controls.isLocked) { this.slotHighlight.visible = false; return; }
         const info = this._findTarget();
@@ -365,34 +421,25 @@ export class InteractionManager {
             this.revertObjectHighlight(this.currentlyHighlightedObject);
             this.currentlyHighlightedObject = null;
         }
-
         this.slotHighlight.visible = false;
-
         if (obj) {
-            // 1. Grid Logic
             if (obj.userData.grid) {
                 const grid = obj.userData.grid;
                 const { col, row } = grid.worldToGrid(point);
-                
-                // *** AIM FIX: If slot occupied, Highlight the item inside instead ***
                 const itemInside = grid.occupied[col]?.[row];
                 if (itemInside) {
-                    // Transfer highlight to the item
                     this.applyObjectHighlight(itemInside);
                     this.currentlyHighlightedObject = itemInside;
                 } 
                 else if (grid.isAreaFree(col, row, 1, 1)) {
-                    // Slot is free -> Show Grid Highlight
                     const worldPos = grid.gridToWorld(col, row);
                     let y = obj.position.y;
                     if (obj.userData.type === STATION_TYPES.FLOOR) y = 0.01;
-                    else y = 0.9 + 0.01; // Counter height
-                    
+                    else y = 0.9 + 0.01; 
                     this.slotHighlight.position.set(worldPos.x, y, worldPos.z);
                     this.slotHighlight.visible = true;
                 }
             }
-            // 2. Object Logic (Loose items)
             else if (obj.userData.type === ITEM_TYPES.ITEM || obj.userData.type === ITEM_TYPES.INGREDIENT || obj.userData.type === 'station') {
                 if (obj.userData.stationType !== STATION_TYPES.COUNTER && obj.userData.stationType !== STATION_TYPES.TABLE) {
                     this.applyObjectHighlight(obj);
@@ -401,12 +448,10 @@ export class InteractionManager {
             }
         }
     }
-
     applyObjectHighlight(obj) {
         if (!obj.userData.originalScale) obj.userData.originalScale = obj.scale.clone();
         gsap.to(obj.scale, { x: obj.userData.originalScale.x * 1.1, y: obj.userData.originalScale.y * 1.1, z: obj.userData.originalScale.z * 1.1, duration: 0.15 });
     }
-
     revertObjectHighlight(obj) {
         if (!obj || !obj.userData.originalScale) return;
         gsap.to(obj.scale, { x: obj.userData.originalScale.x, y: obj.userData.originalScale.y, z: obj.userData.originalScale.z, duration: 0.1 });

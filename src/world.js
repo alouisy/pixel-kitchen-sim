@@ -2,21 +2,27 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { LABEL_Y_OFFSET, STATION_TYPES, GRID_UNIT, MODULE_HEIGHT } from './constants.js';
 import { GridSystem } from './grid.js';
-import { 
-    VoxelBuilder, PALETTE, 
-    createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, 
-    createStoveMesh, createSinkMesh, createIngredientBinMesh, createPlateStackMesh
-} from './voxelBuilder.js';
+import { VoxelBuilder, PALETTE, createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, createStoveMesh, createSinkMesh, createIngredientBinMesh, createPlateStackMesh } from './voxelBuilder.js';
+import { getTrans } from './i18nData.js';
 
 let currentKitchenObjects = [];
 let currentLabels = [];
 let currentFloor = null;
+let currentLang = 'en'; 
+// NEW: Track label visibility state
+let currentLabelVisibility = true;
+
+export function setWorldLanguage(lang) {
+    currentLang = lang;
+}
 
 function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
+    const translatedText = getTrans(text, currentLang);
+
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     context.font = "Bold 40px 'Courier New'";
-    const metrics = context.measureText(text);
+    const metrics = context.measureText(translatedText);
     canvas.width = metrics.width + 20;
     canvas.height = 50;
     context.font = "Bold 40px 'Courier New'";
@@ -25,7 +31,7 @@ function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     context.fillStyle = '#FFD700';
-    context.fillText(text, canvas.width / 2, canvas.height / 2);
+    context.fillText(translatedText, canvas.width / 2, canvas.height / 2);
     const tex = new THREE.CanvasTexture(canvas);
     tex.minFilter = THREE.NearestFilter;
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false }));
@@ -33,16 +39,21 @@ function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
     sprite.position.copy(position);
     sprite.position.y += yOffset;
     sprite.renderOrder = 999;
+    
+    // *** FIX 1: Apply current visibility immediately ***
+    sprite.visible = currentLabelVisibility;
+
     scene.add(sprite);
     currentLabels.push(sprite);
     return sprite;
 }
 
 export function toggleLabels(visible) {
+    // Update state so future labels are correct
+    currentLabelVisibility = visible;
+    // Update existing
     currentLabels.forEach(s => s.visible = visible);
 }
-
-// --- VOXEL PREFABS ---
 
 function createCounterMesh(isServing) {
     const vb = new VoxelBuilder();
@@ -102,15 +113,11 @@ function createStationPrefab(def) {
     const { name, type, size, color, config } = def;
     const group = new THREE.Group();
     group.name = name;
-
     const w = Math.round((size?.width ?? 0.5) / GRID_UNIT) * GRID_UNIT;
     const d = Math.round((size?.depth ?? 0.5) / GRID_UNIT) * GRID_UNIT;
     const h = 0.3; 
-
     let mesh = null;
     const n = name.toLowerCase();
-
-    // --- Select Voxel Mesh based on Name/Type ---
     if (type === STATION_TYPES.TRASH) {
         mesh = createTrashBinMesh();
     } else if (type === STATION_TYPES.INGREDIENT_SOURCE) {
@@ -132,11 +139,8 @@ function createStationPrefab(def) {
         mesh.position.y = h/2;
         mesh.castShadow = true; mesh.receiveShadow = true;
     }
-
     if (mesh) group.add(mesh);
-
     group.userData = { ...config, type: 'station', stationType: type, name: name, size: { width: w, height: h, depth: d } };
-    
     if (type === STATION_TYPES.PROCESSOR) {
         group.userData.occupiedBy = null;
         if (config?.requiredIngredients) group.userData.internalContents = [];
@@ -148,7 +152,6 @@ function createStationPrefab(def) {
         const d1 = new THREE.Mesh(divGeo, divMat); d1.position.set(-0.5, 0.05, 0); group.add(d1);
         const d2 = new THREE.Mesh(divGeo, divMat); d2.position.set(0.5, 0.05, 0); group.add(d2);
     }
-
     return group;
 }
 
@@ -183,7 +186,6 @@ export function buildKitchen(scene, levelLayout) {
     clearKitchen(scene);
     const newStations = {};
     const newStationInteractables = [];
-    
     const occupancyMap = new Map();
     levelLayout.forEach(def => {
         if (def.type === STATION_TYPES.TABLE || def.type === STATION_TYPES.COUNTER || def.type === STATION_TYPES.SERVING) {
@@ -192,7 +194,6 @@ export function buildKitchen(scene, levelLayout) {
             occupancyMap.set(`${kx},${kz}`, def.type);
         }
     });
-
     const floorSize = 20;
     const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize);
     const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
@@ -238,8 +239,17 @@ export function buildKitchen(scene, levelLayout) {
             object3D = createStationPrefab(def);
             if (def.type === STATION_TYPES.TRASH) object3D.position.set(x, 0, z);
             else object3D.position.set(x, MODULE_HEIGHT, z);
-            
             object3D.add(createLabel(scene, def.name, new THREE.Vector3(0,0.5,0), 0));
+            if (def.type === STATION_TYPES.ASSEMBLY) {
+                const w = object3D.userData.size.width;
+                const slotW = w / 3;
+                const y = object3D.position.y + object3D.userData.size.height/2;
+                object3D.userData.slotPositions = [
+                    new THREE.Vector3(object3D.position.x - slotW, y, object3D.position.z),
+                    new THREE.Vector3(object3D.position.x, y, object3D.position.z),
+                    new THREE.Vector3(object3D.position.x + slotW, y, object3D.position.z)
+                ];
+            }
         }
 
         if (object3D) {
@@ -251,6 +261,7 @@ export function buildKitchen(scene, levelLayout) {
             }
         }
     });
+
     return { stations: newStations, stationInteractables: newStationInteractables, floorMesh: currentFloor };
 }
 

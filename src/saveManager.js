@@ -1,6 +1,6 @@
 // src/saveManager.js
 
-const SAVE_KEY = 'pixelKitchenSaveData'; // Key for localStorage
+const SAVE_KEY = 'pixelKitchenSaveData'; 
 
 export class SaveManager {
     constructor() {
@@ -8,86 +8,77 @@ export class SaveManager {
         console.log("SaveManager Initialized. Loaded data:", this.saveData);
     }
 
-    // Load progress from localStorage
     loadProgress() {
         try {
             const savedString = localStorage.getItem(SAVE_KEY);
             if (savedString) {
                 const data = JSON.parse(savedString);
-                // Basic validation (ensure it has the expected structure)
-                if (data && typeof data.levels === 'object') {
-                    return data;
-                } else {
-                    console.warn("Invalid save data found in localStorage. Resetting.");
-                    return this.createDefaultSaveData();
-                }
+                // Ensure structure exists
+                if (!data.levels) data.levels = {};
+                if (!data.settings) data.settings = { language: 'en', showLabels: true };
+                return data;
             } else {
-                // No save data found, create default
                 return this.createDefaultSaveData();
             }
         } catch (error) {
-            console.error("Error loading save data from localStorage:", error);
-            // Fallback to default data on error
+            console.error("Error loading save data:", error);
             return this.createDefaultSaveData();
         }
     }
 
-    // Save current progress to localStorage
     saveProgress() {
         try {
             const dataString = JSON.stringify(this.saveData);
             localStorage.setItem(SAVE_KEY, dataString);
-            // console.log("Progress saved:", this.saveData); // Optional: Log on save
         } catch (error) {
-            console.error("Error saving progress to localStorage:", error);
+            console.error("Error saving progress:", error);
         }
     }
 
-    // Create a default save data structure
     createDefaultSaveData() {
         return {
-            levels: {} // Use an object keyed by levelIndex (or levelId)
-            // Add other global save data here if needed (e.g., language preference)
-            // settings: { language: 'en' }
+            levels: {}, 
+            settings: { language: 'en', showLabels: true }
         };
     }
 
-    // Get progress data for a specific level index
     getLevelProgress(levelIndex) {
         return this.saveData.levels[levelIndex] || { completed: false, highScore: 0, stars: 0 };
     }
 
-    // Update progress for a completed level
     updateLevelCompletion(levelIndex, score, stars) {
         const currentProgress = this.getLevelProgress(levelIndex);
-
-        // Only update if completed or if the new score is higher
         if (!currentProgress.completed || score > currentProgress.highScore) {
-            console.log(`Updating save data for Level ${levelIndex}: Score=${score}, Stars=${stars} (Previous High: ${currentProgress.highScore})`);
             this.saveData.levels[levelIndex] = {
                 completed: true,
                 highScore: score,
                 stars: stars
             };
-            this.saveProgress(); // Save immediately after updating
-        } else {
-            console.log(`Score ${score} for Level ${levelIndex} is not higher than existing high score ${currentProgress.highScore}. Not saving.`);
+            this.saveProgress();
         }
     }
 
-    // --- Optional Helper Methods ---
-
-    // Check if a level is unlocked (e.g., previous level completed)
     isLevelUnlocked(levelIndex) {
-        if (levelIndex === 0) return true; // First level always unlocked
+        if (levelIndex === 0) return true; 
         const prevLevelProgress = this.getLevelProgress(levelIndex - 1);
-        return prevLevelProgress.completed; // Unlocked if previous level is completed
+        return prevLevelProgress.completed; 
     }
 
-    // Reset all progress (for testing or user option)
-    resetAllProgress() {
-        console.warn("Resetting all save data!");
-        this.saveData = this.createDefaultSaveData();
+    // --- Settings API ---
+    getSetting(key) {
+        // Return default if key missing
+        if (this.saveData.settings && this.saveData.settings[key] !== undefined) {
+            return this.saveData.settings[key];
+        }
+        // Defaults
+        if (key === 'language') return 'en';
+        if (key === 'showLabels') return true;
+        return null;
+    }
+
+    saveSetting(key, value) {
+        if (!this.saveData.settings) this.saveData.settings = {};
+        this.saveData.settings[key] = value;
         this.saveProgress();
     }
 }

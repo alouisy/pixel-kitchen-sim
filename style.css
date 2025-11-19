@@ -330,57 +330,106 @@ canvas {
     text-shadow: 1px 1px 2px #000;
 }
 
+/* In-Game HUD Polish */
 #order-list {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: 15px;
+    left: 15px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    max-width: 250px;
-    /* Limit width */
+    gap: 10px;
+    max-width: 280px;
 }
 
 .order-card {
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 2px solid #888;
-    padding: 8px 12px;
+    background-color: rgba(20, 20, 30, 0.9);
+    border-left: 5px solid #FFD700;
+    border-radius: 4px;
+    padding: 10px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-width: 200px;
+    min-width: 220px;
+    box-shadow: 3px 3px 0px rgba(0,0,0,0.5);
+    
+    /* Animation */
+    animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.2s, opacity 0.3s;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
 
 .order-meal {
+    font-family: 'Courier New', monospace;
     font-weight: bold;
-    margin-right: 10px;
+    font-size: 0.9em;
+    color: #eee;
 }
 
 .order-timer {
     font-weight: bold;
-    color: #FFD700;
-    /* Gold */
+    color: #FFF;
+    background: #444;
+    padding: 2px 6px;
+    border-radius: 3px;
 }
 
 .order-timer.low-time {
-    color: #FF4500;
-    /* OrangeRed */
-    animation: pulse 1s infinite;
+    background: #c00;
+    animation: shake 0.5s infinite;
 }
 
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.05);
-    }
-
-    100% {
-        transform: scale(1);
-    }
+/* RECIPE BOOK (Inside Settings/Pause) */
+#recipe-book-container {
+    margin-top: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.3);
+    border: 2px solid #555;
+    padding: 10px;
 }
+
+.recipe-entry {
+    border-bottom: 1px solid #444;
+    padding: 8px 0;
+    text-align: left;
+}
+
+.recipe-entry h4 {
+    color: #FFD700;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.recipe-entry p {
+    font-size: 0.7em;
+    color: #ccc;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #222; }
+::-webkit-scrollbar-thumb { background: #555; border: 2px solid #222; }
+::-webkit-scrollbar-thumb:hover { background: #777; }
 
 
 #game-timer-container {
