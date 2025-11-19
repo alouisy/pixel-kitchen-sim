@@ -1,7 +1,7 @@
 // src/editor.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GRID_UNIT } from './constants.js';
+import { GRID_UNIT, MODULE_HEIGHT } from './constants.js';
 
 export class LevelEditor {
     constructor(camera, renderer, scene, interactionManager) {
@@ -18,7 +18,6 @@ export class LevelEditor {
         this.orbit.enabled = false;
         
         this.hud = document.getElementById('editor-hud');
-        if(!this.hud) { /* create hud if missing */ }
         
         this.selectionBox = new THREE.BoxHelper(new THREE.Mesh(), 0xffff00);
         this.selectionBox.visible = false;
@@ -54,14 +53,24 @@ export class LevelEditor {
 
     onPointerDown(e) {
         if (!this.enabled || e.button !== 0) return;
-        // ... Select logic (similar to previous) ...
-        // Simplified for brevity
         const mouse = { x: (e.clientX / window.innerWidth) * 2 - 1, y: -(e.clientY / window.innerHeight) * 2 + 1 };
         this.raycaster.setFromCamera(mouse, this.camera);
-        const selectables = this.scene.children.filter(c => c.visible && c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.type === 'decoration'));
-        const hits = this.raycaster.intersectObjects(selectables, false);
+        
+        // Filter for kitchen objects
+        const candidates = [];
+        this.scene.traverse(c => {
+            if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.type === 'table')) {
+                candidates.push(c);
+            }
+        });
+
+        const hits = this.raycaster.intersectObjects(candidates, true);
         if (hits.length > 0) {
-            this.selectedObject = hits[0].object;
+            // Walk up to root
+            let root = hits[0].object;
+            while(root.parent && root.parent !== this.scene) { root = root.parent; }
+            
+            this.selectedObject = root;
             this.selectionBox.setFromObject(this.selectedObject);
             this.selectionBox.visible = true;
             this.isDragging = true;
@@ -78,39 +87,41 @@ export class LevelEditor {
         const mouse = { x: (e.clientX / window.innerWidth) * 2 - 1, y: -(e.clientY / window.innerHeight) * 2 + 1 };
         this.raycaster.setFromCamera(mouse, this.camera);
 
-        const surfaces = this.scene.children.filter(c => 
-            c.visible && c !== this.selectedObject && (c.userData.type === 'floor' || c.userData.type === 'counter' || c.userData.type === 'station')
-        );
-        
-        const hits = this.raycaster.intersectObjects(surfaces, false);
-        if (hits.length > 0) {
-            const hit = hits[0];
-            const surface = hit.object;
-            
-            // Grid Snapping Logic
-            // If surface has a grid, use it!
-            if (surface.userData.grid) {
-                const { col, row } = surface.userData.grid.worldToGrid(hit.point);
-                const worldPos = surface.userData.grid.gridToWorld(col, row);
-                
-                const objH = this.selectedObject.geometry?.parameters?.height || 0;
-                // Determine Y:
-                // If floor, Y = 0 + height/2
-                // If counter, Y = counterTopY + height/2
-                let baseY = surface.position.y;
-                let surfaceH = surface.geometry?.parameters?.height || 0;
-                if (surface.userData.type === 'floor') { baseY = 0; surfaceH = 0; }
-                
-                const topY = baseY + (surfaceH / 2);
-                this.selectedObject.position.set(worldPos.x, topY + objH/2, worldPos.z);
-            } else {
-                // Raw snap
-                this.selectedObject.position.set(
-                    Math.round(hit.point.x / GRID_UNIT) * GRID_UNIT,
-                    hit.point.y + (this.selectedObject.geometry.parameters.height/2),
-                    Math.round(hit.point.z / GRID_UNIT) * GRID_UNIT
-                );
+        // Find surface (Floor or Counter)
+        const surfaces = [];
+        this.scene.traverse(c => {
+            if (c.visible && c !== this.selectedObject) {
+                if (c.userData.type === 'floor' || c.userData.type === 'counter' || c.userData.type === 'table') {
+                    surfaces.push(c);
+                }
             }
+        });
+        
+        const hits = this.raycaster.intersectObjects(surfaces, true);
+        if (hits.length > 0) {
+            let surface = hits[0].object;
+            while(surface.parent && surface.parent !== this.scene) surface = surface.parent;
+
+            const hitPoint = hits[0].point;
+            
+            // Snap to Grid Logic
+            // Calculate grid center
+            const snapX = Math.floor(hitPoint.x / GRID_UNIT) * GRID_UNIT + (GRID_UNIT/2);
+            const snapZ = Math.floor(hitPoint.z / GRID_UNIT) * GRID_UNIT + (GRID_UNIT/2);
+
+            // Calculate Y
+            // If floor, Y = 0. If Counter, Y = MODULE_HEIGHT.
+            let yBase = 0;
+            if (surface.userData.type === 'counter' || surface.userData.type === 'table') {
+                yBase = MODULE_HEIGHT;
+            }
+            
+            // If dragging a counter, it sits on floor (y=0)
+            if (this.selectedObject.userData.isBase) {
+                yBase = 0;
+            }
+
+            this.selectedObject.position.set(snapX, yBase, snapZ);
         }
     }
 

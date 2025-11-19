@@ -1,5 +1,5 @@
 // src/gameData.js
-import { INGREDIENT_STATES, STATION_TYPES, COUNTER_HEIGHT } from './constants.js'; // Keep imports if needed
+// import { INGREDIENT_STATES, STATION_TYPES, COUNTER_HEIGHT } from './constants.js'; // Keep imports if needed
 
 // --- RECIPES ---
 // Includes default timeLimit, baseScore, penalty, and NEW instructions per recipe

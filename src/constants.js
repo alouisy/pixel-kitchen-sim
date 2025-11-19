@@ -1,14 +1,13 @@
 // src/constants.js
 export const PLAYER_HEIGHT = 1.8;
 export const PLAYER_SPEED = 5.0;
-export const INTERACTION_DISTANCE = 3.0; // Increased slightly for easier floor reach
-export const KITCHEN_BOUNDS = { xMin: -4.5, xMax: 4.5, zMin: -4.5, zMax: 4.5 }; 
-export const COUNTER_HEIGHT = 0.85; // Base height
-export const COUNTER_TOP_HEIGHT = 0.05; // Thickness
-export const LABEL_Y_OFFSET = 0.3;
+export const INTERACTION_DISTANCE = 2.5;
+export const KITCHEN_BOUNDS = { xMin: -5, xMax: 5, zMin: -5, zMax: 5 }; 
 
-// --- GRID SYSTEM ---
-export const GRID_UNIT = 0.5; // 1 Slot = 0.5x0.5 Three.js units
+// --- GRID & DIMENSIONS ---
+export const GRID_UNIT = 0.5; // The fundamental unit
+export const MODULE_HEIGHT = 0.9; // Standard counter height
+export const LABEL_Y_OFFSET = 0.3; // Height offset for UI labels above objects
 
 export const STATION_TYPES = {
     INGREDIENT_SOURCE: 'ingredient_source',
@@ -16,9 +15,10 @@ export const STATION_TYPES = {
     PROCESSOR: 'processor',
     ASSEMBLY: 'assembly',
     SERVING: 'serving',
-    COUNTER: 'counter',
+    COUNTER: 'counter', // Solid block
+    TABLE: 'table',     // With legs
     FLOOR: 'floor',
-    WALL: 'wall',
+    TRASH: 'trash'
 };
 
 export const ITEM_TYPES = {
@@ -41,6 +41,7 @@ export const INGREDIENT_STATES = {
     SHREDDED: 'shredded',
 };
 
+// Inputs
 export const GAMEPAD_DEADZONE = 0.15;
 export const GAMEPAD_INTERACT_BUTTON = 0; 
 export const GAMEPAD_BACK_BUTTON = 1;     
