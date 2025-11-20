@@ -217,7 +217,6 @@ export const DATA_TRANSLATIONS = {
         "CuttingBoard": "Cutting Board",
         "Fryer": "Fryer",
         "PlateStack": "Plates",
-        "AssemblyTable": "Assembly",
         "SERVE": "SERVE",
         "Trash": "Trash",
         
@@ -263,7 +262,6 @@ export const DATA_TRANSLATIONS = {
         "CuttingBoard": "Planche",
         "Fryer": "Friteuse",
         "PlateStack": "Assiettes",
-        "AssemblyTable": "Assemblage",
         "SERVE": "SERVIR",
         "Trash": "Poubelle",
 
@@ -308,7 +306,6 @@ export const DATA_TRANSLATIONS = {
         "CuttingBoard": "Tabla",
         "Fryer": "Freidora",
         "PlateStack": "Platos",
-        "AssemblyTable": "Montaje",
         "SERVE": "SERVIR",
         "Trash": "Basura",
 
@@ -581,253 +578,6 @@ export function setupResizeHandler(camera, renderer) {
 }
 </file>
 
-<file path="src/voxelBuilder.js">
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
-import { GRID_UNIT } from './constants.js';
-
-const VOXEL_RESOLUTION = 16; 
-const VOXEL_SIZE = GRID_UNIT / VOXEL_RESOLUTION; 
-
-export const PALETTE = {
-    WOOD_DARK: 0x5d4037,
-    WOOD_LIGHT: 0x8d6e63,
-    WOOD_BOARD: 0xeecfa1,
-    METAL_DARK: 0x424242,
-    METAL_LIGHT: 0xbdbdbd,
-    METAL_SHINY: 0xe0e0e0,
-    BLACK: 0x1a1a1a,
-    COUNTER_TOP: 0xf5f5f5, 
-    TRASH_GREEN: 0x2e7d32,
-    TRASH_LID: 0x1b5e20,
-    PLASTIC_RED: 0xc62828,
-    PLASTIC_BLUE: 0x1565c0,
-    OIL_GOLD: 0xffd700,
-    WATER_BLUE: 0x29b6f6,
-    FIRE_ORANGE: 0xff5722,
-    TOMATO: 0xd32f2f,
-    LETTUCE: 0x43a047,
-    CHEESE: 0xfbc02d,
-    BUN: 0xf4a460,
-    MEAT_RAW: 0xe57373,
-    MEAT_COOKED: 0x5d4037,
-    POTATO: 0xd7ccc8,
-    FRIES_RAW: 0xffecb3,
-    FRIES_COOKED: 0xffeb3b,
-    PLATE_WHITE: 0xffffff,
-    ONION: 0xeceff1,
-    MUSHROOM: 0xa1887f
-};
-
-export class VoxelBuilder {
-    constructor() {
-        this.geometries = [];
-        this.baseGeometry = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE);
-    }
-
-    add(x, y, z, color) {
-        const matrix = new THREE.Matrix4();
-        const offset = (VOXEL_SIZE / 2);
-        const tx = (x * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
-        const ty = (y * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
-        const tz = (z * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
-        matrix.makeTranslation(tx, ty, tz);
-
-        const geometry = this.baseGeometry.clone();
-        geometry.applyMatrix4(matrix);
-
-        const colors = [];
-        const c = new THREE.Color(color);
-        for (let i = 0; i < geometry.attributes.position.count; i++) {
-            colors.push(c.r, c.g, c.b);
-        }
-        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-        this.geometries.push(geometry);
-        return this;
-    }
-
-    addBox(x1, y1, z1, x2, y2, z2, color) {
-        for(let x = x1; x <= x2; x++) {
-            for(let y = y1; y <= y2; y++) {
-                for(let z = z1; z <= z2; z++) {
-                    this.add(x, y, z, color);
-                }
-            }
-        }
-        return this;
-    }
-
-    buildMesh() {
-        if (this.geometries.length === 0) return new THREE.Mesh();
-        const mergedGeometry = BufferGeometryUtils.mergeGeometries(this.geometries, false);
-        const material = new THREE.MeshStandardMaterial({
-            vertexColors: true,
-            roughness: 0.8,
-            metalness: 0.1,
-            flatShading: true
-        });
-        const mesh = new THREE.Mesh(mergedGeometry, material);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        this.geometries.forEach(g => g.dispose());
-        this.geometries = [];
-        return mesh;
-    }
-}
-
-export function createTrashBinMesh() {
-    const vb = new VoxelBuilder();
-    vb.addBox(3, 0, 3, 12, 10, 12, PALETTE.TRASH_GREEN);
-    vb.addBox(2, 10, 2, 13, 11, 13, PALETTE.TRASH_LID);
-    vb.addBox(6, 0, 13, 9, 1, 15, PALETTE.METAL_LIGHT);
-    vb.addBox(4, 9, 4, 11, 10, 11, PALETTE.BLACK);
-    const mesh = vb.buildMesh();
-    mesh.position.y = GRID_UNIT/2; 
-    return mesh;
-}
-
-export function createFryerMesh() {
-    const vb = new VoxelBuilder();
-    vb.addBox(1, 0, 1, 14, 8, 14, PALETTE.METAL_SHINY);
-    vb.addBox(2, 5, 2, 13, 7, 13, PALETTE.OIL_GOLD);
-    vb.addBox(1, 8, 1, 14, 12, 3, PALETTE.METAL_DARK);
-    vb.addBox(4, 9, 4, 4, 14, 4, PALETTE.BLACK);
-    vb.addBox(4, 14, 4, 11, 14, 4, PALETTE.BLACK);
-    vb.addBox(4, 5, 4, 11, 8, 11, PALETTE.METAL_DARK);
-    const mesh = vb.buildMesh();
-    mesh.position.y = GRID_UNIT/2;
-    return mesh;
-}
-
-export function createCuttingBoardMesh() {
-    const vb = new VoxelBuilder();
-    vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.WOOD_BOARD);
-    vb.addBox(10, 1, 3, 10, 1, 10, PALETTE.METAL_SHINY); 
-    vb.addBox(10, 1, 11, 10, 1, 13, PALETTE.BLACK); 
-    const mesh = vb.buildMesh();
-    mesh.position.y = GRID_UNIT/2;
-    return mesh;
-}
-
-export function createStoveMesh() {
-    const vb = new VoxelBuilder();
-    vb.addBox(1, 0, 1, 14, 2, 14, PALETTE.METAL_DARK);
-    vb.addBox(2, 2, 2, 13, 2, 13, PALETTE.BLACK);
-    vb.addBox(4, 2, 4, 5, 2, 5, PALETTE.FIRE_ORANGE);
-    vb.addBox(10, 2, 10, 11, 2, 11, PALETTE.FIRE_ORANGE);
-    vb.addBox(3, 1, 14, 4, 1, 15, PALETTE.PLASTIC_RED);
-    vb.addBox(11, 1, 14, 12, 1, 15, PALETTE.PLASTIC_RED);
-    const mesh = vb.buildMesh();
-    mesh.position.y = GRID_UNIT/2;
-    return mesh;
-}
-
-export function createSinkMesh() {
-    const vb = new VoxelBuilder();
-    vb.addBox(1, 0, 1, 14, 4, 14, PALETTE.METAL_SHINY);
-    vb.addBox(2, 2, 2, 13, 3, 13, PALETTE.WATER_BLUE);
-    vb.addBox(7, 4, 1, 8, 10, 2, PALETTE.METAL_LIGHT); 
-    vb.addBox(7, 10, 2, 8, 11, 8, PALETTE.METAL_LIGHT); 
-    vb.addBox(7, 8, 8, 8, 9, 8, PALETTE.METAL_LIGHT); 
-    const mesh = vb.buildMesh();
-    mesh.position.y = GRID_UNIT/2;
-    return mesh;
-}
-
-export function createIngredientBinMesh(ingredientType) {
-    const vb = new VoxelBuilder();
-    vb.addBox(1, 0, 1, 14, 6, 14, PALETTE.WOOD_LIGHT);
-    vb.addBox(2, 1, 2, 13, 6, 13, PALETTE.BLACK); 
-    const c = getIngredientColor(ingredientType);
-    if (c) {
-        vb.addBox(3, 2, 3, 6, 5, 6, c);
-        vb.addBox(7, 3, 4, 10, 5, 8, c);
-        vb.addBox(4, 4, 8, 8, 6, 11, c);
-    }
-    const mesh = vb.buildMesh();
-    mesh.position.y = GRID_UNIT/2;
-    return mesh;
-}
-
-export function createPlateStackMesh() {
-    const vb = new VoxelBuilder();
-    for(let y=0; y<8; y+=2) {
-        vb.addBox(3, y, 3, 12, y+1, 12, PALETTE.PLATE_WHITE);
-    }
-    const mesh = vb.buildMesh();
-    mesh.position.y = GRID_UNIT/2;
-    return mesh;
-}
-
-function getIngredientColor(type) {
-    if(type.includes('tomato')) return PALETTE.TOMATO;
-    if(type.includes('lettuce')) return PALETTE.LETTUCE;
-    if(type.includes('cheese')) return PALETTE.CHEESE;
-    if(type.includes('bun')) return PALETTE.BUN;
-    if(type.includes('patty')) return PALETTE.MEAT_RAW;
-    if(type.includes('cooked_patty')) return PALETTE.MEAT_COOKED;
-    if(type.includes('potato')) return PALETTE.POTATO;
-    if(type.includes('fries')) return PALETTE.FRIES_RAW;
-    if(type.includes('onion')) return PALETTE.ONION;
-    return PALETTE.WHITE;
-}
-
-export function createItemMesh(type) {
-    const vb = new VoxelBuilder();
-    
-    if (type === 'plate') {
-        vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.PLATE_WHITE);
-        vb.addBox(2, 1, 2, 13, 2, 3, PALETTE.PLATE_WHITE); 
-        vb.addBox(2, 1, 12, 13, 2, 13, PALETTE.PLATE_WHITE);
-        vb.addBox(2, 1, 3, 3, 2, 12, PALETTE.PLATE_WHITE);
-        vb.addBox(12, 1, 3, 13, 2, 12, PALETTE.PLATE_WHITE);
-    } 
-    else if (type.includes('tomato')) {
-        vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.TOMATO);
-        vb.addBox(6, 4, 6, 9, 5, 9, PALETTE.LETTUCE);
-    }
-    else if (type.includes('lettuce')) {
-        vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.LETTUCE);
-    }
-    else if (type.includes('potato')) {
-        vb.addBox(5, 0, 4, 10, 3, 11, PALETTE.POTATO);
-    }
-    else if (type === 'raw_fries') {
-        vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_RAW);
-        vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_RAW);
-        vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_RAW);
-    }
-    else if (type === 'cooked_fries') {
-        vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_COOKED);
-        vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_COOKED);
-        vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_COOKED);
-    }
-    else if (type.includes('patty')) {
-        const c = type.includes('cooked') ? PALETTE.MEAT_COOKED : PALETTE.MEAT_RAW;
-        vb.addBox(3, 0, 3, 12, 2, 12, c);
-    }
-    else if (type === 'bun') {
-        vb.addBox(3, 0, 3, 12, 3, 12, PALETTE.BUN);
-    }
-    else if (type === 'cheese_slice') {
-        vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.CHEESE);
-    }
-    else {
-        vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.PLASTIC_BLUE);
-    }
-
-    const mesh = vb.buildMesh();
-    
-    // *** KEY FIX: NORMALIZE ORIGIN ***
-    // VoxelBuilder 0,0,0 is center of grid unit.
-    // This shift makes (0,0,0) the BOTTOM of the mesh.
-    // Interaction Manager logic `yBase - minLocalY` relies on this.
-    mesh.geometry.translate(0, GRID_UNIT/2, 0); 
-    
-    return mesh;
-}
-</file>
-
 <file path="src/menuManager.js">
 // src/menuManager.js
 
@@ -1078,11 +828,260 @@ export class MenuManager {
 }
 </file>
 
+<file path="src/voxelBuilder.js">
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+import { GRID_UNIT } from './constants.js';
+
+const VOXEL_RESOLUTION = 16; 
+const VOXEL_SIZE = GRID_UNIT / VOXEL_RESOLUTION; 
+
+export const PALETTE = {
+    WOOD_DARK: 0x5d4037,
+    WOOD_LIGHT: 0x8d6e63,
+    WOOD_BOARD: 0xeecfa1,
+    METAL_DARK: 0x424242,
+    METAL_LIGHT: 0xbdbdbd,
+    METAL_SHINY: 0xe0e0e0,
+    BLACK: 0x1a1a1a,
+    COUNTER_TOP: 0xf5f5f5, 
+    TRASH_GREEN: 0x2e7d32,
+    TRASH_LID: 0x1b5e20,
+    PLASTIC_RED: 0xc62828,
+    PLASTIC_BLUE: 0x1565c0,
+    OIL_GOLD: 0xffd700,
+    WATER_BLUE: 0x29b6f6,
+    FIRE_ORANGE: 0xff5722,
+    TOMATO: 0xd32f2f,
+    LETTUCE: 0x43a047,
+    CHEESE: 0xfbc02d,
+    BUN: 0xf4a460,
+    MEAT_RAW: 0xe57373,
+    MEAT_COOKED: 0x5d4037,
+    POTATO: 0xd7ccc8,
+    FRIES_RAW: 0xffecb3,
+    FRIES_COOKED: 0xffeb3b,
+    PLATE_WHITE: 0xffffff,
+    ONION: 0xeceff1,
+    MUSHROOM: 0xa1887f,
+    WALL_WHITE: 0xEFEBE9 // Added Wall Color
+};
+
+export class VoxelBuilder {
+    constructor() {
+        this.geometries = [];
+        this.baseGeometry = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE);
+    }
+
+    add(x, y, z, color) {
+        const matrix = new THREE.Matrix4();
+        const offset = (VOXEL_SIZE / 2);
+        const tx = (x * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
+        const ty = (y * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
+        const tz = (z * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
+        matrix.makeTranslation(tx, ty, tz);
+
+        const geometry = this.baseGeometry.clone();
+        geometry.applyMatrix4(matrix);
+
+        const colors = [];
+        const c = new THREE.Color(color);
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            colors.push(c.r, c.g, c.b);
+        }
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        this.geometries.push(geometry);
+        return this;
+    }
+
+    addBox(x1, y1, z1, x2, y2, z2, color) {
+        for(let x = x1; x <= x2; x++) {
+            for(let y = y1; y <= y2; y++) {
+                for(let z = z1; z <= z2; z++) {
+                    this.add(x, y, z, color);
+                }
+            }
+        }
+        return this;
+    }
+
+    buildMesh() {
+        if (this.geometries.length === 0) return new THREE.Mesh();
+        const mergedGeometry = BufferGeometryUtils.mergeGeometries(this.geometries, false);
+        const material = new THREE.MeshStandardMaterial({
+            vertexColors: true,
+            roughness: 0.8,
+            metalness: 0.1,
+            flatShading: true
+        });
+        const mesh = new THREE.Mesh(mergedGeometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        this.geometries.forEach(g => g.dispose());
+        this.geometries = [];
+        return mesh;
+    }
+}
+
+export function createTrashBinMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(3, 0, 3, 12, 10, 12, PALETTE.TRASH_GREEN);
+    vb.addBox(2, 10, 2, 13, 11, 13, PALETTE.TRASH_LID);
+    vb.addBox(6, 0, 13, 9, 1, 15, PALETTE.METAL_LIGHT);
+    vb.addBox(4, 9, 4, 11, 10, 11, PALETTE.BLACK);
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2; 
+    return mesh;
+}
+
+export function createFryerMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 8, 14, PALETTE.METAL_SHINY);
+    vb.addBox(2, 5, 2, 13, 7, 13, PALETTE.OIL_GOLD);
+    vb.addBox(1, 8, 1, 14, 12, 3, PALETTE.METAL_DARK);
+    vb.addBox(4, 9, 4, 4, 14, 4, PALETTE.BLACK);
+    vb.addBox(4, 14, 4, 11, 14, 4, PALETTE.BLACK);
+    vb.addBox(4, 5, 4, 11, 8, 11, PALETTE.METAL_DARK);
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createCuttingBoardMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.WOOD_BOARD);
+    vb.addBox(10, 1, 3, 10, 1, 10, PALETTE.METAL_SHINY); 
+    vb.addBox(10, 1, 11, 10, 1, 13, PALETTE.BLACK); 
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createStoveMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 2, 14, PALETTE.METAL_DARK);
+    vb.addBox(2, 2, 2, 13, 2, 13, PALETTE.BLACK);
+    vb.addBox(4, 2, 4, 5, 2, 5, PALETTE.FIRE_ORANGE);
+    vb.addBox(10, 2, 10, 11, 2, 11, PALETTE.FIRE_ORANGE);
+    vb.addBox(3, 1, 14, 4, 1, 15, PALETTE.PLASTIC_RED);
+    vb.addBox(11, 1, 14, 12, 1, 15, PALETTE.PLASTIC_RED);
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createSinkMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 4, 14, PALETTE.METAL_SHINY);
+    vb.addBox(2, 2, 2, 13, 3, 13, PALETTE.WATER_BLUE);
+    vb.addBox(7, 4, 1, 8, 10, 2, PALETTE.METAL_LIGHT); 
+    vb.addBox(7, 10, 2, 8, 11, 8, PALETTE.METAL_LIGHT); 
+    vb.addBox(7, 8, 8, 8, 9, 8, PALETTE.METAL_LIGHT); 
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createIngredientBinMesh(ingredientType) {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 6, 14, PALETTE.WOOD_LIGHT);
+    vb.addBox(2, 1, 2, 13, 6, 13, PALETTE.BLACK); 
+    const c = getIngredientColor(ingredientType);
+    if (c) {
+        vb.addBox(3, 2, 3, 6, 5, 6, c);
+        vb.addBox(7, 3, 4, 10, 5, 8, c);
+        vb.addBox(4, 4, 8, 8, 6, 11, c);
+    }
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createPlateStackMesh() {
+    const vb = new VoxelBuilder();
+    for(let y=0; y<8; y+=2) {
+        vb.addBox(3, y, 3, 12, y+1, 12, PALETTE.PLATE_WHITE);
+    }
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+function getIngredientColor(type) {
+    if(type.includes('tomato')) return PALETTE.TOMATO;
+    if(type.includes('lettuce')) return PALETTE.LETTUCE;
+    if(type.includes('cheese')) return PALETTE.CHEESE;
+    if(type.includes('bun')) return PALETTE.BUN;
+    if(type.includes('patty')) return PALETTE.MEAT_RAW;
+    if(type.includes('cooked_patty')) return PALETTE.MEAT_COOKED;
+    if(type.includes('potato')) return PALETTE.POTATO;
+    if(type.includes('fries')) return PALETTE.FRIES_RAW;
+    if(type.includes('onion')) return PALETTE.ONION;
+    return PALETTE.WHITE;
+}
+
+export function createItemMesh(type) {
+    const vb = new VoxelBuilder();
+    
+    if (type === 'plate') {
+        vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.PLATE_WHITE);
+        vb.addBox(2, 1, 2, 13, 2, 3, PALETTE.PLATE_WHITE); 
+        vb.addBox(2, 1, 12, 13, 2, 13, PALETTE.PLATE_WHITE);
+        vb.addBox(2, 1, 3, 3, 2, 12, PALETTE.PLATE_WHITE);
+        vb.addBox(12, 1, 3, 13, 2, 12, PALETTE.PLATE_WHITE);
+    } 
+    else if (type.includes('tomato')) {
+        vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.TOMATO);
+        vb.addBox(6, 4, 6, 9, 5, 9, PALETTE.LETTUCE);
+    }
+    else if (type.includes('lettuce')) {
+        vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.LETTUCE);
+    }
+    else if (type.includes('potato')) {
+        vb.addBox(5, 0, 4, 10, 3, 11, PALETTE.POTATO);
+    }
+    else if (type === 'raw_fries') {
+        vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_RAW);
+        vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_RAW);
+        vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_RAW);
+    }
+    else if (type === 'cooked_fries') {
+        vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_COOKED);
+        vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_COOKED);
+        vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_COOKED);
+    }
+    else if (type.includes('patty')) {
+        const c = type.includes('cooked') ? PALETTE.MEAT_COOKED : PALETTE.MEAT_RAW;
+        vb.addBox(3, 0, 3, 12, 2, 12, c);
+    }
+    else if (type === 'bun') {
+        vb.addBox(3, 0, 3, 12, 3, 12, PALETTE.BUN);
+    }
+    else if (type === 'cheese_slice') {
+        vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.CHEESE);
+    }
+    else {
+        vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.PLASTIC_BLUE);
+    }
+
+    const mesh = vb.buildMesh();
+    
+    // *** KEY FIX: NORMALIZE ORIGIN ***
+    // VoxelBuilder 0,0,0 is center of grid unit.
+    // This shift makes (0,0,0) the BOTTOM of the mesh.
+    // Interaction Manager logic `yBase - minLocalY` relies on this.
+    mesh.geometry.translate(0, GRID_UNIT/2, 0); 
+    
+    return mesh;
+}
+</file>
+
 <file path="src/editor.js">
 // src/editor.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GRID_UNIT, GAMEPAD_DEADZONE } from './constants.js';
+import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT } from './constants.js';
+import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh } from './world.js';
 
 export class LevelEditor {
     constructor(camera, renderer, scene, interactionManager) {
@@ -1092,53 +1091,144 @@ export class LevelEditor {
         this.interactionManager = interactionManager;
         this.enabled = false;
         this.raycaster = new THREE.Raycaster();
-        this.selectedObject = null;
         
+        // State
+        this.selectedObject = null;
+        this.ghostObject = null; // Object currently being placed
+        this.isDragging = false;
+        this.placementMode = false; // If true, we are trying to place a new item
+
+        // Ground Plane for Raycasting (Y=0)
+        this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+        // Grid Helper (Visible only in Editor)
+        // 8x8 size, 0.5 unit cells = 16 divisions
+        this.gridHelper = new THREE.GridHelper(8, 16, 0xFFD700, 0x444444);
+        this.gridHelper.position.y = 0.01; // Slight offset to avoid z-fighting if floor was visible
+        this.gridHelper.visible = false;
+        this.scene.add(this.gridHelper);
+
         // Controls
         this.orbit = new OrbitControls(camera, renderer.domElement);
         this.orbit.enabled = false;
-        
-        // UI
-        this.hud = document.getElementById('editor-hud');
-        if (!this.hud) {
-            this.hud = document.createElement('div');
-            this.hud.id = 'editor-hud';
-            this.hud.style.cssText = "display:none; position:absolute; top:10px; right:10px; z-index:20; background:rgba(0,0,0,0.8); padding:10px; color:orange; border:2px solid orange; font-family: monospace;";
-            this.hud.innerHTML = `
-                <h3>EDITOR MODE</h3>
-                <p><b>Mouse:</b> Click/Drag</p>
-                <p><b>Gamepad:</b></p>
-                <p>L-Stick: Pan Cam</p>
-                <p>R-Stick: Move Obj / Rot Cam</p>
-                <p>A (X): Select/Drop</p>
-                <p>X (Sq): Clone</p>
-                <p>Y (Tri): Export</p>
-            `;
-            document.body.appendChild(this.hud);
-        }
+        this.orbit.enableDamping = true;
+        this.orbit.dampingFactor = 0.1;
 
-        // Helper
+        // Visual Helpers
         this.selectionBox = new THREE.BoxHelper(new THREE.Mesh(), 0xffff00);
         this.selectionBox.visible = false;
         this.scene.add(this.selectionBox);
 
-        // Inputs
+        // Init UI
+        this.ui = document.getElementById('editor-ui');
+        this.libraryContent = document.getElementById('library-content');
+        this.inspector = document.getElementById('editor-inspector');
+        this.inspectorName = document.getElementById('inspector-name');
+        this.inspectorX = document.getElementById('val-x');
+        this.inspectorZ = document.getElementById('val-z');
+
+        this._initUI();
+        this._bindEvents();
+    }
+
+    _initUI() {
+        // Populate Library
+        this._renderLibrary('all');
+
+        // Bind Tab Switching
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                tabs.forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                this._renderLibrary(e.target.dataset.category);
+            });
+        });
+
+        // Bind Inspector Actions
+        document.getElementById('btn-rotate').addEventListener('click', () => this.rotateSelected());
+        document.getElementById('btn-clone').addEventListener('click', () => this.cloneSelected());
+        document.getElementById('btn-delete').addEventListener('click', () => this.deleteSelected());
+        document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLayout());
+    }
+
+    _renderLibrary(category) {
+        this.libraryContent.innerHTML = '';
+        const items = category === 'all' 
+            ? CATALOG_ITEMS 
+            : CATALOG_ITEMS.filter(i => i.category === category);
+
+        items.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'library-item';
+            
+            // Simple icon selection based on type
+            let icon = '📦';
+            if(item.type.includes('wall')) icon = '🧱';
+            else if(item.type.includes('counter')) icon = '🟫';
+            else if(item.type.includes('processor')) icon = '🍳';
+            else if(item.type.includes('source')) icon = '🧺';
+            else if(item.isServing) icon = '🛎️';
+
+            el.innerHTML = `
+                <div class="library-item-icon">${icon}</div>
+                <div class="library-item-name">${item.name}</div>
+            `;
+            
+            el.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent canvas click
+                this.startPlacement(item);
+            });
+            
+            this.libraryContent.appendChild(el);
+        });
+    }
+
+    _bindEvents() {
+        // Mouse Events
         this.renderer.domElement.addEventListener('pointerdown', (e) => this.onPointerDown(e));
         this.renderer.domElement.addEventListener('pointermove', (e) => this.onPointerMove(e));
         this.renderer.domElement.addEventListener('pointerup', (e) => this.onPointerUp(e));
-        window.addEventListener('keydown', (e) => this.onKeyDown(e));
-
-        // Gamepad State
-        this.prevButtons = [];
-        this.moveTimer = 0;
+        
+        // Keyboard Shortcuts
+        window.addEventListener('keydown', (e) => {
+            if (!this.enabled) return;
+            switch(e.key.toLowerCase()) {
+                case 'escape': 
+                    this.cancelPlacement(); 
+                    this.deselect(); 
+                    break;
+                case 'delete': 
+                case 'backspace':
+                    this.deleteSelected(); 
+                    break;
+                case 'r': 
+                    this.rotateSelected(); 
+                    break;
+                case 'c': 
+                    this.cloneSelected(); 
+                    break;
+                case 't':
+                    this.exportLayout();
+                    break;
+            }
+        });
     }
 
     enable() {
         this.enabled = true;
         this.orbit.enabled = true;
-        this.hud.style.display = 'block';
-        // High angle view
-        this.camera.position.set(0, 10, 8);
+        this.ui.style.display = 'block';
+        
+        // Show Schematic Grid
+        this.gridHelper.visible = true;
+        
+        // Hide textured floor for clean CAD look
+        const gameFloor = getFloorMesh();
+        if(gameFloor) gameFloor.visible = false;
+
+        // Set optimal editor view
+        this.camera.position.set(0, 12, 8);
         this.camera.lookAt(0, 0, 0);
         this.orbit.target.set(0,0,0);
     }
@@ -1146,220 +1236,302 @@ export class LevelEditor {
     disable() {
         this.enabled = false;
         this.orbit.enabled = false;
-        this.hud.style.display = 'none';
-        this.selectionBox.visible = false;
-        this.selectedObject = null;
+        this.ui.style.display = 'none';
+        this.cancelPlacement();
+        this.deselect();
+
+        // Revert Visuals
+        this.gridHelper.visible = false;
+        const gameFloor = getFloorMesh();
+        if(gameFloor) gameFloor.visible = true;
     }
 
     update(delta) {
         if (!this.enabled) return;
-        
         this.orbit.update();
-        if (this.selectedObject) this.selectionBox.update();
-
-        // Gamepad Handling
-        const gamepad = navigator.getGamepads()[0]; 
-        if (gamepad) this.handleGamepad(gamepad, delta);
-    }
-
-    handleGamepad(gp, delta) {
-        // 1. Camera Pan (Left Stick)
-        const lx = gp.axes[0]; 
-        const ly = gp.axes[1];
-        if (Math.abs(lx) > GAMEPAD_DEADZONE || Math.abs(ly) > GAMEPAD_DEADZONE) {
-            // Move orbit target and camera relative to camera rotation
-            // Simple X/Z pan implementation
-            const speed = 10 * delta;
-            // Right vector
-            const right = new THREE.Vector3(1, 0, 0).applyQuaternion(this.camera.quaternion).setY(0).normalize();
-            // Forward vector
-            const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion).setY(0).normalize();
-            
-            const move = new THREE.Vector3().addScaledVector(right, lx * speed).addScaledVector(forward, ly * speed);
-            
-            this.camera.position.add(move);
-            this.orbit.target.add(move);
-        }
-
-        // 2. Object Move (Right Stick) - Discrete steps
+        
         if (this.selectedObject) {
-            this.moveTimer -= delta;
-            if (this.moveTimer <= 0) {
-                const rx = gp.axes[2];
-                const ry = gp.axes[3];
-                if (Math.abs(rx) > 0.5) {
-                    this.selectedObject.position.x += Math.sign(rx) * GRID_UNIT;
-                    this.moveTimer = 0.2; // Delay
-                }
-                if (Math.abs(ry) > 0.5) {
-                    this.selectedObject.position.z += Math.sign(ry) * GRID_UNIT;
-                    this.moveTimer = 0.2;
-                }
-            }
-        } else {
-            // If no object selected, Right Stick rotates camera
-            const rx = gp.axes[2];
-            if (Math.abs(rx) > GAMEPAD_DEADZONE) {
-                // OrbitControls handles rotation if we feed it input? 
-                // Easier to manually adjust camera position for simple orbit
-                // Or just rely on Mouse/Touch for rotation usually. 
-                // Let's implement simple rotation around target
-                const speed = 2 * delta;
-                const x = this.camera.position.x - this.orbit.target.x;
-                const z = this.camera.position.z - this.orbit.target.z;
-                const angle = -rx * speed;
-                const cos = Math.cos(angle);
-                const sin = Math.sin(angle);
-                this.camera.position.x = x * cos - z * sin + this.orbit.target.x;
-                this.camera.position.z = x * sin + z * cos + this.orbit.target.z;
-                this.camera.lookAt(this.orbit.target);
-            }
+            this.selectionBox.update();
+            this._updateInspectorData();
         }
-
-        // 3. Buttons
-        const btnPressed = (i) => gp.buttons[i].pressed && !this.prevButtons[i];
-        
-        // A (0): Select Center Screen or Drop
-        if (btnPressed(0)) {
-            if (this.selectedObject) {
-                // Drop
-                this.selectedObject = null;
-                this.selectionBox.visible = false;
-            } else {
-                // Select object at screen center
-                this.raycaster.setFromCamera({x:0, y:0}, this.camera);
-                const candidates = [];
-                this.scene.traverse(c => {
-                    if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.type === 'table')) {
-                        candidates.push(c);
-                    }
-                });
-                const hits = this.raycaster.intersectObjects(candidates, true);
-                if (hits.length > 0) {
-                    let root = hits[0].object;
-                    while(root.parent && root.parent !== this.scene) { root = root.parent; }
-                    this.selectedObject = root;
-                    this.selectionBox.setFromObject(this.selectedObject);
-                    this.selectionBox.visible = true;
-                }
-            }
-        }
-
-        // X (2): Clone
-        if (btnPressed(2) && this.selectedObject) {
-            this.cloneSelected();
-        }
-
-        // Y (3): Export
-        if (btnPressed(3)) {
-            this.exportLayout();
-        }
-
-        this.prevButtons = gp.buttons.map(b => b.pressed);
     }
 
-    // --- Mouse Logic (Keep existing) ---
+    // --- Core Logic ---
 
-    onPointerDown(e) {
-        if (!this.enabled || e.button !== 0) return;
-        const mouse = { x: (e.clientX / window.innerWidth) * 2 - 1, y: -(e.clientY / window.innerHeight) * 2 + 1 };
-        this.raycaster.setFromCamera(mouse, this.camera);
+    startPlacement(template) {
+        this.cancelPlacement(); // Clear existing ghost
+        this.deselect(); // Clear selection
         
-        const candidates = [];
-        this.scene.traverse(c => {
-            if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.type === 'table')) {
-                candidates.push(c);
+        this.placementMode = true;
+        this.ghostObject = this._createObjectFromTemplate(template);
+        
+        // Make ghost transparent
+        this.ghostObject.traverse(c => {
+            if (c.isMesh) {
+                c.material = c.material.clone();
+                c.material.transparent = true;
+                c.material.opacity = 0.6;
+                c.material.emissive = new THREE.Color(0x00FF00);
+                c.material.emissiveIntensity = 0.2;
             }
         });
 
-        const hits = this.raycaster.intersectObjects(candidates, true);
-        if (hits.length > 0) {
-            let root = hits[0].object;
-            while(root.parent && root.parent !== this.scene) { root = root.parent; }
-            this.selectedObject = root;
-            this.selectionBox.setFromObject(this.selectedObject);
-            this.selectionBox.visible = true;
-            this.isDragging = true;
-            this.orbit.enabled = false;
+        this.scene.add(this.ghostObject);
+    }
+
+    cancelPlacement() {
+        if (this.ghostObject) {
+            this.scene.remove(this.ghostObject);
+            this.ghostObject = null;
+        }
+        this.placementMode = false;
+    }
+
+    confirmPlacement() {
+        if (this.ghostObject) {
+            // Create a real solid instance
+            const template = this.ghostObject.userData.template;
+            const realObject = this._createObjectFromTemplate(template);
+            
+            realObject.position.copy(this.ghostObject.position);
+            realObject.rotation.copy(this.ghostObject.rotation);
+            
+            this.scene.add(realObject);
+        }
+    }
+
+    _createObjectFromTemplate(t) {
+        // Map template to world.js creation functions
+        let obj;
+        const fakeColor = t.color || '#FFFFFF';
+        const dummyPos = { x: 0, z: 0 }; // Position set later
+
+        if (t.type === STATION_TYPES.COUNTER || t.type === STATION_TYPES.SERVING) {
+            obj = createCounterPrefab(t.name, fakeColor, t.isServing);
+        } else if (t.type === STATION_TYPES.TABLE) {
+            obj = createTablePrefab(t.name, fakeColor, {n:false, s:false, e:false, w:false});
         } else {
-            this.selectedObject = null;
-            this.selectionBox.visible = false;
+            // Generic Station / Wall / Source
+            const def = {
+                name: t.name,
+                type: t.type,
+                size: t.size,
+                color: fakeColor,
+                config: t.config,
+                position: dummyPos
+            };
+            obj = createStationPrefab(def);
+        }
+
+        // Store template data for serialization later
+        obj.userData.template = t; 
+        // Y position will be handled by onPointerMove snapping
+        obj.position.y = 0;
+
+        return obj;
+    }
+
+    select(object) {
+        if (this.selectedObject === object) return;
+        this.selectedObject = object;
+        this.selectionBox.setFromObject(object);
+        this.selectionBox.visible = true;
+        
+        // Update UI
+        this.inspector.style.display = 'flex';
+        this.inspectorName.textContent = object.name;
+    }
+
+    deselect() {
+        this.selectedObject = null;
+        this.selectionBox.visible = false;
+        this.inspector.style.display = 'none';
+    }
+
+    // --- Manipulation ---
+
+    rotateSelected() {
+        const target = this.placementMode ? this.ghostObject : this.selectedObject;
+        if (target) {
+            target.rotation.y -= Math.PI / 2;
+            target.updateMatrixWorld();
+            if (this.selectionBox.visible) this.selectionBox.update();
+        }
+    }
+
+    deleteSelected() {
+        if (this.selectedObject) {
+            this.scene.remove(this.selectedObject);
+            this.deselect();
+        }
+    }
+
+    cloneSelected() {
+        if (this.selectedObject) {
+            const template = this.selectedObject.userData.template || {
+                name: this.selectedObject.name,
+                type: this.selectedObject.userData.stationType || this.selectedObject.userData.type,
+            };
+            
+            if (this.selectedObject.userData.template) {
+                this.startPlacement(this.selectedObject.userData.template);
+            } else {
+                const clone = this.selectedObject.clone();
+                clone.position.x += GRID_UNIT;
+                this.scene.add(clone);
+                this.select(clone);
+            }
+        }
+    }
+
+    _updateInspectorData() {
+        if (this.selectedObject) {
+            this.inspectorX.textContent = this.selectedObject.position.x.toFixed(1);
+            this.inspectorZ.textContent = this.selectedObject.position.z.toFixed(1);
+        }
+    }
+
+    // --- Input Handling ---
+
+    onPointerDown(e) {
+        if (!this.enabled || e.button !== 0) return;
+        
+        // Ignore clicks on UI panels
+        if (e.target.closest('.editor-panel') || e.target.closest('.editor-top-bar')) return;
+
+        if (this.placementMode) {
+            this.confirmPlacement();
+        } else {
+            // Raycast for selection
+            const mouse = { 
+                x: (e.clientX / window.innerWidth) * 2 - 1, 
+                y: -(e.clientY / window.innerHeight) * 2 + 1 
+            };
+            this.raycaster.setFromCamera(mouse, this.camera);
+            
+            const candidates = [];
+            this.scene.traverse(c => {
+                // Find root objects
+                if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.stationType)) {
+                    candidates.push(c);
+                }
+            });
+
+            const hits = this.raycaster.intersectObjects(candidates, true);
+            
+            if (hits.length > 0) {
+                // Walk up to the root group
+                let root = hits[0].object;
+                while(root.parent && root.parent !== this.scene) { root = root.parent; }
+                
+                if (this.selectedObject !== root) {
+                    this.select(root);
+                }
+                this.isDragging = true;
+                this.orbit.enabled = false; 
+            } else {
+                this.deselect();
+            }
         }
     }
 
     onPointerMove(e) {
-        if (!this.enabled || !this.isDragging || !this.selectedObject) return;
-        
-        const mouse = { x: (e.clientX / window.innerWidth) * 2 - 1, y: -(e.clientY / window.innerHeight) * 2 + 1 };
+        if (!this.enabled) return;
+
+        const mouse = { 
+            x: (e.clientX / window.innerWidth) * 2 - 1, 
+            y: -(e.clientY / window.innerHeight) * 2 + 1 
+        };
         this.raycaster.setFromCamera(mouse, this.camera);
 
-        const surfaces = [];
+        // --- STACKING LOGIC ---
+        // 1. Find potential support objects (Counters, Tables)
+        const supports = [];
         this.scene.traverse(c => {
-            if (c.visible && c !== this.selectedObject && (c.userData.type === 'floor' || c.userData.type === 'counter' || c.userData.type === 'table')) {
-                surfaces.push(c);
+            // Must be visible, and not the object currently being dragged/placed
+            if (c.visible && c !== this.ghostObject && c !== this.selectedObject) {
+                if (c.userData && (c.userData.stationType === STATION_TYPES.COUNTER || c.userData.stationType === STATION_TYPES.TABLE || c.userData.stationType === STATION_TYPES.SERVING)) {
+                    supports.push(c);
+                }
             }
         });
-        
-        const hits = this.raycaster.intersectObjects(surfaces, true);
-        if (hits.length > 0) {
-            const hitPoint = hits[0].point;
-            const snapX = Math.floor(hitPoint.x / GRID_UNIT) * GRID_UNIT + (GRID_UNIT/2);
-            const snapZ = Math.floor(hitPoint.z / GRID_UNIT) * GRID_UNIT + (GRID_UNIT/2);
-            
-            let y = 0;
-            if (hits[0].object.userData.type !== 'floor') y = 0.9; 
-            if (this.selectedObject.userData.isBase) y = 0; 
 
-            this.selectedObject.position.set(snapX, y, snapZ);
+        // 2. Check intersections with supports
+        const hits = this.raycaster.intersectObjects(supports, true);
+        
+        let targetY = 0;
+        let targetX = 0;
+        let targetZ = 0;
+        let foundSupport = false;
+
+        if (hits.length > 0) {
+            // Hit a counter/table -> Stack on top
+            foundSupport = true;
+            const hit = hits[0];
+            const p = hit.point;
+            targetX = p.x;
+            targetZ = p.z;
+            targetY = MODULE_HEIGHT; // Place on top of counter (0.9)
+        } else {
+            // Hit nothing valid -> Check Ground Plane (Y=0)
+            const target = new THREE.Vector3();
+            if (this.raycaster.ray.intersectPlane(this.groundPlane, target)) {
+                foundSupport = true;
+                targetX = target.x;
+                targetZ = target.z;
+                targetY = 0;
+            }
+        }
+
+        if (foundSupport) {
+            // Snap X/Z to grid
+            const finalX = Math.round(targetX * 2) / 2; 
+            const finalZ = Math.round(targetZ * 2) / 2;
+
+            if (this.placementMode && this.ghostObject) {
+                this.ghostObject.position.set(finalX, targetY, finalZ);
+            } else if (this.isDragging && this.selectedObject) {
+                this.selectedObject.position.set(finalX, targetY, finalZ);
+            }
         }
     }
 
     onPointerUp() {
-        if(this.enabled) {
+        if (this.enabled) {
             this.isDragging = false;
             this.orbit.enabled = true;
         }
     }
 
-    onKeyDown(e) {
-        if(!this.enabled) return;
-        if (e.key.toLowerCase() === 'c' && this.selectedObject) this.cloneSelected();
-        if (e.key.toLowerCase() === 't') this.exportLayout();
-    }
-
-    cloneSelected() {
-        const clone = this.selectedObject.clone();
-        clone.position.x += GRID_UNIT; 
-        this.scene.add(clone);
-        this.selectedObject = clone;
-        this.selectionBox.setFromObject(clone);
-        // Copy UserData logic manually if needed, clone handles simple structure
-        clone.userData = JSON.parse(JSON.stringify(this.selectedObject.userData));
-    }
+    // --- Export ---
 
     exportLayout() {
         const data = [];
         this.scene.traverse(c => {
-            if (c.parent === this.scene && c.userData.type) {
-                if(['station','counter','table','serving'].includes(c.userData.type) || ['station','counter','table','serving'].includes(c.userData.stationType)) {
-                    const entry = {
-                        name: c.name,
-                        type: c.userData.stationType || c.userData.type,
-                        position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
-                        color: c.children[1]?.material?.color ? '#' + c.children[1].material.color.getHexString() : undefined
-                    };
-                    // Pass through configs
-                    if(c.userData.isServing) entry.isServing = true;
-                    if(c.userData.ingredient) entry.config = { ingredient: c.userData.ingredient };
-                    if(c.userData.item) entry.config = { item: c.userData.item };
-                    if(c.userData.processes) entry.config = { processes: c.userData.processes, result: c.userData.result, processingTime: c.userData.processingTime };
-                    
-                    data.push(entry);
-                }
+            if (c.parent === this.scene && c.userData && (c.userData.type === 'station' || c.userData.type === 'counter')) {
+                const entry = {
+                    name: c.name,
+                    type: c.userData.stationType || c.userData.type,
+                    position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
+                };
+                
+                // Check Y position to see if it's stacked (optional context)
+                // Generally we export X/Z. Game logic snaps Y based on type.
+                // But if we support custom stacking, we might need Y or "onTop" logic.
+                // For now, the game engine assumes stations are at MODULE_HEIGHT if not walls.
+                
+                if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
+                if (c.userData.template?.color) entry.color = c.userData.template.color;
+                if (c.userData.isServing) entry.isServing = true;
+                if (c.userData.config) entry.config = c.userData.config;
+
+                data.push(entry);
             }
         });
+        
+        console.log("--- LEVEL JSON EXPORT ---");
         console.log(JSON.stringify(data, null, 2));
-        alert("Exported to Console");
+        alert("Layout JSON exported to Console (F12)");
     }
 }
 </file>
@@ -1703,11 +1875,48 @@ export class PlayerControls {
         <div id="temp-message"></div>
     </div>
 
-    <!-- EDITOR HUD (New) -->
-    <div id="editor-hud" style="display: none; position: absolute; top: 10px; right: 10px; z-index: 20; background: rgba(0,0,0,0.8); padding: 10px; border: 2px solid orange; text-align: right;">
-        <h3 style="color: orange; margin-bottom: 10px;">LEVEL EDITOR</h3>
-        <p style="font-size: 0.8em; color: #ccc; margin-bottom: 10px;">Click obj to select. 'T' to Translate.</p>
-        <button id="editor-export-btn" style="padding: 5px 10px; background: #444; color: white; border: 1px solid white; cursor: pointer;">Export JSON to Console</button>
+    <!-- EDITOR UI CONTAINER -->
+    <div id="editor-ui" style="display: none;">
+        <!-- Top Helper Bar -->
+        <div class="editor-top-bar">
+            <div class="editor-title">🏗️ LEVEL EDITOR MODE</div>
+            <div class="editor-controls-hint">
+                <span><b>Left Click:</b> Select/Place</span> |
+                <span><b>Right Drag:</b> Pan Cam</span> |
+                <span><b>Scroll:</b> Zoom</span> |
+                <span><b>T:</b> Export JSON</span> |
+                <span><b>F1:</b> Exit Editor</span>
+            </div>
+            <button id="editor-export-btn" class="editor-btn small">Export</button>
+        </div>
+
+        <!-- Bottom Library (Visual Picker) -->
+        <div id="editor-library" class="editor-panel bottom-panel">
+            <div class="library-tabs">
+                <button class="tab-btn active" data-category="all">All</button>
+                <button class="tab-btn" data-category="Architecture">Walls/Floors</button>
+                <button class="tab-btn" data-category="Furniture">Furniture</button>
+                <button class="tab-btn" data-category="Stations">Stations</button>
+                <button class="tab-btn" data-category="Sources">Sources</button>
+            </div>
+            <div id="library-content" class="library-grid">
+                <!-- Items injected by JS -->
+            </div>
+        </div>
+
+        <!-- Right Inspector (Context Actions) -->
+        <div id="editor-inspector" class="editor-panel right-panel" style="display: none;">
+            <h3>Selected Object</h3>
+            <div id="inspector-name" class="inspector-field">None</div>
+            <div class="inspector-actions">
+                <button id="btn-rotate" class="editor-action-btn" title="Rotate (R)">🔄 Rotate</button>
+                <button id="btn-clone" class="editor-action-btn" title="Clone (C)">📋 Duplicate</button>
+                <button id="btn-delete" class="editor-action-btn delete" title="Delete (Del)">🗑️ Delete</button>
+            </div>
+            <div class="inspector-coords">
+                X: <span id="val-x">0</span> Z: <span id="val-z">0</span>
+            </div>
+        </div>
     </div>
 
     <!-- Level End Screen -->
@@ -1744,72 +1953,474 @@ export class PlayerControls {
         "levelId": 1,
         "name": "Fry Cook Training",
         "duration": 180,
-        "starThresholds": [300, 500, 700],
-        "availableMeals": ["French Fries"],
+        "starThresholds": [
+            300,
+            500,
+            700
+        ],
+        "availableMeals": [
+            "French Fries"
+        ],
         "maxActiveOrders": 2,
         "newOrderDelay": 15,
         "layout": [
-            
-            { "name": "C_Back_1", "type": "counter", "position": { "x": -2.0, "z": -3.0 }, "color": "#8B4513" },
-            { "name": "C_Back_2", "type": "counter", "position": { "x": -1.5, "z": -3.0 }, "color": "#8B4513" },
-            { "name": "C_Back_3", "type": "counter", "position": { "x": -1.0, "z": -3.0 }, "color": "#8B4513" },
-            { "name": "C_Back_4", "type": "counter", "position": { "x": -0.5, "z": -3.0 }, "color": "#8B4513" },
-            { "name": "C_Back_5", "type": "counter", "position": { "x": 0.0, "z": -3.0 }, "color": "#8B4513" },
-            { "name": "C_Back_6", "type": "counter", "position": { "x": 0.5, "z": -3.0 }, "color": "#8B4513" },
-            { "name": "C_Back_7", "type": "counter", "position": { "x": 1.0, "z": -3.0 }, "color": "#8B4513" },
-            { "name": "C_Back_8", "type": "counter", "position": { "x": 1.5, "z": -3.0 }, "color": "#8B4513" },
-            { "name": "C_Back_9", "type": "counter", "position": { "x": 2.0, "z": -3.0 }, "color": "#8B4513" },
-
-            { "name": "C_Serve_1", "type": "serving", "position": { "x": -1.0, "z": 3.0 }, "isServing": true },
-            { "name": "C_Serve_2", "type": "serving", "position": { "x": -0.5, "z": 3.0 }, "isServing": true },
-            { "name": "C_Serve_3", "type": "serving", "position": { "x": 0.0, "z": 3.0 }, "isServing": true },
-            { "name": "C_Serve_4", "type": "serving", "position": { "x": 0.5, "z": 3.0 }, "isServing": true },
-            { "name": "C_Serve_5", "type": "serving", "position": { "x": 1.0, "z": 3.0 }, "isServing": true },
-
-            { 
-                "name": "PotatoBin", 
-                "type": "ingredient_source", 
-                "position": { "x": -2.0, "z": -3.0 }, 
-                "size": { "width": 0.5, "depth": 0.5, "height": 0.4 }, 
-                "color": "#CD853F", 
-                "config": { "ingredient": "potato" } 
+            {
+                "name": "Wall_Back",
+                "type": "wall",
+                "position": {
+                    "x": 0,
+                    "z": -4
+                },
+                "size": {
+                    "width": 8.5,
+                    "depth": 0.5
+                }
             },
-            { 
-                "name": "CuttingBoard", 
-                "type": "processor", 
-                "position": { "x": -1.0, "z": -3.0 }, 
-                "size": { "width": 0.5, "depth": 0.5, "height": 0.1 }, 
+            {
+                "name": "Wall_Front_L",
+                "type": "wall",
+                "position": {
+                    "x": -2.5,
+                    "z": 4
+                },
+                "size": {
+                    "width": 3.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "Wall_Front_R",
+                "type": "wall",
+                "position": {
+                    "x": 2.5,
+                    "z": 4
+                },
+                "size": {
+                    "width": 3.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "Wall_Left",
+                "type": "wall",
+                "position": {
+                    "x": -4,
+                    "z": 0
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 7.5
+                }
+            },
+            {
+                "name": "Wall_Right",
+                "type": "wall",
+                "position": {
+                    "x": 4,
+                    "z": 0
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 7.5
+                }
+            },
+            {
+                "name": "C_Serve_1",
+                "type": "serving",
+                "position": {
+                    "x": -0.5,
+                    "z": 4
+                }
+            },
+            {
+                "name": "C_Serve_2",
+                "type": "serving",
+                "position": {
+                    "x": 0,
+                    "z": 4
+                }
+            },
+            {
+                "name": "C_Serve_3",
+                "type": "serving",
+                "position": {
+                    "x": 0.5,
+                    "z": 4
+                }
+            },
+            {
+                "name": "C_Back_1",
+                "type": "counter",
+                "position": {
+                    "x": -3,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_2",
+                "type": "counter",
+                "position": {
+                    "x": -2.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_3",
+                "type": "counter",
+                "position": {
+                    "x": -1,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_4",
+                "type": "counter",
+                "position": {
+                    "x": 1,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_5",
+                "type": "counter",
+                "position": {
+                    "x": 2.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_6",
+                "type": "counter",
+                "position": {
+                    "x": 3,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Side_L1",
+                "type": "counter",
+                "position": {
+                    "x": -3.5,
+                    "z": -3
+                }
+            },
+            {
+                "name": "C_Side_L2",
+                "type": "counter",
+                "position": {
+                    "x": -3.5,
+                    "z": -2.5
+                }
+            },
+            {
+                "name": "C_Side_R1",
+                "type": "counter",
+                "position": {
+                    "x": 3.5,
+                    "z": -3
+                }
+            },
+            {
+                "name": "C_Side_R2",
+                "type": "counter",
+                "position": {
+                    "x": 3.5,
+                    "z": -2.5
+                }
+            },
+            {
+                "name": "CuttingBoard1",
+                "type": "processor",
+                "position": {
+                    "x": -2.5,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
                 "color": "#DEB887", 
-                "config": { "processes": ["potato"], "result": { "potato": "raw_fries" } } 
+                "config": { "processes": ["potato"], "result": { "potato": "raw_fries" } }
             },
-            { 
-                "name": "Fryer", 
-                "type": "processor", 
-                "position": { "x": 0.0, "z": -3.0 }, 
-                "size": { "width": 0.5, "depth": 0.5, "height": 0.4 }, 
+            {
+                "name": "Fryer1",
+                "type": "processor",
+                "position": {
+                    "x": -1,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "color": "#555", 
+                "config": { "processes": ["raw_fries"], "result": { "raw_fries": "cooked_fries" }, "processingTime": 3000 }
+            },
+            {
+                "name": "Trash",
+                "type": "trash",
+                "position": {
+                    "x": 3.5,
+                    "z": -2
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base1",
+                "type": "table",
+                "position": {
+                    "x": -1.5,
+                    "z": -0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base2",
+                "type": "table",
+                "position": {
+                    "x": -1,
+                    "z": -0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base3",
+                "type": "table",
+                "position": {
+                    "x": -0.5,
+                    "z": -0.5
+                }
+            },
+            {
+                "name": "Counter (Corner)",
+                "type": "counter",
+                "position": {
+                    "x": -3.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Corner)",
+                "type": "counter",
+                "position": {
+                    "x": 3.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": -2,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": -1.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": -0.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 0,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 0.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 1.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 2,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "T_Assem_Base7",
+                "type": "table",
+                "position": {
+                    "x": 0.5,
+                    "z": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base8",
+                "type": "table",
+                "position": {
+                    "x": 1,
+                    "z": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base9",
+                "type": "table",
+                "position": {
+                    "x": 1.5,
+                    "z": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base10",
+                "type": "table",
+                "position": {
+                    "x": 0.5,
+                    "z": 1
+                }
+            },
+            {
+                "name": "T_Assem_Base11",
+                "type": "table",
+                "position": {
+                    "x": 1,
+                    "z": 1
+                }
+            },
+            {
+                "name": "T_Assem_Base12",
+                "type": "table",
+                "position": {
+                    "x": 1.5,
+                    "z": 1
+                }
+            },
+            {
+                "name": "CuttingBoard2",
+                "type": "processor",
+                "position": {
+                    "x": -3.5,
+                    "z": -2.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "color": "#DEB887", 
+                "config": { "processes": ["potato"], "result": { "potato": "raw_fries" } }
+            },
+            {
+                "name": "Fryer2",
+                "type": "processor",
+                "position": {
+                    "x": -0.5,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
                 "color": "#555", 
                 "config": { "processes": ["raw_fries"], "result": { "raw_fries": "cooked_fries" }, "processingTime": 3000 } 
             },
-            { 
-                "name": "PlateStack", 
-                "type": "item_source", 
-                "position": { "x": 1.0, "z": -3.0 }, 
-                "size": { "width": 0.5, "depth": 0.5, "height": 0.3 }, 
+            {
+                "name": "TrashBin2",
+                "type": "trash",
+                "position": {
+                    "x": -3.5,
+                    "z": -2
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base4",
+                "type": "table",
+                "position": {
+                    "x": -1.5,
+                    "z": -1
+                },
+                "color": "#CCCCCC"
+            },
+            {
+                "name": "T_Assem_Base5",
+                "type": "table",
+                "position": {
+                    "x": -1,
+                    "z": -1
+                },
+                "color": "#CCCCCC"
+            },
+            {
+                "name": "T_Assem_Base6",
+                "type": "table",
+                "position": {
+                    "x": -0.5,
+                    "z": -1
+                },
+                "color": "#CCCCCC"
+            },
+            {
+                "name": "PotatoBin_1",
+                "type": "ingredient_source",
+                "position": {
+                    "x": -3.5,
+                    "z": -3
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "color": "#CD853F",
+                "config": { "ingredient": "potato" }
+            },
+            {
+                "name": "PotatoBin_2",
+                "type": "ingredient_source",
+                "position": {
+                    "x": -3,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "color": "#CD853F",
+                "config": { "ingredient": "potato" }
+            },
+            {
+                "name": "PlateStack",
+                "type": "item_source",
+                "position": {
+                    "x": 3.5,
+                    "z": -3
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
                 "color": "#FFF", 
-                "config": { "item": "plate" } 
-            },
-            { 
-                "name": "AssemblyTable", 
-                "type": "assembly", 
-                "position": { "x": 0.0, "z": 0.0 }, 
-                "size": { "width": 1.5, "depth": 0.5, "height": 0.1 }, 
-                "color": "#AAA", 
-                "config": {} 
-            },
-            
-            { "name": "T_Assem_Base1", "type": "table", "position": { "x": -0.5, "z": 0.0 } },
-            { "name": "T_Assem_Base2", "type": "table", "position": { "x": 0.0, "z": 0.0 } },
-            { "name": "T_Assem_Base3", "type": "table", "position": { "x": 0.5, "z": 0.0 } }
+                "config": { "item": "plate" }
+            }
         ]
     }
 ]
@@ -2463,417 +3074,195 @@ canvas {
 ::-webkit-scrollbar-thumb { background: #555; border: 2px solid #222; }
 ::-webkit-scrollbar-thumb:hover { background: #777; }
 
-/* Editor HUD */
-#editor-hud {
-    display: none;
+/* =========================================
+   EDITOR UI
+   ========================================= */
+#editor-ui {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 20;
-    background: rgba(0,0,0,0.8);
+    pointer-events: none; /* Allow clicks to pass through empty areas */
+    font-family: 'Courier New', monospace;
+}
+
+.editor-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #555;
+    pointer-events: auto;
+}
+
+.editor-title {
+    color: orange;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.editor-controls-hint {
+    color: #ccc;
+    font-size: 0.8em;
+}
+
+.editor-controls-hint span {
+    margin: 0 10px;
+}
+
+.editor-panel {
+    background: rgba(30, 30, 30, 0.95);
+    border: 2px solid #666;
+    pointer-events: auto;
+}
+
+.bottom-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+}
+
+.library-tabs {
+    display: flex;
+    background: #222;
+    border-bottom: 1px solid #555;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.2s, background 0.2s;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    background: #444;
+}
+
+.tab-btn.active {
+    color: #FFD700;
+    border-bottom: 2px solid #FFD700;
+    background: #333;
+}
+
+.library-grid {
+    flex-grow: 1;
+    overflow-x: auto;
+    display: flex;
+    gap: 10px;
     padding: 10px;
-    border: 2px solid orange;
-    text-align: right;
-}
-</file>
-
-<file path="src/ui.js">
-// src/ui.js
-import { getRecipeDetails, getRecipeIngredients, RECIPES } from './gameData.js'; 
-import { getTrans } from './i18nData.js';
-
-function formatTime(seconds) {
-    const mins = Math.floor(Math.max(0, seconds) / 60);
-    const secs = Math.floor(Math.max(0, seconds) % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    align-items: center;
 }
 
-export class UIManager {
-    constructor(saveManager) {
-        this.saveManager = saveManager;
-        this.loadingScreen = document.getElementById('loading-screen');
-        this.mainMenu = document.getElementById('main-menu');
-        this.settingsScreen = document.getElementById('settings-screen');
-        this.levelSelectScreen = document.getElementById('level-select-screen');
-        this.levelEndScreen = document.getElementById('level-end-screen');
-        this.gameHud = document.getElementById('game-hud');
-        this.levelInstructionsScreen = document.getElementById('level-instructions-screen'); 
-
-        this.orderListElement = document.getElementById('order-list');
-        this.levelTimerDisplay = document.getElementById('level-timer-display');
-        this.holdingDisplay = document.getElementById('holding-display');
-        this.scoreDisplay = document.getElementById('score-display');
-        this.gamepadStatusElement = document.getElementById('gamepad-status');
-        this.crosshair = document.getElementById('crosshair');
-        this.tempMessageElement = document.getElementById('temp-message');
-
-        this.finalScoreElement = document.getElementById('final-score');
-        this.finalStarsElement = document.getElementById('final-stars');
-        this.languageButtons = this.settingsScreen.querySelectorAll('.lang-button');
-        this.toggleLabelsCheckbox = document.getElementById('toggle-labels-setting');
-        this.resumeButtonSettings = document.getElementById('resume-button-settings');
-        this.languageLabel = document.getElementById('language-label');
-        this.levelListContainer = document.getElementById('level-list');
-
-        this.instructionsTitle = document.getElementById('instructions-title');
-        this.instructionsContent = document.getElementById('instructions-content');
-        this.startLevelInstructionsButton = document.getElementById('start-level-instructions-button');
-        this.instructionsHint = this.levelInstructionsScreen.querySelector('.menu-hint'); 
-
-        this.activeScreen = null;
-        this.messageTimeout = null;
-        this.currentLanguage = 'en';
-
-        // Initial UI Dictionary
-        this.uiText = {
-            en: { title: "Pixel Kitchen Sim", play: "Play", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked", levelInstructions: "Level Instructions", startLevel: "Start Level", recipe: "Recipe", close: "Close", hintToggleInstructions: "Toggle: [I] / [△/Y]" },
-            fr: { title: "Pixel Cuisine Sim", play: "Jouer", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher Étiquettes:", version: "Version:", selectLevel: "Choisir Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous Niveaux Finis!", playAgain: "Rejouer?", loading: "Chargement...", levelTime: "Temps Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé", levelInstructions: "Instructions du Niveau", startLevel: "Commencer Niveau", recipe: "Recette", close: "Fermer", hintToggleInstructions: "Basculer: [I] / [△/Y]" },
-            es: { title: "Pixel Cocina Sim", play: "Jugar", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menú Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", version: "Versión:", selectLevel: "Elegir Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos Niveles Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", levelTime: "Tiempo Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado", levelInstructions: "Instrucciones del Nivel", startLevel: "Empezar Nivel", recipe: "Receta", close: "Cerrar", hintToggleInstructions: "Alternar: [I] / [△/Y]" }
-        };
-
-        // Initialize Recipe Book container
-        this.createRecipeBook();
-
-        // Set Language from Save or Default
-        const savedLang = this.saveManager.getSetting('language') || 'en';
-        this.setLanguage(savedLang);
-    }
-
-    createRecipeBook() {
-        const container = document.createElement('div');
-        container.id = 'recipe-book-container';
-        this.settingsScreen.querySelector('.menu-container').insertBefore(container, document.getElementById('back-to-main-button'));
-        this.recipeBookContainer = container;
-    }
-
-    updateRecipeBook(lang) {
-        if (!this.recipeBookContainer || !this.uiText || !this.uiText[lang]) return;
-        this.recipeBookContainer.innerHTML = '';
-        const title = document.createElement('h3');
-        title.textContent = (this.uiText[lang].recipe || "Recipes") + " Book";
-        title.style.color = '#FFD700';
-        this.recipeBookContainer.appendChild(title);
-        for (const [mealName, data] of Object.entries(RECIPES)) {
-            if (data.instructions && data.instructions[lang]) {
-                const entry = document.createElement('div');
-                entry.className = 'recipe-entry';
-                const h4 = document.createElement('h4');
-                h4.textContent = getTrans(mealName, lang); 
-                const p = document.createElement('p');
-                p.textContent = data.instructions[lang].join(" → ");
-                entry.appendChild(h4); entry.appendChild(p);
-                this.recipeBookContainer.appendChild(entry);
-            }
-        }
-    }
-
-    _setActiveScreen(screenElement) { if (this.activeScreen && this.activeScreen !== screenElement) this.activeScreen.classList.remove('active'); if (screenElement) screenElement.classList.add('active'); this.activeScreen = screenElement; }
-    showLoading() { this._setActiveScreen(this.loadingScreen); }
-    hideLoading() { if (this.activeScreen === this.loadingScreen) this.loadingScreen.classList.remove('active'); }
-    showMainMenu() { this._setActiveScreen(this.mainMenu); this.hideGameUI(); }
-    showSettings(isPauseMenu = false) {
-        this._setActiveScreen(this.settingsScreen);
-        this.resumeButtonSettings.style.display = isPauseMenu ? 'block' : 'none';
-        this.hideGameUI();
-    }
-    showLevelSelect() { this._setActiveScreen(this.levelSelectScreen); this.hideGameUI(); }
-    showLevelEnd(score, stars, levelIndex, canContinue) {
-        this.finalScoreElement.textContent = score;
-        this.finalStarsElement.textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
-        this.levelEndScreen.dataset.levelIndex = levelIndex;
-        const nextButton = document.getElementById('next-level-button');
-        const isNextLevelUnlocked = this.saveManager.isLevelUnlocked(levelIndex + 1);
-        if (nextButton) nextButton.style.display = (canContinue && isNextLevelUnlocked) ? 'block' : 'none';
-        const restartButton = document.getElementById('restart-level-button');
-        if (restartButton) restartButton.textContent = this.uiText[this.currentLanguage].restartLevel || "Restart Level";
-        this._setActiveScreen(this.levelEndScreen);
-        this.hideGameUI();
-    }
-    showGameEnd() {
-        this.finalScoreElement.textContent = "-";
-        this.finalStarsElement.textContent = this.uiText[this.currentLanguage].allLevelsDone || "All Levels Done!";
-        this.levelEndScreen.dataset.levelIndex = -1;
-        const nextButton = document.getElementById('next-level-button');
-        if (nextButton) nextButton.style.display = 'none';
-        const restartButton = document.getElementById('restart-level-button');
-        if (restartButton) restartButton.textContent = this.uiText[this.currentLanguage].playAgain || "Play Again?";
-        this._setActiveScreen(this.levelEndScreen);
-        this.hideGameUI();
-    }
-    showGameUI() {
-        if (this.activeScreen && this.activeScreen !== this.gameHud) { this.activeScreen.classList.remove('active'); this.activeScreen = null; }
-        this.gameHud.style.display = 'block';
-        this.crosshair.style.display = 'block';
-    }
-    hideGameUI() {
-        this.gameHud.style.display = 'none';
-        this.crosshair.style.display = 'none';
-    }
-
-    showLevelInstructions(levelData, isMidGame = false) {
-        if (!levelData || !this.instructionsTitle || !this.instructionsContent) return;
-        const lang = this.currentLanguage;
-        this.instructionsTitle.textContent = `${this.uiText[lang].level || "Level"} ${levelData.levelId}: ${levelData.name}`;
-        this.instructionsContent.innerHTML = ''; 
-        levelData.availableMeals.forEach(mealName => {
-            const details = getRecipeDetails(mealName);
-            if (details && details.instructions && details.instructions[lang]) {
-                const recipeDiv = document.createElement('div');
-                recipeDiv.className = 'recipe-instruction';
-                const title = document.createElement('h3');
-                title.textContent = getTrans(mealName, lang); 
-                recipeDiv.appendChild(title);
-                const stepList = document.createElement('ul');
-                details.instructions[lang].forEach(step => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = step;
-                    stepList.appendChild(listItem);
-                });
-                recipeDiv.appendChild(stepList);
-                this.instructionsContent.appendChild(recipeDiv);
-            }
-        });
-        if (isMidGame) {
-            this.startLevelInstructionsButton.style.display = 'none'; 
-            this.instructionsHint.textContent = this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]";
-        } else {
-            this.startLevelInstructionsButton.style.display = 'block'; 
-            this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
-            this.instructionsHint.textContent = this.uiText[lang].select || "Select: Enter/[X]/[A]"; 
-        }
-        this._setActiveScreen(this.levelInstructionsScreen);
-        this.hideGameUI();
-    }
-
-    updateLevelTimer(seconds) { this.levelTimerDisplay.textContent = formatTime(seconds); }
-    updateScore(score) { this.scoreDisplay.textContent = score; }
-    
-    updateHolding(heldItemName) {
-        // Translate the holding text
-        const text = heldItemName ? getTrans(heldItemName, this.currentLanguage) : (this.uiText[this.currentLanguage].nothing || "Nothing");
-        this.holdingDisplay.textContent = text;
-    }
-
-    updateGamepadStatus(isConnected) { this.gamepadStatusElement.textContent = isConnected ? '🎮' : ''; }
-    
-    showTemporaryMessage(messageKey, duration = 2000) {
-        let messageText = getTrans(messageKey, this.currentLanguage); 
-        if (messageText === messageKey && this.uiText[this.currentLanguage][messageKey]) {
-             messageText = this.uiText[this.currentLanguage][messageKey];
-        }
-        this.tempMessageElement.textContent = messageText;
-        this.tempMessageElement.classList.add('visible');
-        if (this.messageTimeout) clearTimeout(this.messageTimeout);
-        this.messageTimeout = setTimeout(() => {
-            this.tempMessageElement.classList.remove('visible');
-            this.messageTimeout = null;
-        }, duration);
-    }
-
-    // Updated Order Card Logic for Overcooked-style UI
-    addOrderCard(orderId, mealName, timeLimit) {
-        const card = document.createElement('div');
-        card.className = 'order-card'; 
-        card.id = orderId;
-        card.dataset.maxTime = timeLimit; // Store max time for calculation
-
-        // 1. Timer Bar (Top)
-        const timerContainer = document.createElement('div');
-        timerContainer.className = 'order-timer-container';
-        const timerBar = document.createElement('div');
-        timerBar.className = 'order-timer-bar';
-        timerContainer.appendChild(timerBar);
-        card.appendChild(timerContainer);
-
-        // 2. Header (Meal Name)
-        const header = document.createElement('div');
-        header.className = 'order-header';
-        header.textContent = getTrans(mealName, this.currentLanguage);
-        card.appendChild(header);
-
-        // 3. Ingredient List
-        const ingredientsContainer = document.createElement('div');
-        ingredientsContainer.className = 'order-ingredients';
-        
-        const ingredients = getRecipeIngredients(mealName) || [];
-        ingredients.forEach(ing => {
-            const ingEl = document.createElement('div');
-            ingEl.className = 'ingredient-item';
-            // Use shorter translation or mapping if available, for now standard translation
-            ingEl.textContent = getTrans(ing, this.currentLanguage);
-            ingredientsContainer.appendChild(ingEl);
-        });
-        card.appendChild(ingredientsContainer);
-
-        this.orderListElement.appendChild(card);
-        return card;
-    }
-
-    updateOrderCardTimer(orderId, seconds) {
-        const card = document.getElementById(orderId);
-        if (card) {
-            const maxTime = parseFloat(card.dataset.maxTime) || seconds;
-            const percentage = Math.max(0, Math.min(100, (seconds / maxTime) * 100));
-            
-            const bar = card.querySelector('.order-timer-bar');
-            if (bar) {
-                bar.style.width = `${percentage}%`;
-                
-                // Color states
-                if (percentage > 50) {
-                    bar.style.backgroundColor = '#4CAF50'; // Green
-                    card.classList.remove('critical');
-                } else if (percentage > 25) {
-                    bar.style.backgroundColor = '#FFC107'; // Yellow
-                    card.classList.remove('critical');
-                } else {
-                    bar.style.backgroundColor = '#D32F2F'; // Red
-                    card.classList.add('critical'); // Adds shake animation
-                }
-            }
-        }
-    }
-
-    removeOrderCard(orderId) {
-        const card = document.getElementById(orderId);
-        if (card) { 
-            // Slide up animation
-            card.style.transform = 'translateY(-120%)'; 
-            card.style.opacity = '0';
-            setTimeout(() => card.remove(), 400); 
-        }
-    }
-
-    clearOrderList() { this.orderListElement.innerHTML = ''; }
-
-    populateLevelSelect(levelDataArray, saveManager) {
-        this.levelListContainer.innerHTML = '';
-        if (!levelDataArray || !saveManager) return;
-        levelDataArray.forEach((level, index) => {
-            const button = document.createElement('button');
-            button.className = 'menu-button level-button';
-            button.dataset.action = 'start-level';
-            button.dataset.levelIndex = index;
-            const levelProgress = saveManager.getLevelProgress(index);
-            const isUnlocked = saveManager.isLevelUnlocked(index);
-            let buttonHTML = `<span class="level-name">${this.uiText[this.currentLanguage].level || "Level"} ${level.levelId}: ${level.name}</span>`;
-            if (isUnlocked) {
-                if (levelProgress.completed) {
-                    buttonHTML += `<span class="level-stars">${'★'.repeat(levelProgress.stars)}${'☆'.repeat(3 - levelProgress.stars)}</span><span class="level-score">${this.uiText[this.currentLanguage].highScore || "High Score"}: ${levelProgress.highScore}</span>`;
-                } else { buttonHTML += `<span class="level-status"></span>`; }
-            } else {
-                buttonHTML += `<span class="level-locked">${this.uiText[this.currentLanguage].levelLocked || "Locked"}</span>`;
-                button.disabled = true; button.classList.add('locked');
-            }
-            button.innerHTML = buttonHTML;
-            this.levelListContainer.appendChild(button);
-        });
-    }
-
-    setLanguage(lang) {
-        if (!this.uiText[lang]) { lang = 'en'; }
-        this.currentLanguage = lang;
-        
-        this.mainMenu.querySelector('h1').textContent = this.uiText[lang].title;
-        document.getElementById('play-button').textContent = this.uiText[lang].play;
-        document.getElementById('settings-button').textContent = this.uiText[lang].settings;
-        this.settingsScreen.querySelector('h1').textContent = this.uiText[lang].settings;
-        if (this.languageLabel) this.languageLabel.textContent = this.uiText[lang].language + ":";
-        this.settingsScreen.querySelector('label[for="toggle-labels-setting"]').textContent = this.uiText[lang].showLabels;
-        document.getElementById('back-to-main-button').textContent = this.uiText[lang].back;
-        document.getElementById('resume-button-settings').textContent = this.uiText[lang].resume;
-        document.getElementById('game-version').textContent = `${this.uiText[lang].version} 1.0 Beta`;
-        this.levelSelectScreen.querySelector('h1').textContent = this.uiText[lang].selectLevel;
-        document.getElementById('back-to-main-from-level-select').textContent = this.uiText[lang].back;
-        this.levelEndScreen.querySelector('h1').textContent = this.uiText[lang].levelComplete;
-        this.levelEndScreen.querySelector('#final-score').parentNode.firstChild.textContent = this.uiText[lang].score + ": ";
-        this.levelEndScreen.querySelector('#final-stars').parentNode.firstChild.textContent = this.uiText[lang].stars + ": ";
-        document.getElementById('next-level-button').textContent = this.uiText[lang].nextLevel;
-        document.getElementById('restart-level-button').textContent = this.uiText[lang].restartLevel;
-        document.getElementById('level-end-main-menu-button').textContent = this.uiText[lang].mainMenu;
-        document.querySelector('#game-timer-container').firstChild.textContent = this.uiText[lang].levelTime + ": ";
-        // document.querySelector('#bottom-hud').firstChild.textContent = this.uiText[lang].holding + ": "; // Removed hardcoded prefix
-        this.loadingScreen.querySelector('h2').textContent = this.uiText[lang].loading;
-        
-        if(this.instructionsTitle) this.instructionsTitle.textContent = this.uiText[lang].levelInstructions || "Level Instructions";
-        if(this.startLevelInstructionsButton) this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
-        if(this.instructionsHint) {
-             const startButtonVisible = this.startLevelInstructionsButton && this.startLevelInstructionsButton.style.display !== 'none';
-             this.instructionsHint.textContent = startButtonVisible ? (this.uiText[lang].select || "Select: Enter/[X]/[A]") : (this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]");
-        }
-
-        this.languageButtons.forEach(btn => btn.classList.toggle('active-lang', btn.dataset.lang === lang));
-
-        this.updateRecipeBook(lang);
-
-        if (this.activeScreen === this.levelSelectScreen && this.saveManager && typeof levelDatabase !== 'undefined') {
-             this.populateLevelSelect(levelDatabase, this.saveManager);
-        }
-        if (this.activeScreen === this.levelInstructionsScreen && typeof currentLevelData !== 'undefined' && currentLevelData) {
-             this.showLevelInstructions(currentLevelData, true); 
-        }
-        
-        // Update holding display immediately to reflect language change
-        const holdingEl = document.getElementById('holding-display');
-        if(holdingEl) this.updateHolding(holdingEl.dataset.rawItem);
-    }
-
-    getLabelToggleState() { return this.toggleLabelsCheckbox.checked; }
-    setLabelToggleState(isChecked) { this.toggleLabelsCheckbox.checked = isChecked; }
+.library-item {
+    min-width: 90px;
+    height: 90px;
+    background: #444;
+    border: 2px solid #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+    text-align: center;
+    padding: 5px;
 }
-</file>
 
-<file path="src/constants.js">
-// src/constants.js
-export const PLAYER_HEIGHT = 1.8;
-export const PLAYER_SPEED = 5.0;
-export const INTERACTION_DISTANCE = 3.0;
-export const KITCHEN_BOUNDS = { xMin: -8, xMax: 8, zMin: -8, zMax: 8 }; 
+.library-item:hover {
+    transform: scale(1.05);
+    border-color: #FFF;
+    background: #555;
+}
 
-// --- GRID & DIMENSIONS ---
-export const GRID_UNIT = 0.5; 
-export const MODULE_HEIGHT = 0.9; 
-export const LABEL_Y_OFFSET = 0.3;
+.library-item-icon {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
 
-export const STATION_TYPES = {
-    INGREDIENT_SOURCE: 'ingredient_source',
-    ITEM_SOURCE: 'item_source',
-    PROCESSOR: 'processor',
-    SERVING: 'serving',
-    COUNTER: 'counter', // Solid block
-    TABLE: 'table',     // With smart legs
-    FLOOR: 'floor',
-    TRASH: 'trash'
-};
+.library-item-name {
+    font-size: 0.6em;
+    line-height: 1.2;
+}
 
-export const ITEM_TYPES = {
-    INGREDIENT: 'ingredient',
-    ITEM: 'item', 
-};
+.right-panel {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    width: 200px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-export const INGREDIENT_STATES = {
-    RAW: 'raw',
-    CHOPPED: 'chopped',
-    COOKED: 'cooked',
-    MIXED: 'mixed',
-    BATTER: 'batter',
-    SLICED: 'sliced',
-    TOASTED: 'toasted',
-    COATED: 'coated',
-    READY: 'ready',
-};
+.right-panel h3 {
+    color: #87CEEB;
+    font-size: 0.9em;
+    border-bottom: 1px solid #555;
+    padding-bottom: 5px;
+}
 
-// --- INPUT ---
-export const GAMEPAD_DEADZONE = 0.15;
-export const GAMEPAD_INTERACT_BUTTON = 0; // Cross/A
-export const GAMEPAD_BACK_BUTTON = 1;     // Circle/B
-export const GAMEPAD_INSTRUCTIONS_BUTTON = 3; // Triangle/Y
-export const GAMEPAD_PAUSE_BUTTON = 9;    // Options/Start
-// These were missing:
-export const GAMEPAD_LOOK_SENSITIVITY_X = 300.0;
-export const GAMEPAD_LOOK_SENSITIVITY_Y = 300.0;
+.inspector-field {
+    background: #222;
+    padding: 5px;
+    font-size: 0.8em;
+    text-align: center;
+    margin-bottom: 10px;
+}
 
-export const KEYBOARD_INSTRUCTIONS_KEY = 'KeyI';
+.inspector-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.editor-action-btn {
+    background: #444;
+    color: white;
+    border: 1px solid #666;
+    padding: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8em;
+    transition: background 0.2s;
+    text-align: left;
+}
+
+.editor-action-btn:hover {
+    background: #666;
+}
+
+.editor-action-btn.delete {
+    background: #622;
+    border-color: #844;
+}
+
+.editor-action-btn.delete:hover {
+    background: #922;
+}
+
+.inspector-coords {
+    font-size: 0.7em;
+    color: #aaa;
+    margin-top: 10px;
+    text-align: center;
+}
 </file>
 
 <file path="src/gameData.js">
@@ -3425,6 +3814,434 @@ export function createItem(scene, type, preloadedModels, state = INGREDIENT_STAT
     scene.add(mesh);
     return mesh;
 }
+</file>
+
+<file path="src/ui.js">
+// src/ui.js
+import { getRecipeDetails, getRecipeIngredients, RECIPES } from './gameData.js'; 
+import { getTrans } from './i18nData.js';
+
+function formatTime(seconds) {
+    const mins = Math.floor(Math.max(0, seconds) / 60);
+    const secs = Math.floor(Math.max(0, seconds) % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+export class UIManager {
+    constructor(saveManager) {
+        this.saveManager = saveManager;
+        this.loadingScreen = document.getElementById('loading-screen');
+        this.mainMenu = document.getElementById('main-menu');
+        this.settingsScreen = document.getElementById('settings-screen');
+        this.levelSelectScreen = document.getElementById('level-select-screen');
+        this.levelEndScreen = document.getElementById('level-end-screen');
+        this.gameHud = document.getElementById('game-hud');
+        this.levelInstructionsScreen = document.getElementById('level-instructions-screen'); 
+
+        this.orderListElement = document.getElementById('order-list');
+        this.levelTimerDisplay = document.getElementById('level-timer-display');
+        this.holdingDisplay = document.getElementById('holding-display');
+        this.scoreDisplay = document.getElementById('score-display');
+        this.gamepadStatusElement = document.getElementById('gamepad-status');
+        this.crosshair = document.getElementById('crosshair');
+        this.tempMessageElement = document.getElementById('temp-message');
+
+        this.finalScoreElement = document.getElementById('final-score');
+        this.finalStarsElement = document.getElementById('final-stars');
+        this.languageButtons = this.settingsScreen.querySelectorAll('.lang-button');
+        this.toggleLabelsCheckbox = document.getElementById('toggle-labels-setting');
+        this.resumeButtonSettings = document.getElementById('resume-button-settings');
+        this.languageLabel = document.getElementById('language-label');
+        this.levelListContainer = document.getElementById('level-list');
+
+        this.instructionsTitle = document.getElementById('instructions-title');
+        this.instructionsContent = document.getElementById('instructions-content');
+        this.startLevelInstructionsButton = document.getElementById('start-level-instructions-button');
+        this.instructionsHint = this.levelInstructionsScreen.querySelector('.menu-hint'); 
+
+        this.activeScreen = null;
+        this.messageTimeout = null;
+        this.currentLanguage = 'en';
+
+        // Initial UI Dictionary
+        this.uiText = {
+            en: { title: "Pixel Kitchen Sim", play: "Play", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked", levelInstructions: "Level Instructions", startLevel: "Start Level", recipe: "Recipe", close: "Close", hintToggleInstructions: "Toggle: [I] / [△/Y]" },
+            fr: { title: "Pixel Cuisine Sim", play: "Jouer", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher Étiquettes:", version: "Version:", selectLevel: "Choisir Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous Niveaux Finis!", playAgain: "Rejouer?", loading: "Chargement...", levelTime: "Temps Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé", levelInstructions: "Instructions du Niveau", startLevel: "Commencer Niveau", recipe: "Recette", close: "Fermer", hintToggleInstructions: "Basculer: [I] / [△/Y]" },
+            es: { title: "Pixel Cocina Sim", play: "Jugar", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menú Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", version: "Versión:", selectLevel: "Elegir Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos Niveles Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", levelTime: "Tiempo Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado", levelInstructions: "Instrucciones del Nivel", startLevel: "Empezar Nivel", recipe: "Receta", close: "Cerrar", hintToggleInstructions: "Alternar: [I] / [△/Y]" }
+        };
+
+        // Initialize Recipe Book container
+        this.createRecipeBook();
+
+        // Set Language from Save or Default
+        const savedLang = this.saveManager.getSetting('language') || 'en';
+        this.setLanguage(savedLang);
+    }
+
+    createRecipeBook() {
+        const container = document.createElement('div');
+        container.id = 'recipe-book-container';
+        this.settingsScreen.querySelector('.menu-container').insertBefore(container, document.getElementById('back-to-main-button'));
+        this.recipeBookContainer = container;
+    }
+
+    updateRecipeBook(lang) {
+        if (!this.recipeBookContainer || !this.uiText || !this.uiText[lang]) return;
+        this.recipeBookContainer.innerHTML = '';
+        const title = document.createElement('h3');
+        title.textContent = (this.uiText[lang].recipe || "Recipes") + " Book";
+        title.style.color = '#FFD700';
+        this.recipeBookContainer.appendChild(title);
+        for (const [mealName, data] of Object.entries(RECIPES)) {
+            if (data.instructions && data.instructions[lang]) {
+                const entry = document.createElement('div');
+                entry.className = 'recipe-entry';
+                const h4 = document.createElement('h4');
+                h4.textContent = getTrans(mealName, lang); 
+                const p = document.createElement('p');
+                p.textContent = data.instructions[lang].join(" → ");
+                entry.appendChild(h4); entry.appendChild(p);
+                this.recipeBookContainer.appendChild(entry);
+            }
+        }
+    }
+
+    _setActiveScreen(screenElement) { if (this.activeScreen && this.activeScreen !== screenElement) this.activeScreen.classList.remove('active'); if (screenElement) screenElement.classList.add('active'); this.activeScreen = screenElement; }
+    showLoading() { this._setActiveScreen(this.loadingScreen); }
+    hideLoading() { if (this.activeScreen === this.loadingScreen) this.loadingScreen.classList.remove('active'); }
+    showMainMenu() { this._setActiveScreen(this.mainMenu); this.hideGameUI(); }
+    showSettings(isPauseMenu = false) {
+        this._setActiveScreen(this.settingsScreen);
+        this.resumeButtonSettings.style.display = isPauseMenu ? 'block' : 'none';
+        this.hideGameUI();
+    }
+    showLevelSelect() { this._setActiveScreen(this.levelSelectScreen); this.hideGameUI(); }
+    showLevelEnd(score, stars, levelIndex, canContinue) {
+        this.finalScoreElement.textContent = score;
+        this.finalStarsElement.textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+        this.levelEndScreen.dataset.levelIndex = levelIndex;
+        const nextButton = document.getElementById('next-level-button');
+        const isNextLevelUnlocked = this.saveManager.isLevelUnlocked(levelIndex + 1);
+        if (nextButton) nextButton.style.display = (canContinue && isNextLevelUnlocked) ? 'block' : 'none';
+        const restartButton = document.getElementById('restart-level-button');
+        if (restartButton) restartButton.textContent = this.uiText[this.currentLanguage].restartLevel || "Restart Level";
+        this._setActiveScreen(this.levelEndScreen);
+        this.hideGameUI();
+    }
+    showGameEnd() {
+        this.finalScoreElement.textContent = "-";
+        this.finalStarsElement.textContent = this.uiText[this.currentLanguage].allLevelsDone || "All Levels Done!";
+        this.levelEndScreen.dataset.levelIndex = -1;
+        const nextButton = document.getElementById('next-level-button');
+        if (nextButton) nextButton.style.display = 'none';
+        const restartButton = document.getElementById('restart-level-button');
+        if (restartButton) restartButton.textContent = this.uiText[this.currentLanguage].playAgain || "Play Again?";
+        this._setActiveScreen(this.levelEndScreen);
+        this.hideGameUI();
+    }
+    showGameUI() {
+        if (this.activeScreen && this.activeScreen !== this.gameHud) { this.activeScreen.classList.remove('active'); this.activeScreen = null; }
+        this.gameHud.style.display = 'block';
+        this.crosshair.style.display = 'block';
+    }
+    hideGameUI() {
+        this.gameHud.style.display = 'none';
+        this.crosshair.style.display = 'none';
+    }
+
+    showLevelInstructions(levelData, isMidGame = false) {
+        if (!levelData || !this.instructionsTitle || !this.instructionsContent) return;
+        const lang = this.currentLanguage;
+        this.instructionsTitle.textContent = `${this.uiText[lang].level || "Level"} ${levelData.levelId}: ${levelData.name}`;
+        this.instructionsContent.innerHTML = ''; 
+        levelData.availableMeals.forEach(mealName => {
+            const details = getRecipeDetails(mealName);
+            if (details && details.instructions && details.instructions[lang]) {
+                const recipeDiv = document.createElement('div');
+                recipeDiv.className = 'recipe-instruction';
+                const title = document.createElement('h3');
+                title.textContent = getTrans(mealName, lang); 
+                recipeDiv.appendChild(title);
+                const stepList = document.createElement('ul');
+                details.instructions[lang].forEach(step => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = step;
+                    stepList.appendChild(listItem);
+                });
+                recipeDiv.appendChild(stepList);
+                this.instructionsContent.appendChild(recipeDiv);
+            }
+        });
+        if (isMidGame) {
+            this.startLevelInstructionsButton.style.display = 'none'; 
+            this.instructionsHint.textContent = this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]";
+        } else {
+            this.startLevelInstructionsButton.style.display = 'block'; 
+            this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
+            this.instructionsHint.textContent = this.uiText[lang].select || "Select: Enter/[X]/[A]"; 
+        }
+        this._setActiveScreen(this.levelInstructionsScreen);
+        this.hideGameUI();
+    }
+
+    updateLevelTimer(seconds) { this.levelTimerDisplay.textContent = formatTime(seconds); }
+    updateScore(score) { this.scoreDisplay.textContent = score; }
+    
+    updateHolding(heldItemName) {
+        // Translate the holding text
+        const text = heldItemName ? getTrans(heldItemName, this.currentLanguage) : (this.uiText[this.currentLanguage].nothing || "Nothing");
+        this.holdingDisplay.textContent = text;
+    }
+
+    updateGamepadStatus(isConnected) { this.gamepadStatusElement.textContent = isConnected ? '🎮' : ''; }
+    
+    showTemporaryMessage(messageKey, duration = 2000) {
+        let messageText = getTrans(messageKey, this.currentLanguage); 
+        if (messageText === messageKey && this.uiText[this.currentLanguage][messageKey]) {
+             messageText = this.uiText[this.currentLanguage][messageKey];
+        }
+        this.tempMessageElement.textContent = messageText;
+        this.tempMessageElement.classList.add('visible');
+        if (this.messageTimeout) clearTimeout(this.messageTimeout);
+        this.messageTimeout = setTimeout(() => {
+            this.tempMessageElement.classList.remove('visible');
+            this.messageTimeout = null;
+        }, duration);
+    }
+
+    // Updated Order Card Logic for Overcooked-style UI
+    addOrderCard(orderId, mealName, timeLimit) {
+        const card = document.createElement('div');
+        card.className = 'order-card'; 
+        card.id = orderId;
+        card.dataset.maxTime = timeLimit; // Store max time for calculation
+
+        // 1. Timer Bar (Top)
+        const timerContainer = document.createElement('div');
+        timerContainer.className = 'order-timer-container';
+        const timerBar = document.createElement('div');
+        timerBar.className = 'order-timer-bar';
+        timerContainer.appendChild(timerBar);
+        card.appendChild(timerContainer);
+
+        // 2. Header (Meal Name)
+        const header = document.createElement('div');
+        header.className = 'order-header';
+        header.textContent = getTrans(mealName, this.currentLanguage);
+        card.appendChild(header);
+
+        // 3. Ingredient List
+        const ingredientsContainer = document.createElement('div');
+        ingredientsContainer.className = 'order-ingredients';
+        
+        const ingredients = getRecipeIngredients(mealName) || [];
+        ingredients.forEach(ing => {
+            const ingEl = document.createElement('div');
+            ingEl.className = 'ingredient-item';
+            // Use shorter translation or mapping if available, for now standard translation
+            ingEl.textContent = getTrans(ing, this.currentLanguage);
+            ingredientsContainer.appendChild(ingEl);
+        });
+        card.appendChild(ingredientsContainer);
+
+        this.orderListElement.appendChild(card);
+        return card;
+    }
+
+    updateOrderCardTimer(orderId, seconds) {
+        const card = document.getElementById(orderId);
+        if (card) {
+            const maxTime = parseFloat(card.dataset.maxTime) || seconds;
+            const percentage = Math.max(0, Math.min(100, (seconds / maxTime) * 100));
+            
+            const bar = card.querySelector('.order-timer-bar');
+            if (bar) {
+                bar.style.width = `${percentage}%`;
+                
+                // Color states
+                if (percentage > 50) {
+                    bar.style.backgroundColor = '#4CAF50'; // Green
+                    card.classList.remove('critical');
+                } else if (percentage > 25) {
+                    bar.style.backgroundColor = '#FFC107'; // Yellow
+                    card.classList.remove('critical');
+                } else {
+                    bar.style.backgroundColor = '#D32F2F'; // Red
+                    card.classList.add('critical'); // Adds shake animation
+                }
+            }
+        }
+    }
+
+    removeOrderCard(orderId) {
+        const card = document.getElementById(orderId);
+        if (card) { 
+            // Slide up animation
+            card.style.transform = 'translateY(-120%)'; 
+            card.style.opacity = '0';
+            setTimeout(() => card.remove(), 400); 
+        }
+    }
+
+    clearOrderList() { this.orderListElement.innerHTML = ''; }
+
+    populateLevelSelect(levelDataArray, saveManager) {
+        this.levelListContainer.innerHTML = '';
+        if (!levelDataArray || !saveManager) return;
+        levelDataArray.forEach((level, index) => {
+            const button = document.createElement('button');
+            button.className = 'menu-button level-button';
+            button.dataset.action = 'start-level';
+            button.dataset.levelIndex = index;
+            const levelProgress = saveManager.getLevelProgress(index);
+            const isUnlocked = saveManager.isLevelUnlocked(index);
+            let buttonHTML = `<span class="level-name">${this.uiText[this.currentLanguage].level || "Level"} ${level.levelId}: ${level.name}</span>`;
+            if (isUnlocked) {
+                if (levelProgress.completed) {
+                    buttonHTML += `<span class="level-stars">${'★'.repeat(levelProgress.stars)}${'☆'.repeat(3 - levelProgress.stars)}</span><span class="level-score">${this.uiText[this.currentLanguage].highScore || "High Score"}: ${levelProgress.highScore}</span>`;
+                } else { buttonHTML += `<span class="level-status"></span>`; }
+            } else {
+                buttonHTML += `<span class="level-locked">${this.uiText[this.currentLanguage].levelLocked || "Locked"}</span>`;
+                button.disabled = true; button.classList.add('locked');
+            }
+            button.innerHTML = buttonHTML;
+            this.levelListContainer.appendChild(button);
+        });
+    }
+
+    setLanguage(lang) {
+        if (!this.uiText[lang]) { lang = 'en'; }
+        this.currentLanguage = lang;
+        
+        this.mainMenu.querySelector('h1').textContent = this.uiText[lang].title;
+        document.getElementById('play-button').textContent = this.uiText[lang].play;
+        document.getElementById('settings-button').textContent = this.uiText[lang].settings;
+        this.settingsScreen.querySelector('h1').textContent = this.uiText[lang].settings;
+        if (this.languageLabel) this.languageLabel.textContent = this.uiText[lang].language + ":";
+        this.settingsScreen.querySelector('label[for="toggle-labels-setting"]').textContent = this.uiText[lang].showLabels;
+        document.getElementById('back-to-main-button').textContent = this.uiText[lang].back;
+        document.getElementById('resume-button-settings').textContent = this.uiText[lang].resume;
+        document.getElementById('game-version').textContent = `${this.uiText[lang].version} 1.0 Beta`;
+        this.levelSelectScreen.querySelector('h1').textContent = this.uiText[lang].selectLevel;
+        document.getElementById('back-to-main-from-level-select').textContent = this.uiText[lang].back;
+        this.levelEndScreen.querySelector('h1').textContent = this.uiText[lang].levelComplete;
+        this.levelEndScreen.querySelector('#final-score').parentNode.firstChild.textContent = this.uiText[lang].score + ": ";
+        this.levelEndScreen.querySelector('#final-stars').parentNode.firstChild.textContent = this.uiText[lang].stars + ": ";
+        document.getElementById('next-level-button').textContent = this.uiText[lang].nextLevel;
+        document.getElementById('restart-level-button').textContent = this.uiText[lang].restartLevel;
+        document.getElementById('level-end-main-menu-button').textContent = this.uiText[lang].mainMenu;
+        document.querySelector('#game-timer-container').firstChild.textContent = this.uiText[lang].levelTime + ": ";
+        // document.querySelector('#bottom-hud').firstChild.textContent = this.uiText[lang].holding + ": "; // Removed hardcoded prefix
+        this.loadingScreen.querySelector('h2').textContent = this.uiText[lang].loading;
+        
+        if(this.instructionsTitle) this.instructionsTitle.textContent = this.uiText[lang].levelInstructions || "Level Instructions";
+        if(this.startLevelInstructionsButton) this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
+        if(this.instructionsHint) {
+             const startButtonVisible = this.startLevelInstructionsButton && this.startLevelInstructionsButton.style.display !== 'none';
+             this.instructionsHint.textContent = startButtonVisible ? (this.uiText[lang].select || "Select: Enter/[X]/[A]") : (this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]");
+        }
+
+        this.languageButtons.forEach(btn => btn.classList.toggle('active-lang', btn.dataset.lang === lang));
+
+        this.updateRecipeBook(lang);
+
+        if (this.activeScreen === this.levelSelectScreen && this.saveManager && typeof levelDatabase !== 'undefined') {
+             this.populateLevelSelect(levelDatabase, this.saveManager);
+        }
+        if (this.activeScreen === this.levelInstructionsScreen && typeof currentLevelData !== 'undefined' && currentLevelData) {
+             this.showLevelInstructions(currentLevelData, true); 
+        }
+        
+        // Update holding display immediately to reflect language change
+        const holdingEl = document.getElementById('holding-display');
+        if(holdingEl) this.updateHolding(holdingEl.dataset.rawItem);
+    }
+
+    getLabelToggleState() { return this.toggleLabelsCheckbox.checked; }
+    setLabelToggleState(isChecked) { this.toggleLabelsCheckbox.checked = isChecked; }
+}
+</file>
+
+<file path="src/constants.js">
+// src/constants.js
+export const PLAYER_HEIGHT = 1.8;
+export const PLAYER_SPEED = 5.0;
+export const INTERACTION_DISTANCE = 3.0;
+// Bounds match the new 8x8 floor (Radius 4)
+export const KITCHEN_BOUNDS = { xMin: -3.5, xMax: 3.5, zMin: -3.5, zMax: 3.5 }; 
+
+// --- GRID & DIMENSIONS ---
+export const GRID_UNIT = 0.5; 
+export const MODULE_HEIGHT = 0.9; 
+export const LABEL_Y_OFFSET = 0.3;
+
+export const STATION_TYPES = {
+    INGREDIENT_SOURCE: 'ingredient_source',
+    ITEM_SOURCE: 'item_source',
+    PROCESSOR: 'processor',
+    SERVING: 'serving',
+    COUNTER: 'counter', // Solid block
+    TABLE: 'table',     // With smart legs
+    FLOOR: 'floor',
+    TRASH: 'trash',
+    WALL: 'wall'
+};
+
+export const ITEM_TYPES = {
+    INGREDIENT: 'ingredient',
+    ITEM: 'item', 
+};
+
+export const INGREDIENT_STATES = {
+    RAW: 'raw',
+    CHOPPED: 'chopped',
+    COOKED: 'cooked',
+    MIXED: 'mixed',
+    BATTER: 'batter',
+    SLICED: 'sliced',
+    TOASTED: 'toasted',
+    COATED: 'coated',
+    READY: 'ready',
+};
+
+// --- INPUT ---
+export const GAMEPAD_DEADZONE = 0.15;
+export const GAMEPAD_INTERACT_BUTTON = 0; // Cross/A
+export const GAMEPAD_BACK_BUTTON = 1;     // Circle/B
+export const GAMEPAD_INSTRUCTIONS_BUTTON = 3; // Triangle/Y
+export const GAMEPAD_PAUSE_BUTTON = 9;    // Options/Start
+export const GAMEPAD_LOOK_SENSITIVITY_X = 300.0;
+export const GAMEPAD_LOOK_SENSITIVITY_Y = 300.0;
+
+export const KEYBOARD_INSTRUCTIONS_KEY = 'KeyI';
+
+// --- EDITOR CATALOG ---
+export const CATALOG_ITEMS = [
+    // Architecture
+    { name: "Wall (Short)", type: STATION_TYPES.WALL, category: "Architecture", size: { width: 1.0, depth: 0.5 }, color: "#EFEBE9" },
+    { name: "Wall (Long)", type: STATION_TYPES.WALL, category: "Architecture", size: { width: 2.0, depth: 0.5 }, color: "#EFEBE9" },
+    { name: "Corner Wall", type: STATION_TYPES.WALL, category: "Architecture", size: { width: 0.5, depth: 0.5 }, color: "#EFEBE9" },
+    
+    // Counters
+    { name: "Counter (Wood)", type: STATION_TYPES.COUNTER, category: "Furniture", color: "#8B4513" },
+    { name: "Counter (Corner)", type: STATION_TYPES.COUNTER, category: "Furniture", color: "#8B4513" },
+    { name: "Serving Pass", type: STATION_TYPES.SERVING, category: "Furniture", isServing: true },
+    { name: "Table", type: STATION_TYPES.TABLE, category: "Furniture", color: "#CCCCCC" },
+    { name: "Trash Bin", type: STATION_TYPES.TRASH, category: "Furniture", size: { width: 0.5, depth: 0.5 } },
+
+    // Stations
+    { name: "Cutting Board", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#DEB887", config: { processes: ["potato", "tomato", "lettuce"], processingTime: 0 } },
+    { name: "Fryer", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#555", config: { processes: ["raw_fries"], processingTime: 3000 } },
+    { name: "Stove", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#333", config: { processes: ["patty"], processingTime: 4000 } },
+    
+    // Sources
+    { name: "Plate Stack", type: STATION_TYPES.ITEM_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, config: { item: "plate" } },
+    { name: "Potato Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#CD853F", config: { ingredient: "potato" } },
+    { name: "Tomato Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FF6347", config: { ingredient: "tomato" } },
+    { name: "Lettuce Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#90EE90", config: { ingredient: "lettuce" } },
+    { name: "Bun Rack", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F4A460", config: { ingredient: "bun" } },
+    { name: "Patty Box", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#A52A2A", config: { ingredient: "patty" } },
+];
 </file>
 
 <file path="src/LevelManager.js">
@@ -4043,284 +4860,6 @@ async function runGame() {
 runGame();
 </file>
 
-<file path="src/world.js">
-// src/world.js
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { LABEL_Y_OFFSET, STATION_TYPES, GRID_UNIT, MODULE_HEIGHT } from './constants.js';
-import { GridSystem } from './grid.js';
-import { VoxelBuilder, PALETTE, createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, createStoveMesh, createSinkMesh, createIngredientBinMesh, createPlateStackMesh } from './voxelBuilder.js';
-import { getTrans } from './i18nData.js';
-
-let currentKitchenObjects = [];
-let currentLabels = [];
-let currentFloor = null;
-let currentLang = 'en'; 
-// NEW: Track label visibility state
-let currentLabelVisibility = true;
-
-export function setWorldLanguage(lang) {
-    currentLang = lang;
-}
-
-function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
-    const translatedText = getTrans(text, currentLang);
-
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    context.font = "Bold 40px 'Courier New'";
-    const metrics = context.measureText(translatedText);
-    canvas.width = metrics.width + 20;
-    canvas.height = 50;
-    context.font = "Bold 40px 'Courier New'";
-    context.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.textAlign = 'center';
-    context.textBaseline = 'middle';
-    context.fillStyle = '#FFD700';
-    context.fillText(translatedText, canvas.width / 2, canvas.height / 2);
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.minFilter = THREE.NearestFilter;
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false }));
-    sprite.scale.set(canvas.width * 0.005, canvas.height * 0.005, 1);
-    sprite.position.copy(position);
-    sprite.position.y += yOffset;
-    sprite.renderOrder = 999;
-    
-    // *** FIX 1: Apply current visibility immediately ***
-    sprite.visible = currentLabelVisibility;
-
-    scene.add(sprite);
-    currentLabels.push(sprite);
-    return sprite;
-}
-
-export function toggleLabels(visible) {
-    // Update state so future labels are correct
-    currentLabelVisibility = visible;
-    // Update existing
-    currentLabels.forEach(s => s.visible = visible);
-}
-
-function createCounterMesh(isServing) {
-    const vb = new VoxelBuilder();
-    vb.addBox(1, 0, 1, 14, 1, 14, PALETTE.BLACK);
-    vb.addBox(0, 2, 0, 15, 14, 15, isServing ? PALETTE.WOOD_LIGHT : PALETTE.WOOD_DARK);
-    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.COUNTER_TOP);
-    if (!isServing) {
-        vb.addBox(1, 11, 15, 14, 13, 15, PALETTE.WOOD_BOARD); 
-        vb.addBox(6, 12, 16, 9, 12, 16, PALETTE.METAL_LIGHT);
-        vb.addBox(1, 3, 15, 14, 9, 15, PALETTE.WOOD_BOARD);
-        vb.addBox(12, 6, 16, 12, 8, 16, PALETTE.METAL_LIGHT);
-    } else {
-        vb.addBox(1, 3, 15, 14, 13, 15, PALETTE.PLASTIC_RED);
-    }
-    const mesh = vb.buildMesh();
-    mesh.scale.set(1, MODULE_HEIGHT / GRID_UNIT, 1);
-    mesh.position.y = MODULE_HEIGHT / 2;
-    return mesh;
-}
-
-function createTableMesh(neighbors) {
-    const vb = new VoxelBuilder();
-    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.METAL_SHINY);
-    vb.addBox(1, 5, 1, 14, 5, 14, PALETTE.METAL_DARK);
-    const addLeg = (x, z) => vb.addBox(x, 0, z, x+1, 14, z+1, PALETTE.METAL_LIGHT);
-    if(!neighbors.w && !neighbors.n) addLeg(1, 1);   
-    if(!neighbors.e && !neighbors.n) addLeg(13, 1);  
-    if(!neighbors.w && !neighbors.s) addLeg(1, 13);  
-    if(!neighbors.e && !neighbors.s) addLeg(13, 13); 
-    const mesh = vb.buildMesh();
-    mesh.scale.set(1, MODULE_HEIGHT / GRID_UNIT, 1);
-    mesh.position.y = MODULE_HEIGHT / 2;
-    return mesh;
-}
-
-function createCounterPrefab(name, color, isServing) {
-    const group = new THREE.Group();
-    group.name = name;
-    const visual = createCounterMesh(isServing);
-    group.add(visual);
-    group.userData = { type: isServing ? 'station' : 'counter', stationType: isServing ? STATION_TYPES.SERVING : STATION_TYPES.COUNTER, name: name, isBase: true };
-    group.userData.grid = new GridSystem(GRID_UNIT, GRID_UNIT, 0, 0, group);
-    return group;
-}
-
-function createTablePrefab(name, color, neighbors) {
-    const group = new THREE.Group();
-    group.name = name;
-    const visual = createTableMesh(neighbors);
-    group.add(visual);
-    group.userData = { type: 'counter', stationType: STATION_TYPES.TABLE, name: name, isBase: true };
-    group.userData.grid = new GridSystem(GRID_UNIT, GRID_UNIT, 0, 0, group);
-    return group;
-}
-
-function createStationPrefab(def) {
-    const { name, type, size, color, config } = def;
-    const group = new THREE.Group();
-    group.name = name;
-    const w = Math.round((size?.width ?? 0.5) / GRID_UNIT) * GRID_UNIT;
-    const d = Math.round((size?.depth ?? 0.5) / GRID_UNIT) * GRID_UNIT;
-    const h = 0.3; 
-    let mesh = null;
-    const n = name.toLowerCase();
-    if (type === STATION_TYPES.TRASH) {
-        mesh = createTrashBinMesh();
-    } else if (type === STATION_TYPES.INGREDIENT_SOURCE) {
-        mesh = createIngredientBinMesh(config?.ingredient || 'generic');
-    } else if (type === STATION_TYPES.ITEM_SOURCE && config?.item === 'plate') {
-        mesh = createPlateStackMesh();
-    } else if (n.includes('fryer')) {
-        mesh = createFryerMesh();
-    } else if (n.includes('cutting') || n.includes('board')) {
-        mesh = createCuttingBoardMesh();
-    } else if (n.includes('stove') || n.includes('grill') || n.includes('oven')) {
-        mesh = createStoveMesh();
-    } else if (n.includes('sink')) {
-        mesh = createSinkMesh();
-    } else {
-        const geo = new THREE.BoxGeometry(w - 0.05, h, d - 0.05);
-        const mat = new THREE.MeshStandardMaterial({ color: color || 0x555555 });
-        mesh = new THREE.Mesh(geo, mat);
-        mesh.position.y = h/2;
-        mesh.castShadow = true; mesh.receiveShadow = true;
-    }
-    if (mesh) group.add(mesh);
-    group.userData = { ...config, type: 'station', stationType: type, name: name, size: { width: w, height: h, depth: d } };
-    if (type === STATION_TYPES.PROCESSOR) {
-        group.userData.occupiedBy = null;
-        if (config?.requiredIngredients) group.userData.internalContents = [];
-    }
-    if (type === STATION_TYPES.ASSEMBLY) {
-        group.userData.slots = [null, null, null];
-        const divGeo = new THREE.BoxGeometry(0.02, 0.1, d * 0.9);
-        const divMat = new THREE.MeshStandardMaterial({color:0x333});
-        const d1 = new THREE.Mesh(divGeo, divMat); d1.position.set(-0.5, 0.05, 0); group.add(d1);
-        const d2 = new THREE.Mesh(divGeo, divMat); d2.position.set(0.5, 0.05, 0); group.add(d2);
-    }
-    return group;
-}
-
-export function clearKitchen(scene) {
-    currentKitchenObjects.forEach(obj => {
-        scene.remove(obj);
-        obj.traverse(c => {
-            if (c.geometry) c.geometry.dispose();
-            if (c.material) {
-                if (Array.isArray(c.material)) c.material.forEach(m => m.dispose());
-                else c.material.dispose();
-            }
-        });
-    });
-    currentLabels.forEach(l => {
-        scene.remove(l);
-        l.material.map.dispose();
-        l.material.dispose();
-    });
-    currentKitchenObjects = [];
-    currentLabels = [];
-    if (currentFloor) {
-        scene.remove(currentFloor);
-        currentFloor.geometry.dispose();
-        currentFloor.material.map.dispose();
-        currentFloor.material.dispose();
-        currentFloor = null;
-    }
-}
-
-export function buildKitchen(scene, levelLayout) {
-    clearKitchen(scene);
-    const newStations = {};
-    const newStationInteractables = [];
-    const occupancyMap = new Map();
-    levelLayout.forEach(def => {
-        if (def.type === STATION_TYPES.TABLE || def.type === STATION_TYPES.COUNTER || def.type === STATION_TYPES.SERVING) {
-            const kx = Math.round(def.position.x * 100) / 100;
-            const kz = Math.round(def.position.z * 100) / 100;
-            occupancyMap.set(`${kx},${kz}`, def.type);
-        }
-    });
-    const floorSize = 20;
-    const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize);
-    const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#E0E0E0'; ctx.fillRect(0,0,64,64);
-    ctx.fillStyle = '#90CAF9'; ctx.fillRect(0,0,32,32); ctx.fillRect(32,32,32,32);
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(floorSize, floorSize); tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter;
-    const floorMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6 });
-    currentFloor = new THREE.Mesh(floorGeo, floorMat);
-    currentFloor.rotation.x = -Math.PI / 2; 
-    currentFloor.receiveShadow = true;
-    currentFloor.name = "Floor";
-    currentFloor.userData = { type: STATION_TYPES.FLOOR, grid: new GridSystem(floorSize, floorSize, 0, 0, currentFloor) };
-    scene.add(currentFloor);
-
-    levelLayout.forEach(def => {
-        let object3D = null;
-        const x = def.position.x; 
-        const z = def.position.z;
-
-        if (def.type === STATION_TYPES.COUNTER || def.type === STATION_TYPES.SERVING) {
-            object3D = createCounterPrefab(def.name, def.color, def.type === STATION_TYPES.SERVING);
-            object3D.position.set(x, 0, z);
-            object3D.userData.grid.originX = x - (GRID_UNIT/2);
-            object3D.userData.grid.originZ = z - (GRID_UNIT/2);
-            if (def.type === STATION_TYPES.SERVING) object3D.attach(createLabel(scene, "SERVE", object3D.position, 1.5));
-
-        } else if (def.type === STATION_TYPES.TABLE) {
-            const neighbors = {
-                n: occupancyMap.get(`${x},${z-GRID_UNIT}`) === STATION_TYPES.TABLE,
-                s: occupancyMap.get(`${x},${z+GRID_UNIT}`) === STATION_TYPES.TABLE,
-                e: occupancyMap.get(`${x+GRID_UNIT},${z}`) === STATION_TYPES.TABLE,
-                w: occupancyMap.get(`${x-GRID_UNIT},${z}`) === STATION_TYPES.TABLE
-            };
-            object3D = createTablePrefab(def.name, def.color, neighbors);
-            object3D.position.set(x, 0, z);
-            object3D.userData.grid.originX = x - (GRID_UNIT/2);
-            object3D.userData.grid.originZ = z - (GRID_UNIT/2);
-
-        } else if (Object.values(STATION_TYPES).includes(def.type)) {
-            object3D = createStationPrefab(def);
-            if (def.type === STATION_TYPES.TRASH) object3D.position.set(x, 0, z);
-            else object3D.position.set(x, MODULE_HEIGHT, z);
-            object3D.add(createLabel(scene, def.name, new THREE.Vector3(0,0.5,0), 0));
-            if (def.type === STATION_TYPES.ASSEMBLY) {
-                const w = object3D.userData.size.width;
-                const slotW = w / 3;
-                const y = object3D.position.y + object3D.userData.size.height/2;
-                object3D.userData.slotPositions = [
-                    new THREE.Vector3(object3D.position.x - slotW, y, object3D.position.z),
-                    new THREE.Vector3(object3D.position.x, y, object3D.position.z),
-                    new THREE.Vector3(object3D.position.x + slotW, y, object3D.position.z)
-                ];
-            }
-        }
-
-        if (object3D) {
-            scene.add(object3D);
-            currentKitchenObjects.push(object3D);
-            if (def.type !== 'decoration') {
-                newStations[def.name] = object3D;
-                newStationInteractables.push(object3D);
-            }
-        }
-    });
-
-    return { stations: newStations, stationInteractables: newStationInteractables, floorMesh: currentFloor };
-}
-
-export function getAssemblySlotIndex(station, worldX) {
-    const w = station.userData.size.width;
-    const relativeX = worldX - station.position.x;
-    const slotW = w/3;
-    if (relativeX < -slotW/2) return 0;
-    if (relativeX > slotW/2) return 2;
-    return 1;
-}
-</file>
-
 <file path="src/interaction.js">
 // src/interaction.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
@@ -4778,6 +5317,305 @@ export class InteractionManager {
         if (!obj || !obj.userData.originalScale) return;
         gsap.to(obj.scale, { x: obj.userData.originalScale.x, y: obj.userData.originalScale.y, z: obj.userData.originalScale.z, duration: 0.1 });
     }
+}
+</file>
+
+<file path="src/world.js">
+// src/world.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { LABEL_Y_OFFSET, STATION_TYPES, GRID_UNIT, MODULE_HEIGHT } from './constants.js';
+import { GridSystem } from './grid.js';
+import { VoxelBuilder, PALETTE, createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, createStoveMesh, createSinkMesh, createIngredientBinMesh, createPlateStackMesh } from './voxelBuilder.js';
+import { getTrans } from './i18nData.js';
+
+let currentKitchenObjects = [];
+let currentLabels = [];
+let currentFloor = null;
+let currentLang = 'en'; 
+let currentLabelVisibility = true;
+
+export function setWorldLanguage(lang) {
+    currentLang = lang;
+}
+
+function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
+    const translatedText = getTrans(text, currentLang);
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = "Bold 40px 'Courier New'";
+    const metrics = context.measureText(translatedText);
+    canvas.width = metrics.width + 20;
+    canvas.height = 50;
+    context.font = "Bold 40px 'Courier New'";
+    context.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillStyle = '#FFD700';
+    context.fillText(translatedText, canvas.width / 2, canvas.height / 2);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.minFilter = THREE.NearestFilter;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false }));
+    sprite.scale.set(canvas.width * 0.005, canvas.height * 0.005, 1);
+    sprite.position.copy(position);
+    sprite.position.y += yOffset;
+    sprite.renderOrder = 999;
+    
+    sprite.visible = currentLabelVisibility;
+
+    scene.add(sprite);
+    currentLabels.push(sprite);
+    return sprite;
+}
+
+export function toggleLabels(visible) {
+    currentLabelVisibility = visible;
+    currentLabels.forEach(s => s.visible = visible);
+}
+
+export function getFloorMesh() {
+    return currentFloor;
+}
+
+function createCounterMesh(isServing) {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 1, 14, PALETTE.BLACK);
+    vb.addBox(0, 2, 0, 15, 14, 15, isServing ? PALETTE.WOOD_LIGHT : PALETTE.WOOD_DARK);
+    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.COUNTER_TOP);
+    if (!isServing) {
+        vb.addBox(1, 11, 15, 14, 13, 15, PALETTE.WOOD_BOARD); 
+        vb.addBox(6, 12, 16, 9, 12, 16, PALETTE.METAL_LIGHT);
+        vb.addBox(1, 3, 15, 14, 9, 15, PALETTE.WOOD_BOARD);
+        vb.addBox(12, 6, 16, 12, 8, 16, PALETTE.METAL_LIGHT);
+    } else {
+        vb.addBox(1, 3, 15, 14, 13, 15, PALETTE.PLASTIC_RED);
+    }
+    const mesh = vb.buildMesh();
+    mesh.scale.set(1, MODULE_HEIGHT / GRID_UNIT, 1);
+    mesh.position.y = MODULE_HEIGHT / 2;
+    return mesh;
+}
+
+function createTableMesh(neighbors) {
+    const vb = new VoxelBuilder();
+    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.METAL_SHINY);
+    vb.addBox(1, 5, 1, 14, 5, 14, PALETTE.METAL_DARK);
+    const addLeg = (x, z) => vb.addBox(x, 0, z, x+1, 14, z+1, PALETTE.METAL_LIGHT);
+    if(!neighbors.w && !neighbors.n) addLeg(1, 1);   
+    if(!neighbors.e && !neighbors.n) addLeg(13, 1);  
+    if(!neighbors.w && !neighbors.s) addLeg(1, 13);  
+    if(!neighbors.e && !neighbors.s) addLeg(13, 13); 
+    const mesh = vb.buildMesh();
+    mesh.scale.set(1, MODULE_HEIGHT / GRID_UNIT, 1);
+    mesh.position.y = MODULE_HEIGHT / 2;
+    return mesh;
+}
+
+// Exported for Editor use
+export function createCounterPrefab(name, color, isServing) {
+    const group = new THREE.Group();
+    group.name = name;
+    const visual = createCounterMesh(isServing);
+    group.add(visual);
+    group.userData = { type: isServing ? 'station' : 'counter', stationType: isServing ? STATION_TYPES.SERVING : STATION_TYPES.COUNTER, name: name, isBase: true };
+    group.userData.grid = new GridSystem(GRID_UNIT, GRID_UNIT, 0, 0, group);
+    return group;
+}
+
+// Exported for Editor use
+export function createTablePrefab(name, color, neighbors) {
+    const group = new THREE.Group();
+    group.name = name;
+    const visual = createTableMesh(neighbors);
+    group.add(visual);
+    group.userData = { type: 'counter', stationType: STATION_TYPES.TABLE, name: name, isBase: true };
+    group.userData.grid = new GridSystem(GRID_UNIT, GRID_UNIT, 0, 0, group);
+    return group;
+}
+
+// Exported for Editor use
+export function createStationPrefab(def) {
+    const { name, type, size, color, config } = def;
+    const group = new THREE.Group();
+    group.name = name;
+    const w = Math.round((size?.width ?? 0.5) / GRID_UNIT) * GRID_UNIT;
+    const d = Math.round((size?.depth ?? 0.5) / GRID_UNIT) * GRID_UNIT;
+    const h = 0.3; 
+    let mesh = null;
+    const n = name.toLowerCase();
+
+    if (type === STATION_TYPES.WALL) {
+        // Walls are just simple blocks, typically 2.5m tall
+        const wallH = 2.5;
+        const geo = new THREE.BoxGeometry(w, wallH, d);
+        const mat = new THREE.MeshStandardMaterial({ color: color || PALETTE.WALL_WHITE });
+        mesh = new THREE.Mesh(geo, mat);
+        mesh.position.y = wallH / 2;
+        mesh.castShadow = true; 
+        mesh.receiveShadow = true;
+    } else if (type === STATION_TYPES.TRASH) {
+        mesh = createTrashBinMesh();
+    } else if (type === STATION_TYPES.INGREDIENT_SOURCE) {
+        mesh = createIngredientBinMesh(config?.ingredient || 'generic');
+    } else if (type === STATION_TYPES.ITEM_SOURCE && config?.item === 'plate') {
+        mesh = createPlateStackMesh();
+    } else if (n.includes('fryer')) {
+        mesh = createFryerMesh();
+    } else if (n.includes('cutting') || n.includes('board')) {
+        mesh = createCuttingBoardMesh();
+    } else if (n.includes('stove') || n.includes('grill') || n.includes('oven')) {
+        mesh = createStoveMesh();
+    } else if (n.includes('sink')) {
+        mesh = createSinkMesh();
+    } else {
+        const geo = new THREE.BoxGeometry(w - 0.05, h, d - 0.05);
+        const mat = new THREE.MeshStandardMaterial({ color: color || 0x555555 });
+        mesh = new THREE.Mesh(geo, mat);
+        mesh.position.y = h/2;
+        mesh.castShadow = true; mesh.receiveShadow = true;
+    }
+    if (mesh) group.add(mesh);
+    group.userData = { ...config, type: 'station', stationType: type, name: name, size: { width: w, height: h, depth: d } };
+    if (type === STATION_TYPES.PROCESSOR) {
+        group.userData.occupiedBy = null;
+        if (config?.requiredIngredients) group.userData.internalContents = [];
+    }
+    return group;
+}
+
+export function clearKitchen(scene) {
+    currentKitchenObjects.forEach(obj => {
+        scene.remove(obj);
+        obj.traverse(c => {
+            if (c.geometry) c.geometry.dispose();
+            if (c.material) {
+                if (Array.isArray(c.material)) c.material.forEach(m => m.dispose());
+                else c.material.dispose();
+            }
+        });
+    });
+    currentLabels.forEach(l => {
+        scene.remove(l);
+        l.material.map.dispose();
+        l.material.dispose();
+    });
+    currentKitchenObjects = [];
+    currentLabels = [];
+    if (currentFloor) {
+        scene.remove(currentFloor);
+        currentFloor.geometry.dispose();
+        currentFloor.material.map.dispose();
+        currentFloor.material.dispose();
+        currentFloor = null;
+    }
+}
+
+export function buildKitchen(scene, levelLayout) {
+    clearKitchen(scene);
+    const newStations = {};
+    const newStationInteractables = [];
+    const occupancyMap = new Map();
+    levelLayout.forEach(def => {
+        if (def.type === STATION_TYPES.TABLE || def.type === STATION_TYPES.COUNTER || def.type === STATION_TYPES.SERVING) {
+            const kx = Math.round(def.position.x * 100) / 100;
+            const kz = Math.round(def.position.z * 100) / 100;
+            occupancyMap.set(`${kx},${kz}`, def.type);
+        }
+    });
+    
+    // Reduced floor size 8x8 (matches bounds -3.5 to 3.5 visual padding)
+    const floorSize = 8; 
+    const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize);
+    
+    // Improved "Kitchen Tile" texture
+    const canvas = document.createElement('canvas'); 
+    canvas.width = 128; 
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    
+    // Dark slate background
+    ctx.fillStyle = '#37474F'; 
+    ctx.fillRect(0, 0, 128, 128);
+    
+    // Lighter grey tiles (checkerboard pattern)
+    ctx.fillStyle = '#546E7A'; 
+    ctx.fillRect(0, 0, 64, 64);
+    ctx.fillRect(64, 64, 64, 64);
+    
+    // Border/Grout line effect included by gap logic or simply drawing rectangles slightly smaller?
+    // Let's draw a thin border
+    ctx.strokeStyle = '#263238';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(0,0,128,128);
+    ctx.beginPath();
+    ctx.moveTo(64,0); ctx.lineTo(64,128);
+    ctx.moveTo(0,64); ctx.lineTo(128,64);
+    ctx.stroke();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+    // Repeat per unit (size)
+    tex.repeat.set(floorSize/2, floorSize/2); 
+    tex.magFilter = THREE.NearestFilter; 
+    tex.minFilter = THREE.NearestFilter;
+    
+    const floorMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5, metalness: 0.1 });
+    currentFloor = new THREE.Mesh(floorGeo, floorMat);
+    currentFloor.rotation.x = -Math.PI / 2; 
+    currentFloor.receiveShadow = true;
+    currentFloor.name = "Floor";
+    currentFloor.userData = { type: STATION_TYPES.FLOOR, grid: new GridSystem(floorSize, floorSize, 0, 0, currentFloor) };
+    scene.add(currentFloor);
+
+    levelLayout.forEach(def => {
+        let object3D = null;
+        const x = def.position.x; 
+        const z = def.position.z;
+
+        if (def.type === STATION_TYPES.COUNTER || def.type === STATION_TYPES.SERVING) {
+            object3D = createCounterPrefab(def.name, def.color, def.type === STATION_TYPES.SERVING);
+            object3D.position.set(x, 0, z);
+            object3D.userData.grid.originX = x - (GRID_UNIT/2);
+            object3D.userData.grid.originZ = z - (GRID_UNIT/2);
+            if (def.type === STATION_TYPES.SERVING) object3D.attach(createLabel(scene, "SERVE", object3D.position, 1.5));
+
+        } else if (def.type === STATION_TYPES.TABLE) {
+            const neighbors = {
+                n: occupancyMap.get(`${x},${z-GRID_UNIT}`) === STATION_TYPES.TABLE,
+                s: occupancyMap.get(`${x},${z+GRID_UNIT}`) === STATION_TYPES.TABLE,
+                e: occupancyMap.get(`${x+GRID_UNIT},${z}`) === STATION_TYPES.TABLE,
+                w: occupancyMap.get(`${x-GRID_UNIT},${z}`) === STATION_TYPES.TABLE
+            };
+            object3D = createTablePrefab(def.name, def.color, neighbors);
+            object3D.position.set(x, 0, z);
+            object3D.userData.grid.originX = x - (GRID_UNIT/2);
+            object3D.userData.grid.originZ = z - (GRID_UNIT/2);
+
+        } else if (Object.values(STATION_TYPES).includes(def.type)) {
+            object3D = createStationPrefab(def);
+            if (def.type === STATION_TYPES.TRASH || def.type === STATION_TYPES.WALL) {
+                object3D.position.set(x, 0, z);
+            } else {
+                object3D.position.set(x, MODULE_HEIGHT, z);
+            }
+            
+            if (def.type !== STATION_TYPES.WALL) {
+                object3D.add(createLabel(scene, def.name, new THREE.Vector3(0,0.5,0), 0));
+            }
+        }
+
+        if (object3D) {
+            scene.add(object3D);
+            currentKitchenObjects.push(object3D);
+            if (def.type !== 'decoration' && def.type !== STATION_TYPES.WALL) {
+                newStations[def.name] = object3D;
+                newStationInteractables.push(object3D);
+            }
+        }
+    });
+
+    return { stations: newStations, stationInteractables: newStationInteractables, floorMesh: currentFloor };
 }
 </file>
 

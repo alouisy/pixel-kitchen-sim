@@ -91,11 +91,48 @@
         <div id="temp-message"></div>
     </div>
 
-    <!-- EDITOR HUD (New) -->
-    <div id="editor-hud" style="display: none; position: absolute; top: 10px; right: 10px; z-index: 20; background: rgba(0,0,0,0.8); padding: 10px; border: 2px solid orange; text-align: right;">
-        <h3 style="color: orange; margin-bottom: 10px;">LEVEL EDITOR</h3>
-        <p style="font-size: 0.8em; color: #ccc; margin-bottom: 10px;">Click obj to select. 'T' to Translate.</p>
-        <button id="editor-export-btn" style="padding: 5px 10px; background: #444; color: white; border: 1px solid white; cursor: pointer;">Export JSON to Console</button>
+    <!-- EDITOR UI CONTAINER -->
+    <div id="editor-ui" style="display: none;">
+        <!-- Top Helper Bar -->
+        <div class="editor-top-bar">
+            <div class="editor-title">🏗️ LEVEL EDITOR MODE</div>
+            <div class="editor-controls-hint">
+                <span><b>Left Click:</b> Select/Place</span> |
+                <span><b>Right Drag:</b> Pan Cam</span> |
+                <span><b>Scroll:</b> Zoom</span> |
+                <span><b>T:</b> Export JSON</span> |
+                <span><b>F1:</b> Exit Editor</span>
+            </div>
+            <button id="editor-export-btn" class="editor-btn small">Export</button>
+        </div>
+
+        <!-- Bottom Library (Visual Picker) -->
+        <div id="editor-library" class="editor-panel bottom-panel">
+            <div class="library-tabs">
+                <button class="tab-btn active" data-category="all">All</button>
+                <button class="tab-btn" data-category="Architecture">Walls/Floors</button>
+                <button class="tab-btn" data-category="Furniture">Furniture</button>
+                <button class="tab-btn" data-category="Stations">Stations</button>
+                <button class="tab-btn" data-category="Sources">Sources</button>
+            </div>
+            <div id="library-content" class="library-grid">
+                <!-- Items injected by JS -->
+            </div>
+        </div>
+
+        <!-- Right Inspector (Context Actions) -->
+        <div id="editor-inspector" class="editor-panel right-panel" style="display: none;">
+            <h3>Selected Object</h3>
+            <div id="inspector-name" class="inspector-field">None</div>
+            <div class="inspector-actions">
+                <button id="btn-rotate" class="editor-action-btn" title="Rotate (R)">🔄 Rotate</button>
+                <button id="btn-clone" class="editor-action-btn" title="Clone (C)">📋 Duplicate</button>
+                <button id="btn-delete" class="editor-action-btn delete" title="Delete (Del)">🗑️ Delete</button>
+            </div>
+            <div class="inspector-coords">
+                X: <span id="val-x">0</span> Z: <span id="val-z">0</span>
+            </div>
+        </div>
     </div>
 
     <!-- Level End Screen -->

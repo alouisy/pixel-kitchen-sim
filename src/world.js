@@ -51,6 +51,10 @@ export function toggleLabels(visible) {
     currentLabels.forEach(s => s.visible = visible);
 }
 
+export function getFloorMesh() {
+    return currentFloor;
+}
+
 function createCounterMesh(isServing) {
     const vb = new VoxelBuilder();
     vb.addBox(1, 0, 1, 14, 1, 14, PALETTE.BLACK);
@@ -85,7 +89,8 @@ function createTableMesh(neighbors) {
     return mesh;
 }
 
-function createCounterPrefab(name, color, isServing) {
+// Exported for Editor use
+export function createCounterPrefab(name, color, isServing) {
     const group = new THREE.Group();
     group.name = name;
     const visual = createCounterMesh(isServing);
@@ -95,7 +100,8 @@ function createCounterPrefab(name, color, isServing) {
     return group;
 }
 
-function createTablePrefab(name, color, neighbors) {
+// Exported for Editor use
+export function createTablePrefab(name, color, neighbors) {
     const group = new THREE.Group();
     group.name = name;
     const visual = createTableMesh(neighbors);
@@ -105,7 +111,8 @@ function createTablePrefab(name, color, neighbors) {
     return group;
 }
 
-function createStationPrefab(def) {
+// Exported for Editor use
+export function createStationPrefab(def) {
     const { name, type, size, color, config } = def;
     const group = new THREE.Group();
     group.name = name;
@@ -151,13 +158,6 @@ function createStationPrefab(def) {
         group.userData.occupiedBy = null;
         if (config?.requiredIngredients) group.userData.internalContents = [];
     }
-    if (type === STATION_TYPES.ASSEMBLY) {
-        group.userData.slots = [null, null, null];
-        const divGeo = new THREE.BoxGeometry(0.02, 0.1, d * 0.9);
-        const divMat = new THREE.MeshStandardMaterial({color:0x333});
-        const d1 = new THREE.Mesh(divGeo, divMat); d1.position.set(-0.5, 0.05, 0); group.add(d1);
-        const d2 = new THREE.Mesh(divGeo, divMat); d2.position.set(0.5, 0.05, 0); group.add(d2);
-    }
     return group;
 }
 
@@ -201,17 +201,43 @@ export function buildKitchen(scene, levelLayout) {
         }
     });
     
-    // Reduced floor size (Radius 5, Diameter 10)
-    const floorSize = 10; 
+    // Reduced floor size 8x8 (matches bounds -3.5 to 3.5 visual padding)
+    const floorSize = 8; 
     const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize);
-    const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
+    
+    // Improved "Kitchen Tile" texture
+    const canvas = document.createElement('canvas'); 
+    canvas.width = 128; 
+    canvas.height = 128;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#E0E0E0'; ctx.fillRect(0,0,64,64);
-    ctx.fillStyle = '#90CAF9'; ctx.fillRect(0,0,32,32); ctx.fillRect(32,32,32,32);
+    
+    // Dark slate background
+    ctx.fillStyle = '#37474F'; 
+    ctx.fillRect(0, 0, 128, 128);
+    
+    // Lighter grey tiles (checkerboard pattern)
+    ctx.fillStyle = '#546E7A'; 
+    ctx.fillRect(0, 0, 64, 64);
+    ctx.fillRect(64, 64, 64, 64);
+    
+    // Border/Grout line effect included by gap logic or simply drawing rectangles slightly smaller?
+    // Let's draw a thin border
+    ctx.strokeStyle = '#263238';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(0,0,128,128);
+    ctx.beginPath();
+    ctx.moveTo(64,0); ctx.lineTo(64,128);
+    ctx.moveTo(0,64); ctx.lineTo(128,64);
+    ctx.stroke();
+
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(floorSize, floorSize); tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter;
-    const floorMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6 });
+    // Repeat per unit (size)
+    tex.repeat.set(floorSize/2, floorSize/2); 
+    tex.magFilter = THREE.NearestFilter; 
+    tex.minFilter = THREE.NearestFilter;
+    
+    const floorMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5, metalness: 0.1 });
     currentFloor = new THREE.Mesh(floorGeo, floorMat);
     currentFloor.rotation.x = -Math.PI / 2; 
     currentFloor.receiveShadow = true;
@@ -254,17 +280,6 @@ export function buildKitchen(scene, levelLayout) {
             if (def.type !== STATION_TYPES.WALL) {
                 object3D.add(createLabel(scene, def.name, new THREE.Vector3(0,0.5,0), 0));
             }
-            
-            if (def.type === STATION_TYPES.ASSEMBLY) {
-                const w = object3D.userData.size.width;
-                const slotW = w / 3;
-                const y = object3D.position.y + object3D.userData.size.height/2;
-                object3D.userData.slotPositions = [
-                    new THREE.Vector3(object3D.position.x - slotW, y, object3D.position.z),
-                    new THREE.Vector3(object3D.position.x, y, object3D.position.z),
-                    new THREE.Vector3(object3D.position.x + slotW, y, object3D.position.z)
-                ];
-            }
         }
 
         if (object3D) {
@@ -278,13 +293,4 @@ export function buildKitchen(scene, levelLayout) {
     });
 
     return { stations: newStations, stationInteractables: newStationInteractables, floorMesh: currentFloor };
-}
-
-export function getAssemblySlotIndex(station, worldX) {
-    const w = station.userData.size.width;
-    const relativeX = worldX - station.position.x;
-    const slotW = w/3;
-    if (relativeX < -slotW/2) return 0;
-    if (relativeX > slotW/2) return 2;
-    return 1;
 }

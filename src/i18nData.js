@@ -25,7 +25,6 @@ export const DATA_TRANSLATIONS = {
         "CuttingBoard": "Cutting Board",
         "Fryer": "Fryer",
         "PlateStack": "Plates",
-        "AssemblyTable": "Assembly",
         "SERVE": "SERVE",
         "Trash": "Trash",
         
@@ -71,7 +70,6 @@ export const DATA_TRANSLATIONS = {
         "CuttingBoard": "Planche",
         "Fryer": "Friteuse",
         "PlateStack": "Assiettes",
-        "AssemblyTable": "Assemblage",
         "SERVE": "SERVIR",
         "Trash": "Poubelle",
 
@@ -116,7 +114,6 @@ export const DATA_TRANSLATIONS = {
         "CuttingBoard": "Tabla",
         "Fryer": "Freidora",
         "PlateStack": "Platos",
-        "AssemblyTable": "Montaje",
         "SERVE": "SERVIR",
         "Trash": "Basura",
 

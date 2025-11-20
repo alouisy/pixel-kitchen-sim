@@ -520,15 +520,192 @@ canvas {
 ::-webkit-scrollbar-thumb { background: #555; border: 2px solid #222; }
 ::-webkit-scrollbar-thumb:hover { background: #777; }
 
-/* Editor HUD */
-#editor-hud {
-    display: none;
+/* =========================================
+   EDITOR UI
+   ========================================= */
+#editor-ui {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 20;
-    background: rgba(0,0,0,0.8);
+    pointer-events: none; /* Allow clicks to pass through empty areas */
+    font-family: 'Courier New', monospace;
+}
+
+.editor-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #555;
+    pointer-events: auto;
+}
+
+.editor-title {
+    color: orange;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.editor-controls-hint {
+    color: #ccc;
+    font-size: 0.8em;
+}
+
+.editor-controls-hint span {
+    margin: 0 10px;
+}
+
+.editor-panel {
+    background: rgba(30, 30, 30, 0.95);
+    border: 2px solid #666;
+    pointer-events: auto;
+}
+
+.bottom-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+}
+
+.library-tabs {
+    display: flex;
+    background: #222;
+    border-bottom: 1px solid #555;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.2s, background 0.2s;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    background: #444;
+}
+
+.tab-btn.active {
+    color: #FFD700;
+    border-bottom: 2px solid #FFD700;
+    background: #333;
+}
+
+.library-grid {
+    flex-grow: 1;
+    overflow-x: auto;
+    display: flex;
+    gap: 10px;
     padding: 10px;
-    border: 2px solid orange;
-    text-align: right;
+    align-items: center;
+}
+
+.library-item {
+    min-width: 90px;
+    height: 90px;
+    background: #444;
+    border: 2px solid #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+    text-align: center;
+    padding: 5px;
+}
+
+.library-item:hover {
+    transform: scale(1.05);
+    border-color: #FFF;
+    background: #555;
+}
+
+.library-item-icon {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.library-item-name {
+    font-size: 0.6em;
+    line-height: 1.2;
+}
+
+.right-panel {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    width: 200px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.right-panel h3 {
+    color: #87CEEB;
+    font-size: 0.9em;
+    border-bottom: 1px solid #555;
+    padding-bottom: 5px;
+}
+
+.inspector-field {
+    background: #222;
+    padding: 5px;
+    font-size: 0.8em;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.inspector-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.editor-action-btn {
+    background: #444;
+    color: white;
+    border: 1px solid #666;
+    padding: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8em;
+    transition: background 0.2s;
+    text-align: left;
+}
+
+.editor-action-btn:hover {
+    background: #666;
+}
+
+.editor-action-btn.delete {
+    background: #622;
+    border-color: #844;
+}
+
+.editor-action-btn.delete:hover {
+    background: #922;
+}
+
+.inspector-coords {
+    font-size: 0.7em;
+    color: #aaa;
+    margin-top: 10px;
+    text-align: center;
 }
