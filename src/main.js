@@ -23,7 +23,8 @@ const GameState = {
     PAUSED: 'PAUSED', 
     VIEWING_INSTRUCTIONS: 'VIEWING_INSTRUCTIONS', 
     LEVEL_END: 'LEVEL_END',
-    EDITOR: 'EDITOR'
+    EDITOR: 'EDITOR',
+    EDITOR_HUB: 'EDITOR_HUB'
 };
 
 let currentGameState = GameState.LOADING;
@@ -33,6 +34,7 @@ const clock = new THREE.Clock();
 
 let scene, camera, renderer, playerControls, player, interactionManager, levelManager, uiManager, menuManager, saveManager, levelEditor, audioManager;
 let levelDatabase = []; 
+let levelDataCache = {}; // Cache level contents: filename/id -> json data
 let pendingLevelIndex = -1;
 let pendingLevelData = null;
 let currentLevelData = null; 
@@ -94,15 +96,16 @@ async function preloadAssets() {
 
 async function loadLevelData() {
     try {
-        const response = await fetch('./levels.json'); 
+        // Load roadmap instead of a giant monolithic file
+        const response = await fetch('levels/game_roadmap.json'); 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         levelDatabase = await response.json();
-        if (!Array.isArray(levelDatabase) || levelDatabase.length === 0) throw new Error("Loaded level data is not a valid non-empty array.");
+        if (!Array.isArray(levelDatabase) || levelDatabase.length === 0) throw new Error("Loaded level roadmap is not a valid non-empty array.");
     } catch (error) {
         console.error("Failed to load level data:", error);
         levelDatabase = [];
         if (uiManager && uiManager.loadingScreen) {
-            uiManager.loadingScreen.innerHTML = `<h2>Error loading level data! Cannot start game.</h2><p>${error.message}</p>`;
+            uiManager.loadingScreen.innerHTML = `<h2>Error loading game roadmap!</h2><p>${error.message}</p>`;
         }
     }
 }
@@ -132,7 +135,10 @@ function initializeGameComponents() {
     interactionManager = new InteractionManager(camera, scene, player, {}, [], levelManager, uiManager, preloadedModels, null);
     interactionManager.audioManager = audioManager;
 
-    levelEditor = new LevelEditor(camera, renderer, scene, interactionManager);
+    // Pass an exit callback to the editor to return to the editor hub
+    levelEditor = new LevelEditor(camera, renderer, scene, interactionManager, () => {
+        changeGameState(GameState.EDITOR_HUB);
+    });
 
     // --- APPLY SAVED SETTINGS ---
     const savedLang = saveManager.getSetting('language') || 'en';
@@ -152,20 +158,17 @@ function initializeGameComponents() {
 function addEventListeners() {
     document.body.addEventListener('mousedown', (event) => {
         audioManager.resume(); 
-        if (isMenuState(currentGameState) && inputCooldownTimer <= 0) {
+        // Allow handling interaction if we are in a menu OR editor hub
+        if ((isMenuState(currentGameState) || currentGameState === GameState.EDITOR_HUB) && inputCooldownTimer <= 0) {
             handleMenuAction(event);
         }
     });
     window.addEventListener('keydown', (e) => {
         audioManager.resume();
-        if (e.key === 'F1') {
-            if (currentGameState === GameState.GAME_RUNNING) changeGameState(GameState.EDITOR);
-            else if (currentGameState === GameState.EDITOR) changeGameState(GameState.GAME_RUNNING);
-        }
+        // Removed F1 toggle, using Editor Exit button now
     });
 
     // --- FIX: Label Toggle Listener ---
-    // Ensure this listener persists state to SaveManager
     const labelToggle = document.getElementById('toggle-labels-setting');
     if (labelToggle) {
         // Clone to clear old listeners if any
@@ -192,10 +195,12 @@ function addEventListeners() {
 
 function changeGameState(newState) {
     const previousState = currentGameState;
-    if (isMenuState(previousState) && !isMenuState(newState)) menuManager.deactivateMenu();
+    if (isMenuState(previousState) && !isMenuState(newState) && newState !== GameState.EDITOR_HUB) menuManager.deactivateMenu();
+    
     if ((previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS) && newState !== GameState.PAUSED && newState !== GameState.VIEWING_INSTRUCTIONS && newState !== GameState.EDITOR) {
         if (playerControls) playerControls.unlock();
     }
+
     if (newState === GameState.EDITOR) {
         if (playerControls) playerControls.unlock();
         uiManager.hideGameUI();
@@ -208,9 +213,19 @@ function changeGameState(newState) {
             camera.rotation.set(0,0,0);
         }
     }
+
     currentGameState = newState;
+    const editorHubScreen = document.getElementById('editor-hub-screen');
+    if (editorHubScreen) editorHubScreen.classList.remove('active');
+
     switch (newState) {
         case GameState.MAIN_MENU: uiManager.showMainMenu(); menuManager.activateMenu(uiManager.mainMenu); break;
+        case GameState.EDITOR_HUB: 
+            uiManager.hideGameUI();
+            renderEditorHub();
+            editorHubScreen.classList.add('active');
+            menuManager.activateMenu(editorHubScreen);
+            break;
         case GameState.SETTINGS:
             const isPause = previousState === GameState.PAUSED || previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS;
             uiManager.showSettings(isPause); menuManager.activateMenu(uiManager.settingsScreen);
@@ -253,16 +268,42 @@ function handleMenuAction(eventOrAction) {
     if (!action || !element) return;
 
     let actionTaken = true;
-    audioManager.play('pop'); 
+    // Only play pop sound for menu clicks, not generic editor clicks if already in editor
+    if (currentGameState !== GameState.EDITOR) audioManager.play('pop'); 
+
+    // --- Editor Hub Actions ---
+    if (currentGameState === GameState.EDITOR_HUB) {
+        const idx = parseInt(element.dataset.index, 10);
+        switch (action) {
+            case 'back-to-main': changeGameState(GameState.MAIN_MENU); break;
+            case 'create-level': createNewLevel(); break;
+            case 'save-roadmap': downloadRoadmap(); break;
+            case 'edit-level': if (!isNaN(idx)) prepareEditLevel(idx); break;
+            case 'move-up': if (!isNaN(idx)) reorderLevel(idx, -1); break;
+            case 'move-down': if (!isNaN(idx)) reorderLevel(idx, 1); break;
+            case 'duplicate': if (!isNaN(idx)) duplicateLevel(idx); break;
+            case 'delete-level': if (!isNaN(idx)) deleteLevel(idx); break;
+            default: actionTaken = false;
+        }
+        if (actionTaken) {
+            inputCooldownTimer = INPUT_COOLDOWN_DURATION;
+            return;
+        }
+    }
 
     switch (action) {
         case 'play': changeGameState(GameState.LEVEL_SELECT); break;
+        case 'editor-hub': changeGameState(GameState.EDITOR_HUB); break; 
         case 'settings': changeGameState(GameState.SETTINGS); break;
         case 'back-to-main': changeGameState(GameState.MAIN_MENU); break;
         case 'start-level':
             const levelIndex = parseInt(element.dataset.levelIndex, 10);
-            if (!isNaN(levelIndex) && saveManager.isLevelUnlocked(levelIndex)) prepareStartLevel(levelIndex);
-            else { if (!isNaN(levelIndex)) uiManager.showTemporaryMessage("Level Locked!", 1500); actionTaken = false; }
+            if (!isNaN(levelIndex) && saveManager.isLevelUnlocked(levelIndex)) {
+                prepareStartLevel(levelIndex);
+            } else { 
+                if (!isNaN(levelIndex)) uiManager.showTemporaryMessage("Level Locked!", 1500); 
+                actionTaken = false; 
+            }
             break;
         case 'start-level-confirm':
             if (currentGameState === GameState.LEVEL_INSTRUCTIONS) { confirmStartLevel(); audioManager.play('music_start'); } else actionTaken = false;
@@ -291,20 +332,196 @@ function handleMenuAction(eventOrAction) {
     if (actionTaken) inputCooldownTimer = INPUT_COOLDOWN_DURATION;
 }
 
-function prepareStartLevel(levelIndex) {
+// --- Editor Hub Logic ---
+
+function renderEditorHub() {
+    const container = document.getElementById('editor-level-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    levelDatabase.forEach((level, index) => {
+        const row = document.createElement('div');
+        row.className = 'editor-level-row';
+        row.innerHTML = `
+            <div class="editor-level-actions">
+                <button class="icon-btn" data-action="move-up" data-index="${index}" title="Move Up">▲</button>
+                <button class="icon-btn" data-action="move-down" data-index="${index}" title="Move Down">▼</button>
+            </div>
+            <div class="editor-level-info">
+                <span class="level-name-display">${level.name}</span>
+                <span class="level-id-badge">ID: ${level.levelId} | File: ${level.filename || 'unsaved'}</span>
+            </div>
+            <div class="editor-level-actions">
+                <button class="icon-btn" data-action="edit-level" data-index="${index}" title="Edit">✏️</button>
+                <button class="icon-btn" data-action="duplicate" data-index="${index}" title="Duplicate">📋</button>
+                <button class="icon-btn delete" data-action="delete-level" data-index="${index}" title="Delete">🗑️</button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+function createNewLevel() {
+    const newId = levelDatabase.length > 0 ? Math.max(...levelDatabase.map(l => l.levelId)) + 1 : 1;
+    const filename = `level_${newId}.json`;
+    const newEntry = {
+        levelId: newId,
+        name: `New Level ${newId}`,
+        filename: filename
+    };
+    
+    // Create default content in cache
+    levelDataCache[filename] = {
+        levelId: newId,
+        name: `New Level ${newId}`,
+        duration: 180,
+        starThresholds: [100, 200, 300],
+        availableMeals: [],
+        maxActiveOrders: 2,
+        newOrderDelay: 15,
+        layout: []
+    };
+
+    levelDatabase.push(newEntry);
+    renderEditorHub();
+}
+
+function reorderLevel(index, direction) {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= levelDatabase.length) return;
+    
+    // Swap
+    const temp = levelDatabase[index];
+    levelDatabase[index] = levelDatabase[newIndex];
+    levelDatabase[newIndex] = temp;
+    
+    renderEditorHub();
+}
+
+function deleteLevel(index) {
+    if (!confirm("Delete this level reference? (Files cannot be deleted by web browser)")) return;
+    levelDatabase.splice(index, 1);
+    renderEditorHub();
+}
+
+// Fetch logic helper
+async function getLevelData(entry) {
+    // Check cache first
+    if (levelDataCache[entry.filename]) {
+        return JSON.parse(JSON.stringify(levelDataCache[entry.filename])); // Deep copy
+    }
+    
+    // Fetch from server
+    try {
+        const res = await fetch(`levels/${entry.filename}`);
+        if (!res.ok) throw new Error("File not found");
+        const data = await res.json();
+        levelDataCache[entry.filename] = data; // Cache it
+        return data;
+    } catch (e) {
+        console.warn(`Could not load ${entry.filename}, creating empty template.`);
+        const tmpl = { levelId: entry.levelId, name: entry.name, layout: [] };
+        levelDataCache[entry.filename] = tmpl;
+        return tmpl;
+    }
+}
+
+async function duplicateLevel(index) {
+    const sourceEntry = levelDatabase[index];
+    const sourceData = await getLevelData(sourceEntry);
+    
+    const newId = Math.max(...levelDatabase.map(l => l.levelId)) + 1;
+    const newFilename = `level_${newId}.json`;
+    
+    // Clone data
+    const newData = JSON.parse(JSON.stringify(sourceData));
+    newData.levelId = newId;
+    newData.name = `${sourceData.name} (Copy)`;
+    
+    // Update Roadmap
+    const newEntry = {
+        levelId: newId,
+        name: newData.name,
+        filename: newFilename
+    };
+    levelDatabase.push(newEntry);
+    
+    // Update Cache
+    levelDataCache[newFilename] = newData;
+    
+    renderEditorHub();
+}
+
+async function prepareEditLevel(index) {
+    const entry = levelDatabase[index];
+    uiManager.showLoading();
+    try {
+        const data = await getLevelData(entry);
+        
+        resetWorldState();
+        clearKitchen(scene);
+        
+        // Use builder to show current state
+        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, data.layout || [], preloadedModels);
+        interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
+        
+        // Initialize Editor with this data
+        levelEditor.loadLevel(data);
+        
+        uiManager.hideLoading();
+        changeGameState(GameState.EDITOR);
+    } catch (e) {
+        console.error(e);
+        uiManager.hideLoading();
+        alert("Failed to load level for editing");
+    }
+}
+
+function downloadRoadmap() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(levelDatabase, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "game_roadmap.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    alert("Roadmap downloaded. Overwrite levels/game_roadmap.json in your project.");
+}
+
+// --- Game Load Logic ---
+
+// Converted to async to handle fetching individual level files
+async function prepareStartLevel(levelIndex) {
     if (!levelManager || !interactionManager || !scene || !uiManager) { changeGameState(GameState.MAIN_MENU); return; }
     if (levelIndex < 0 || levelIndex >= levelDatabase.length) { changeGameState(GameState.LEVEL_SELECT); return; }
-    resetWorldState();
-    clearKitchen(scene);
-    const levelData = levelDatabase[levelIndex];
-    // Pass preloadedModels to buildKitchen so preplaced items can be instantiated
-    const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout, preloadedModels);
-    interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
-    pendingLevelIndex = levelIndex;
-    pendingLevelData = levelData;
-    currentLevelData = null; 
-    uiManager.showLevelInstructions(levelData, false);
-    changeGameState(GameState.LEVEL_INSTRUCTIONS);
+    
+    uiManager.showLoading();
+    
+    try {
+        const levelEntry = levelDatabase[levelIndex];
+        // Fetch specific level data
+        const levelData = await getLevelData(levelEntry);
+
+        resetWorldState();
+        clearKitchen(scene);
+        
+        // Pass preloadedModels to buildKitchen so preplaced items can be instantiated
+        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout, preloadedModels);
+        interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
+        
+        pendingLevelIndex = levelIndex;
+        pendingLevelData = levelData;
+        currentLevelData = null; 
+        
+        uiManager.hideLoading();
+        uiManager.showLevelInstructions(levelData, false);
+        changeGameState(GameState.LEVEL_INSTRUCTIONS);
+    } catch (e) {
+        console.error(e);
+        uiManager.hideLoading();
+        uiManager.showTemporaryMessage("Error loading level", 2000);
+        changeGameState(GameState.LEVEL_SELECT);
+    }
 }
 
 function confirmStartLevel() {
@@ -371,6 +588,13 @@ function animate() {
         pausePressed = playerControls.consumePauseToggleRequest(); 
         instructionPressed = playerControls.consumeInstructionToggleRequest(); 
     }
+    
+    // Handle gamepad in editor hub
+    if (currentGameState === GameState.EDITOR_HUB && activeGamepad && inputCooldownTimer <= 0) {
+        const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); 
+        if (menuAction) handleMenuAction(menuAction);
+    }
+
     if (currentGameState === GameState.GAME_RUNNING) {
         if (pausePressed) { pauseGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
         if (instructionPressed) { changeGameState(GameState.VIEWING_INSTRUCTIONS); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
@@ -394,6 +618,7 @@ function animate() {
     else if (currentGameState === GameState.VIEWING_INSTRUCTIONS) { if (instructionPressed || pausePressed) { resumeGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; } }
     else if (currentGameState === GameState.EDITOR) { levelEditor.update(delta); renderer.render(scene, camera); return; }
     else if (isMenuState(currentGameState)) { if (inputCooldownTimer <= 0 && activeGamepad) { const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); if (menuAction) handleMenuAction(menuAction); } }
+    
     if (currentGameState !== GameState.EDITOR) renderer.render(scene, camera);
 }
 

@@ -3,16 +3,21 @@ import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT } from './constants.js';
 import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh } from './world.js';
+import { RECIPES } from './gameData.js';
 
 export class LevelEditor {
-    constructor(camera, renderer, scene, interactionManager) {
+    constructor(camera, renderer, scene, interactionManager, onExit) {
         this.camera = camera;
         this.renderer = renderer;
         this.scene = scene;
         this.interactionManager = interactionManager;
+        this.onExit = onExit;
         this.enabled = false;
         this.raycaster = new THREE.Raycaster();
         
+        // Loaded Level Metadata
+        this.currentLevelData = {};
+
         // State
         this.selectedObject = null;
         this.ghostObject = null; // Object currently being placed
@@ -48,6 +53,9 @@ export class LevelEditor {
         this.inspectorX = document.getElementById('val-x');
         this.inspectorZ = document.getElementById('val-z');
 
+        // Meta Modal
+        this.metaModal = document.getElementById('editor-meta-modal');
+
         this._initUI();
         this._bindEvents();
     }
@@ -55,6 +63,15 @@ export class LevelEditor {
     _initUI() {
         // Populate Library
         this._renderLibrary('all');
+
+        // Populate Meals for Meta
+        const mealsSelect = document.getElementById('meta-meals');
+        Object.keys(RECIPES).forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r;
+            opt.textContent = r;
+            mealsSelect.appendChild(opt);
+        });
 
         // Bind Tab Switching
         const tabs = document.querySelectorAll('.tab-btn');
@@ -71,6 +88,18 @@ export class LevelEditor {
         document.getElementById('btn-clone').addEventListener('click', () => this.cloneSelected());
         document.getElementById('btn-delete').addEventListener('click', () => this.deleteSelected());
         document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLayout());
+        document.getElementById('editor-exit-btn').addEventListener('click', () => {
+            if (this.onExit) this.onExit();
+        });
+
+        // Meta Button
+        document.getElementById('editor-meta-btn').addEventListener('click', () => {
+            this.openMetaModal();
+        });
+        document.getElementById('meta-close-btn').addEventListener('click', () => {
+            this.saveMetaFromModal();
+            this.metaModal.style.display = 'none';
+        });
 
         // Bind Config Editor
         this.inspectorConfig = document.getElementById('inspector-config');
@@ -119,7 +148,7 @@ export class LevelEditor {
         // Keyboard Shortcuts
         window.addEventListener('keydown', (e) => {
             if (!this.enabled) return;
-            // Do not trigger shortcuts if user is typing in textarea
+            // Do not trigger shortcuts if user is typing in textarea or inputs
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
 
             switch(e.key.toLowerCase()) {
@@ -142,6 +171,14 @@ export class LevelEditor {
                     break;
             }
         });
+    }
+
+    // Called when opening editor for a specific level
+    loadLevel(levelData) {
+        // We store the metadata locally. The 3D objects are already added by main.js using buildKitchen
+        // We just need to sync our internal state.
+        this.currentLevelData = JSON.parse(JSON.stringify(levelData)); // Deep copy
+        document.getElementById('editor-current-level-name').textContent = levelData.name || "Untitled";
     }
 
     enable() {
@@ -183,6 +220,43 @@ export class LevelEditor {
             this.selectionBox.update();
             this._updateInspectorData();
         }
+    }
+
+    // --- Meta Modal ---
+
+    openMetaModal() {
+        this.metaModal.style.display = 'flex';
+        const d = this.currentLevelData;
+        document.getElementById('meta-name').value = d.name || "";
+        document.getElementById('meta-duration').value = d.duration || 180;
+        document.getElementById('meta-delay').value = d.newOrderDelay || 15;
+        document.getElementById('meta-max-orders').value = d.maxActiveOrders || 2;
+        document.getElementById('meta-star1').value = d.starThresholds ? d.starThresholds[0] : 100;
+        document.getElementById('meta-star2').value = d.starThresholds ? d.starThresholds[1] : 200;
+        document.getElementById('meta-star3').value = d.starThresholds ? d.starThresholds[2] : 300;
+        
+        const mealsSelect = document.getElementById('meta-meals');
+        Array.from(mealsSelect.options).forEach(opt => {
+            opt.selected = d.availableMeals ? d.availableMeals.includes(opt.value) : false;
+        });
+    }
+
+    saveMetaFromModal() {
+        const d = this.currentLevelData;
+        d.name = document.getElementById('meta-name').value;
+        d.duration = parseInt(document.getElementById('meta-duration').value);
+        d.newOrderDelay = parseInt(document.getElementById('meta-delay').value);
+        d.maxActiveOrders = parseInt(document.getElementById('meta-max-orders').value);
+        d.starThresholds = [
+            parseInt(document.getElementById('meta-star1').value),
+            parseInt(document.getElementById('meta-star2').value),
+            parseInt(document.getElementById('meta-star3').value),
+        ];
+        
+        const mealsSelect = document.getElementById('meta-meals');
+        d.availableMeals = Array.from(mealsSelect.selectedOptions).map(opt => opt.value);
+
+        document.getElementById('editor-current-level-name').textContent = d.name;
     }
 
     // --- Core Logic ---
@@ -458,7 +532,7 @@ export class LevelEditor {
     // --- Export ---
 
     exportLayout() {
-        const data = [];
+        const layout = [];
         this.scene.traverse(c => {
             if (c.parent === this.scene && c.userData && (c.userData.type === 'station' || c.userData.type === 'counter')) {
                 const entry = {
@@ -472,11 +546,6 @@ export class LevelEditor {
                     entry.rotation = parseFloat(c.rotation.y.toFixed(2));
                 }
 
-                // Check Y position to see if it's stacked (optional context)
-                // Generally we export X/Z. Game logic snaps Y based on type.
-                // But if we support custom stacking, we might need Y or "onTop" logic.
-                // For now, the game engine assumes stations are at MODULE_HEIGHT if not walls.
-                
                 if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
                 if (c.userData.template?.color) entry.color = c.userData.template.color;
                 if (c.userData.isServing) entry.isServing = true;
@@ -489,12 +558,25 @@ export class LevelEditor {
                     entry.config = c.userData.template.config;
                 }
 
-                data.push(entry);
+                layout.push(entry);
             }
         });
         
-        console.log("--- LEVEL JSON EXPORT ---");
-        console.log(JSON.stringify(data, null, 2));
-        alert("Layout JSON exported to Console (F12)");
+        // Update current level data with new layout
+        this.currentLevelData.layout = layout;
+        
+        const jsonStr = JSON.stringify(this.currentLevelData, null, 2);
+        const fileName = `level_${this.currentLevelData.levelId || 'custom'}.json`;
+
+        // Trigger Download
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", fileName);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        
+        alert(`Level Exported! Replace the file in 'levels/${fileName}' to persist changes.`);
     }
 }

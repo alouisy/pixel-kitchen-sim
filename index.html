@@ -31,6 +31,7 @@
         <h1>Pixel Kitchen Sim</h1>
         <div class="menu-container">
             <button id="play-button" class="menu-button" data-action="play">Play</button>
+            <button id="editor-button" class="menu-button" data-action="editor-hub">Level Editor</button>
             <button id="settings-button" class="menu-button" data-action="settings">Settings</button>
             <div id="credits">
                 <p>A Game By [Your Name/Studio]</p>
@@ -42,6 +43,19 @@
             </div>
         </div>
         <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+    </div>
+
+    <!-- Editor Hub (New) -->
+    <div id="editor-hub-screen" class="overlay menu-screen">
+        <h1>Level Manager</h1>
+        <div class="editor-toolbar">
+            <button class="menu-button small" data-action="create-level">➕ New Level</button>
+            <button class="menu-button small" data-action="save-roadmap">💾 Download Roadmap</button>
+        </div>
+        <div id="editor-level-list" class="menu-container level-list-editor">
+            <!-- List items injected by JS -->
+        </div>
+        <button class="menu-button" data-action="back-to-main">Back to Menu</button>
     </div>
 
     <!-- Settings Screen -->
@@ -95,15 +109,37 @@
     <div id="editor-ui" style="display: none;">
         <!-- Top Helper Bar -->
         <div class="editor-top-bar">
-            <div class="editor-title">🏗️ LEVEL EDITOR MODE</div>
+            <div class="editor-title">🏗️ LEVEL EDITOR: <span id="editor-current-level-name">Untitled</span></div>
             <div class="editor-controls-hint">
-                <span><b>Left Click:</b> Select/Place</span> |
-                <span><b>Right Drag:</b> Pan Cam</span> |
-                <span><b>Scroll:</b> Zoom</span> |
-                <span><b>T:</b> Export JSON</span> |
-                <span><b>F1:</b> Exit Editor</span>
+                <span><b>Left Click:</b> Place</span> |
+                <span><b>Right Drag:</b> Pan</span> |
+                <span><b>T:</b> Save JSON</span>
             </div>
-            <button id="editor-export-btn" class="editor-btn small">Export</button>
+            <div class="editor-top-actions">
+                <button id="editor-meta-btn" class="editor-action-btn small">⚙️ Level Settings</button>
+                <button id="editor-export-btn" class="editor-action-btn small">💾 Save JSON</button>
+                <button id="editor-exit-btn" class="editor-action-btn small delete">Exit</button>
+            </div>
+        </div>
+
+        <!-- Level Metadata Modal (Hidden by default) -->
+        <div id="editor-meta-modal" class="editor-panel center-panel" style="display: none;">
+            <h3>Level Settings</h3>
+            <div class="meta-row"><label>Name:</label> <input type="text" id="meta-name"></div>
+            <div class="meta-row"><label>Duration (s):</label> <input type="number" id="meta-duration"></div>
+            <div class="meta-row"><label>Delay (s):</label> <input type="number" id="meta-delay"></div>
+            <div class="meta-row"><label>Max Orders:</label> <input type="number" id="meta-max-orders"></div>
+            <div class="meta-row"><label>1 Star:</label> <input type="number" id="meta-star1"></div>
+            <div class="meta-row"><label>2 Stars:</label> <input type="number" id="meta-star2"></div>
+            <div class="meta-row"><label>3 Stars:</label> <input type="number" id="meta-star3"></div>
+            <div class="meta-row">
+                <label>Meals:</label>
+                <select id="meta-meals" multiple size="4">
+                    <!-- Populated by JS -->
+                </select>
+            </div>
+            <p style="font-size:0.6em; color:#aaa;">Hold Ctrl to select multiple meals.</p>
+            <button id="meta-close-btn" class="editor-action-btn">Close</button>
         </div>
 
         <!-- Bottom Library (Visual Picker) -->

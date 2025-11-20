@@ -95,6 +95,11 @@ canvas {
     transform: scale(0.98);
 }
 
+.menu-button.small {
+    font-size: 0.8em;
+    padding: 5px 10px;
+}
+
 .menu-hint {
     margin-top: 20px;
     font-size: 0.8em;
@@ -220,6 +225,71 @@ canvas {
     color: #F00;
     font-weight: bold;
 }
+
+/* =========================================
+   EDITOR HUB
+   ========================================= */
+
+.editor-toolbar {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 10px;
+}
+
+.level-list-editor {
+    width: 100%;
+    max-width: 700px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.editor-level-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #333;
+    border: 2px solid #555;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+.editor-level-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.level-id-badge {
+    font-size: 0.6em;
+    color: #888;
+}
+
+.editor-level-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.icon-btn {
+    background: #444;
+    border: 1px solid #666;
+    color: #fff;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 0.8em;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover { background: #666; }
+.icon-btn.delete:hover { background: #A33; }
 
 /* =========================================
    IN-GAME HUD & ORDERS (OVERCOOKED STYLE)
@@ -569,6 +639,42 @@ canvas {
     pointer-events: auto;
 }
 
+.center-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 300px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    z-index: 30;
+}
+
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.meta-row label {
+    font-size: 0.8em;
+    color: #ddd;
+    margin-right: 10px;
+}
+
+.meta-row input, .meta-row select {
+    background: #111;
+    border: 1px solid #555;
+    color: white;
+    padding: 5px;
+    font-family: inherit;
+    width: 150px;
+}
+
+
 .bottom-panel {
     position: absolute;
     bottom: 20px;
@@ -711,11 +817,15 @@ canvas {
     font-family: inherit;
     font-size: 0.8em;
     transition: background 0.2s;
-    text-align: left;
+    text-align: center;
 }
 
 .editor-action-btn:hover {
     background: #666;
+}
+
+.editor-action-btn.small {
+    padding: 5px 10px;
 }
 
 .editor-action-btn.delete {
