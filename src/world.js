@@ -6,9 +6,11 @@ import {
     VoxelBuilder, PALETTE, 
     createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, createStoveMesh, createSinkMesh, 
     createIngredientBinMesh, createPlateStackMesh, createCupStackMesh, createBowlStackMesh,
-    createToasterMesh, createMixerMesh, createBlenderMesh, createDoughPressMesh, createPizzaOvenMesh 
+    createToasterMesh, createMixerMesh, createBlenderMesh, createDoughPressMesh, createPizzaOvenMesh,
+    createItemMesh
 } from './voxelBuilder.js';
 import { getTrans } from './i18nData.js';
+import { createItem } from './items.js';
 
 let currentKitchenObjects = [];
 let currentLabels = [];
@@ -152,6 +154,13 @@ export function createStationPrefab(def) {
         else if (config?.item === 'bowl') mesh = createBowlStackMesh();
         else mesh = createPlateStackMesh(); // Fallback
     } 
+    else if (type === STATION_TYPES.PREPLACED_ITEM) {
+        // For the editor/ghost, we just want a visual representation.
+        // We use createItemMesh directly.
+        mesh = createItemMesh(config?.item || 'plate');
+        // Shift Y to bottom to match station origin expectations
+        mesh.position.y = 0; 
+    }
     else if (n.includes('fryer')) {
         mesh = createFryerMesh();
     } 
@@ -228,7 +237,7 @@ export function clearKitchen(scene) {
     }
 }
 
-export function buildKitchen(scene, levelLayout) {
+export function buildKitchen(scene, levelLayout, preloadedModels) {
     clearKitchen(scene);
     const newStations = {};
     const newStationInteractables = [];
@@ -308,6 +317,24 @@ export function buildKitchen(scene, levelLayout) {
             object3D.position.set(x, 0, z);
             object3D.userData.grid.originX = x - (GRID_UNIT/2);
             object3D.userData.grid.originZ = z - (GRID_UNIT/2);
+
+        } else if (def.type === STATION_TYPES.PREPLACED_ITEM) {
+            // Special Case: Create a dynamic item instead of a station
+            // This item will be pickup-able immediately
+            const item = createItem(scene, def.config.item, preloadedModels);
+            
+            // Adjust position to sit on top of counters (which are at y=0.9)
+            // Or use floor level if no counter under it? Assuming placement on counters for now.
+            // The level layout usually puts items where counters are.
+            // Voxel items have origin at bottom.
+            item.position.set(x, MODULE_HEIGHT + 0.01, z);
+            
+            if (def.rotation) item.rotation.y = def.rotation;
+            
+            currentKitchenObjects.push(item);
+            newStationInteractables.push(item);
+            // Do NOT add to newStations, as it's not a fixed machine
+            object3D = null; 
 
         } else if (Object.values(STATION_TYPES).includes(def.type)) {
             object3D = createStationPrefab(def);

@@ -19,7 +19,8 @@ export const STATION_TYPES = {
     TABLE: 'table',     // With smart legs
     FLOOR: 'floor',
     TRASH: 'trash',
-    WALL: 'wall'
+    WALL: 'wall',
+    PREPLACED_ITEM: 'preplaced_item' // New type for individual items
 };
 
 export const ITEM_TYPES = {
@@ -63,6 +64,11 @@ export const CATALOG_ITEMS = [
     { name: "Serving Pass", type: STATION_TYPES.SERVING, category: "Furniture", isServing: true },
     { name: "Table", type: STATION_TYPES.TABLE, category: "Furniture", color: "#CCCCCC" },
     { name: "Trash Bin", type: STATION_TYPES.TRASH, category: "Furniture", size: { width: 0.5, depth: 0.5 } },
+
+    // --- ITEMS (Single Placeable) ---
+    { name: "Plate (Single)", type: STATION_TYPES.PREPLACED_ITEM, category: "Items", size: { width: 0.5, depth: 0.5 }, config: { item: "plate" } },
+    { name: "Bowl (Single)", type: STATION_TYPES.PREPLACED_ITEM, category: "Items", size: { width: 0.5, depth: 0.5 }, config: { item: "bowl" } },
+    { name: "Cup (Single)", type: STATION_TYPES.PREPLACED_ITEM, category: "Items", size: { width: 0.5, depth: 0.5 }, config: { item: "cup" } },
 
     // --- PROCESSORS (APPLIANCES) ---
     { name: "Cutting Board", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#DEB887", config: { processes: ["potato", "tomato", "lettuce", "onion", "banana", "strawberry", "raw_chicken"], result: { "potato": "raw_fries", "tomato": "chopped_tomato", "lettuce": "chopped_lettuce", "onion": "onion_rings_raw", "banana": "sliced_banana", "strawberry": "sliced_strawberry", "raw_chicken": "raw_chicken_strips" } } },

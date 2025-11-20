@@ -297,7 +297,8 @@ function prepareStartLevel(levelIndex) {
     resetWorldState();
     clearKitchen(scene);
     const levelData = levelDatabase[levelIndex];
-    const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout);
+    // Pass preloadedModels to buildKitchen so preplaced items can be instantiated
+    const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout, preloadedModels);
     interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
     pendingLevelIndex = levelIndex;
     pendingLevelData = levelData;

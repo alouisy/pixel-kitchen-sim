@@ -94,6 +94,7 @@ export class LevelEditor {
             else if(item.type.includes('processor')) icon = '🍳';
             else if(item.type.includes('source')) icon = '🧺';
             else if(item.isServing) icon = '🛎️';
+            else if(item.category === 'Items') icon = '🍽️';
 
             el.innerHTML = `
                 <div class="library-item-icon">${icon}</div>
@@ -239,7 +240,7 @@ export class LevelEditor {
         } else if (t.type === STATION_TYPES.TABLE) {
             obj = createTablePrefab(t.name, fakeColor, {n:false, s:false, e:false, w:false});
         } else {
-            // Generic Station / Wall / Source
+            // Generic Station / Wall / Source / Preplaced Item
             const def = {
                 name: t.name,
                 type: t.type,
@@ -362,6 +363,7 @@ export class LevelEditor {
             const candidates = [];
             this.scene.traverse(c => {
                 // Find root objects
+                // Also enable selecting PREPLACED_ITEM types
                 if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.stationType)) {
                     candidates.push(c);
                 }
