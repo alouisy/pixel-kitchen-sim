@@ -1,5 +1,5 @@
 // src/ui.js
-import { getRecipeDetails, RECIPES } from './gameData.js'; 
+import { getRecipeDetails, getRecipeIngredients, RECIPES } from './gameData.js'; 
 import { getTrans } from './i18nData.js';
 
 function formatTime(seconds) {
@@ -178,7 +178,6 @@ export class UIManager {
     
     showTemporaryMessage(messageKey, duration = 2000) {
         let messageText = getTrans(messageKey, this.currentLanguage); 
-        // Fallback if getTrans returned key but UI text has mapping
         if (messageText === messageKey && this.uiText[this.currentLanguage][messageKey]) {
              messageText = this.uiText[this.currentLanguage][messageKey];
         }
@@ -191,15 +190,41 @@ export class UIManager {
         }, duration);
     }
 
+    // Updated Order Card Logic for Overcooked-style UI
     addOrderCard(orderId, mealName, timeLimit) {
         const card = document.createElement('div');
-        card.className = 'order-card'; card.id = orderId; 
-        const mealSpan = document.createElement('span');
-        mealSpan.className = 'order-meal'; 
-        mealSpan.textContent = getTrans(mealName, this.currentLanguage); // Translate order name
-        const timerSpan = document.createElement('span');
-        timerSpan.className = 'order-timer'; timerSpan.textContent = formatTime(timeLimit);
-        card.appendChild(mealSpan); card.appendChild(timerSpan);
+        card.className = 'order-card'; 
+        card.id = orderId;
+        card.dataset.maxTime = timeLimit; // Store max time for calculation
+
+        // 1. Timer Bar (Top)
+        const timerContainer = document.createElement('div');
+        timerContainer.className = 'order-timer-container';
+        const timerBar = document.createElement('div');
+        timerBar.className = 'order-timer-bar';
+        timerContainer.appendChild(timerBar);
+        card.appendChild(timerContainer);
+
+        // 2. Header (Meal Name)
+        const header = document.createElement('div');
+        header.className = 'order-header';
+        header.textContent = getTrans(mealName, this.currentLanguage);
+        card.appendChild(header);
+
+        // 3. Ingredient List
+        const ingredientsContainer = document.createElement('div');
+        ingredientsContainer.className = 'order-ingredients';
+        
+        const ingredients = getRecipeIngredients(mealName) || [];
+        ingredients.forEach(ing => {
+            const ingEl = document.createElement('div');
+            ingEl.className = 'ingredient-item';
+            // Use shorter translation or mapping if available, for now standard translation
+            ingEl.textContent = getTrans(ing, this.currentLanguage);
+            ingredientsContainer.appendChild(ingEl);
+        });
+        card.appendChild(ingredientsContainer);
+
         this.orderListElement.appendChild(card);
         return card;
     }
@@ -207,18 +232,36 @@ export class UIManager {
     updateOrderCardTimer(orderId, seconds) {
         const card = document.getElementById(orderId);
         if (card) {
-            const timerSpan = card.querySelector('.order-timer');
-            if (timerSpan) {
-                timerSpan.textContent = formatTime(seconds);
-                if (seconds <= 15 && seconds > 0) { timerSpan.classList.add('low-time'); timerSpan.style.color = 'red'; } 
-                else { timerSpan.classList.remove('low-time'); timerSpan.style.color = '#FFD700'; }
+            const maxTime = parseFloat(card.dataset.maxTime) || seconds;
+            const percentage = Math.max(0, Math.min(100, (seconds / maxTime) * 100));
+            
+            const bar = card.querySelector('.order-timer-bar');
+            if (bar) {
+                bar.style.width = `${percentage}%`;
+                
+                // Color states
+                if (percentage > 50) {
+                    bar.style.backgroundColor = '#4CAF50'; // Green
+                    card.classList.remove('critical');
+                } else if (percentage > 25) {
+                    bar.style.backgroundColor = '#FFC107'; // Yellow
+                    card.classList.remove('critical');
+                } else {
+                    bar.style.backgroundColor = '#D32F2F'; // Red
+                    card.classList.add('critical'); // Adds shake animation
+                }
             }
         }
     }
 
     removeOrderCard(orderId) {
         const card = document.getElementById(orderId);
-        if (card) { card.style.transform = 'translateX(-120%)'; setTimeout(() => card.remove(), 300); }
+        if (card) { 
+            // Slide up animation
+            card.style.transform = 'translateY(-120%)'; 
+            card.style.opacity = '0';
+            setTimeout(() => card.remove(), 400); 
+        }
     }
 
     clearOrderList() { this.orderListElement.innerHTML = ''; }
@@ -269,7 +312,7 @@ export class UIManager {
         document.getElementById('restart-level-button').textContent = this.uiText[lang].restartLevel;
         document.getElementById('level-end-main-menu-button').textContent = this.uiText[lang].mainMenu;
         document.querySelector('#game-timer-container').firstChild.textContent = this.uiText[lang].levelTime + ": ";
-        document.querySelector('#bottom-hud').firstChild.textContent = this.uiText[lang].holding + ": ";
+        // document.querySelector('#bottom-hud').firstChild.textContent = this.uiText[lang].holding + ": "; // Removed hardcoded prefix
         this.loadingScreen.querySelector('h2').textContent = this.uiText[lang].loading;
         
         if(this.instructionsTitle) this.instructionsTitle.textContent = this.uiText[lang].levelInstructions || "Level Instructions";
@@ -289,6 +332,10 @@ export class UIManager {
         if (this.activeScreen === this.levelInstructionsScreen && typeof currentLevelData !== 'undefined' && currentLevelData) {
              this.showLevelInstructions(currentLevelData, true); 
         }
+        
+        // Update holding display immediately to reflect language change
+        const holdingEl = document.getElementById('holding-display');
+        if(holdingEl) this.updateHolding(holdingEl.dataset.rawItem);
     }
 
     getLabelToggleState() { return this.toggleLabelsCheckbox.checked; }

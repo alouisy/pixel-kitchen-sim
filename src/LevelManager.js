@@ -36,10 +36,6 @@ export class LevelManager {
             if (this.onGameEnd) this.onGameEnd();
             return false;
         }
-        // Optional sanity check
-        // if (levelData.levelId !== levelIndex + 1) {
-        //      console.warn(`Level index ${levelIndex} does not match levelId ${levelData.levelId} in data.`);
-        // }
 
         // Reset internal state
         this.currentLevelIndex = levelIndex;
@@ -57,9 +53,7 @@ export class LevelManager {
         this.newOrderTimer = 0; // Reset delay timer
 
         console.log(`Loading Level ${this.currentLevelData.levelId}: ${this.currentLevelData.name}`);
-        console.log(` - Available Meals: ${this.availableMeals.join(', ')}`);
-        console.log(` - Max Orders: ${this.maxActiveOrders}, Delay: ${this.newOrderDelay}s`);
-
+        
         this.uiManager.updateScore(this.currentScore);
         this.uiManager.updateLevelTimer(this.levelTimer);
         this.uiManager.clearOrderList();
@@ -95,6 +89,7 @@ export class LevelManager {
         };
 
         this.activeOrders.set(orderId, newOrder);
+        // Pass timeLimit as maxTime for progress bar calculation
         this.uiManager.addOrderCard(orderId, mealName, newOrder.timer);
         console.log(`Generated new order: ${mealName} (ID: ${orderId})`);
 
@@ -141,8 +136,8 @@ export class LevelManager {
                 let penalty = 25; this.currentScore -= penalty;
                 this.currentScore = Math.max(0, this.currentScore);
                 this.uiManager.updateScore(this.currentScore);
-                this.uiManager.showTemporaryMessage('wrongOrder');
-            } else { this.uiManager.showTemporaryMessage('wrongOrder'); }
+                this.uiManager.showTemporaryMessage('Wrong / No Order!');
+            } else { this.uiManager.showTemporaryMessage('Wrong / No Order!'); }
             return false;
         }
 

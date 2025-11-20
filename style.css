@@ -8,16 +8,10 @@
 body {
     overflow: hidden;
     font-family: 'Press Start 2P', monospace;
-    /* Use your pixel font */
     background-color: #222;
-    /* Dark background */
     color: #FFF;
-    /* Prevents text selection */
     user-select: none;
     -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    /* Helps pixel fonts render sharply */
     image-rendering: pixelated;
     font-smooth: never;
     -webkit-font-smoothing: none;
@@ -25,7 +19,6 @@ body {
 
 canvas {
     display: block;
-    /* Remove extra space below canvas */
     position: absolute;
     top: 0;
     left: 0;
@@ -40,9 +33,7 @@ canvas {
     width: 100%;
     height: 100%;
     background-color: rgba(20, 20, 30, 0.95);
-    /* Dark semi-transparent */
     display: none;
-    /* Hidden by default */
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -53,7 +44,6 @@ canvas {
 
 .overlay.active {
     display: flex;
-    /* Show active overlay */
 }
 
 /* Menu Screens General Styling */
@@ -61,7 +51,6 @@ canvas {
     font-size: 2.5em;
     margin-bottom: 30px;
     color: #FFD700;
-    /* Gold-ish color */
     text-shadow: 2px 2px #000;
 }
 
@@ -69,20 +58,15 @@ canvas {
     background-color: rgba(0, 0, 0, 0.5);
     padding: 25px;
     border: 4px solid #888;
-    /* Pixel border */
-    /* border-image: url('path/to/pixel-border.png') 4 round; */
-    /* Example for image border */
     display: flex;
     flex-direction: column;
     gap: 15px;
-    /* Spacing between elements */
     min-width: 300px;
     max-width: 500px;
 }
 
 .menu-button {
     font-family: inherit;
-    /* Use body font */
     font-size: 1.2em;
     color: #FFF;
     background-color: #555;
@@ -92,7 +76,6 @@ canvas {
     text-align: center;
     transition: transform 0.1s ease, background-color 0.1s ease;
     outline: none;
-    /* Remove default focus outline */
 }
 
 .menu-button:hover {
@@ -102,7 +85,6 @@ canvas {
 
 .menu-button.selected {
     background-color: #FF8C00;
-    /* Orange highlight */
     border-color: #FFF;
     transform: scale(1.05);
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
@@ -119,20 +101,15 @@ canvas {
     color: #BBB;
 }
 
-/* Specific Menu Elements */
 #credits {
     margin-top: 20px;
     font-size: 0.8em;
     color: #CCC;
 }
 
-#credits p {
-    margin-bottom: 5px;
-}
 
 .menu-link {
     color: #87CEEB;
-    /* Light blue links */
     text-decoration: none;
     padding: 2px 0;
 }
@@ -143,10 +120,6 @@ canvas {
     outline: 2px solid white;
 }
 
-.menu-link:hover {
-    text-decoration: underline;
-}
-
 /* Settings Screen */
 .setting-group {
     display: flex;
@@ -154,11 +127,6 @@ canvas {
     align-items: center;
     margin-bottom: 10px;
     gap: 15px;
-}
-
-.setting-group label {
-    font-size: 1em;
-    text-align: left;
 }
 
 .button-group {
@@ -172,19 +140,11 @@ canvas {
 }
 
 .lang-button.active-lang {
-    /* Style for selected language */
     background-color: #4CAF50;
-    /* Green */
     border-color: #FFF;
 }
 
-#game-version {
-    font-size: 0.9em;
-    color: #AAA;
-    margin-top: 15px;
-}
-
-/* Basic Toggle Switch Style */
+/* Toggle Switch */
 .menu-toggle {
     appearance: none;
     width: 40px;
@@ -195,7 +155,6 @@ canvas {
     cursor: pointer;
     outline: none;
     vertical-align: middle;
-    /* Align with label */
 }
 
 .menu-toggle::after {
@@ -211,7 +170,6 @@ canvas {
 
 .menu-toggle:checked {
     background-color: #4CAF50;
-    /* Green when checked */
 }
 
 .menu-toggle:checked::after {
@@ -219,102 +177,54 @@ canvas {
 }
 
 .menu-toggle.selected {
-    /* Highlight toggle */
     box-shadow: 0 0 8px white;
 }
-
 
 /* Level Select Screen */
 .level-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    /* Wider columns */
     gap: 15px;
-    /* Increased gap */
     max-height: 60vh;
     overflow-y: auto;
     padding: 15px;
-    /* Increased padding */
     background-color: rgba(0, 0, 0, 0.3);
     border: 2px solid #666;
 }
 
 .level-button {
     font-size: 0.9em;
-    /* Slightly smaller base font */
     padding: 10px;
-    /* Adjust padding */
     display: flex;
-    /* Use flexbox for layout */
     flex-direction: column;
-    /* Stack elements vertically */
     align-items: center;
-    /* Center align items */
     justify-content: center;
     min-height: 80px;
-    /* Ensure consistent height */
     text-align: center;
-    position: relative;
-    /* For potential absolute positioning inside */
 }
-
-.level-button .level-name {
-    font-weight: bold;
-    margin-bottom: 5px;
-    font-size: 1.1em;
-    /* Make name slightly larger */
-}
-
-.level-button .level-stars {
-    color: #FFD700;
-    /* Gold */
-    font-size: 1.2em;
-    /* Larger stars */
-    margin-bottom: 3px;
-    height: 1.2em;
-    /* Reserve space even if no stars */
-}
-
-.level-button .level-score {
-    font-size: 0.8em;
-    color: #CCC;
-    height: 1em;
-    /* Reserve space */
-}
-
-.level-button .level-status {
-    /* Placeholder for alignment when not completed */
-    height: 2.2em;
-    /* Match height of stars + score */
-    display: block;
-}
-
 
 .level-button.locked {
     background-color: #444;
-    /* Darker background for locked */
     border-color: #222;
     cursor: default;
     opacity: 0.6;
 }
 
-.level-button.locked:hover,
-.level-button.locked.selected {
-    /* Prevent hover/selected styles on locked */
-    background-color: #444;
-    transform: none;
-    box-shadow: none;
-    border-color: #222;
+.level-button .level-stars {
+    color: #FFD700;
+    font-size: 1.2em;
+    margin-bottom: 3px;
 }
 
 .level-button .level-locked {
-    font-size: 1em;
     color: #F00;
-    /* Red */
     font-weight: bold;
 }
 
-/* In-Game HUD */
+/* =========================================
+   IN-GAME HUD & ORDERS (OVERCOOKED STYLE)
+   ========================================= */
+
 #game-hud {
     position: absolute;
     top: 0;
@@ -322,81 +232,193 @@ canvas {
     width: 100%;
     height: 100%;
     z-index: 5;
-    /* Below menus */
     pointer-events: none;
-    /* Allow clicks through HUD */
     color: #FFF;
     font-size: 1.1em;
     text-shadow: 1px 1px 2px #000;
 }
 
-/* In-Game HUD Polish */
 #order-list {
     position: absolute;
     top: 15px;
     left: 15px;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 280px;
+    flex-direction: row; /* Horizontal layout */
+    gap: 12px;
+    max-width: 80vw; /* Allow wrapping if too many */
+    flex-wrap: wrap;
 }
 
+/* The Order Ticket */
 .order-card {
-    background-color: rgba(20, 20, 30, 0.9);
-    border-left: 5px solid #FFD700;
-    border-radius: 4px;
-    padding: 10px 15px;
+    background-color: #F0F0F0;
+    color: #222;
+    border: 3px solid #888;
+    border-radius: 6px;
+    width: 130px;
+    height: auto;
+    min-height: 100px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+    animation: ticketSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    position: relative;
+    text-shadow: none; /* Clean text for ticket */
+}
+
+@keyframes ticketSlideIn {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Header Section (Name) */
+.order-header {
+    background-color: #DDD;
+    padding: 6px 4px;
+    border-bottom: 2px solid #BBB;
+    text-align: center;
+    font-size: 0.65em;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Progress Bar Container */
+.order-timer-container {
+    width: 100%;
+    height: 12px;
+    background-color: #333;
+    border-bottom: 2px solid #888;
+}
+
+/* Actual Bar */
+.order-timer-bar {
+    height: 100%;
+    width: 100%;
+    background-color: #4CAF50; /* Green start */
+    transition: width 0.2s linear, background-color 0.5s;
+}
+
+/* Ingredient List Section */
+.order-ingredients {
+    flex-grow: 1;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     align-items: center;
-    min-width: 220px;
-    box-shadow: 3px 3px 0px rgba(0,0,0,0.5);
-    
-    /* Animation */
-    animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    transition: transform 0.2s, opacity 0.3s;
+    justify-content: center;
+    background-color: #FFF;
 }
 
-@keyframes slideIn {
-    from { transform: translateX(-100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+.ingredient-item {
+    font-size: 0.6em;
+    background: #EEE;
+    border: 1px solid #CCC;
+    padding: 4px 6px;
+    border-radius: 4px;
+    width: 90%;
+    text-align: center;
+    color: #444;
 }
 
-@keyframes shake {
+/* Animations for urgency */
+@keyframes pulseRed {
+    0% { background-color: #ff3333; }
+    50% { background-color: #ff0000; }
+    100% { background-color: #ff3333; }
+}
+
+@keyframes shakeCard {
     0% { transform: translate(1px, 1px) rotate(0deg); }
-    10% { transform: translate(-1px, -2px) rotate(-1deg); }
-    20% { transform: translate(-3px, 0px) rotate(1deg); }
-    30% { transform: translate(3px, 2px) rotate(0deg); }
-    40% { transform: translate(1px, -1px) rotate(1deg); }
-    50% { transform: translate(-1px, 2px) rotate(-1deg); }
-    60% { transform: translate(-3px, 1px) rotate(0deg); }
-    70% { transform: translate(3px, 1px) rotate(-1deg); }
-    80% { transform: translate(-1px, -1px) rotate(1deg); }
-    90% { transform: translate(1px, 2px) rotate(0deg); }
+    25% { transform: translate(-1px, -2px) rotate(-1deg); }
+    50% { transform: translate(-2px, 0px) rotate(1deg); }
+    75% { transform: translate(2px, 1px) rotate(0deg); }
     100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
 
-.order-meal {
-    font-family: 'Courier New', monospace;
+.order-card.critical {
+    border-color: #D32F2F;
+    animation: shakeCard 0.5s infinite;
+}
+
+.order-card.critical .order-timer-bar {
+    background-color: #D32F2F;
+    animation: pulseRed 0.5s infinite;
+}
+
+/* =========================================
+   OTHER HUD ELEMENTS
+   ========================================= */
+
+#game-timer-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid #888;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+#bottom-hud {
+    position: absolute;
+    bottom: 15px;
+    right: 15px; /* Moved to right for cleaner look */
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid #888;
+    padding: 10px 15px;
+    border-radius: 4px;
+    text-align: right;
+}
+
+#holding-display {
+    color: #FFD700;
     font-weight: bold;
-    font-size: 0.9em;
-    color: #eee;
 }
 
-.order-timer {
-    font-weight: bold;
-    color: #FFF;
-    background: #444;
-    padding: 2px 6px;
-    border-radius: 3px;
+#crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border: 1px solid black;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 6;
 }
 
-.order-timer.low-time {
-    background: #c00;
-    animation: shake 0.5s infinite;
+#temp-message {
+    position: absolute;
+    top: 30%; /* Moved up slightly */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 25px;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #FFD700;
+    border: 2px solid #FFF;
+    border-radius: 8px;
+    z-index: 7;
+    font-size: 1.4em;
+    text-align: center;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+    box-shadow: 0 0 15px rgba(0,0,0,0.7);
 }
 
-/* RECIPE BOOK (Inside Settings/Pause) */
+#temp-message.visible {
+    display: block;
+    opacity: 1;
+}
+
+/* Recipe Book & Instructions */
 #recipe-book-container {
     margin-top: 20px;
     max-height: 300px;
@@ -412,171 +434,43 @@ canvas {
     text-align: left;
 }
 
-.recipe-entry h4 {
-    color: #FFD700;
-    margin-bottom: 5px;
-    font-size: 0.9em;
-}
-
-.recipe-entry p {
-    font-size: 0.7em;
-    color: #ccc;
-    line-height: 1.4;
-    margin: 0;
-}
-
-/* SCROLLBAR */
-::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: #222; }
-::-webkit-scrollbar-thumb { background: #555; border: 2px solid #222; }
-::-webkit-scrollbar-thumb:hover { background: #777; }
-
-
-#game-timer-container {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 2px solid #888;
-    padding: 8px 12px;
-}
-
-#bottom-hud {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 2px solid #888;
-    padding: 8px 12px;
-}
-
-#gamepad-status {
-    font-size: 0.9em;
-    color: #90ee90;
-    /* Light green */
-}
-
-#crosshair {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 6px;
-    /* Slightly larger pixel crosshair */
-    height: 6px;
-    background-color: white;
-    border: 1px solid black;
-    transform: translate(-50%, -50%);
-    display: none;
-    /* Initially hidden */
-    z-index: 6;
-    /* Above HUD, below menus */
-    image-rendering: pixelated;
-}
-
-#temp-message {
-    position: absolute;
-    bottom: 50px;
-    /* Position above bottom HUD */
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    border: 2px solid #FFF;
-    z-index: 7;
-    font-size: 1.1em;
-    text-align: center;
-    display: none;
-    /* Initially hidden */
-    opacity: 0;
-    transition: opacity 0.3s ease-out;
-}
-
-#temp-message.visible {
-    display: block;
-    opacity: 1;
-}
-
-/* Level End Screen Specifics */
-#level-end-screen .menu-container {
-    background-color: rgba(50, 0, 50, 0.7);
-    /* Purple-ish */
-    border-color: #FFD700;
-}
-
-#final-stars {
-    color: #FFD700;
-    font-size: 1.5em;
-    margin: 10px 0;
-}
-
-/* Loading Screen */
-#loading-screen h2 {
-    color: #FFF;
-    font-size: 1.5em;
-}
-
-
-/* --- NEW: Level Instructions Screen --- */
-#level-instructions-screen h1 {
-    font-size: 2em;
-    /* Slightly smaller title */
-    margin-bottom: 20px;
-}
-
 .instructions-box {
-    max-width: 700px;
-    /* Wider container */
+    max-width: 800px;
     width: 90%;
-    max-height: 75vh;
-    /* Limit height */
-    background-color: rgba(20, 40, 60, 0.8);
-    /* Bluish background */
-    border-color: #ADD8E6;
-    /* Light blue border */
+    max-height: 80vh;
+    background-color: rgba(30, 35, 45, 0.95);
+    border: 3px solid #678;
     padding: 20px;
-    gap: 20px;
-    /* More spacing */
+    display: flex;
+    flex-direction: column;
 }
 
 #instructions-content {
     flex-grow: 1;
-    /* Allow content to take space */
     overflow-y: auto;
-    /* Enable scrolling if needed */
-    padding: 15px;
-    background-color: rgba(0, 0, 0, 0.4);
-    border: 2px dashed #668;
-    /* Inner dashed border */
-    text-align: left;
-    /* Align text left */
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.3);
     display: flex;
-    /* Use flexbox for columns */
     flex-wrap: wrap;
-    /* Allow wrapping */
-    gap: 20px;
-    /* Space between recipe columns */
+    gap: 15px;
     justify-content: center;
-    /* Center columns if space allows */
 }
 
 .recipe-instruction {
-    border: 1px solid #88a;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid #556;
     padding: 15px;
-    background-color: rgba(0, 0, 10, 0.3);
-    min-width: 250px;
-    /* Minimum width for a recipe block */
+    min-width: 280px;
     flex: 1;
-    /* Allow recipes to grow */
+    border-radius: 4px;
 }
 
 .recipe-instruction h3 {
-    font-size: 1.3em;
-    color: #FFD700;
+    color: #87CEEB;
+    border-bottom: 1px solid #556;
+    padding-bottom: 8px;
     margin-bottom: 10px;
     text-align: center;
-    border-bottom: 1px solid #88a;
-    padding-bottom: 5px;
 }
 
 .recipe-instruction ul {
@@ -604,6 +498,7 @@ canvas {
 }
 
 #start-level-instructions-button {
+    margin: auto;
     margin-top: 15px;
     /* Space above button */
     font-size: 1.3em;
@@ -619,103 +514,21 @@ canvas {
     box-shadow: 0 0 12px rgba(102, 255, 102, 0.7);
 }
 
-/* --- NEW: Editor UI Panel --- */
-#editor-panel {
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #222; }
+::-webkit-scrollbar-thumb { background: #555; border: 2px solid #222; }
+::-webkit-scrollbar-thumb:hover { background: #777; }
+
+/* Editor HUD */
+#editor-hud {
+    display: none;
     position: absolute;
     top: 10px;
-    left: 10px;
-    background-color: rgba(40, 40, 50, 0.9);
-    border: 3px solid #888;
-    padding: 15px;
+    right: 10px;
     z-index: 20;
-    /* Above HUD, below overlays */
-    color: white;
-    font-family: 'Press Start 2P', monospace;
-    /* Ensure font */
-    display: flex;
-    /* Arrange controls and palette */
-    gap: 20px;
-    align-items: flex-start;
-    /* Align items top */
-}
-
-#editor-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-}
-
-#editor-controls h3 {
-    font-size: 1.2em;
-    color: #FFD700;
-    margin-bottom: 5px;
-    text-align: center;
-    width: 100%;
-}
-
-#editor-controls button {
-    font-family: inherit;
-    font-size: 0.9em;
-    color: #FFF;
-    background-color: #555;
-    border: 2px solid #333;
-    padding: 5px 10px;
-    cursor: pointer;
-    min-width: 100px;
-}
-
-#editor-controls button:hover {
-    background-color: #777;
-}
-
-#editor-controls button:active {
-    background-color: #444;
-}
-
-#editor-controls p {
-    font-size: 0.7em;
-    color: #ccc;
-}
-
-
-#object-palette {
-    background-color: rgba(0, 0, 0, 0.3);
-    border: 1px solid #666;
+    background: rgba(0,0,0,0.8);
     padding: 10px;
-    max-height: 300px;
-    /* Limit height */
-    overflow-y: auto;
-    min-width: 180px;
-}
-
-#object-palette h4 {
-    font-size: 1em;
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-#object-palette button {
-    display: block;
-    /* Each button on new line */
-    width: 100%;
-    font-family: inherit;
-    font-size: 0.8em;
-    color: #FFF;
-    background-color: #4a4a4a;
-    border: 1px solid #222;
-    padding: 4px 8px;
-    cursor: pointer;
-    margin-bottom: 5px;
-    text-align: left;
-}
-
-#object-palette button:hover {
-    background-color: #666;
-}
-
-#object-palette button.selected-for-placement {
-    background-color: #FF8C00;
-    /* Highlight selected type */
-    border-color: #FFF;
+    border: 2px solid orange;
+    text-align: right;
 }
