@@ -2,7 +2,12 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { LABEL_Y_OFFSET, STATION_TYPES, GRID_UNIT, MODULE_HEIGHT } from './constants.js';
 import { GridSystem } from './grid.js';
-import { VoxelBuilder, PALETTE, createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, createStoveMesh, createSinkMesh, createIngredientBinMesh, createPlateStackMesh } from './voxelBuilder.js';
+import { 
+    VoxelBuilder, PALETTE, 
+    createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, createStoveMesh, createSinkMesh, 
+    createIngredientBinMesh, createPlateStackMesh, createCupStackMesh, createBowlStackMesh,
+    createToasterMesh, createMixerMesh, createBlenderMesh, createDoughPressMesh, createPizzaOvenMesh 
+} from './voxelBuilder.js';
 import { getTrans } from './i18nData.js';
 
 let currentKitchenObjects = [];
@@ -127,7 +132,6 @@ export function createStationPrefab(def) {
     const n = name.toLowerCase();
 
     if (type === STATION_TYPES.WALL) {
-        // Walls are just simple blocks, typically 2.5m tall
         const wallH = 2.5;
         const geo = new THREE.BoxGeometry(w, wallH, d);
         const mat = new THREE.MeshStandardMaterial({ color: color || PALETTE.WALL_WHITE });
@@ -135,27 +139,55 @@ export function createStationPrefab(def) {
         mesh.position.y = wallH / 2;
         mesh.castShadow = true; 
         mesh.receiveShadow = true;
-    } else if (type === STATION_TYPES.TRASH) {
+    } 
+    else if (type === STATION_TYPES.TRASH) {
         mesh = createTrashBinMesh();
-    } else if (type === STATION_TYPES.INGREDIENT_SOURCE) {
+    } 
+    else if (type === STATION_TYPES.INGREDIENT_SOURCE) {
         mesh = createIngredientBinMesh(config?.ingredient || 'generic');
-    } else if (type === STATION_TYPES.ITEM_SOURCE && config?.item === 'plate') {
-        mesh = createPlateStackMesh();
-    } else if (n.includes('fryer')) {
+    } 
+    else if (type === STATION_TYPES.ITEM_SOURCE) {
+        if (config?.item === 'plate') mesh = createPlateStackMesh();
+        else if (config?.item === 'cup') mesh = createCupStackMesh();
+        else if (config?.item === 'bowl') mesh = createBowlStackMesh();
+        else mesh = createPlateStackMesh(); // Fallback
+    } 
+    else if (n.includes('fryer')) {
         mesh = createFryerMesh();
-    } else if (n.includes('cutting') || n.includes('board')) {
+    } 
+    else if (n.includes('cutting') || n.includes('board')) {
         mesh = createCuttingBoardMesh();
-    } else if (n.includes('stove') || n.includes('grill') || n.includes('oven')) {
+    } 
+    else if (n.includes('stove') || n.includes('grill') || n.includes('hob')) {
         mesh = createStoveMesh();
-    } else if (n.includes('sink')) {
+    } 
+    else if (n.includes('sink')) {
         mesh = createSinkMesh();
-    } else {
+    } 
+    else if (n.includes('toaster')) {
+        mesh = createToasterMesh();
+    }
+    else if (n.includes('mixer')) {
+        mesh = createMixerMesh();
+    }
+    else if (n.includes('blender')) {
+        mesh = createBlenderMesh();
+    }
+    else if (n.includes('press')) {
+        mesh = createDoughPressMesh();
+    }
+    else if (n.includes('oven') || n.includes('pizza')) {
+        mesh = createPizzaOvenMesh();
+    }
+    else {
+        // Generic fallback
         const geo = new THREE.BoxGeometry(w - 0.05, h, d - 0.05);
         const mat = new THREE.MeshStandardMaterial({ color: color || 0x555555 });
         mesh = new THREE.Mesh(geo, mat);
         mesh.position.y = h/2;
         mesh.castShadow = true; mesh.receiveShadow = true;
     }
+
     if (mesh) group.add(mesh);
     
     // Store config separately in userData so it's accessible for export

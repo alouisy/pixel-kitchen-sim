@@ -52,28 +52,56 @@ export const KEYBOARD_INSTRUCTIONS_KEY = 'KeyI';
 
 // --- EDITOR CATALOG ---
 export const CATALOG_ITEMS = [
-    // Architecture
+    // --- ARCHITECTURE ---
     { name: "Wall (Short)", type: STATION_TYPES.WALL, category: "Architecture", size: { width: 1.0, depth: 0.5 }, color: "#EFEBE9" },
     { name: "Wall (Long)", type: STATION_TYPES.WALL, category: "Architecture", size: { width: 2.0, depth: 0.5 }, color: "#EFEBE9" },
     { name: "Corner Wall", type: STATION_TYPES.WALL, category: "Architecture", size: { width: 0.5, depth: 0.5 }, color: "#EFEBE9" },
     
-    // Counters
+    // --- FURNITURE ---
     { name: "Counter (Wood)", type: STATION_TYPES.COUNTER, category: "Furniture", color: "#8B4513" },
     { name: "Counter (Corner)", type: STATION_TYPES.COUNTER, category: "Furniture", color: "#8B4513" },
     { name: "Serving Pass", type: STATION_TYPES.SERVING, category: "Furniture", isServing: true },
     { name: "Table", type: STATION_TYPES.TABLE, category: "Furniture", color: "#CCCCCC" },
     { name: "Trash Bin", type: STATION_TYPES.TRASH, category: "Furniture", size: { width: 0.5, depth: 0.5 } },
 
-    // Stations
-    { name: "Cutting Board", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#DEB887", config: { processes: ["potato", "tomato", "lettuce"], processingTime: 0 } },
-    { name: "Fryer", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#555", config: { processes: ["raw_fries"], processingTime: 3000 } },
-    { name: "Stove", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#333", config: { processes: ["patty"], processingTime: 4000 } },
+    // --- PROCESSORS (APPLIANCES) ---
+    { name: "Cutting Board", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#DEB887", config: { processes: ["potato", "tomato", "lettuce", "onion", "banana", "strawberry", "raw_chicken"], result: { "potato": "raw_fries", "tomato": "chopped_tomato", "lettuce": "chopped_lettuce", "onion": "onion_rings_raw", "banana": "sliced_banana", "strawberry": "sliced_strawberry", "raw_chicken": "raw_chicken_strips" } } },
+    { name: "Stove Top", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#333", config: { processes: ["patty", "raw_bacon", "pancake_batter", "omelette_mix", "grilled_cheese_raw"], result: { "patty": "cooked_patty", "raw_bacon": "cooked_bacon", "pancake_batter": "cooked_pancakes", "omelette_mix": "cooked_omelette", "grilled_cheese_raw": "grilled_cheese_cooked" }, processingTime: 4000 } },
+    { name: "Deep Fryer", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#555", config: { processes: ["raw_fries", "onion_rings_coated", "coated_chicken_strips"], result: { "raw_fries": "cooked_fries", "onion_rings_coated": "cooked_onion_rings", "coated_chicken_strips": "cooked_chicken_tenders" }, processingTime: 3000 } },
+    { name: "Toaster", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#D3D3D3", config: { processes: ["bread_slice"], result: { "bread_slice": "toasted_bread" }, processingTime: 3000 } },
+    { name: "Stand Mixer", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#FFF", config: { processes: ["egg", "pancake_mix"], result: { "egg": "omelette_mix", "pancake_mix": "pancake_batter" }, processingTime: 2000 } },
+    { name: "Blender", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#708090", config: { requiredIngredients: ["sliced_banana", "sliced_strawberry", "milk"], outputItem: "smoothie_ready", acceptsIngredients: ["sliced_banana", "sliced_strawberry", "milk", "yogurt"], acceptsContainer: "cup" } },
+    { name: "Dough Press", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#B0C4DE", config: { processes: ["pizza_dough"], result: { "pizza_dough": "pizza_base" } } },
+    { name: "Pizza Oven", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#8B0000", config: { processes: ["pizza_margherita_raw"], result: { "pizza_margherita_raw": "cooked_pizza_margherita" }, processingTime: 6000 } },
     
-    // Sources
+    // --- SOURCES (INGREDIENTS) ---
     { name: "Plate Stack", type: STATION_TYPES.ITEM_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, config: { item: "plate" } },
+    { name: "Bowl Stack", type: STATION_TYPES.ITEM_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, config: { item: "bowl" } },
+    { name: "Cup Stack", type: STATION_TYPES.ITEM_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, config: { item: "cup" } },
+    
     { name: "Potato Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#CD853F", config: { ingredient: "potato" } },
     { name: "Tomato Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FF6347", config: { ingredient: "tomato" } },
     { name: "Lettuce Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#90EE90", config: { ingredient: "lettuce" } },
+    { name: "Onion Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F0F8FF", config: { ingredient: "onion" } },
+    { name: "Banana Crate", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFE135", config: { ingredient: "banana" } },
+    { name: "Strawberry Box", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FC5A8D", config: { ingredient: "strawberry" } },
+    
     { name: "Bun Rack", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F4A460", config: { ingredient: "bun" } },
+    { name: "Bread Rack", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#DEB887", config: { ingredient: "bread_slice" } },
     { name: "Patty Box", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#A52A2A", config: { ingredient: "patty" } },
+    { name: "Chicken Box", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFB6C1", config: { ingredient: "raw_chicken" } },
+    { name: "Bacon Pack", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#CD5C5C", config: { ingredient: "raw_bacon" } },
+    { name: "Cheese Fridge", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFD700", config: { ingredient: "cheese_slice" } },
+    { name: "Mozzarella Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFFFF0", config: { ingredient: "shredded_mozzarella" } },
+    { name: "Pizza Dough", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F5DEB3", config: { ingredient: "pizza_dough" } },
+    
+    { name: "Egg Carton", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFF8DC", config: { ingredient: "egg" } },
+    { name: "Milk Carton", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFFFFF", config: { ingredient: "milk" } },
+    { name: "Yogurt Pot", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F0FFFF", config: { ingredient: "yogurt" } },
+    { name: "Pancake Mix", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F5DEB3", config: { ingredient: "pancake_mix" } },
+    
+    { name: "Tomato Sauce", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#8B0000", config: { ingredient: "tomato_sauce" } },
+    { name: "Syrup Bottle", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#8B4513", config: { ingredient: "syrup" } },
+    { name: "Granola Jar", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#D2691E", config: { ingredient: "granola" } },
+    { name: "Coating Mix", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F5F5DC", config: { ingredient: "coating_mix" } },
 ];

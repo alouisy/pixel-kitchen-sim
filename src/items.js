@@ -32,17 +32,17 @@ export function createItem(scene, type, preloadedModels, state = INGREDIENT_STAT
     let userData = {};
     let finalName = type;
 
-    // Meta Data Logic (Keep consistent)
-    if (type === 'tomato') userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'tomato', state: INGREDIENT_STATES.RAW };
-    else if (type === 'potato') userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'potato', state: INGREDIENT_STATES.RAW };
-    else if (type === 'lettuce') userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'lettuce', state: INGREDIENT_STATES.RAW };
-    else if (type === 'chopped_tomato') userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'tomato', state: INGREDIENT_STATES.CHOPPED };
-    else if (type === 'raw_fries') userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'fries', state: INGREDIENT_STATES.RAW };
-    else if (type === 'cooked_fries') userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: 'fries', state: INGREDIENT_STATES.COOKED };
-    else if (type === 'plate') userData = { type: ITEM_TYPES.ITEM, itemType: 'plate', contents: [], mealName: null };
+    // Determine type based on string analysis or direct match
+    // This logic is critical for interaction compatibility
+    
+    if (['plate', 'bowl', 'cup'].includes(type)) {
+         userData = { type: ITEM_TYPES.ITEM, itemType: type, contents: [], mealName: null };
+    }
+    else if (type.includes('smoothie_ready') || type.includes('cooked') || type.includes('chopped') || type.includes('sliced') || type.includes('toasted') || type.includes('coated') || type.includes('mixed') || type.includes('batter') || type.includes('base')) {
+        userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: type, state: INGREDIENT_STATES.COOKED }; // Generalized state
+    }
     else {
-        // Generic Fallback
-        userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: type, state: 'unknown' };
+        userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: type, state: INGREDIENT_STATES.RAW };
     }
 
     mesh.castShadow = true; 

@@ -33,7 +33,21 @@ export const PALETTE = {
     PLATE_WHITE: 0xffffff,
     ONION: 0xeceff1,
     MUSHROOM: 0xa1887f,
-    WALL_WHITE: 0xEFEBE9 // Added Wall Color
+    WALL_WHITE: 0xEFEBE9,
+    // New Colors
+    CHICKEN_RAW: 0xFFB6C1,
+    CHICKEN_COOKED: 0xCD853F,
+    BACON_RAW: 0xFA8072,
+    BACON_COOKED: 0x8B0000,
+    EGG_WHITE: 0xFFFFFF,
+    EGG_YOLK: 0xFFD700,
+    PANCAKE: 0xF4A460,
+    PIZZA_CRUST: 0xDEB887,
+    SAUCE_RED: 0xB22222,
+    MOZZARELLA: 0xFFFFF0,
+    BANANA: 0xFFE135,
+    STRAWBERRY: 0xFC5A8D,
+    GLASS_BLUE: 0xAADDFF
 };
 
 export class VoxelBuilder {
@@ -92,6 +106,8 @@ export class VoxelBuilder {
     }
 }
 
+// --- APPLIANCES ---
+
 export function createTrashBinMesh() {
     const vb = new VoxelBuilder();
     vb.addBox(3, 0, 3, 12, 10, 12, PALETTE.TRASH_GREEN);
@@ -108,9 +124,9 @@ export function createFryerMesh() {
     vb.addBox(1, 0, 1, 14, 8, 14, PALETTE.METAL_SHINY);
     vb.addBox(2, 5, 2, 13, 7, 13, PALETTE.OIL_GOLD);
     vb.addBox(1, 8, 1, 14, 12, 3, PALETTE.METAL_DARK);
-    vb.addBox(4, 9, 4, 4, 14, 4, PALETTE.BLACK);
-    vb.addBox(4, 14, 4, 11, 14, 4, PALETTE.BLACK);
-    vb.addBox(4, 5, 4, 11, 8, 11, PALETTE.METAL_DARK);
+    vb.addBox(4, 9, 4, 4, 14, 4, PALETTE.BLACK); // Basket handle L
+    vb.addBox(11, 9, 4, 11, 14, 4, PALETTE.BLACK); // Basket handle R
+    vb.addBox(4, 5, 4, 11, 8, 11, PALETTE.METAL_DARK); // Basket mesh area
     const mesh = vb.buildMesh();
     mesh.position.y = GRID_UNIT/2;
     return mesh;
@@ -119,8 +135,8 @@ export function createFryerMesh() {
 export function createCuttingBoardMesh() {
     const vb = new VoxelBuilder();
     vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.WOOD_BOARD);
-    vb.addBox(10, 1, 3, 10, 1, 10, PALETTE.METAL_SHINY); 
-    vb.addBox(10, 1, 11, 10, 1, 13, PALETTE.BLACK); 
+    vb.addBox(10, 1, 3, 10, 1, 10, PALETTE.METAL_SHINY); // Knife blade
+    vb.addBox(10, 1, 11, 10, 1, 13, PALETTE.BLACK); // Knife handle
     const mesh = vb.buildMesh();
     mesh.position.y = GRID_UNIT/2;
     return mesh;
@@ -132,8 +148,8 @@ export function createStoveMesh() {
     vb.addBox(2, 2, 2, 13, 2, 13, PALETTE.BLACK);
     vb.addBox(4, 2, 4, 5, 2, 5, PALETTE.FIRE_ORANGE);
     vb.addBox(10, 2, 10, 11, 2, 11, PALETTE.FIRE_ORANGE);
-    vb.addBox(3, 1, 14, 4, 1, 15, PALETTE.PLASTIC_RED);
-    vb.addBox(11, 1, 14, 12, 1, 15, PALETTE.PLASTIC_RED);
+    vb.addBox(3, 1, 14, 4, 1, 15, PALETTE.PLASTIC_RED); // Knob
+    vb.addBox(11, 1, 14, 12, 1, 15, PALETTE.PLASTIC_RED); // Knob
     const mesh = vb.buildMesh();
     mesh.position.y = GRID_UNIT/2;
     return mesh;
@@ -151,10 +167,73 @@ export function createSinkMesh() {
     return mesh;
 }
 
+export function createToasterMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(3, 0, 3, 12, 6, 12, PALETTE.METAL_SHINY);
+    vb.addBox(4, 6, 5, 11, 6, 6, PALETTE.BLACK); // Slot 1
+    vb.addBox(4, 6, 9, 11, 6, 10, PALETTE.BLACK); // Slot 2
+    vb.addBox(13, 2, 7, 14, 4, 8, PALETTE.BLACK); // Lever
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createMixerMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(4, 0, 4, 11, 1, 11, PALETTE.METAL_LIGHT); // Base
+    vb.addBox(4, 1, 4, 6, 10, 6, PALETTE.METAL_LIGHT); // Neck
+    vb.addBox(4, 10, 4, 11, 12, 6, PALETTE.METAL_LIGHT); // Top arm
+    vb.addBox(9, 2, 6, 11, 6, 11, PALETTE.METAL_SHINY); // Bowl
+    vb.addBox(9, 6, 8, 9, 10, 9, PALETTE.METAL_DARK); // Beater
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createBlenderMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.METAL_DARK); // Base
+    vb.addBox(6, 4, 6, 9, 11, 9, PALETTE.GLASS_BLUE); // Jug
+    vb.addBox(6, 11, 6, 9, 12, 9, PALETTE.BLACK); // Lid
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createDoughPressMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.METAL_LIGHT); // Base
+    vb.addBox(7, 1, 2, 8, 8, 3, PALETTE.METAL_DARK); // Hinge pillar
+    vb.addBox(3, 8, 3, 12, 9, 12, PALETTE.METAL_LIGHT); // Top Plate
+    vb.addBox(7, 9, 7, 8, 12, 8, PALETTE.BLACK); // Handle vert
+    vb.addBox(5, 12, 7, 10, 13, 8, PALETTE.BLACK); // Handle horiz
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createPizzaOvenMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 1, 14, PALETTE.METAL_DARK); // Floor
+    // Arch
+    vb.addBox(1, 1, 1, 3, 10, 14, PALETTE.WOOD_DARK); // L wall
+    vb.addBox(12, 1, 1, 14, 10, 14, PALETTE.WOOD_DARK); // R wall
+    vb.addBox(1, 1, 1, 14, 10, 3, PALETTE.WOOD_DARK); // Back wall
+    vb.addBox(1, 10, 1, 14, 12, 14, PALETTE.WOOD_DARK); // Roof
+    vb.addBox(6, 2, 6, 9, 4, 9, PALETTE.FIRE_ORANGE); // Fire inside
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+// --- SOURCES ---
+
 export function createIngredientBinMesh(ingredientType) {
     const vb = new VoxelBuilder();
     vb.addBox(1, 0, 1, 14, 6, 14, PALETTE.WOOD_LIGHT);
-    vb.addBox(2, 1, 2, 13, 6, 13, PALETTE.BLACK); 
+    vb.addBox(2, 1, 2, 13, 6, 13, PALETTE.BLACK); // Interior void illusion
+    
+    // Content fill
     const c = getIngredientColor(ingredientType);
     if (c) {
         vb.addBox(3, 2, 3, 6, 5, 6, c);
@@ -176,18 +255,52 @@ export function createPlateStackMesh() {
     return mesh;
 }
 
+export function createCupStackMesh() {
+    const vb = new VoxelBuilder();
+    // Stack of cups
+    for(let i=0; i<3; i++) {
+        let y = i * 3;
+        vb.addBox(5, y, 5, 10, y+2, 10, PALETTE.WATER_BLUE);
+    }
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createBowlStackMesh() {
+    const vb = new VoxelBuilder();
+    for(let i=0; i<4; i++) {
+        let y = i * 2;
+        vb.addBox(4, y, 4, 11, y+1, 11, PALETTE.WOOD_BOARD); // Beige bowls
+    }
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+// --- HELPERS ---
+
 function getIngredientColor(type) {
-    if(type.includes('tomato')) return PALETTE.TOMATO;
+    if(type.includes('tomato')) return type.includes('sauce') ? PALETTE.SAUCE_RED : PALETTE.TOMATO;
     if(type.includes('lettuce')) return PALETTE.LETTUCE;
-    if(type.includes('cheese')) return PALETTE.CHEESE;
-    if(type.includes('bun')) return PALETTE.BUN;
+    if(type.includes('cheese') || type.includes('mozzarella')) return PALETTE.CHEESE;
+    if(type.includes('bun') || type.includes('bread')) return PALETTE.BUN;
     if(type.includes('patty')) return PALETTE.MEAT_RAW;
     if(type.includes('cooked_patty')) return PALETTE.MEAT_COOKED;
     if(type.includes('potato')) return PALETTE.POTATO;
     if(type.includes('fries')) return PALETTE.FRIES_RAW;
     if(type.includes('onion')) return PALETTE.ONION;
-    return PALETTE.WHITE;
+    if(type.includes('chicken')) return PALETTE.CHICKEN_RAW;
+    if(type.includes('bacon')) return PALETTE.BACON_RAW;
+    if(type.includes('banana')) return PALETTE.BANANA;
+    if(type.includes('strawberry')) return PALETTE.STRAWBERRY;
+    if(type.includes('egg')) return PALETTE.EGG_WHITE;
+    if(type.includes('pizza')) return PALETTE.PIZZA_CRUST;
+    if(type.includes('coating')) return PALETTE.WOOD_BOARD;
+    return null;
 }
+
+// --- ITEMS (Physical objects in hand/world) ---
 
 export function createItemMesh(type) {
     const vb = new VoxelBuilder();
@@ -199,9 +312,25 @@ export function createItemMesh(type) {
         vb.addBox(2, 1, 3, 3, 2, 12, PALETTE.PLATE_WHITE);
         vb.addBox(12, 1, 3, 13, 2, 12, PALETTE.PLATE_WHITE);
     } 
+    else if (type === 'bowl') {
+        vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.WOOD_BOARD);
+        vb.addBox(3, 1, 3, 12, 4, 4, PALETTE.WOOD_BOARD);
+        vb.addBox(3, 1, 11, 12, 4, 12, PALETTE.WOOD_BOARD);
+        vb.addBox(3, 1, 4, 4, 4, 11, PALETTE.WOOD_BOARD);
+        vb.addBox(11, 1, 4, 12, 4, 11, PALETTE.WOOD_BOARD);
+    }
+    else if (type === 'cup') {
+        vb.addBox(5, 0, 5, 10, 6, 10, PALETTE.GLASS_BLUE);
+    }
+    // --- Food Items ---
     else if (type.includes('tomato')) {
-        vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.TOMATO);
-        vb.addBox(6, 4, 6, 9, 5, 9, PALETTE.LETTUCE);
+        if (type.includes('sauce')) {
+             vb.addBox(4, 0, 4, 11, 5, 11, PALETTE.METAL_LIGHT); // Can
+             vb.addBox(4, 2, 4, 11, 4, 11, PALETTE.SAUCE_RED); // Label
+        } else {
+            vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.TOMATO);
+            if (!type.includes('chopped')) vb.addBox(6, 4, 6, 9, 5, 9, PALETTE.LETTUCE); // Stem
+        }
     }
     else if (type.includes('lettuce')) {
         vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.LETTUCE);
@@ -210,27 +339,63 @@ export function createItemMesh(type) {
         vb.addBox(5, 0, 4, 10, 3, 11, PALETTE.POTATO);
     }
     else if (type === 'raw_fries') {
-        vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_RAW);
-        vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_RAW);
-        vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_RAW);
+        vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_RAW); vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_RAW); vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_RAW);
     }
     else if (type === 'cooked_fries') {
-        vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_COOKED);
-        vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_COOKED);
-        vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_COOKED);
+        vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_COOKED); vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_COOKED); vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_COOKED);
     }
     else if (type.includes('patty')) {
         const c = type.includes('cooked') ? PALETTE.MEAT_COOKED : PALETTE.MEAT_RAW;
         vb.addBox(3, 0, 3, 12, 2, 12, c);
     }
-    else if (type === 'bun') {
-        vb.addBox(3, 0, 3, 12, 3, 12, PALETTE.BUN);
+    else if (type === 'bun' || type.includes('bread')) {
+        const c = type.includes('toasted') ? PALETTE.WOOD_DARK : PALETTE.BUN;
+        vb.addBox(3, 0, 3, 12, 2, 12, c);
     }
-    else if (type === 'cheese_slice') {
+    else if (type.includes('cheese') || type.includes('mozzarella')) {
         vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.CHEESE);
     }
+    else if (type.includes('chicken')) {
+        const c = type.includes('cooked') ? PALETTE.CHICKEN_COOKED : (type.includes('coated') ? PALETTE.WOOD_BOARD : PALETTE.CHICKEN_RAW);
+        vb.addBox(4, 0, 4, 11, 3, 9, c);
+    }
+    else if (type.includes('bacon')) {
+        const c = type.includes('cooked') ? PALETTE.BACON_COOKED : PALETTE.BACON_RAW;
+        vb.addBox(2, 0, 6, 13, 1, 9, c);
+    }
+    else if (type.includes('onion')) {
+        vb.addBox(5, 0, 5, 10, 5, 10, PALETTE.ONION);
+    }
+    else if (type.includes('banana')) {
+        vb.addBox(3, 0, 7, 12, 3, 9, PALETTE.BANANA); // Curved shape approximation
+    }
+    else if (type.includes('strawberry')) {
+        vb.addBox(6, 0, 6, 9, 3, 9, PALETTE.STRAWBERRY);
+    }
+    else if (type.includes('pizza_dough') || type.includes('pizza_base')) {
+        vb.addBox(3, 0, 3, 12, 2, 12, PALETTE.PIZZA_CRUST);
+    }
+    else if (type.includes('pizza_margherita')) {
+        const c = type.includes('cooked') ? PALETTE.PIZZA_CRUST : PALETTE.PIZZA_CRUST;
+        vb.addBox(3, 0, 3, 12, 2, 12, c);
+        vb.addBox(4, 2, 4, 11, 3, 11, PALETTE.SAUCE_RED);
+        vb.addBox(5, 3, 5, 10, 4, 10, PALETTE.MOZZARELLA);
+    }
+    else if (type.includes('egg')) {
+        vb.addBox(6, 0, 6, 9, 4, 9, PALETTE.EGG_WHITE);
+    }
+    else if (type.includes('pancake')) {
+        if (type.includes('mix') || type.includes('batter')) vb.addBox(5, 0, 5, 10, 6, 10, PALETTE.WOOD_BOARD); // Box
+        else vb.addBox(3, 0, 3, 12, 2, 12, PALETTE.PANCAKE); // Cooked
+    }
+    else if (type.includes('omelette')) {
+        vb.addBox(3, 0, 6, 12, 3, 10, PALETTE.EGG_YOLK); // Folded
+    }
+    else if (type.includes('milk') || type.includes('yogurt')) {
+        vb.addBox(5, 0, 5, 10, 8, 10, PALETTE.WHITE);
+    }
     else {
-        vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.PLASTIC_BLUE);
+        vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.PLASTIC_BLUE); // Generic
     }
 
     const mesh = vb.buildMesh();
@@ -238,7 +403,6 @@ export function createItemMesh(type) {
     // *** KEY FIX: NORMALIZE ORIGIN ***
     // VoxelBuilder 0,0,0 is center of grid unit.
     // This shift makes (0,0,0) the BOTTOM of the mesh.
-    // Interaction Manager logic `yBase - minLocalY` relies on this.
     mesh.geometry.translate(0, GRID_UNIT/2, 0); 
     
     return mesh;
