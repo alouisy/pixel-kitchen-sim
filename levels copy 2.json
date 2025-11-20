@@ -1,0 +1,258 @@
+[
+    {
+        "levelId": 1,
+        "name": "Fry Cook Training",
+        "duration": 180,
+        "starThresholds": [
+            300,
+            500,
+            700
+        ],
+        "availableMeals": [
+            "French Fries"
+        ],
+        "maxActiveOrders": 2,
+        "newOrderDelay": 15,
+        "layout": [
+            {
+                "name": "Wall_Back",
+                "type": "wall",
+                "position": {
+                    "x": 0.25,
+                    "z": -3.75
+                }, "size": { "width": 8.5, "depth": 0.5 }
+            },
+            {
+                "name": "Wall_Front_L",
+                "type": "wall",
+                "position": {
+                    "x": -2.25,
+                    "z": 4.25
+                }, "size": { "width": 3.5, "depth": 0.5 }
+            },
+            {
+                "name": "Wall_Front_R",
+                "type": "wall",
+                "position": {
+                    "x": 2.75,
+                    "z": 4.25
+                }, "size": { "width": 3.5, "depth": 0.5 }
+            },
+            {
+                "name": "Wall_Left",
+                "type": "wall",
+                "position": {
+                    "x": -3.75,
+                    "z": 0.25
+                }, "size": { "width": 0.5, "depth": 7.5 }
+            },
+            {
+                "name": "Wall_Right",
+                "type": "wall",
+                "position": {
+                    "x": 4.25,
+                    "z": 0.25
+                }, "size": { "width": 0.5, "depth": 7.5 }
+            },
+            {
+                "name": "C_Serve_1",
+                "type": "serving",
+                "position": {
+                    "x": -0.25,
+                    "z": 4.25
+                },
+                "color": "#ffffff"
+            },
+            {
+                "name": "C_Serve_2",
+                "type": "serving",
+                "position": {
+                    "x": 0.25,
+                    "z": 4.25
+                },
+                "color": "#ffffff"
+            },
+            {
+                "name": "C_Serve_3",
+                "type": "serving",
+                "position": {
+                    "x": 0.75,
+                    "z": 4.25
+                },
+                "color": "#ffffff"
+            },
+            {
+                "name": "C_Back_1",
+                "type": "counter",
+                "position": {
+                    "x": -2.75,
+                    "z": -3.25
+                }
+            },
+            {
+                "name": "C_Back_2",
+                "type": "counter",
+                "position": {
+                    "x": -2.25,
+                    "z": -3.25
+                }
+            },
+            {
+                "name": "C_Back_3",
+                "type": "counter",
+                "position": {
+                    "x": -1.75,
+                    "z": -3.25
+                }
+            },
+            {
+                "name": "C_Back_4",
+                "type": "counter",
+                "position": {
+                    "x": -0.75,
+                    "z": -3.25
+                }
+            },
+            {
+                "name": "C_Back_5",
+                "type": "counter",
+                "position": {
+                    "x": -0.25,
+                    "z": -3.25
+                }
+            },
+            {
+                "name": "C_Back_6",
+                "type": "counter",
+                "position": {
+                    "x": 0.25,
+                    "z": -3.25
+                }
+            },
+            {
+                "name": "C_Side_L1",
+                "type": "counter",
+                "position": {
+                    "x": -3.25,
+                    "z": -3.25
+                }
+            },
+            {
+                "name": "C_Side_L2",
+                "type": "counter",
+                "position": {
+                    "x": 1.25,
+                    "z": -3.25
+                }
+            },
+            {
+                "name": "C_Side_R1",
+                "type": "counter",
+                "position": {
+                    "x": -1.25,
+                    "z": -3.25
+                }
+            },
+            {
+                "name": "C_Side_R2",
+                "type": "counter",
+                "position": {
+                    "x": 0.75,
+                    "z": -3.25
+                }
+            },
+            {
+                "name": "PotatoBin",
+                "type": "ingredient_source",
+                "position": {
+                    "x": -3.25,
+                    "z": -3.25
+                },
+                "color": "#ffffff",
+                "config": {
+                    "ingredient": "potato"
+                }
+            },
+            {
+                "name": "CuttingBoard",
+                "type": "processor",
+                "position": {
+                    "x": -2.25,
+                    "z": -3.25
+                },
+                "color": "#ffffff",
+                "config": {
+                    "processes": [
+                        "potato"
+                    ],
+                    "result": {
+                        "potato": "raw_fries"
+                    }
+                }
+            },
+            {
+                "name": "Fryer",
+                "type": "processor",
+                "position": {
+                    "x": -1.25,
+                    "z": -3.25
+                },
+                "color": "#ffffff",
+                "config": {
+                    "processes": [
+                        "raw_fries"
+                    ],
+                    "result": {
+                        "raw_fries": "cooked_fries"
+                    },
+                    "processingTime": 3000
+                }
+            },
+            {
+                "name": "PlateStack",
+                "type": "item_source",
+                "position": {
+                    "x": -0.25,
+                    "z": -3.25
+                },
+                "color": "#ffffff",
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Trash",
+                "type": "trash",
+                "position": {
+                    "x": 1.75,
+                    "z": -3.25
+                },
+                "color": "#ffffff"
+            },
+            {
+                "name": "T_Assem_Base1",
+                "type": "table",
+                "position": {
+                    "x": -0.5,
+                    "z": 0
+                }
+            },
+            {
+                "name": "T_Assem_Base2",
+                "type": "table",
+                "position": {
+                    "x": 0,
+                    "z": 0
+                }
+            },
+            {
+                "name": "T_Assem_Base3",
+                "type": "table",
+                "position": {
+                    "x": 0.5,
+                    "z": 0
+                }
+            }
+        ]
+    }
+]

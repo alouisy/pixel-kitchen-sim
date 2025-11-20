@@ -9,7 +9,6 @@ let currentKitchenObjects = [];
 let currentLabels = [];
 let currentFloor = null;
 let currentLang = 'en'; 
-// NEW: Track label visibility state
 let currentLabelVisibility = true;
 
 export function setWorldLanguage(lang) {
@@ -40,7 +39,6 @@ function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
     sprite.position.y += yOffset;
     sprite.renderOrder = 999;
     
-    // *** FIX 1: Apply current visibility immediately ***
     sprite.visible = currentLabelVisibility;
 
     scene.add(sprite);
@@ -49,9 +47,7 @@ function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
 }
 
 export function toggleLabels(visible) {
-    // Update state so future labels are correct
     currentLabelVisibility = visible;
-    // Update existing
     currentLabels.forEach(s => s.visible = visible);
 }
 
@@ -118,7 +114,17 @@ function createStationPrefab(def) {
     const h = 0.3; 
     let mesh = null;
     const n = name.toLowerCase();
-    if (type === STATION_TYPES.TRASH) {
+
+    if (type === STATION_TYPES.WALL) {
+        // Walls are just simple blocks, typically 2.5m tall
+        const wallH = 2.5;
+        const geo = new THREE.BoxGeometry(w, wallH, d);
+        const mat = new THREE.MeshStandardMaterial({ color: color || PALETTE.WALL_WHITE });
+        mesh = new THREE.Mesh(geo, mat);
+        mesh.position.y = wallH / 2;
+        mesh.castShadow = true; 
+        mesh.receiveShadow = true;
+    } else if (type === STATION_TYPES.TRASH) {
         mesh = createTrashBinMesh();
     } else if (type === STATION_TYPES.INGREDIENT_SOURCE) {
         mesh = createIngredientBinMesh(config?.ingredient || 'generic');
@@ -194,7 +200,9 @@ export function buildKitchen(scene, levelLayout) {
             occupancyMap.set(`${kx},${kz}`, def.type);
         }
     });
-    const floorSize = 20;
+    
+    // Reduced floor size (Radius 5, Diameter 10)
+    const floorSize = 10; 
     const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize);
     const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
     const ctx = canvas.getContext('2d');
@@ -237,9 +245,16 @@ export function buildKitchen(scene, levelLayout) {
 
         } else if (Object.values(STATION_TYPES).includes(def.type)) {
             object3D = createStationPrefab(def);
-            if (def.type === STATION_TYPES.TRASH) object3D.position.set(x, 0, z);
-            else object3D.position.set(x, MODULE_HEIGHT, z);
-            object3D.add(createLabel(scene, def.name, new THREE.Vector3(0,0.5,0), 0));
+            if (def.type === STATION_TYPES.TRASH || def.type === STATION_TYPES.WALL) {
+                object3D.position.set(x, 0, z);
+            } else {
+                object3D.position.set(x, MODULE_HEIGHT, z);
+            }
+            
+            if (def.type !== STATION_TYPES.WALL) {
+                object3D.add(createLabel(scene, def.name, new THREE.Vector3(0,0.5,0), 0));
+            }
+            
             if (def.type === STATION_TYPES.ASSEMBLY) {
                 const w = object3D.userData.size.width;
                 const slotW = w / 3;
@@ -255,7 +270,7 @@ export function buildKitchen(scene, levelLayout) {
         if (object3D) {
             scene.add(object3D);
             currentKitchenObjects.push(object3D);
-            if (def.type !== 'decoration') {
+            if (def.type !== 'decoration' && def.type !== STATION_TYPES.WALL) {
                 newStations[def.name] = object3D;
                 newStationInteractables.push(object3D);
             }

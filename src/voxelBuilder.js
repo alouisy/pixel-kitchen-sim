@@ -32,7 +32,8 @@ export const PALETTE = {
     FRIES_COOKED: 0xffeb3b,
     PLATE_WHITE: 0xffffff,
     ONION: 0xeceff1,
-    MUSHROOM: 0xa1887f
+    MUSHROOM: 0xa1887f,
+    WALL_WHITE: 0xEFEBE9 // Added Wall Color
 };
 
 export class VoxelBuilder {
