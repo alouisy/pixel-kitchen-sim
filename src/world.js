@@ -55,17 +55,19 @@ export function getFloorMesh() {
     return currentFloor;
 }
 
-function createCounterMesh(isServing) {
+function createCounterMesh(isServing, isCorner) {
     const vb = new VoxelBuilder();
     vb.addBox(1, 0, 1, 14, 1, 14, PALETTE.BLACK);
     vb.addBox(0, 2, 0, 15, 14, 15, isServing ? PALETTE.WOOD_LIGHT : PALETTE.WOOD_DARK);
     vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.COUNTER_TOP);
-    if (!isServing) {
+    
+    // Only add front details if it's NOT a serving counter AND NOT a corner
+    if (!isServing && !isCorner) {
         vb.addBox(1, 11, 15, 14, 13, 15, PALETTE.WOOD_BOARD); 
         vb.addBox(6, 12, 16, 9, 12, 16, PALETTE.METAL_LIGHT);
         vb.addBox(1, 3, 15, 14, 9, 15, PALETTE.WOOD_BOARD);
         vb.addBox(12, 6, 16, 12, 8, 16, PALETTE.METAL_LIGHT);
-    } else {
+    } else if (isServing) {
         vb.addBox(1, 3, 15, 14, 13, 15, PALETTE.PLASTIC_RED);
     }
     const mesh = vb.buildMesh();
@@ -93,7 +95,9 @@ function createTableMesh(neighbors) {
 export function createCounterPrefab(name, color, isServing) {
     const group = new THREE.Group();
     group.name = name;
-    const visual = createCounterMesh(isServing);
+    // Detect corner from name
+    const isCorner = name && name.toLowerCase().includes('corner');
+    const visual = createCounterMesh(isServing, isCorner);
     group.add(visual);
     group.userData = { type: isServing ? 'station' : 'counter', stationType: isServing ? STATION_TYPES.SERVING : STATION_TYPES.COUNTER, name: name, isBase: true };
     group.userData.grid = new GridSystem(GRID_UNIT, GRID_UNIT, 0, 0, group);
@@ -153,7 +157,11 @@ export function createStationPrefab(def) {
         mesh.castShadow = true; mesh.receiveShadow = true;
     }
     if (mesh) group.add(mesh);
+    
+    // Store config separately in userData so it's accessible for export
     group.userData = { ...config, type: 'station', stationType: type, name: name, size: { width: w, height: h, depth: d } };
+    if (config) group.userData.config = config;
+
     if (type === STATION_TYPES.PROCESSOR) {
         group.userData.occupiedBy = null;
         if (config?.requiredIngredients) group.userData.internalContents = [];
@@ -283,6 +291,11 @@ export function buildKitchen(scene, levelLayout) {
         }
 
         if (object3D) {
+            // Apply rotation if present in layout definition
+            if (def.rotation) {
+                object3D.rotation.y = def.rotation;
+            }
+            
             scene.add(object3D);
             currentKitchenObjects.push(object3D);
             if (def.type !== 'decoration' && def.type !== STATION_TYPES.WALL) {

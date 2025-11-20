@@ -650,7 +650,7 @@ canvas {
     position: absolute;
     top: 70px;
     right: 20px;
-    width: 200px;
+    width: 240px;
     padding: 15px;
     display: flex;
     flex-direction: column;
@@ -676,6 +676,30 @@ canvas {
     display: flex;
     flex-direction: column;
     gap: 5px;
+}
+
+.inspector-config-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+    border-top: 1px solid #555;
+    padding-top: 10px;
+}
+
+.inspector-config-section label {
+    font-size: 0.7em;
+    color: #ccc;
+}
+
+#inspector-config {
+    background: #111;
+    color: #0f0;
+    border: 1px solid #444;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7em;
+    resize: vertical;
+    padding: 5px;
 }
 
 .editor-action-btn {

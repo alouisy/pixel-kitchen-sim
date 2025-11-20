@@ -71,6 +71,10 @@ export class LevelEditor {
         document.getElementById('btn-clone').addEventListener('click', () => this.cloneSelected());
         document.getElementById('btn-delete').addEventListener('click', () => this.deleteSelected());
         document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLayout());
+
+        // Bind Config Editor
+        this.inspectorConfig = document.getElementById('inspector-config');
+        document.getElementById('btn-save-config').addEventListener('click', () => this.saveConfig());
     }
 
     _renderLibrary(category) {
@@ -114,6 +118,9 @@ export class LevelEditor {
         // Keyboard Shortcuts
         window.addEventListener('keydown', (e) => {
             if (!this.enabled) return;
+            // Do not trigger shortcuts if user is typing in textarea
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+
             switch(e.key.toLowerCase()) {
                 case 'escape': 
                     this.cancelPlacement(); 
@@ -261,6 +268,11 @@ export class LevelEditor {
         // Update UI
         this.inspector.style.display = 'flex';
         this.inspectorName.textContent = object.name;
+
+        // Populate Config
+        // Use existing userData.config if set, otherwise fallback to template config
+        const config = object.userData.config || object.userData.template?.config || {};
+        this.inspectorConfig.value = JSON.stringify(config, null, 2);
     }
 
     deselect() {
@@ -270,6 +282,23 @@ export class LevelEditor {
     }
 
     // --- Manipulation ---
+
+    saveConfig() {
+        if (!this.selectedObject) return;
+        try {
+            const newConfig = JSON.parse(this.inspectorConfig.value);
+            this.selectedObject.userData.config = newConfig;
+            
+            // Visual feedback
+            const btn = document.getElementById('btn-save-config');
+            const originalText = btn.innerText;
+            btn.innerText = "✅ Saved!";
+            setTimeout(() => btn.innerText = originalText, 1000);
+            
+        } catch (e) {
+            alert("Invalid JSON syntax! Check your brackets and quotes.");
+        }
+    }
 
     rotateSelected() {
         const target = this.placementMode ? this.ghostObject : this.selectedObject;
@@ -436,6 +465,11 @@ export class LevelEditor {
                     position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
                 };
                 
+                // Include rotation if not zero
+                if (c.rotation.y !== 0) {
+                    entry.rotation = parseFloat(c.rotation.y.toFixed(2));
+                }
+
                 // Check Y position to see if it's stacked (optional context)
                 // Generally we export X/Z. Game logic snaps Y based on type.
                 // But if we support custom stacking, we might need Y or "onTop" logic.
@@ -444,7 +478,14 @@ export class LevelEditor {
                 if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
                 if (c.userData.template?.color) entry.color = c.userData.template.color;
                 if (c.userData.isServing) entry.isServing = true;
-                if (c.userData.config) entry.config = c.userData.config;
+                
+                // Config: Prioritize userData.config (preserved from loaded levels)
+                // Fallback to template config if available (editor-created items)
+                if (c.userData.config) {
+                    entry.config = c.userData.config;
+                } else if (c.userData.template?.config) {
+                    entry.config = c.userData.template.config;
+                }
 
                 data.push(entry);
             }
