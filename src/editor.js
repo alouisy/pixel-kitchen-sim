@@ -2,7 +2,7 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT } from './constants.js';
-import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh } from './world.js';
+import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh, resizeWall, refreshSmartObjects } from './world.js';
 import { RECIPES } from './gameData.js';
 
 export class LevelEditor {
@@ -23,6 +23,13 @@ export class LevelEditor {
         this.ghostObject = null; // Object currently being placed
         this.isDragging = false;
         this.placementMode = false; // If true, we are trying to place a new item
+        
+        // Resize/Extend State
+        this.activeHandle = null;
+        this.startDragPos = new THREE.Vector3();
+        this.originalSize = { width: 0, depth: 0 };
+        this.originalPos = new THREE.Vector3();
+        this.extendingGhosts = []; // For counters/tables
 
         // Ground Plane for Raycasting (Y=0)
         this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -44,6 +51,22 @@ export class LevelEditor {
         this.selectionBox = new THREE.BoxHelper(new THREE.Mesh(), 0xffff00);
         this.selectionBox.visible = false;
         this.scene.add(this.selectionBox);
+
+        // Resize Handles
+        this.handlesGroup = new THREE.Group();
+        this.scene.add(this.handlesGroup);
+        this.handles = {};
+        ['n', 's', 'e', 'w'].forEach(dir => {
+            const g = new THREE.SphereGeometry(0.25, 16, 16);
+            const m = new THREE.MeshBasicMaterial({ color: 0x00FFFF, depthTest: false, transparent: true, opacity: 0.8 });
+            const mesh = new THREE.Mesh(g, m);
+            mesh.userData = { isHandle: true, direction: dir };
+            mesh.renderOrder = 999;
+            mesh.visible = false;
+            this.handlesGroup.add(mesh);
+            this.handles[dir] = mesh;
+        });
+
 
         // Init UI
         this.ui = document.getElementById('editor-ui');
@@ -219,6 +242,7 @@ export class LevelEditor {
         if (this.selectedObject) {
             this.selectionBox.update();
             this._updateInspectorData();
+            this._updateHandles();
         }
     }
 
@@ -300,6 +324,9 @@ export class LevelEditor {
             realObject.rotation.copy(this.ghostObject.rotation);
             
             this.scene.add(realObject);
+            
+            // Auto-fuse visuals
+            refreshSmartObjects(this.scene);
         }
     }
 
@@ -312,6 +339,7 @@ export class LevelEditor {
         if (t.type === STATION_TYPES.COUNTER || t.type === STATION_TYPES.SERVING) {
             obj = createCounterPrefab(t.name, fakeColor, t.isServing);
         } else if (t.type === STATION_TYPES.TABLE) {
+            // Neighbors default to false, will fuse later
             obj = createTablePrefab(t.name, fakeColor, {n:false, s:false, e:false, w:false});
         } else {
             // Generic Station / Wall / Source / Preplaced Item
@@ -348,12 +376,15 @@ export class LevelEditor {
         // Use existing userData.config if set, otherwise fallback to template config
         const config = object.userData.config || object.userData.template?.config || {};
         this.inspectorConfig.value = JSON.stringify(config, null, 2);
+        
+        this._updateHandles();
     }
 
     deselect() {
         this.selectedObject = null;
         this.selectionBox.visible = false;
         this.inspector.style.display = 'none';
+        this.handlesGroup.visible = false;
     }
 
     // --- Manipulation ---
@@ -381,6 +412,8 @@ export class LevelEditor {
             target.rotation.y -= Math.PI / 2;
             target.updateMatrixWorld();
             if (this.selectionBox.visible) this.selectionBox.update();
+            // If rotating placed object, refresh visuals
+            if (!this.placementMode) refreshSmartObjects(this.scene);
         }
     }
 
@@ -388,6 +421,7 @@ export class LevelEditor {
         if (this.selectedObject) {
             this.scene.remove(this.selectedObject);
             this.deselect();
+            refreshSmartObjects(this.scene);
         }
     }
 
@@ -405,6 +439,7 @@ export class LevelEditor {
                 clone.position.x += GRID_UNIT;
                 this.scene.add(clone);
                 this.select(clone);
+                refreshSmartObjects(this.scene);
             }
         }
     }
@@ -415,6 +450,50 @@ export class LevelEditor {
             this.inspectorZ.textContent = this.selectedObject.position.z.toFixed(1);
         }
     }
+    
+    // --- Handle Management ---
+
+    _updateHandles() {
+        const obj = this.selectedObject;
+        if (!obj) {
+            this.handlesGroup.visible = false;
+            return;
+        }
+        
+        const type = obj.userData.stationType || obj.userData.type;
+        const resizable = type === STATION_TYPES.WALL;
+        const extendable = type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING;
+        
+        if (!resizable && !extendable) {
+            this.handlesGroup.visible = false;
+            return;
+        }
+        
+        this.handlesGroup.visible = true;
+        
+        // Calculate bounds
+        const box = new THREE.Box3().setFromObject(obj);
+        const center = obj.position;
+        // Use simple box dimensions based on userData for walls to be precise, or bounding box for others
+        let w, d;
+        if (resizable && obj.userData.size) {
+            w = obj.userData.size.width;
+            d = obj.userData.size.depth;
+        } else {
+            w = box.max.x - box.min.x;
+            d = box.max.z - box.min.z;
+        }
+        
+        const y = center.y;
+        const offset = 0.3;
+
+        this.handles.n.position.set(center.x, y, center.z - d/2 - offset);
+        this.handles.s.position.set(center.x, y, center.z + d/2 + offset);
+        this.handles.e.position.set(center.x + w/2 + offset, y, center.z);
+        this.handles.w.position.set(center.x - w/2 - offset, y, center.z);
+        
+        Object.values(this.handles).forEach(h => h.visible = true);
+    }
 
     // --- Input Handling ---
 
@@ -424,20 +503,41 @@ export class LevelEditor {
         // Ignore clicks on UI panels
         if (e.target.closest('.editor-panel') || e.target.closest('.editor-top-bar')) return;
 
+        const mouse = { 
+            x: (e.clientX / window.innerWidth) * 2 - 1, 
+            y: -(e.clientY / window.innerHeight) * 2 + 1 
+        };
+        this.raycaster.setFromCamera(mouse, this.camera);
+
+        // Check Handle Click first
+        if (this.handlesGroup.visible) {
+            const handleIntersects = this.raycaster.intersectObjects(this.handlesGroup.children);
+            if (handleIntersects.length > 0) {
+                this.activeHandle = handleIntersects[0].object;
+                this.isDragging = true;
+                this.orbit.enabled = false;
+                
+                // Setup drag state
+                const planeIntersect = new THREE.Vector3();
+                this.raycaster.ray.intersectPlane(this.groundPlane, planeIntersect);
+                this.startDragPos.copy(planeIntersect);
+                this.originalPos.copy(this.selectedObject.position);
+                
+                if (this.selectedObject.userData.stationType === STATION_TYPES.WALL) {
+                    this.originalSize = { ...this.selectedObject.userData.size };
+                }
+                
+                return; // Consumed
+            }
+        }
+
         if (this.placementMode) {
             this.confirmPlacement();
         } else {
             // Raycast for selection
-            const mouse = { 
-                x: (e.clientX / window.innerWidth) * 2 - 1, 
-                y: -(e.clientY / window.innerHeight) * 2 + 1 
-            };
-            this.raycaster.setFromCamera(mouse, this.camera);
-            
             const candidates = [];
             this.scene.traverse(c => {
                 // Find root objects
-                // Also enable selecting PREPLACED_ITEM types
                 if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.stationType)) {
                     candidates.push(c);
                 }
@@ -469,8 +569,97 @@ export class LevelEditor {
             y: -(e.clientY / window.innerHeight) * 2 + 1 
         };
         this.raycaster.setFromCamera(mouse, this.camera);
+        
+        // --- RESIZE / EXTEND LOGIC ---
+        if (this.isDragging && this.activeHandle && this.selectedObject) {
+            const intersect = new THREE.Vector3();
+            if (this.raycaster.ray.intersectPlane(this.groundPlane, intersect)) {
+                const delta = intersect.clone().sub(this.startDragPos);
+                const type = this.selectedObject.userData.stationType;
+                
+                // Direction multipliers based on handle
+                const dir = this.activeHandle.userData.direction;
+                // n: z-, s: z+, e: x+, w: x-
+                
+                if (type === STATION_TYPES.WALL) {
+                    // Resize Logic
+                    let dw = 0; 
+                    let dd = 0;
+                    let dx = 0;
+                    let dz = 0;
+                    
+                    // Calculate dimension changes locally aligned
+                    if (dir === 'e') dw = delta.x;
+                    if (dir === 'w') dw = -delta.x;
+                    if (dir === 's') dd = delta.z;
+                    if (dir === 'n') dd = -delta.z;
+                    
+                    // Snap to grid unit
+                    let newW = Math.max(GRID_UNIT, Math.round((this.originalSize.width + dw) * 2) / 2);
+                    let newD = Math.max(GRID_UNIT, Math.round((this.originalSize.depth + dd) * 2) / 2);
+                    
+                    // Shift center to compensate anchor
+                    if (dir === 'e') dx = (newW - this.originalSize.width) / 2;
+                    if (dir === 'w') dx = -(newW - this.originalSize.width) / 2;
+                    if (dir === 's') dz = (newD - this.originalSize.depth) / 2;
+                    if (dir === 'n') dz = -(newD - this.originalSize.depth) / 2;
 
-        // --- STACKING LOGIC ---
+                    // Update Wall
+                    resizeWall(this.selectedObject, newW, newD);
+                    this.selectedObject.position.set(
+                        this.originalPos.x + dx,
+                        this.originalPos.y,
+                        this.originalPos.z + dz
+                    );
+                    this.selectionBox.setFromObject(this.selectedObject);
+                } 
+                else if (type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING) {
+                    // Tiling Logic
+                    // Calculate how many units moved along axis
+                    let axisDelta = 0;
+                    let axisVector = new THREE.Vector3();
+                    
+                    if (dir === 'e') { axisDelta = delta.x; axisVector.set(1,0,0); }
+                    if (dir === 'w') { axisDelta = -delta.x; axisVector.set(-1,0,0); }
+                    if (dir === 's') { axisDelta = delta.z; axisVector.set(0,0,1); }
+                    if (dir === 'n') { axisDelta = -delta.z; axisVector.set(0,0,-1); }
+                    
+                    const count = Math.floor((axisDelta + (GRID_UNIT/2)) / GRID_UNIT);
+                    
+                    // Cleanup old ghosts
+                    this.extendingGhosts.forEach(g => this.scene.remove(g));
+                    this.extendingGhosts = [];
+                    
+                    if (count > 0) {
+                        // Create ghosts
+                        const t = this.selectedObject.userData.template;
+                        for(let i=1; i<=count; i++) {
+                            const ghost = this._createObjectFromTemplate(t);
+                            ghost.position.copy(this.originalPos).add(axisVector.clone().multiplyScalar(i * GRID_UNIT));
+                            
+                            // Make ghost transparent
+                             ghost.traverse(c => {
+                                if (c.isMesh) {
+                                    c.material = c.material.clone();
+                                    c.material.transparent = true;
+                                    c.material.opacity = 0.5;
+                                    c.material.color.setHex(0x00FF00);
+                                }
+                            });
+                            
+                            this.scene.add(ghost);
+                            this.extendingGhosts.push(ghost);
+                        }
+                    }
+                }
+                
+                // Update handle positions to follow the expansion
+                this._updateHandles(); 
+            }
+            return;
+        }
+
+        // --- STACKING LOGIC (Existing) ---
         // 1. Find potential support objects (Counters, Tables)
         const supports = [];
         this.scene.traverse(c => {
@@ -524,6 +713,26 @@ export class LevelEditor {
 
     onPointerUp() {
         if (this.enabled) {
+            if (this.activeHandle) {
+                // Finish Extend/Resize
+                if (this.extendingGhosts.length > 0) {
+                    // Solidify ghosts
+                    this.extendingGhosts.forEach(g => {
+                         const t = g.userData.template;
+                         const real = this._createObjectFromTemplate(t);
+                         real.position.copy(g.position);
+                         real.rotation.copy(g.rotation);
+                         this.scene.add(real);
+                         this.scene.remove(g);
+                    });
+                    this.extendingGhosts = [];
+                    refreshSmartObjects(this.scene); // Fuse visuals
+                }
+                
+                this.activeHandle = null;
+                this._updateHandles();
+            }
+            
             this.isDragging = false;
             this.orbit.enabled = true;
         }

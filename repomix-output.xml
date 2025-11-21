@@ -32,7 +32,7 @@ The content is organized as follows:
 <notes>
 - Some files may have been excluded based on .gitignore rules and Repomix's configuration
 - Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
-- Only files matching these patterns are included: src, src/audioManager.js, src/constants.js, src/controls.js, src/editor.js, src/gameData.js, src/grid.js, src/i18nData.js, src/interaction.js, src/items.js, src/LevelManager.js, src/main.js, src/menuManager.js, src/player.js, src/saveLoad.js, src/saveManager.js, src/setup.js, src/ui.js, src/voxelBuilder.js, src/world.js, vendor, index.html, levels.json, style.css
+- Only files matching these patterns are included: levels, levels/game_roadmap.json, levels/level_1.json, levels/level_2.json, src, src/audioManager.js, src/constants.js, src/controls.js, src/editor.js, src/gameData.js, src/grid.js, src/i18nData.js, src/interaction.js, src/items.js, src/LevelManager.js, src/main.js, src/menuManager.js, src/player.js, src/saveLoad.js, src/saveManager.js, src/setup.js, src/ui.js, src/voxelBuilder.js, src/world.js, vendor, index.html, levels.json, style.css
 - Files matching patterns in .gitignore are excluded
 - Files matching default ignore patterns are excluded
 - Files are sorted by Git change count (files with more changes are at the bottom)
@@ -41,6 +41,10 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+levels/
+  game_roadmap.json
+  level_1.json
+  level_2.json
 src/
   audioManager.js
   constants.js
@@ -68,6 +72,1385 @@ style.css
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="levels/level_2.json">
+{
+  "levelId": 2,
+  "name": "Burger & Fries",
+  "duration": 180,
+  "starThresholds": [
+    100,
+    200,
+    300
+  ],
+  "availableMeals": [
+    "French Fries",
+    "Salad",
+    "Hamburger",
+    "Cheeseburger"
+  ],
+  "maxActiveOrders": 2,
+  "newOrderDelay": 15,
+  "layout": [
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": -2.5,
+        "z": 4
+      },
+      "size": {
+        "width": 3.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Wall (Long)",
+      "type": "wall",
+      "position": {
+        "x": -4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 7.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Wall (Long)",
+      "type": "wall",
+      "position": {
+        "x": 4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 7.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": -4,
+        "z": -4
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": 4,
+        "z": -4
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": 2.5,
+        "z": 4
+      },
+      "size": {
+        "width": 3.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Wall (Long)",
+      "type": "wall",
+      "position": {
+        "x": 0,
+        "z": -4
+      },
+      "size": {
+        "width": 8,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": 0.5,
+        "z": 4
+      },
+      "rotation": -3.14
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": 0,
+        "z": 4
+      },
+      "rotation": -3.14
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": -0.5,
+        "z": 4
+      },
+      "rotation": -3.14
+    },
+    {
+      "name": "Counter (Corner)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Corner)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -2.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -2,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -1,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 0,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 1,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 2,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 2.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -4,
+        "z": -3
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -4.5,
+        "z": -3
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -4,
+        "z": -3
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1.5
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3
+      },
+      "rotation": -7.85,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2.5
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1.5
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -2,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -1.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -2,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -1.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -0.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -0.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 1.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 2,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 1.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 2,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": 0.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": 0,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": -0.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": 1.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": -1.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": -1
+      },
+      "rotation": -4.71,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": 3.5,
+        "z": -1
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Deep Fryer",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": -2
+      },
+      "rotation": -4.71,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#555",
+      "config": {
+        "processes": [
+          "raw_fries",
+          "onion_rings_coated",
+          "coated_chicken_strips"
+        ],
+        "result": {
+          "raw_fries": "cooked_fries",
+          "onion_rings_coated": "cooked_onion_rings",
+          "coated_chicken_strips": "cooked_chicken_tenders"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "Stove Top",
+      "type": "processor",
+      "position": {
+        "x": -3,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#333",
+      "config": {
+        "processes": [
+          "patty",
+          "raw_bacon",
+          "pancake_batter",
+          "omelette_mix",
+          "grilled_cheese_raw"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "raw_bacon": "cooked_bacon",
+          "pancake_batter": "cooked_pancakes",
+          "omelette_mix": "cooked_omelette",
+          "grilled_cheese_raw": "grilled_cheese_cooked"
+        },
+        "processingTime": 4000
+      }
+    },
+    {
+      "name": "Stove Top",
+      "type": "processor",
+      "position": {
+        "x": 3,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#333",
+      "config": {
+        "processes": [
+          "patty",
+          "raw_bacon",
+          "pancake_batter",
+          "omelette_mix",
+          "grilled_cheese_raw"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "raw_bacon": "cooked_bacon",
+          "pancake_batter": "cooked_pancakes",
+          "omelette_mix": "cooked_omelette",
+          "grilled_cheese_raw": "grilled_cheese_cooked"
+        },
+        "processingTime": 4000
+      }
+    },
+    {
+      "name": "Deep Fryer",
+      "type": "processor",
+      "position": {
+        "x": 3.5,
+        "z": -2
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#555",
+      "config": {
+        "processes": [
+          "raw_fries",
+          "onion_rings_coated",
+          "coated_chicken_strips"
+        ],
+        "result": {
+          "raw_fries": "cooked_fries",
+          "onion_rings_coated": "cooked_onion_rings",
+          "coated_chicken_strips": "cooked_chicken_tenders"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "Potato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#CD853F",
+      "config": {
+        "ingredient": "potato"
+      }
+    },
+    {
+      "name": "Potato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#CD853F",
+      "config": {
+        "ingredient": "potato"
+      }
+    },
+    {
+      "name": "Bun Rack",
+      "type": "ingredient_source",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#F4A460",
+      "config": {
+        "ingredient": "bun"
+      }
+    },
+    {
+      "name": "Tomato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#FF6347",
+      "config": {
+        "ingredient": "tomato"
+      }
+    },
+    {
+      "name": "Lettuce Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -1,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#90EE90",
+      "config": {
+        "ingredient": "lettuce"
+      }
+    },
+    {
+      "name": "Plate Stack",
+      "type": "item_source",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate Stack",
+      "type": "item_source",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Cheese Fridge",
+      "type": "ingredient_source",
+      "position": {
+        "x": 1,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#FFD700",
+      "config": {
+        "ingredient": "cheese_slice"
+      }
+    },
+    {
+      "name": "Patty Box",
+      "type": "ingredient_source",
+      "position": {
+        "x": 0,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#A52A2A",
+      "config": {
+        "ingredient": "patty"
+      }
+    }
+  ]
+}
+</file>
+
+<file path="levels/game_roadmap.json">
+[
+  {
+    "levelId": 1,
+    "name": "Fry Cook Training",
+    "filename": "level_1.json"
+  },
+  {
+    "levelId": 2,
+    "name": "Burger & Fries",
+    "filename": "level_2.json"
+  }
+]
+</file>
+
+<file path="levels/level_1.json">
+{
+    "levelId": 1,
+    "name": "Fry Cook Training",
+    "duration": 180,
+    "starThresholds": [
+        300,
+        500,
+        700
+    ],
+    "availableMeals": [
+        "French Fries"
+    ],
+    "maxActiveOrders": 2,
+    "newOrderDelay": 15,
+    "layout": [
+        {
+            "name": "Wall_Back",
+            "type": "wall",
+            "position": { "x": 0, "z": -4 },
+            "size": { "width": 8.5, "depth": 0.5 }
+        },
+        {
+            "name": "Wall_Front_L",
+            "type": "wall",
+            "position": { "x": -2.5, "z": 4 },
+            "size": { "width": 3.5, "depth": 0.5 }
+        },
+        {
+            "name": "Wall_Front_R",
+            "type": "wall",
+            "position": { "x": 2.5, "z": 4 },
+            "size": { "width": 3.5, "depth": 0.5 }
+        },
+        {
+            "name": "Wall_Left",
+            "type": "wall",
+            "position": { "x": -4, "z": 0 },
+            "size": { "width": 0.5, "depth": 7.5 }
+        },
+        {
+            "name": "Wall_Right",
+            "type": "wall",
+            "position": { "x": 4, "z": 0 },
+            "size": { "width": 0.5, "depth": 7.5 }
+        },
+        {
+            "name": "C_Serve_1",
+            "type": "serving",
+            "position": { "x": -0.5, "z": 4 },
+            "rotation": -3.14
+        },
+        {
+            "name": "C_Serve_2",
+            "type": "serving",
+            "position": { "x": 0, "z": 4 },
+            "rotation": -3.14
+        },
+        {
+            "name": "C_Serve_3",
+            "type": "serving",
+            "position": { "x": 0.5, "z": 4 },
+            "rotation": -3.14
+        },
+        {
+            "name": "C_Back_1",
+            "type": "counter",
+            "position": { "x": -3, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_2",
+            "type": "counter",
+            "position": { "x": -2.5, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_3",
+            "type": "counter",
+            "position": { "x": -1, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_4",
+            "type": "counter",
+            "position": { "x": 1, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_5",
+            "type": "counter",
+            "position": { "x": 2.5, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_6",
+            "type": "counter",
+            "position": { "x": 3, "z": -3.5 }
+        },
+        {
+            "name": "C_Side_L1",
+            "type": "counter",
+            "position": { "x": -3.5, "z": -3 },
+            "rotation": -4.71
+        },
+        {
+            "name": "C_Side_L2",
+            "type": "counter",
+            "position": { "x": -3.5, "z": -2.5 },
+            "rotation": -4.71
+        },
+        {
+            "name": "C_Side_R1",
+            "type": "counter",
+            "position": { "x": 3.5, "z": -3 },
+            "rotation": -1.57
+        },
+        {
+            "name": "C_Side_R2",
+            "type": "counter",
+            "position": { "x": 3.5, "z": -2.5 },
+            "rotation": -1.57
+        },
+        {
+            "name": "CuttingBoard1",
+            "type": "processor",
+            "position": { "x": -2.5, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["potato"],
+                "result": { "potato": "raw_fries" }
+            }
+        },
+        {
+            "name": "Fryer1",
+            "type": "processor",
+            "position": { "x": -1, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["raw_fries"],
+                "result": { "raw_fries": "cooked_fries" },
+                "processingTime": 3000
+            }
+        },
+        {
+            "name": "Trash",
+            "type": "trash",
+            "position": { "x": 3.5, "z": -2 },
+            "rotation": -1.57,
+            "size": { "width": 0.5, "depth": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base1",
+            "type": "table",
+            "position": { "x": -1.5, "z": -0.5 }
+        },
+        {
+            "name": "T_Assem_Base2",
+            "type": "table",
+            "position": { "x": -1, "z": -0.5 }
+        },
+        {
+            "name": "T_Assem_Base3",
+            "type": "table",
+            "position": { "x": -0.5, "z": -0.5 }
+        },
+        {
+            "name": "Counter (Corner)",
+            "type": "counter",
+            "position": { "x": -3.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Corner)",
+            "type": "counter",
+            "position": { "x": 3.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": -2, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": -1.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": -0.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 0, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 0.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 1.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 2, "z": -3.5 }
+        },
+        {
+            "name": "T_Assem_Base7",
+            "type": "table",
+            "position": { "x": 0.5, "z": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base8",
+            "type": "table",
+            "position": { "x": 1, "z": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base9",
+            "type": "table",
+            "position": { "x": 1.5, "z": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base10",
+            "type": "table",
+            "position": { "x": 0.5, "z": 1 }
+        },
+        {
+            "name": "T_Assem_Base11",
+            "type": "table",
+            "position": { "x": 1, "z": 1 }
+        },
+        {
+            "name": "T_Assem_Base12",
+            "type": "table",
+            "position": { "x": 1.5, "z": 1 }
+        },
+        {
+            "name": "CuttingBoard2",
+            "type": "processor",
+            "position": { "x": -3.5, "z": -2.5 },
+            "rotation": -11,
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["potato"],
+                "result": { "potato": "raw_fries" }
+            }
+        },
+        {
+            "name": "Fryer2",
+            "type": "processor",
+            "position": { "x": -0.5, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["raw_fries"],
+                "result": { "raw_fries": "cooked_fries" },
+                "processingTime": 3000
+            }
+        },
+        {
+            "name": "TrashBin2",
+            "type": "trash",
+            "position": { "x": -3.5, "z": -2 },
+            "rotation": -4.71,
+            "size": { "width": 0.5, "depth": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base4",
+            "type": "table",
+            "position": { "x": -1.5, "z": -1 }
+        },
+        {
+            "name": "T_Assem_Base5",
+            "type": "table",
+            "position": { "x": -1, "z": -1 }
+        },
+        {
+            "name": "T_Assem_Base6",
+            "type": "table",
+            "position": { "x": -0.5, "z": -1 }
+        },
+        {
+            "name": "PotatoBin_1",
+            "type": "ingredient_source",
+            "position": { "x": -3.5, "z": -3 },
+            "rotation": -4.71,
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "ingredient": "potato" }
+        },
+        {
+            "name": "PotatoBin_2",
+            "type": "ingredient_source",
+            "position": { "x": -3, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "ingredient": "potato" }
+        },
+        {
+            "name": "PlateStack",
+            "type": "item_source",
+            "position": { "x": 3.5, "z": -3 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": -1.5, "z": -1 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": -1, "z": -1 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": -0.5, "z": -1 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": 0.5, "z": 0.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": 1, "z": 0.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": 1.5, "z": 0.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        }
+    ]
+}
+</file>
 
 <file path="src/audioManager.js">
 // src/audioManager.js
@@ -1057,6 +2440,47 @@ export function createPizzaOvenMesh() {
     return mesh;
 }
 
+export function createTableMesh(neighbors) {
+    const vb = new VoxelBuilder();
+    // Top
+    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.METAL_SHINY);
+    vb.addBox(1, 5, 1, 14, 5, 14, PALETTE.METAL_DARK); // Underside brace
+    
+    // Smart Legs Logic: Add leg only if no neighbor in that direction
+    // Corners need legs if either adjacent side is open? 
+    // Standard logic: 4 corners. 
+    // NW Leg (x=1, z=1) - Remove if N or W has neighbor?
+    // Actually, tables usually fuse. If there is a table to the West, we don't need the West legs? 
+    // Or rather, shared legs?
+    // Let's simply: Only place a leg if NO neighbor is present on the two adjacent sides.
+    
+    const addLeg = (x, z) => vb.addBox(x, 0, z, x+1, 14, z+1, PALETTE.METAL_LIGHT);
+    
+    // NW Corner (1,1)
+    if(!neighbors.w && !neighbors.n) addLeg(1, 1);
+    
+    // NE Corner (13,1)
+    if(!neighbors.e && !neighbors.n) addLeg(13, 1);
+    
+    // SW Corner (1,13)
+    if(!neighbors.w && !neighbors.s) addLeg(1, 13);
+    
+    // SE Corner (13,13)
+    if(!neighbors.e && !neighbors.s) addLeg(13, 13);
+
+    const mesh = vb.buildMesh();
+    mesh.scale.set(1, GRID_UNIT*1.8 / GRID_UNIT, 1); // Adjust height scalar (1.8 units ~ 0.9 world height)
+    // Wait, normal voxel scale is 1.
+    // GRID_UNIT is 0.5. 
+    // Voxel Size = 0.5/16.
+    // Mesh is 16 voxels high = 0.5 height.
+    // We want 0.9 height. Scale Y by 1.8.
+    mesh.scale.set(1, 1.8, 1);
+    
+    mesh.position.y = (GRID_UNIT * 1.8) / 2;
+    return mesh;
+}
+
 // --- SOURCES ---
 
 export function createIngredientBinMesh(ingredientType) {
@@ -1485,509 +2909,6 @@ export class PlayerControls {
 }
 </file>
 
-<file path="src/editor.js">
-// src/editor.js
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT } from './constants.js';
-import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh } from './world.js';
-
-export class LevelEditor {
-    constructor(camera, renderer, scene, interactionManager) {
-        this.camera = camera;
-        this.renderer = renderer;
-        this.scene = scene;
-        this.interactionManager = interactionManager;
-        this.enabled = false;
-        this.raycaster = new THREE.Raycaster();
-        
-        // State
-        this.selectedObject = null;
-        this.ghostObject = null; // Object currently being placed
-        this.isDragging = false;
-        this.placementMode = false; // If true, we are trying to place a new item
-
-        // Ground Plane for Raycasting (Y=0)
-        this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-
-        // Grid Helper (Visible only in Editor)
-        // 8x8 size, 0.5 unit cells = 16 divisions
-        this.gridHelper = new THREE.GridHelper(8, 16, 0xFFD700, 0x444444);
-        this.gridHelper.position.y = 0.01; // Slight offset to avoid z-fighting if floor was visible
-        this.gridHelper.visible = false;
-        this.scene.add(this.gridHelper);
-
-        // Controls
-        this.orbit = new OrbitControls(camera, renderer.domElement);
-        this.orbit.enabled = false;
-        this.orbit.enableDamping = true;
-        this.orbit.dampingFactor = 0.1;
-
-        // Visual Helpers
-        this.selectionBox = new THREE.BoxHelper(new THREE.Mesh(), 0xffff00);
-        this.selectionBox.visible = false;
-        this.scene.add(this.selectionBox);
-
-        // Init UI
-        this.ui = document.getElementById('editor-ui');
-        this.libraryContent = document.getElementById('library-content');
-        this.inspector = document.getElementById('editor-inspector');
-        this.inspectorName = document.getElementById('inspector-name');
-        this.inspectorX = document.getElementById('val-x');
-        this.inspectorZ = document.getElementById('val-z');
-
-        this._initUI();
-        this._bindEvents();
-    }
-
-    _initUI() {
-        // Populate Library
-        this._renderLibrary('all');
-
-        // Bind Tab Switching
-        const tabs = document.querySelectorAll('.tab-btn');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                tabs.forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
-                this._renderLibrary(e.target.dataset.category);
-            });
-        });
-
-        // Bind Inspector Actions
-        document.getElementById('btn-rotate').addEventListener('click', () => this.rotateSelected());
-        document.getElementById('btn-clone').addEventListener('click', () => this.cloneSelected());
-        document.getElementById('btn-delete').addEventListener('click', () => this.deleteSelected());
-        document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLayout());
-
-        // Bind Config Editor
-        this.inspectorConfig = document.getElementById('inspector-config');
-        document.getElementById('btn-save-config').addEventListener('click', () => this.saveConfig());
-    }
-
-    _renderLibrary(category) {
-        this.libraryContent.innerHTML = '';
-        const items = category === 'all' 
-            ? CATALOG_ITEMS 
-            : CATALOG_ITEMS.filter(i => i.category === category);
-
-        items.forEach(item => {
-            const el = document.createElement('div');
-            el.className = 'library-item';
-            
-            // Simple icon selection based on type
-            let icon = '📦';
-            if(item.type.includes('wall')) icon = '🧱';
-            else if(item.type.includes('counter')) icon = '🟫';
-            else if(item.type.includes('processor')) icon = '🍳';
-            else if(item.type.includes('source')) icon = '🧺';
-            else if(item.isServing) icon = '🛎️';
-            else if(item.category === 'Items') icon = '🍽️';
-
-            el.innerHTML = `
-                <div class="library-item-icon">${icon}</div>
-                <div class="library-item-name">${item.name}</div>
-            `;
-            
-            el.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent canvas click
-                this.startPlacement(item);
-            });
-            
-            this.libraryContent.appendChild(el);
-        });
-    }
-
-    _bindEvents() {
-        // Mouse Events
-        this.renderer.domElement.addEventListener('pointerdown', (e) => this.onPointerDown(e));
-        this.renderer.domElement.addEventListener('pointermove', (e) => this.onPointerMove(e));
-        this.renderer.domElement.addEventListener('pointerup', (e) => this.onPointerUp(e));
-        
-        // Keyboard Shortcuts
-        window.addEventListener('keydown', (e) => {
-            if (!this.enabled) return;
-            // Do not trigger shortcuts if user is typing in textarea
-            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-
-            switch(e.key.toLowerCase()) {
-                case 'escape': 
-                    this.cancelPlacement(); 
-                    this.deselect(); 
-                    break;
-                case 'delete': 
-                case 'backspace':
-                    this.deleteSelected(); 
-                    break;
-                case 'r': 
-                    this.rotateSelected(); 
-                    break;
-                case 'c': 
-                    this.cloneSelected(); 
-                    break;
-                case 't':
-                    this.exportLayout();
-                    break;
-            }
-        });
-    }
-
-    enable() {
-        this.enabled = true;
-        this.orbit.enabled = true;
-        this.ui.style.display = 'block';
-        
-        // Show Schematic Grid
-        this.gridHelper.visible = true;
-        
-        // Hide textured floor for clean CAD look
-        const gameFloor = getFloorMesh();
-        if(gameFloor) gameFloor.visible = false;
-
-        // Set optimal editor view
-        this.camera.position.set(0, 12, 8);
-        this.camera.lookAt(0, 0, 0);
-        this.orbit.target.set(0,0,0);
-    }
-
-    disable() {
-        this.enabled = false;
-        this.orbit.enabled = false;
-        this.ui.style.display = 'none';
-        this.cancelPlacement();
-        this.deselect();
-
-        // Revert Visuals
-        this.gridHelper.visible = false;
-        const gameFloor = getFloorMesh();
-        if(gameFloor) gameFloor.visible = true;
-    }
-
-    update(delta) {
-        if (!this.enabled) return;
-        this.orbit.update();
-        
-        if (this.selectedObject) {
-            this.selectionBox.update();
-            this._updateInspectorData();
-        }
-    }
-
-    // --- Core Logic ---
-
-    startPlacement(template) {
-        this.cancelPlacement(); // Clear existing ghost
-        this.deselect(); // Clear selection
-        
-        this.placementMode = true;
-        this.ghostObject = this._createObjectFromTemplate(template);
-        
-        // Make ghost transparent
-        this.ghostObject.traverse(c => {
-            if (c.isMesh) {
-                c.material = c.material.clone();
-                c.material.transparent = true;
-                c.material.opacity = 0.6;
-                c.material.emissive = new THREE.Color(0x00FF00);
-                c.material.emissiveIntensity = 0.2;
-            }
-        });
-
-        this.scene.add(this.ghostObject);
-    }
-
-    cancelPlacement() {
-        if (this.ghostObject) {
-            this.scene.remove(this.ghostObject);
-            this.ghostObject = null;
-        }
-        this.placementMode = false;
-    }
-
-    confirmPlacement() {
-        if (this.ghostObject) {
-            // Create a real solid instance
-            const template = this.ghostObject.userData.template;
-            const realObject = this._createObjectFromTemplate(template);
-            
-            realObject.position.copy(this.ghostObject.position);
-            realObject.rotation.copy(this.ghostObject.rotation);
-            
-            this.scene.add(realObject);
-        }
-    }
-
-    _createObjectFromTemplate(t) {
-        // Map template to world.js creation functions
-        let obj;
-        const fakeColor = t.color || '#FFFFFF';
-        const dummyPos = { x: 0, z: 0 }; // Position set later
-
-        if (t.type === STATION_TYPES.COUNTER || t.type === STATION_TYPES.SERVING) {
-            obj = createCounterPrefab(t.name, fakeColor, t.isServing);
-        } else if (t.type === STATION_TYPES.TABLE) {
-            obj = createTablePrefab(t.name, fakeColor, {n:false, s:false, e:false, w:false});
-        } else {
-            // Generic Station / Wall / Source / Preplaced Item
-            const def = {
-                name: t.name,
-                type: t.type,
-                size: t.size,
-                color: fakeColor,
-                config: t.config,
-                position: dummyPos
-            };
-            obj = createStationPrefab(def);
-        }
-
-        // Store template data for serialization later
-        obj.userData.template = t; 
-        // Y position will be handled by onPointerMove snapping
-        obj.position.y = 0;
-
-        return obj;
-    }
-
-    select(object) {
-        if (this.selectedObject === object) return;
-        this.selectedObject = object;
-        this.selectionBox.setFromObject(object);
-        this.selectionBox.visible = true;
-        
-        // Update UI
-        this.inspector.style.display = 'flex';
-        this.inspectorName.textContent = object.name;
-
-        // Populate Config
-        // Use existing userData.config if set, otherwise fallback to template config
-        const config = object.userData.config || object.userData.template?.config || {};
-        this.inspectorConfig.value = JSON.stringify(config, null, 2);
-    }
-
-    deselect() {
-        this.selectedObject = null;
-        this.selectionBox.visible = false;
-        this.inspector.style.display = 'none';
-    }
-
-    // --- Manipulation ---
-
-    saveConfig() {
-        if (!this.selectedObject) return;
-        try {
-            const newConfig = JSON.parse(this.inspectorConfig.value);
-            this.selectedObject.userData.config = newConfig;
-            
-            // Visual feedback
-            const btn = document.getElementById('btn-save-config');
-            const originalText = btn.innerText;
-            btn.innerText = "✅ Saved!";
-            setTimeout(() => btn.innerText = originalText, 1000);
-            
-        } catch (e) {
-            alert("Invalid JSON syntax! Check your brackets and quotes.");
-        }
-    }
-
-    rotateSelected() {
-        const target = this.placementMode ? this.ghostObject : this.selectedObject;
-        if (target) {
-            target.rotation.y -= Math.PI / 2;
-            target.updateMatrixWorld();
-            if (this.selectionBox.visible) this.selectionBox.update();
-        }
-    }
-
-    deleteSelected() {
-        if (this.selectedObject) {
-            this.scene.remove(this.selectedObject);
-            this.deselect();
-        }
-    }
-
-    cloneSelected() {
-        if (this.selectedObject) {
-            const template = this.selectedObject.userData.template || {
-                name: this.selectedObject.name,
-                type: this.selectedObject.userData.stationType || this.selectedObject.userData.type,
-            };
-            
-            if (this.selectedObject.userData.template) {
-                this.startPlacement(this.selectedObject.userData.template);
-            } else {
-                const clone = this.selectedObject.clone();
-                clone.position.x += GRID_UNIT;
-                this.scene.add(clone);
-                this.select(clone);
-            }
-        }
-    }
-
-    _updateInspectorData() {
-        if (this.selectedObject) {
-            this.inspectorX.textContent = this.selectedObject.position.x.toFixed(1);
-            this.inspectorZ.textContent = this.selectedObject.position.z.toFixed(1);
-        }
-    }
-
-    // --- Input Handling ---
-
-    onPointerDown(e) {
-        if (!this.enabled || e.button !== 0) return;
-        
-        // Ignore clicks on UI panels
-        if (e.target.closest('.editor-panel') || e.target.closest('.editor-top-bar')) return;
-
-        if (this.placementMode) {
-            this.confirmPlacement();
-        } else {
-            // Raycast for selection
-            const mouse = { 
-                x: (e.clientX / window.innerWidth) * 2 - 1, 
-                y: -(e.clientY / window.innerHeight) * 2 + 1 
-            };
-            this.raycaster.setFromCamera(mouse, this.camera);
-            
-            const candidates = [];
-            this.scene.traverse(c => {
-                // Find root objects
-                // Also enable selecting PREPLACED_ITEM types
-                if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.stationType)) {
-                    candidates.push(c);
-                }
-            });
-
-            const hits = this.raycaster.intersectObjects(candidates, true);
-            
-            if (hits.length > 0) {
-                // Walk up to the root group
-                let root = hits[0].object;
-                while(root.parent && root.parent !== this.scene) { root = root.parent; }
-                
-                if (this.selectedObject !== root) {
-                    this.select(root);
-                }
-                this.isDragging = true;
-                this.orbit.enabled = false; 
-            } else {
-                this.deselect();
-            }
-        }
-    }
-
-    onPointerMove(e) {
-        if (!this.enabled) return;
-
-        const mouse = { 
-            x: (e.clientX / window.innerWidth) * 2 - 1, 
-            y: -(e.clientY / window.innerHeight) * 2 + 1 
-        };
-        this.raycaster.setFromCamera(mouse, this.camera);
-
-        // --- STACKING LOGIC ---
-        // 1. Find potential support objects (Counters, Tables)
-        const supports = [];
-        this.scene.traverse(c => {
-            // Must be visible, and not the object currently being dragged/placed
-            if (c.visible && c !== this.ghostObject && c !== this.selectedObject) {
-                if (c.userData && (c.userData.stationType === STATION_TYPES.COUNTER || c.userData.stationType === STATION_TYPES.TABLE || c.userData.stationType === STATION_TYPES.SERVING)) {
-                    supports.push(c);
-                }
-            }
-        });
-
-        // 2. Check intersections with supports
-        const hits = this.raycaster.intersectObjects(supports, true);
-        
-        let targetY = 0;
-        let targetX = 0;
-        let targetZ = 0;
-        let foundSupport = false;
-
-        if (hits.length > 0) {
-            // Hit a counter/table -> Stack on top
-            foundSupport = true;
-            const hit = hits[0];
-            const p = hit.point;
-            targetX = p.x;
-            targetZ = p.z;
-            targetY = MODULE_HEIGHT; // Place on top of counter (0.9)
-        } else {
-            // Hit nothing valid -> Check Ground Plane (Y=0)
-            const target = new THREE.Vector3();
-            if (this.raycaster.ray.intersectPlane(this.groundPlane, target)) {
-                foundSupport = true;
-                targetX = target.x;
-                targetZ = target.z;
-                targetY = 0;
-            }
-        }
-
-        if (foundSupport) {
-            // Snap X/Z to grid
-            const finalX = Math.round(targetX * 2) / 2; 
-            const finalZ = Math.round(targetZ * 2) / 2;
-
-            if (this.placementMode && this.ghostObject) {
-                this.ghostObject.position.set(finalX, targetY, finalZ);
-            } else if (this.isDragging && this.selectedObject) {
-                this.selectedObject.position.set(finalX, targetY, finalZ);
-            }
-        }
-    }
-
-    onPointerUp() {
-        if (this.enabled) {
-            this.isDragging = false;
-            this.orbit.enabled = true;
-        }
-    }
-
-    // --- Export ---
-
-    exportLayout() {
-        const data = [];
-        this.scene.traverse(c => {
-            if (c.parent === this.scene && c.userData && (c.userData.type === 'station' || c.userData.type === 'counter')) {
-                const entry = {
-                    name: c.name,
-                    type: c.userData.stationType || c.userData.type,
-                    position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
-                };
-                
-                // Include rotation if not zero
-                if (c.rotation.y !== 0) {
-                    entry.rotation = parseFloat(c.rotation.y.toFixed(2));
-                }
-
-                // Check Y position to see if it's stacked (optional context)
-                // Generally we export X/Z. Game logic snaps Y based on type.
-                // But if we support custom stacking, we might need Y or "onTop" logic.
-                // For now, the game engine assumes stations are at MODULE_HEIGHT if not walls.
-                
-                if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
-                if (c.userData.template?.color) entry.color = c.userData.template.color;
-                if (c.userData.isServing) entry.isServing = true;
-                
-                // Config: Prioritize userData.config (preserved from loaded levels)
-                // Fallback to template config if available (editor-created items)
-                if (c.userData.config) {
-                    entry.config = c.userData.config;
-                } else if (c.userData.template?.config) {
-                    entry.config = c.userData.template.config;
-                }
-
-                data.push(entry);
-            }
-        });
-        
-        console.log("--- LEVEL JSON EXPORT ---");
-        console.log(JSON.stringify(data, null, 2));
-        alert("Layout JSON exported to Console (F12)");
-    }
-}
-</file>
-
 <file path="src/player.js">
 // src/player.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
@@ -2113,783 +3034,798 @@ export class Player {
 }
 </file>
 
-<file path="index.html">
-<!DOCTYPE html>
-<html lang="en">
+<file path="src/editor.js">
+// src/editor.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT } from './constants.js';
+import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh, resizeWall, refreshSmartObjects } from './world.js';
+import { RECIPES } from './gameData.js';
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Kitchen Simulator</title>
-    <link rel="stylesheet" href="style.css">
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-                "gsap": "https://unpkg.com/gsap@3.12.4/index.js"
+export class LevelEditor {
+    constructor(camera, renderer, scene, interactionManager, onExit) {
+        this.camera = camera;
+        this.renderer = renderer;
+        this.scene = scene;
+        this.interactionManager = interactionManager;
+        this.onExit = onExit;
+        this.enabled = false;
+        this.raycaster = new THREE.Raycaster();
+        
+        // Loaded Level Metadata
+        this.currentLevelData = {};
+
+        // State
+        this.selectedObject = null;
+        this.ghostObject = null; // Object currently being placed
+        this.isDragging = false;
+        this.placementMode = false; // If true, we are trying to place a new item
+        
+        // Resize/Extend State
+        this.activeHandle = null;
+        this.startDragPos = new THREE.Vector3();
+        this.originalSize = { width: 0, depth: 0 };
+        this.originalPos = new THREE.Vector3();
+        this.extendingGhosts = []; // For counters/tables
+
+        // Ground Plane for Raycasting (Y=0)
+        this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+        // Grid Helper (Visible only in Editor)
+        // 8x8 size, 0.5 unit cells = 16 divisions
+        this.gridHelper = new THREE.GridHelper(8, 16, 0xFFD700, 0x444444);
+        this.gridHelper.position.y = 0.01; // Slight offset to avoid z-fighting if floor was visible
+        this.gridHelper.visible = false;
+        this.scene.add(this.gridHelper);
+
+        // Controls
+        this.orbit = new OrbitControls(camera, renderer.domElement);
+        this.orbit.enabled = false;
+        this.orbit.enableDamping = true;
+        this.orbit.dampingFactor = 0.1;
+
+        // Visual Helpers
+        this.selectionBox = new THREE.BoxHelper(new THREE.Mesh(), 0xffff00);
+        this.selectionBox.visible = false;
+        this.scene.add(this.selectionBox);
+
+        // Resize Handles
+        this.handlesGroup = new THREE.Group();
+        this.scene.add(this.handlesGroup);
+        this.handles = {};
+        ['n', 's', 'e', 'w'].forEach(dir => {
+            const g = new THREE.SphereGeometry(0.25, 16, 16);
+            const m = new THREE.MeshBasicMaterial({ color: 0x00FFFF, depthTest: false, transparent: true, opacity: 0.8 });
+            const mesh = new THREE.Mesh(g, m);
+            mesh.userData = { isHandle: true, direction: dir };
+            mesh.renderOrder = 999;
+            mesh.visible = false;
+            this.handlesGroup.add(mesh);
+            this.handles[dir] = mesh;
+        });
+
+
+        // Init UI
+        this.ui = document.getElementById('editor-ui');
+        this.libraryContent = document.getElementById('library-content');
+        this.inspector = document.getElementById('editor-inspector');
+        this.inspectorName = document.getElementById('inspector-name');
+        this.inspectorX = document.getElementById('val-x');
+        this.inspectorZ = document.getElementById('val-z');
+
+        // Meta Modal
+        this.metaModal = document.getElementById('editor-meta-modal');
+
+        this._initUI();
+        this._bindEvents();
+    }
+
+    _initUI() {
+        // Populate Library
+        this._renderLibrary('all');
+
+        // Populate Meals for Meta
+        const mealsSelect = document.getElementById('meta-meals');
+        Object.keys(RECIPES).forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r;
+            opt.textContent = r;
+            mealsSelect.appendChild(opt);
+        });
+
+        // Bind Tab Switching
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                tabs.forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                this._renderLibrary(e.target.dataset.category);
+            });
+        });
+
+        // Bind Inspector Actions
+        document.getElementById('btn-rotate').addEventListener('click', () => this.rotateSelected());
+        document.getElementById('btn-clone').addEventListener('click', () => this.cloneSelected());
+        document.getElementById('btn-delete').addEventListener('click', () => this.deleteSelected());
+        document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLayout());
+        document.getElementById('editor-exit-btn').addEventListener('click', () => {
+            if (this.onExit) this.onExit();
+        });
+
+        // Meta Button
+        document.getElementById('editor-meta-btn').addEventListener('click', () => {
+            this.openMetaModal();
+        });
+        document.getElementById('meta-close-btn').addEventListener('click', () => {
+            this.saveMetaFromModal();
+            this.metaModal.style.display = 'none';
+        });
+
+        // Bind Config Editor
+        this.inspectorConfig = document.getElementById('inspector-config');
+        document.getElementById('btn-save-config').addEventListener('click', () => this.saveConfig());
+    }
+
+    _renderLibrary(category) {
+        this.libraryContent.innerHTML = '';
+        const items = category === 'all' 
+            ? CATALOG_ITEMS 
+            : CATALOG_ITEMS.filter(i => i.category === category);
+
+        items.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'library-item';
+            
+            // Simple icon selection based on type
+            let icon = '📦';
+            if(item.type.includes('wall')) icon = '🧱';
+            else if(item.type.includes('counter')) icon = '🟫';
+            else if(item.type.includes('processor')) icon = '🍳';
+            else if(item.type.includes('source')) icon = '🧺';
+            else if(item.isServing) icon = '🛎️';
+            else if(item.category === 'Items') icon = '🍽️';
+
+            el.innerHTML = `
+                <div class="library-item-icon">${icon}</div>
+                <div class="library-item-name">${item.name}</div>
+            `;
+            
+            el.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent canvas click
+                this.startPlacement(item);
+            });
+            
+            this.libraryContent.appendChild(el);
+        });
+    }
+
+    _bindEvents() {
+        // Mouse Events
+        this.renderer.domElement.addEventListener('pointerdown', (e) => this.onPointerDown(e));
+        this.renderer.domElement.addEventListener('pointermove', (e) => this.onPointerMove(e));
+        this.renderer.domElement.addEventListener('pointerup', (e) => this.onPointerUp(e));
+        
+        // Keyboard Shortcuts
+        window.addEventListener('keydown', (e) => {
+            if (!this.enabled) return;
+            // Do not trigger shortcuts if user is typing in textarea or inputs
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+
+            switch(e.key.toLowerCase()) {
+                case 'escape': 
+                    this.cancelPlacement(); 
+                    this.deselect(); 
+                    break;
+                case 'delete': 
+                case 'backspace':
+                    this.deleteSelected(); 
+                    break;
+                case 'r': 
+                    this.rotateSelected(); 
+                    break;
+                case 'c': 
+                    this.cloneSelected(); 
+                    break;
+                case 't':
+                    this.exportLayout();
+                    break;
+            }
+        });
+    }
+
+    // Called when opening editor for a specific level
+    loadLevel(levelData) {
+        // We store the metadata locally. The 3D objects are already added by main.js using buildKitchen
+        // We just need to sync our internal state.
+        this.currentLevelData = JSON.parse(JSON.stringify(levelData)); // Deep copy
+        document.getElementById('editor-current-level-name').textContent = levelData.name || "Untitled";
+    }
+
+    enable() {
+        this.enabled = true;
+        this.orbit.enabled = true;
+        this.ui.style.display = 'block';
+        
+        // Show Schematic Grid
+        this.gridHelper.visible = true;
+        
+        // Hide textured floor for clean CAD look
+        const gameFloor = getFloorMesh();
+        if(gameFloor) gameFloor.visible = false;
+
+        // Set optimal editor view
+        this.camera.position.set(0, 12, 8);
+        this.camera.lookAt(0, 0, 0);
+        this.orbit.target.set(0,0,0);
+    }
+
+    disable() {
+        this.enabled = false;
+        this.orbit.enabled = false;
+        this.ui.style.display = 'none';
+        this.cancelPlacement();
+        this.deselect();
+
+        // Revert Visuals
+        this.gridHelper.visible = false;
+        const gameFloor = getFloorMesh();
+        if(gameFloor) gameFloor.visible = true;
+    }
+
+    update(delta) {
+        if (!this.enabled) return;
+        this.orbit.update();
+        
+        if (this.selectedObject) {
+            this.selectionBox.update();
+            this._updateInspectorData();
+            this._updateHandles();
+        }
+    }
+
+    // --- Meta Modal ---
+
+    openMetaModal() {
+        this.metaModal.style.display = 'flex';
+        const d = this.currentLevelData;
+        document.getElementById('meta-name').value = d.name || "";
+        document.getElementById('meta-duration').value = d.duration || 180;
+        document.getElementById('meta-delay').value = d.newOrderDelay || 15;
+        document.getElementById('meta-max-orders').value = d.maxActiveOrders || 2;
+        document.getElementById('meta-star1').value = d.starThresholds ? d.starThresholds[0] : 100;
+        document.getElementById('meta-star2').value = d.starThresholds ? d.starThresholds[1] : 200;
+        document.getElementById('meta-star3').value = d.starThresholds ? d.starThresholds[2] : 300;
+        
+        const mealsSelect = document.getElementById('meta-meals');
+        Array.from(mealsSelect.options).forEach(opt => {
+            opt.selected = d.availableMeals ? d.availableMeals.includes(opt.value) : false;
+        });
+    }
+
+    saveMetaFromModal() {
+        const d = this.currentLevelData;
+        d.name = document.getElementById('meta-name').value;
+        d.duration = parseInt(document.getElementById('meta-duration').value);
+        d.newOrderDelay = parseInt(document.getElementById('meta-delay').value);
+        d.maxActiveOrders = parseInt(document.getElementById('meta-max-orders').value);
+        d.starThresholds = [
+            parseInt(document.getElementById('meta-star1').value),
+            parseInt(document.getElementById('meta-star2').value),
+            parseInt(document.getElementById('meta-star3').value),
+        ];
+        
+        const mealsSelect = document.getElementById('meta-meals');
+        d.availableMeals = Array.from(mealsSelect.selectedOptions).map(opt => opt.value);
+
+        document.getElementById('editor-current-level-name').textContent = d.name;
+    }
+
+    // --- Core Logic ---
+
+    startPlacement(template) {
+        this.cancelPlacement(); // Clear existing ghost
+        this.deselect(); // Clear selection
+        
+        this.placementMode = true;
+        this.ghostObject = this._createObjectFromTemplate(template);
+        
+        // Make ghost transparent
+        this.ghostObject.traverse(c => {
+            if (c.isMesh) {
+                c.material = c.material.clone();
+                c.material.transparent = true;
+                c.material.opacity = 0.6;
+                c.material.emissive = new THREE.Color(0x00FF00);
+                c.material.emissiveIntensity = 0.2;
+            }
+        });
+
+        this.scene.add(this.ghostObject);
+    }
+
+    cancelPlacement() {
+        if (this.ghostObject) {
+            this.scene.remove(this.ghostObject);
+            this.ghostObject = null;
+        }
+        this.placementMode = false;
+    }
+
+    confirmPlacement() {
+        if (this.ghostObject) {
+            // Create a real solid instance
+            const template = this.ghostObject.userData.template;
+            const realObject = this._createObjectFromTemplate(template);
+            
+            realObject.position.copy(this.ghostObject.position);
+            realObject.rotation.copy(this.ghostObject.rotation);
+            
+            this.scene.add(realObject);
+            
+            // Auto-fuse visuals
+            refreshSmartObjects(this.scene);
+        }
+    }
+
+    _createObjectFromTemplate(t) {
+        // Map template to world.js creation functions
+        let obj;
+        const fakeColor = t.color || '#FFFFFF';
+        const dummyPos = { x: 0, z: 0 }; // Position set later
+
+        if (t.type === STATION_TYPES.COUNTER || t.type === STATION_TYPES.SERVING) {
+            obj = createCounterPrefab(t.name, fakeColor, t.isServing);
+        } else if (t.type === STATION_TYPES.TABLE) {
+            // Neighbors default to false, will fuse later
+            obj = createTablePrefab(t.name, fakeColor, {n:false, s:false, e:false, w:false});
+        } else {
+            // Generic Station / Wall / Source / Preplaced Item
+            const def = {
+                name: t.name,
+                type: t.type,
+                size: t.size,
+                color: fakeColor,
+                config: t.config,
+                position: dummyPos
+            };
+            obj = createStationPrefab(def);
+        }
+
+        // Store template data for serialization later
+        obj.userData.template = t; 
+        // Y position will be handled by onPointerMove snapping
+        obj.position.y = 0;
+
+        return obj;
+    }
+
+    select(object) {
+        if (this.selectedObject === object) return;
+        this.selectedObject = object;
+        this.selectionBox.setFromObject(object);
+        this.selectionBox.visible = true;
+        
+        // Update UI
+        this.inspector.style.display = 'flex';
+        this.inspectorName.textContent = object.name;
+
+        // Populate Config
+        // Use existing userData.config if set, otherwise fallback to template config
+        const config = object.userData.config || object.userData.template?.config || {};
+        this.inspectorConfig.value = JSON.stringify(config, null, 2);
+        
+        this._updateHandles();
+    }
+
+    deselect() {
+        this.selectedObject = null;
+        this.selectionBox.visible = false;
+        this.inspector.style.display = 'none';
+        this.handlesGroup.visible = false;
+    }
+
+    // --- Manipulation ---
+
+    saveConfig() {
+        if (!this.selectedObject) return;
+        try {
+            const newConfig = JSON.parse(this.inspectorConfig.value);
+            this.selectedObject.userData.config = newConfig;
+            
+            // Visual feedback
+            const btn = document.getElementById('btn-save-config');
+            const originalText = btn.innerText;
+            btn.innerText = "✅ Saved!";
+            setTimeout(() => btn.innerText = originalText, 1000);
+            
+        } catch (e) {
+            alert("Invalid JSON syntax! Check your brackets and quotes.");
+        }
+    }
+
+    rotateSelected() {
+        const target = this.placementMode ? this.ghostObject : this.selectedObject;
+        if (target) {
+            target.rotation.y -= Math.PI / 2;
+            target.updateMatrixWorld();
+            if (this.selectionBox.visible) this.selectionBox.update();
+            // If rotating placed object, refresh visuals
+            if (!this.placementMode) refreshSmartObjects(this.scene);
+        }
+    }
+
+    deleteSelected() {
+        if (this.selectedObject) {
+            this.scene.remove(this.selectedObject);
+            this.deselect();
+            refreshSmartObjects(this.scene);
+        }
+    }
+
+    cloneSelected() {
+        if (this.selectedObject) {
+            const template = this.selectedObject.userData.template || {
+                name: this.selectedObject.name,
+                type: this.selectedObject.userData.stationType || this.selectedObject.userData.type,
+            };
+            
+            if (this.selectedObject.userData.template) {
+                this.startPlacement(this.selectedObject.userData.template);
+            } else {
+                const clone = this.selectedObject.clone();
+                clone.position.x += GRID_UNIT;
+                this.scene.add(clone);
+                this.select(clone);
+                refreshSmartObjects(this.scene);
             }
         }
-    </script>
-</head>
+    }
 
-<body>
-    <!-- Game Canvas -->
-    <canvas id="gameCanvas"></canvas>
+    _updateInspectorData() {
+        if (this.selectedObject) {
+            this.inspectorX.textContent = this.selectedObject.position.x.toFixed(1);
+            this.inspectorZ.textContent = this.selectedObject.position.z.toFixed(1);
+        }
+    }
+    
+    // --- Handle Management ---
 
-    <!-- Loading Indicator -->
-    <div id="loading-screen" class="overlay active">
-        <h2>Loading Assets...</h2>
-    </div>
+    _updateHandles() {
+        const obj = this.selectedObject;
+        if (!obj) {
+            this.handlesGroup.visible = false;
+            return;
+        }
+        
+        const type = obj.userData.stationType || obj.userData.type;
+        const resizable = type === STATION_TYPES.WALL;
+        const extendable = type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING;
+        
+        if (!resizable && !extendable) {
+            this.handlesGroup.visible = false;
+            return;
+        }
+        
+        this.handlesGroup.visible = true;
+        
+        // Calculate bounds
+        const box = new THREE.Box3().setFromObject(obj);
+        const center = obj.position;
+        // Use simple box dimensions based on userData for walls to be precise, or bounding box for others
+        let w, d;
+        if (resizable && obj.userData.size) {
+            w = obj.userData.size.width;
+            d = obj.userData.size.depth;
+        } else {
+            w = box.max.x - box.min.x;
+            d = box.max.z - box.min.z;
+        }
+        
+        const y = center.y;
+        const offset = 0.3;
 
-    <!-- Main Menu -->
-    <div id="main-menu" class="overlay menu-screen">
-        <h1>Pixel Kitchen Sim</h1>
-        <div class="menu-container">
-            <button id="play-button" class="menu-button" data-action="play">Play</button>
-            <button id="settings-button" class="menu-button" data-action="settings">Settings</button>
-            <div id="credits">
-                <p>A Game By [Your Name/Studio]</p>
-                <p>
-                    <a href="#" class="menu-link" data-action="link">X (Twitter)</a> |
-                    <a href="#" class="menu-link" data-action="link">Instagram</a> |
-                    <a href="#" class="menu-link" data-action="link">GitHub</a>
-                </p>
-            </div>
-        </div>
-        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
-    </div>
+        this.handles.n.position.set(center.x, y, center.z - d/2 - offset);
+        this.handles.s.position.set(center.x, y, center.z + d/2 + offset);
+        this.handles.e.position.set(center.x + w/2 + offset, y, center.z);
+        this.handles.w.position.set(center.x - w/2 - offset, y, center.z);
+        
+        Object.values(this.handles).forEach(h => h.visible = true);
+    }
 
-    <!-- Settings Screen -->
-    <div id="settings-screen" class="overlay menu-screen">
-        <h1>Settings</h1>
-        <div class="menu-container">
-            <div class="setting-group">
-                <label id="language-label">Language:</label>
-                <div id="language-options" class="button-group">
-                    <button class="menu-button lang-button" data-lang="en" data-action="set-language">English</button>
-                    <button class="menu-button lang-button" data-lang="fr" data-action="set-language">Français</button>
-                    <button class="menu-button lang-button" data-lang="es" data-action="set-language">Español</button>
-                </div>
-            </div>
-            <div class="setting-group">
-                <label for="toggle-labels-setting">Show Station Labels:</label>
-                <input type="checkbox" id="toggle-labels-setting" class="menu-toggle" data-action="toggle-labels"
-                    checked>
-            </div>
-            <p id="game-version">Version: 1.0 Beta</p>
-            <button id="back-to-main-button" class="menu-button" data-action="back-to-main">Back</button>
-            <button id="resume-button-settings" class="menu-button" data-action="resume" style="display: none;">Resume Game</button>
-        </div>
-        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
-    </div>
+    // --- Input Handling ---
 
-    <!-- Level Select Screen -->
-    <div id="level-select-screen" class="overlay menu-screen">
-        <h1>Select Level</h1>
-        <div id="level-list" class="menu-container level-grid"></div>
-        <button id="back-to-main-from-level-select" class="menu-button" data-action="back-to-main">Back</button>
-        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
-    </div>
+    onPointerDown(e) {
+        if (!this.enabled || e.button !== 0) return;
+        
+        // Ignore clicks on UI panels
+        if (e.target.closest('.editor-panel') || e.target.closest('.editor-top-bar')) return;
 
-    <!-- In-Game HUD -->
-    <div id="game-hud" style="display: none;">
-        <div id="order-list"></div>
-        <div id="game-timer-container">
-            Level Time: <span id="level-timer-display">0:00</span>
-        </div>
-        <div id="bottom-hud">
-            Holding: <span id="holding-display">Nothing</span> |
-            Score: <span id="score-display">0</span> |
-            <span id="gamepad-status"></span>
-        </div>
-        <div id="crosshair"></div>
-        <div id="temp-message"></div>
-    </div>
+        const mouse = { 
+            x: (e.clientX / window.innerWidth) * 2 - 1, 
+            y: -(e.clientY / window.innerHeight) * 2 + 1 
+        };
+        this.raycaster.setFromCamera(mouse, this.camera);
 
-    <!-- EDITOR UI CONTAINER -->
-    <div id="editor-ui" style="display: none;">
-        <!-- Top Helper Bar -->
-        <div class="editor-top-bar">
-            <div class="editor-title">🏗️ LEVEL EDITOR MODE</div>
-            <div class="editor-controls-hint">
-                <span><b>Left Click:</b> Select/Place</span> |
-                <span><b>Right Drag:</b> Pan Cam</span> |
-                <span><b>Scroll:</b> Zoom</span> |
-                <span><b>T:</b> Export JSON</span> |
-                <span><b>F1:</b> Exit Editor</span>
-            </div>
-            <button id="editor-export-btn" class="editor-btn small">Export</button>
-        </div>
+        // Check Handle Click first
+        if (this.handlesGroup.visible) {
+            const handleIntersects = this.raycaster.intersectObjects(this.handlesGroup.children);
+            if (handleIntersects.length > 0) {
+                this.activeHandle = handleIntersects[0].object;
+                this.isDragging = true;
+                this.orbit.enabled = false;
+                
+                // Setup drag state
+                const planeIntersect = new THREE.Vector3();
+                this.raycaster.ray.intersectPlane(this.groundPlane, planeIntersect);
+                this.startDragPos.copy(planeIntersect);
+                this.originalPos.copy(this.selectedObject.position);
+                
+                if (this.selectedObject.userData.stationType === STATION_TYPES.WALL) {
+                    this.originalSize = { ...this.selectedObject.userData.size };
+                }
+                
+                return; // Consumed
+            }
+        }
 
-        <!-- Bottom Library (Visual Picker) -->
-        <div id="editor-library" class="editor-panel bottom-panel">
-            <div class="library-tabs">
-                <button class="tab-btn active" data-category="all">All</button>
-                <button class="tab-btn" data-category="Architecture">Walls/Floors</button>
-                <button class="tab-btn" data-category="Furniture">Furniture</button>
-                <button class="tab-btn" data-category="Stations">Stations</button>
-                <button class="tab-btn" data-category="Sources">Sources</button>
-            </div>
-            <div id="library-content" class="library-grid">
-                <!-- Items injected by JS -->
-            </div>
-        </div>
+        if (this.placementMode) {
+            this.confirmPlacement();
+        } else {
+            // Raycast for selection
+            const candidates = [];
+            this.scene.traverse(c => {
+                // Find root objects
+                if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.stationType)) {
+                    candidates.push(c);
+                }
+            });
 
-        <!-- Right Inspector (Context Actions) -->
-        <div id="editor-inspector" class="editor-panel right-panel" style="display: none;">
-            <h3>Selected Object</h3>
-            <div id="inspector-name" class="inspector-field">None</div>
-            <div class="inspector-actions">
-                <button id="btn-rotate" class="editor-action-btn" title="Rotate (R)">🔄 Rotate</button>
-                <button id="btn-clone" class="editor-action-btn" title="Clone (C)">📋 Duplicate</button>
-                <button id="btn-delete" class="editor-action-btn delete" title="Delete (Del)">🗑️ Delete</button>
-            </div>
+            const hits = this.raycaster.intersectObjects(candidates, true);
             
-            <div class="inspector-config-section">
-                <label for="inspector-config">Config (JSON):</label>
-                <textarea id="inspector-config" rows="5" spellcheck="false"></textarea>
-                <button id="btn-save-config" class="editor-action-btn">💾 Save Config</button>
-            </div>
+            if (hits.length > 0) {
+                // Walk up to the root group
+                let root = hits[0].object;
+                while(root.parent && root.parent !== this.scene) { root = root.parent; }
+                
+                if (this.selectedObject !== root) {
+                    this.select(root);
+                }
+                this.isDragging = true;
+                this.orbit.enabled = false; 
+            } else {
+                this.deselect();
+            }
+        }
+    }
 
-            <div class="inspector-coords">
-                X: <span id="val-x">0</span> Z: <span id="val-z">0</span>
-            </div>
-        </div>
-    </div>
+    onPointerMove(e) {
+        if (!this.enabled) return;
 
-    <!-- Level End Screen -->
-    <div id="level-end-screen" class="overlay menu-screen">
-        <h1>Level Complete!</h1>
-        <div class="menu-container">
-            <p>Score: <span id="final-score">0</span></p>
-            <p>Stars: <span id="final-stars">☆☆☆</span></p>
-            <button id="next-level-button" class="menu-button" data-action="next-level">Next Level</button>
-            <button id="restart-level-button" class="menu-button" data-action="restart-level">Restart Level</button>
-            <button id="level-end-main-menu-button" class="menu-button" data-action="back-to-main">Main Menu</button>
-        </div>
-        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
-    </div>
+        const mouse = { 
+            x: (e.clientX / window.innerWidth) * 2 - 1, 
+            y: -(e.clientY / window.innerHeight) * 2 + 1 
+        };
+        this.raycaster.setFromCamera(mouse, this.camera);
+        
+        // --- RESIZE / EXTEND LOGIC ---
+        if (this.isDragging && this.activeHandle && this.selectedObject) {
+            const intersect = new THREE.Vector3();
+            if (this.raycaster.ray.intersectPlane(this.groundPlane, intersect)) {
+                const delta = intersect.clone().sub(this.startDragPos);
+                const type = this.selectedObject.userData.stationType;
+                
+                // Direction multipliers based on handle
+                const dir = this.activeHandle.userData.direction;
+                // n: z-, s: z+, e: x+, w: x-
+                
+                if (type === STATION_TYPES.WALL) {
+                    // Resize Logic
+                    let dw = 0; 
+                    let dd = 0;
+                    let dx = 0;
+                    let dz = 0;
+                    
+                    // Calculate dimension changes locally aligned
+                    if (dir === 'e') dw = delta.x;
+                    if (dir === 'w') dw = -delta.x;
+                    if (dir === 's') dd = delta.z;
+                    if (dir === 'n') dd = -delta.z;
+                    
+                    // Snap to grid unit
+                    let newW = Math.max(GRID_UNIT, Math.round((this.originalSize.width + dw) * 2) / 2);
+                    let newD = Math.max(GRID_UNIT, Math.round((this.originalSize.depth + dd) * 2) / 2);
+                    
+                    // Shift center to compensate anchor
+                    if (dir === 'e') dx = (newW - this.originalSize.width) / 2;
+                    if (dir === 'w') dx = -(newW - this.originalSize.width) / 2;
+                    if (dir === 's') dz = (newD - this.originalSize.depth) / 2;
+                    if (dir === 'n') dz = -(newD - this.originalSize.depth) / 2;
 
-    <!-- Level Instructions Screen -->
-    <div id="level-instructions-screen" class="overlay menu-screen">
-        <h1 id="instructions-title">Level Instructions</h1>
-        <div id="instructions-container" class="menu-container instructions-box">
-            <div id="instructions-content"></div>
-            <button id="start-level-instructions-button" class="menu-button" data-action="start-level-confirm">Start Level</button>
-        </div>
-         <p class="menu-hint">Select: Enter/[X]/[A]</p>
-    </div>
-
-    <script type="module" src="src/main.js"></script>
-</body>
-</html>
-</file>
-
-<file path="levels.json">
-[
-    {
-        "levelId": 1,
-        "name": "Fry Cook Training",
-        "duration": 180,
-        "starThresholds": [
-            300,
-            500,
-            700
-        ],
-        "availableMeals": [
-            "French Fries"
-        ],
-        "maxActiveOrders": 2,
-        "newOrderDelay": 15,
-        "layout": [
-            {
-                "name": "Wall_Back",
-                "type": "wall",
-                "position": {
-                    "x": 0,
-                    "z": -4
-                },
-                "size": {
-                    "width": 8.5,
-                    "depth": 0.5
-                }
-            },
-            {
-                "name": "Wall_Front_L",
-                "type": "wall",
-                "position": {
-                    "x": -2.5,
-                    "z": 4
-                },
-                "size": {
-                    "width": 3.5,
-                    "depth": 0.5
-                }
-            },
-            {
-                "name": "Wall_Front_R",
-                "type": "wall",
-                "position": {
-                    "x": 2.5,
-                    "z": 4
-                },
-                "size": {
-                    "width": 3.5,
-                    "depth": 0.5
-                }
-            },
-            {
-                "name": "Wall_Left",
-                "type": "wall",
-                "position": {
-                    "x": -4,
-                    "z": 0
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 7.5
-                }
-            },
-            {
-                "name": "Wall_Right",
-                "type": "wall",
-                "position": {
-                    "x": 4,
-                    "z": 0
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 7.5
-                }
-            },
-            {
-                "name": "C_Serve_1",
-                "type": "serving",
-                "position": {
-                    "x": -0.5,
-                    "z": 4
-                },
-                "rotation": -3.14
-            },
-            {
-                "name": "C_Serve_2",
-                "type": "serving",
-                "position": {
-                    "x": 0,
-                    "z": 4
-                },
-                "rotation": -3.14
-            },
-            {
-                "name": "C_Serve_3",
-                "type": "serving",
-                "position": {
-                    "x": 0.5,
-                    "z": 4
-                },
-                "rotation": -3.14
-            },
-            {
-                "name": "C_Back_1",
-                "type": "counter",
-                "position": {
-                    "x": -3,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "C_Back_2",
-                "type": "counter",
-                "position": {
-                    "x": -2.5,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "C_Back_3",
-                "type": "counter",
-                "position": {
-                    "x": -1,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "C_Back_4",
-                "type": "counter",
-                "position": {
-                    "x": 1,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "C_Back_5",
-                "type": "counter",
-                "position": {
-                    "x": 2.5,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "C_Back_6",
-                "type": "counter",
-                "position": {
-                    "x": 3,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "C_Side_L1",
-                "type": "counter",
-                "position": {
-                    "x": -3.5,
-                    "z": -3
-                },
-                "rotation": -4.71
-            },
-            {
-                "name": "C_Side_L2",
-                "type": "counter",
-                "position": {
-                    "x": -3.5,
-                    "z": -2.5
-                },
-                "rotation": -4.71
-            },
-            {
-                "name": "C_Side_R1",
-                "type": "counter",
-                "position": {
-                    "x": 3.5,
-                    "z": -3
-                },
-                "rotation": -1.57
-            },
-            {
-                "name": "C_Side_R2",
-                "type": "counter",
-                "position": {
-                    "x": 3.5,
-                    "z": -2.5
-                },
-                "rotation": -1.57
-            },
-            {
-                "name": "CuttingBoard1",
-                "type": "processor",
-                "position": {
-                    "x": -2.5,
-                    "z": -3.5
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "processes": [
-                        "potato"
-                    ],
-                    "result": {
-                        "potato": "raw_fries"
+                    // Update Wall
+                    resizeWall(this.selectedObject, newW, newD);
+                    this.selectedObject.position.set(
+                        this.originalPos.x + dx,
+                        this.originalPos.y,
+                        this.originalPos.z + dz
+                    );
+                    this.selectionBox.setFromObject(this.selectedObject);
+                } 
+                else if (type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING) {
+                    // Tiling Logic
+                    // Calculate how many units moved along axis
+                    let axisDelta = 0;
+                    let axisVector = new THREE.Vector3();
+                    
+                    if (dir === 'e') { axisDelta = delta.x; axisVector.set(1,0,0); }
+                    if (dir === 'w') { axisDelta = -delta.x; axisVector.set(-1,0,0); }
+                    if (dir === 's') { axisDelta = delta.z; axisVector.set(0,0,1); }
+                    if (dir === 'n') { axisDelta = -delta.z; axisVector.set(0,0,-1); }
+                    
+                    const count = Math.floor((axisDelta + (GRID_UNIT/2)) / GRID_UNIT);
+                    
+                    // Cleanup old ghosts
+                    this.extendingGhosts.forEach(g => this.scene.remove(g));
+                    this.extendingGhosts = [];
+                    
+                    if (count > 0) {
+                        // Create ghosts
+                        const t = this.selectedObject.userData.template;
+                        for(let i=1; i<=count; i++) {
+                            const ghost = this._createObjectFromTemplate(t);
+                            ghost.position.copy(this.originalPos).add(axisVector.clone().multiplyScalar(i * GRID_UNIT));
+                            
+                            // Make ghost transparent
+                             ghost.traverse(c => {
+                                if (c.isMesh) {
+                                    c.material = c.material.clone();
+                                    c.material.transparent = true;
+                                    c.material.opacity = 0.5;
+                                    c.material.color.setHex(0x00FF00);
+                                }
+                            });
+                            
+                            this.scene.add(ghost);
+                            this.extendingGhosts.push(ghost);
+                        }
                     }
                 }
-            },
-            {
-                "name": "Fryer1",
-                "type": "processor",
-                "position": {
-                    "x": -1,
-                    "z": -3.5
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "processes": [
-                        "raw_fries"
-                    ],
-                    "result": {
-                        "raw_fries": "cooked_fries"
-                    },
-                    "processingTime": 3000
-                }
-            },
-            {
-                "name": "Trash",
-                "type": "trash",
-                "position": {
-                    "x": 3.5,
-                    "z": -2
-                },
-                "rotation": -1.57,
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                }
-            },
-            {
-                "name": "T_Assem_Base1",
-                "type": "table",
-                "position": {
-                    "x": -1.5,
-                    "z": -0.5
-                }
-            },
-            {
-                "name": "T_Assem_Base2",
-                "type": "table",
-                "position": {
-                    "x": -1,
-                    "z": -0.5
-                }
-            },
-            {
-                "name": "T_Assem_Base3",
-                "type": "table",
-                "position": {
-                    "x": -0.5,
-                    "z": -0.5
-                }
-            },
-            {
-                "name": "Counter (Corner)",
-                "type": "counter",
-                "position": {
-                    "x": -3.5,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "Counter (Corner)",
-                "type": "counter",
-                "position": {
-                    "x": 3.5,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "Counter (Wood)",
-                "type": "counter",
-                "position": {
-                    "x": -2,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "Counter (Wood)",
-                "type": "counter",
-                "position": {
-                    "x": -1.5,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "Counter (Wood)",
-                "type": "counter",
-                "position": {
-                    "x": -0.5,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "Counter (Wood)",
-                "type": "counter",
-                "position": {
-                    "x": 0,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "Counter (Wood)",
-                "type": "counter",
-                "position": {
-                    "x": 0.5,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "Counter (Wood)",
-                "type": "counter",
-                "position": {
-                    "x": 1.5,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "Counter (Wood)",
-                "type": "counter",
-                "position": {
-                    "x": 2,
-                    "z": -3.5
-                }
-            },
-            {
-                "name": "T_Assem_Base7",
-                "type": "table",
-                "position": {
-                    "x": 0.5,
-                    "z": 0.5
-                }
-            },
-            {
-                "name": "T_Assem_Base8",
-                "type": "table",
-                "position": {
-                    "x": 1,
-                    "z": 0.5
-                }
-            },
-            {
-                "name": "T_Assem_Base9",
-                "type": "table",
-                "position": {
-                    "x": 1.5,
-                    "z": 0.5
-                }
-            },
-            {
-                "name": "T_Assem_Base10",
-                "type": "table",
-                "position": {
-                    "x": 0.5,
-                    "z": 1
-                }
-            },
-            {
-                "name": "T_Assem_Base11",
-                "type": "table",
-                "position": {
-                    "x": 1,
-                    "z": 1
-                }
-            },
-            {
-                "name": "T_Assem_Base12",
-                "type": "table",
-                "position": {
-                    "x": 1.5,
-                    "z": 1
-                }
-            },
-            {
-                "name": "CuttingBoard2",
-                "type": "processor",
-                "position": {
-                    "x": -3.5,
-                    "z": -2.5
-                },
-                "rotation": -11,
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "processes": [
-                        "potato"
-                    ],
-                    "result": {
-                        "potato": "raw_fries"
-                    }
-                }
-            },
-            {
-                "name": "Fryer2",
-                "type": "processor",
-                "position": {
-                    "x": -0.5,
-                    "z": -3.5
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "processes": [
-                        "raw_fries"
-                    ],
-                    "result": {
-                        "raw_fries": "cooked_fries"
-                    },
-                    "processingTime": 3000
-                }
-            },
-            {
-                "name": "TrashBin2",
-                "type": "trash",
-                "position": {
-                    "x": -3.5,
-                    "z": -2
-                },
-                "rotation": -4.71,
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                }
-            },
-            {
-                "name": "T_Assem_Base4",
-                "type": "table",
-                "position": {
-                    "x": -1.5,
-                    "z": -1
-                }
-            },
-            {
-                "name": "T_Assem_Base5",
-                "type": "table",
-                "position": {
-                    "x": -1,
-                    "z": -1
-                }
-            },
-            {
-                "name": "T_Assem_Base6",
-                "type": "table",
-                "position": {
-                    "x": -0.5,
-                    "z": -1
-                }
-            },
-            {
-                "name": "PotatoBin_1",
-                "type": "ingredient_source",
-                "position": {
-                    "x": -3.5,
-                    "z": -3
-                },
-                "rotation": -4.71,
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "ingredient": "potato"
-                }
-            },
-            {
-                "name": "PotatoBin_2",
-                "type": "ingredient_source",
-                "position": {
-                    "x": -3,
-                    "z": -3.5
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "ingredient": "potato"
-                }
-            },
-            {
-                "name": "PlateStack",
-                "type": "item_source",
-                "position": {
-                    "x": 3.5,
-                    "z": -3
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "item": "plate"
-                }
-            },
-            {
-                "name": "Plate (Single)",
-                "type": "preplaced_item",
-                "position": {
-                    "x": -1.5,
-                    "z": -1
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "item": "plate"
-                }
-            },
-            {
-                "name": "Plate (Single)",
-                "type": "preplaced_item",
-                "position": {
-                    "x": -1,
-                    "z": -1
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "item": "plate"
-                }
-            },
-            {
-                "name": "Plate (Single)",
-                "type": "preplaced_item",
-                "position": {
-                    "x": -0.5,
-                    "z": -1
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "item": "plate"
-                }
-            },
-            {
-                "name": "Plate (Single)",
-                "type": "preplaced_item",
-                "position": {
-                    "x": 0.5,
-                    "z": 0.5
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "item": "plate"
-                }
-            },
-            {
-                "name": "Plate (Single)",
-                "type": "preplaced_item",
-                "position": {
-                    "x": 1,
-                    "z": 0.5
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "item": "plate"
-                }
-            },
-            {
-                "name": "Plate (Single)",
-                "type": "preplaced_item",
-                "position": {
-                    "x": 1.5,
-                    "z": 0.5
-                },
-                "size": {
-                    "width": 0.5,
-                    "depth": 0.5
-                },
-                "config": {
-                    "item": "plate"
+                
+                // Update handle positions to follow the expansion
+                this._updateHandles(); 
+            }
+            return;
+        }
+
+        // --- STACKING LOGIC (Existing) ---
+        // 1. Find potential support objects (Counters, Tables)
+        const supports = [];
+        this.scene.traverse(c => {
+            // Must be visible, and not the object currently being dragged/placed
+            if (c.visible && c !== this.ghostObject && c !== this.selectedObject) {
+                if (c.userData && (c.userData.stationType === STATION_TYPES.COUNTER || c.userData.stationType === STATION_TYPES.TABLE || c.userData.stationType === STATION_TYPES.SERVING)) {
+                    supports.push(c);
                 }
             }
-        ]
+        });
+
+        // 2. Check intersections with supports
+        const hits = this.raycaster.intersectObjects(supports, true);
+        
+        let targetY = 0;
+        let targetX = 0;
+        let targetZ = 0;
+        let foundSupport = false;
+
+        if (hits.length > 0) {
+            // Hit a counter/table -> Stack on top
+            foundSupport = true;
+            const hit = hits[0];
+            const p = hit.point;
+            targetX = p.x;
+            targetZ = p.z;
+            targetY = MODULE_HEIGHT; // Place on top of counter (0.9)
+        } else {
+            // Hit nothing valid -> Check Ground Plane (Y=0)
+            const target = new THREE.Vector3();
+            if (this.raycaster.ray.intersectPlane(this.groundPlane, target)) {
+                foundSupport = true;
+                targetX = target.x;
+                targetZ = target.z;
+                targetY = 0;
+            }
+        }
+
+        if (foundSupport) {
+            // Snap X/Z to grid
+            const finalX = Math.round(targetX * 2) / 2; 
+            const finalZ = Math.round(targetZ * 2) / 2;
+
+            if (this.placementMode && this.ghostObject) {
+                this.ghostObject.position.set(finalX, targetY, finalZ);
+            } else if (this.isDragging && this.selectedObject) {
+                this.selectedObject.position.set(finalX, targetY, finalZ);
+            }
+        }
     }
-]
+
+    onPointerUp() {
+        if (this.enabled) {
+            if (this.activeHandle) {
+                // Finish Extend/Resize
+                if (this.extendingGhosts.length > 0) {
+                    // Solidify ghosts
+                    this.extendingGhosts.forEach(g => {
+                         const t = g.userData.template;
+                         const real = this._createObjectFromTemplate(t);
+                         real.position.copy(g.position);
+                         real.rotation.copy(g.rotation);
+                         this.scene.add(real);
+                         this.scene.remove(g);
+                    });
+                    this.extendingGhosts = [];
+                    refreshSmartObjects(this.scene); // Fuse visuals
+                }
+                
+                this.activeHandle = null;
+                this._updateHandles();
+            }
+            
+            this.isDragging = false;
+            this.orbit.enabled = true;
+        }
+    }
+
+    // --- Export ---
+
+    exportLayout() {
+        const layout = [];
+        this.scene.traverse(c => {
+            if (c.parent === this.scene && c.userData && (c.userData.type === 'station' || c.userData.type === 'counter')) {
+                const entry = {
+                    name: c.name,
+                    type: c.userData.stationType || c.userData.type,
+                    position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
+                };
+                
+                // Include rotation if not zero
+                if (c.rotation.y !== 0) {
+                    entry.rotation = parseFloat(c.rotation.y.toFixed(2));
+                }
+
+                if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
+                if (c.userData.template?.color) entry.color = c.userData.template.color;
+                if (c.userData.isServing) entry.isServing = true;
+                
+                // Config: Prioritize userData.config (preserved from loaded levels)
+                // Fallback to template config if available (editor-created items)
+                if (c.userData.config) {
+                    entry.config = c.userData.config;
+                } else if (c.userData.template?.config) {
+                    entry.config = c.userData.template.config;
+                }
+
+                layout.push(entry);
+            }
+        });
+        
+        // Update current level data with new layout
+        this.currentLevelData.layout = layout;
+        
+        const jsonStr = JSON.stringify(this.currentLevelData, null, 2);
+        const fileName = `level_${this.currentLevelData.levelId || 'custom'}.json`;
+
+        // Trigger Download
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", fileName);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        
+        alert(`Level Exported! Replace the file in 'levels/${fileName}' to persist changes.`);
+    }
+}
 </file>
 
 <file path="src/gameData.js">
@@ -3730,6 +4666,821 @@ export class UIManager {
 }
 </file>
 
+<file path="index.html">
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Kitchen Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+                "gsap": "https://unpkg.com/gsap@3.12.4/index.js"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Loading Indicator -->
+    <div id="loading-screen" class="overlay active">
+        <h2>Loading Assets...</h2>
+    </div>
+
+    <!-- Main Menu -->
+    <div id="main-menu" class="overlay menu-screen">
+        <h1>Pixel Kitchen Sim</h1>
+        <div class="menu-container">
+            <button id="play-button" class="menu-button" data-action="play">Play</button>
+            <button id="editor-button" class="menu-button" data-action="editor-hub">Level Editor</button>
+            <button id="settings-button" class="menu-button" data-action="settings">Settings</button>
+            <div id="credits">
+                <p>A Game By [Your Name/Studio]</p>
+                <p>
+                    <a href="#" class="menu-link" data-action="link">X (Twitter)</a> |
+                    <a href="#" class="menu-link" data-action="link">Instagram</a> |
+                    <a href="#" class="menu-link" data-action="link">GitHub</a>
+                </p>
+            </div>
+        </div>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+    </div>
+
+    <!-- Editor Hub (New) -->
+    <div id="editor-hub-screen" class="overlay menu-screen">
+        <h1>Level Manager</h1>
+        <div class="editor-toolbar">
+            <button class="menu-button small" data-action="create-level">➕ New Level</button>
+            <button class="menu-button small" data-action="save-roadmap">💾 Download Roadmap</button>
+        </div>
+        <div id="editor-level-list" class="menu-container level-list-editor">
+            <!-- List items injected by JS -->
+        </div>
+        <button class="menu-button" data-action="back-to-main">Back to Menu</button>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="settings-screen" class="overlay menu-screen">
+        <h1>Settings</h1>
+        <div class="menu-container">
+            <div class="setting-group">
+                <label id="language-label">Language:</label>
+                <div id="language-options" class="button-group">
+                    <button class="menu-button lang-button" data-lang="en" data-action="set-language">English</button>
+                    <button class="menu-button lang-button" data-lang="fr" data-action="set-language">Français</button>
+                    <button class="menu-button lang-button" data-lang="es" data-action="set-language">Español</button>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label for="toggle-labels-setting">Show Station Labels:</label>
+                <input type="checkbox" id="toggle-labels-setting" class="menu-toggle" data-action="toggle-labels"
+                    checked>
+            </div>
+            <p id="game-version">Version: 1.0 Beta</p>
+            <button id="back-to-main-button" class="menu-button" data-action="back-to-main">Back</button>
+            <button id="resume-button-settings" class="menu-button" data-action="resume" style="display: none;">Resume Game</button>
+        </div>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
+    </div>
+
+    <!-- Level Select Screen -->
+    <div id="level-select-screen" class="overlay menu-screen">
+        <h1>Select Level</h1>
+        <div id="level-list" class="menu-container level-grid"></div>
+        <button id="back-to-main-from-level-select" class="menu-button" data-action="back-to-main">Back</button>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
+    </div>
+
+    <!-- In-Game HUD -->
+    <div id="game-hud" style="display: none;">
+        <div id="order-list"></div>
+        <div id="game-timer-container">
+            Level Time: <span id="level-timer-display">0:00</span>
+        </div>
+        <div id="bottom-hud">
+            Holding: <span id="holding-display">Nothing</span> |
+            Score: <span id="score-display">0</span> |
+            <span id="gamepad-status"></span>
+        </div>
+        <div id="crosshair"></div>
+        <div id="temp-message"></div>
+    </div>
+
+    <!-- EDITOR UI CONTAINER -->
+    <div id="editor-ui" style="display: none;">
+        <!-- Top Helper Bar -->
+        <div class="editor-top-bar">
+            <div class="editor-title">🏗️ LEVEL EDITOR: <span id="editor-current-level-name">Untitled</span></div>
+            <div class="editor-controls-hint">
+                <span><b>Left Click:</b> Place</span> |
+                <span><b>Right Drag:</b> Pan</span> |
+                <span><b>T:</b> Save JSON</span>
+            </div>
+            <div class="editor-top-actions">
+                <button id="editor-meta-btn" class="editor-action-btn small">⚙️ Level Settings</button>
+                <button id="editor-export-btn" class="editor-action-btn small">💾 Save JSON</button>
+                <button id="editor-exit-btn" class="editor-action-btn small delete">Exit</button>
+            </div>
+        </div>
+
+        <!-- Level Metadata Modal (Hidden by default) -->
+        <div id="editor-meta-modal" class="editor-panel center-panel" style="display: none;">
+            <h3>Level Settings</h3>
+            <div class="meta-row"><label>Name:</label> <input type="text" id="meta-name"></div>
+            <div class="meta-row"><label>Duration (s):</label> <input type="number" id="meta-duration"></div>
+            <div class="meta-row"><label>Delay (s):</label> <input type="number" id="meta-delay"></div>
+            <div class="meta-row"><label>Max Orders:</label> <input type="number" id="meta-max-orders"></div>
+            <div class="meta-row"><label>1 Star:</label> <input type="number" id="meta-star1"></div>
+            <div class="meta-row"><label>2 Stars:</label> <input type="number" id="meta-star2"></div>
+            <div class="meta-row"><label>3 Stars:</label> <input type="number" id="meta-star3"></div>
+            <div class="meta-row">
+                <label>Meals:</label>
+                <select id="meta-meals" multiple size="4">
+                    <!-- Populated by JS -->
+                </select>
+            </div>
+            <p style="font-size:0.6em; color:#aaa;">Hold Ctrl to select multiple meals.</p>
+            <button id="meta-close-btn" class="editor-action-btn">Close</button>
+        </div>
+
+        <!-- Bottom Library (Visual Picker) -->
+        <div id="editor-library" class="editor-panel bottom-panel">
+            <div class="library-tabs">
+                <button class="tab-btn active" data-category="all">All</button>
+                <button class="tab-btn" data-category="Architecture">Walls/Floors</button>
+                <button class="tab-btn" data-category="Furniture">Furniture</button>
+                <button class="tab-btn" data-category="Stations">Stations</button>
+                <button class="tab-btn" data-category="Sources">Sources</button>
+            </div>
+            <div id="library-content" class="library-grid">
+                <!-- Items injected by JS -->
+            </div>
+        </div>
+
+        <!-- Right Inspector (Context Actions) -->
+        <div id="editor-inspector" class="editor-panel right-panel" style="display: none;">
+            <h3>Selected Object</h3>
+            <div id="inspector-name" class="inspector-field">None</div>
+            <div class="inspector-actions">
+                <button id="btn-rotate" class="editor-action-btn" title="Rotate (R)">🔄 Rotate</button>
+                <button id="btn-clone" class="editor-action-btn" title="Clone (C)">📋 Duplicate</button>
+                <button id="btn-delete" class="editor-action-btn delete" title="Delete (Del)">🗑️ Delete</button>
+            </div>
+            
+            <div class="inspector-config-section">
+                <label for="inspector-config">Config (JSON):</label>
+                <textarea id="inspector-config" rows="5" spellcheck="false"></textarea>
+                <button id="btn-save-config" class="editor-action-btn">💾 Save Config</button>
+            </div>
+
+            <div class="inspector-coords">
+                X: <span id="val-x">0</span> Z: <span id="val-z">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level End Screen -->
+    <div id="level-end-screen" class="overlay menu-screen">
+        <h1>Level Complete!</h1>
+        <div class="menu-container">
+            <p>Score: <span id="final-score">0</span></p>
+            <p>Stars: <span id="final-stars">☆☆☆</span></p>
+            <button id="next-level-button" class="menu-button" data-action="next-level">Next Level</button>
+            <button id="restart-level-button" class="menu-button" data-action="restart-level">Restart Level</button>
+            <button id="level-end-main-menu-button" class="menu-button" data-action="back-to-main">Main Menu</button>
+        </div>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+    </div>
+
+    <!-- Level Instructions Screen -->
+    <div id="level-instructions-screen" class="overlay menu-screen">
+        <h1 id="instructions-title">Level Instructions</h1>
+        <div id="instructions-container" class="menu-container instructions-box">
+            <div id="instructions-content"></div>
+            <button id="start-level-instructions-button" class="menu-button" data-action="start-level-confirm">Start Level</button>
+        </div>
+         <p class="menu-hint">Select: Enter/[X]/[A]</p>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>
+</file>
+
+<file path="levels.json">
+[
+    {
+        "levelId": 1,
+        "name": "Fry Cook Training",
+        "duration": 180,
+        "starThresholds": [
+            300,
+            500,
+            700
+        ],
+        "availableMeals": [
+            "French Fries"
+        ],
+        "maxActiveOrders": 2,
+        "newOrderDelay": 15,
+        "layout": [
+            {
+                "name": "Wall_Back",
+                "type": "wall",
+                "position": {
+                    "x": 0,
+                    "z": -4
+                },
+                "size": {
+                    "width": 8.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "Wall_Front_L",
+                "type": "wall",
+                "position": {
+                    "x": -2.5,
+                    "z": 4
+                },
+                "size": {
+                    "width": 3.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "Wall_Front_R",
+                "type": "wall",
+                "position": {
+                    "x": 2.5,
+                    "z": 4
+                },
+                "size": {
+                    "width": 3.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "Wall_Left",
+                "type": "wall",
+                "position": {
+                    "x": -4,
+                    "z": 0
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 7.5
+                }
+            },
+            {
+                "name": "Wall_Right",
+                "type": "wall",
+                "position": {
+                    "x": 4,
+                    "z": 0
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 7.5
+                }
+            },
+            {
+                "name": "C_Serve_1",
+                "type": "serving",
+                "position": {
+                    "x": -0.5,
+                    "z": 4
+                },
+                "rotation": -3.14
+            },
+            {
+                "name": "C_Serve_2",
+                "type": "serving",
+                "position": {
+                    "x": 0,
+                    "z": 4
+                },
+                "rotation": -3.14
+            },
+            {
+                "name": "C_Serve_3",
+                "type": "serving",
+                "position": {
+                    "x": 0.5,
+                    "z": 4
+                },
+                "rotation": -3.14
+            },
+            {
+                "name": "C_Back_1",
+                "type": "counter",
+                "position": {
+                    "x": -3,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_2",
+                "type": "counter",
+                "position": {
+                    "x": -2.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_3",
+                "type": "counter",
+                "position": {
+                    "x": -1,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_4",
+                "type": "counter",
+                "position": {
+                    "x": 1,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_5",
+                "type": "counter",
+                "position": {
+                    "x": 2.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_6",
+                "type": "counter",
+                "position": {
+                    "x": 3,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Side_L1",
+                "type": "counter",
+                "position": {
+                    "x": -3.5,
+                    "z": -3
+                },
+                "rotation": -4.71
+            },
+            {
+                "name": "C_Side_L2",
+                "type": "counter",
+                "position": {
+                    "x": -3.5,
+                    "z": -2.5
+                },
+                "rotation": -4.71
+            },
+            {
+                "name": "C_Side_R1",
+                "type": "counter",
+                "position": {
+                    "x": 3.5,
+                    "z": -3
+                },
+                "rotation": -1.57
+            },
+            {
+                "name": "C_Side_R2",
+                "type": "counter",
+                "position": {
+                    "x": 3.5,
+                    "z": -2.5
+                },
+                "rotation": -1.57
+            },
+            {
+                "name": "CuttingBoard1",
+                "type": "processor",
+                "position": {
+                    "x": -2.5,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "processes": [
+                        "potato"
+                    ],
+                    "result": {
+                        "potato": "raw_fries"
+                    }
+                }
+            },
+            {
+                "name": "Fryer1",
+                "type": "processor",
+                "position": {
+                    "x": -1,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "processes": [
+                        "raw_fries"
+                    ],
+                    "result": {
+                        "raw_fries": "cooked_fries"
+                    },
+                    "processingTime": 3000
+                }
+            },
+            {
+                "name": "Trash",
+                "type": "trash",
+                "position": {
+                    "x": 3.5,
+                    "z": -2
+                },
+                "rotation": -1.57,
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base1",
+                "type": "table",
+                "position": {
+                    "x": -1.5,
+                    "z": -0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base2",
+                "type": "table",
+                "position": {
+                    "x": -1,
+                    "z": -0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base3",
+                "type": "table",
+                "position": {
+                    "x": -0.5,
+                    "z": -0.5
+                }
+            },
+            {
+                "name": "Counter (Corner)",
+                "type": "counter",
+                "position": {
+                    "x": -3.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Corner)",
+                "type": "counter",
+                "position": {
+                    "x": 3.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": -2,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": -1.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": -0.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 0,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 0.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 1.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 2,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "T_Assem_Base7",
+                "type": "table",
+                "position": {
+                    "x": 0.5,
+                    "z": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base8",
+                "type": "table",
+                "position": {
+                    "x": 1,
+                    "z": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base9",
+                "type": "table",
+                "position": {
+                    "x": 1.5,
+                    "z": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base10",
+                "type": "table",
+                "position": {
+                    "x": 0.5,
+                    "z": 1
+                }
+            },
+            {
+                "name": "T_Assem_Base11",
+                "type": "table",
+                "position": {
+                    "x": 1,
+                    "z": 1
+                }
+            },
+            {
+                "name": "T_Assem_Base12",
+                "type": "table",
+                "position": {
+                    "x": 1.5,
+                    "z": 1
+                }
+            },
+            {
+                "name": "CuttingBoard2",
+                "type": "processor",
+                "position": {
+                    "x": -3.5,
+                    "z": -2.5
+                },
+                "rotation": -11,
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "processes": [
+                        "potato"
+                    ],
+                    "result": {
+                        "potato": "raw_fries"
+                    }
+                }
+            },
+            {
+                "name": "Fryer2",
+                "type": "processor",
+                "position": {
+                    "x": -0.5,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "processes": [
+                        "raw_fries"
+                    ],
+                    "result": {
+                        "raw_fries": "cooked_fries"
+                    },
+                    "processingTime": 3000
+                }
+            },
+            {
+                "name": "TrashBin2",
+                "type": "trash",
+                "position": {
+                    "x": -3.5,
+                    "z": -2
+                },
+                "rotation": -4.71,
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base4",
+                "type": "table",
+                "position": {
+                    "x": -1.5,
+                    "z": -1
+                }
+            },
+            {
+                "name": "T_Assem_Base5",
+                "type": "table",
+                "position": {
+                    "x": -1,
+                    "z": -1
+                }
+            },
+            {
+                "name": "T_Assem_Base6",
+                "type": "table",
+                "position": {
+                    "x": -0.5,
+                    "z": -1
+                }
+            },
+            {
+                "name": "PotatoBin_1",
+                "type": "ingredient_source",
+                "position": {
+                    "x": -3.5,
+                    "z": -3
+                },
+                "rotation": -4.71,
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "ingredient": "potato"
+                }
+            },
+            {
+                "name": "PotatoBin_2",
+                "type": "ingredient_source",
+                "position": {
+                    "x": -3,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "ingredient": "potato"
+                }
+            },
+            {
+                "name": "PlateStack",
+                "type": "item_source",
+                "position": {
+                    "x": 3.5,
+                    "z": -3
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": -1.5,
+                    "z": -1
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": -1,
+                    "z": -1
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": -0.5,
+                    "z": -1
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": 0.5,
+                    "z": 0.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": 1,
+                    "z": 0.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": 1.5,
+                    "z": 0.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            }
+        ]
+    }
+]
+</file>
+
 <file path="src/items.js">
 // src/items.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
@@ -4086,6 +5837,11 @@ canvas {
     transform: scale(0.98);
 }
 
+.menu-button.small {
+    font-size: 0.8em;
+    padding: 5px 10px;
+}
+
 .menu-hint {
     margin-top: 20px;
     font-size: 0.8em;
@@ -4211,6 +5967,71 @@ canvas {
     color: #F00;
     font-weight: bold;
 }
+
+/* =========================================
+   EDITOR HUB
+   ========================================= */
+
+.editor-toolbar {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 10px;
+}
+
+.level-list-editor {
+    width: 100%;
+    max-width: 700px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.editor-level-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #333;
+    border: 2px solid #555;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+.editor-level-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.level-id-badge {
+    font-size: 0.6em;
+    color: #888;
+}
+
+.editor-level-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.icon-btn {
+    background: #444;
+    border: 1px solid #666;
+    color: #fff;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 0.8em;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover { background: #666; }
+.icon-btn.delete:hover { background: #A33; }
 
 /* =========================================
    IN-GAME HUD & ORDERS (OVERCOOKED STYLE)
@@ -4560,6 +6381,42 @@ canvas {
     pointer-events: auto;
 }
 
+.center-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 300px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    z-index: 30;
+}
+
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.meta-row label {
+    font-size: 0.8em;
+    color: #ddd;
+    margin-right: 10px;
+}
+
+.meta-row input, .meta-row select {
+    background: #111;
+    border: 1px solid #555;
+    color: white;
+    padding: 5px;
+    font-family: inherit;
+    width: 150px;
+}
+
+
 .bottom-panel {
     position: absolute;
     bottom: 20px;
@@ -4702,11 +6559,15 @@ canvas {
     font-family: inherit;
     font-size: 0.8em;
     transition: background 0.2s;
-    text-align: left;
+    text-align: center;
 }
 
 .editor-action-btn:hover {
     background: #666;
+}
+
+.editor-action-btn.small {
+    padding: 5px 10px;
 }
 
 .editor-action-btn.delete {
@@ -4724,424 +6585,10 @@ canvas {
     margin-top: 10px;
     text-align: center;
 }
-</file>
 
-<file path="src/main.js">
-// src/main.js
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { setupScene, setupCamera, setupRenderer, setupLighting, setupResizeHandler } from './setup.js';
-import { PlayerControls } from './controls.js';
-import { Player } from './player.js';
-import { buildKitchen, clearKitchen, toggleLabels, setWorldLanguage } from './world.js';
-import { InteractionManager } from './interaction.js';
-import { LevelManager } from './LevelManager.js';
-import { UIManager } from './ui.js';
-import { MenuManager } from './menuManager.js';
-import { SaveManager } from './saveManager.js';
-import { LevelEditor } from './editor.js';
-import { AudioManager } from './audioManager.js'; 
-
-const GameState = { 
-    LOADING: 'LOADING', 
-    MAIN_MENU: 'MAIN_MENU', 
-    SETTINGS: 'SETTINGS', 
-    LEVEL_SELECT: 'LEVEL_SELECT', 
-    LEVEL_INSTRUCTIONS: 'LEVEL_INSTRUCTIONS', 
-    GAME_RUNNING: 'GAME_RUNNING', 
-    PAUSED: 'PAUSED', 
-    VIEWING_INSTRUCTIONS: 'VIEWING_INSTRUCTIONS', 
-    LEVEL_END: 'LEVEL_END',
-    EDITOR: 'EDITOR'
-};
-
-let currentGameState = GameState.LOADING;
-let preloadedModels = {};
-let activeGamepad = null;
-const clock = new THREE.Clock();
-
-let scene, camera, renderer, playerControls, player, interactionManager, levelManager, uiManager, menuManager, saveManager, levelEditor, audioManager;
-let levelDatabase = []; 
-let pendingLevelIndex = -1;
-let pendingLevelData = null;
-let currentLevelData = null; 
-let inputCooldownTimer = 0;
-const INPUT_COOLDOWN_DURATION = 0.2;
-
-const loadingManager = new THREE.LoadingManager();
-const gltfLoader = new GLTFLoader(loadingManager);
-const assetsToLoad = { 
-    tomato: 'models/tomato.glb',
-    potato: 'models/potato.glb',
-    chopped_tomato: 'models/chopped_tomato.glb',
-    lettuce: 'models/lettuce.glb',
-    banana: 'models/banana.glb',
-    strawberry: 'models/strawberry.glb',
-    milk: 'models/milk.glb',
-    yogurt: 'models/yogurt.glb',
-    cup: 'models/cup.glb',
-    egg: 'models/egg.glb',
-    pancake_mix: 'models/pancake_mix.glb',
-    syrup: 'models/syrup.glb',
-    bowl: 'models/bowl.glb',
-    granola: 'models/granola.glb',
-};
-
-async function preloadAssets() {
-    if (!saveManager) saveManager = new SaveManager();
-    if (!uiManager) uiManager = new UIManager(saveManager);
-    if (!audioManager) audioManager = new AudioManager();
-
-    uiManager.showLoading();
-    currentGameState = GameState.LOADING;
-    const promises = [];
-    console.log("Starting asset preloading...");
-
-    for (const key in assetsToLoad) {
-        promises.push(
-            gltfLoader.loadAsync(assetsToLoad[key]).then(gltf => {
-                console.log(`Loaded ${key}`);
-                const model = gltf.scene;
-                model.visible = false; 
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                    }
-                });
-                preloadedModels[key] = model; 
-            }).catch(error => {
-                console.error(`Failed to load ${key}:`, error);
-            })
-        );
-    }
-    loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => { };
-    loadingManager.onError = (url) => console.error('There was an error loading ' + url);
-    await Promise.all(promises);
-    console.log("Asset preloading complete.");
-}
-
-async function loadLevelData() {
-    try {
-        const response = await fetch('./levels.json'); 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        levelDatabase = await response.json();
-        if (!Array.isArray(levelDatabase) || levelDatabase.length === 0) throw new Error("Loaded level data is not a valid non-empty array.");
-    } catch (error) {
-        console.error("Failed to load level data:", error);
-        levelDatabase = [];
-        if (uiManager && uiManager.loadingScreen) {
-            uiManager.loadingScreen.innerHTML = `<h2>Error loading level data! Cannot start game.</h2><p>${error.message}</p>`;
-        }
-    }
-}
-
-function initializeGameComponents() {
-    console.log("Initializing game components...");
-    scene = setupScene();
-    camera = setupCamera();
-    renderer = setupRenderer();
-    setupLighting(scene);
-    setupResizeHandler(camera, renderer);
-
-    playerControls = new PlayerControls(camera, renderer.domElement);
-    scene.add(playerControls.object);
-
-    player = new Player(playerControls);
-    player.setScene(scene);
-
-    if (!saveManager) saveManager = new SaveManager();
-    if (!uiManager) uiManager = new UIManager(saveManager);
-    if (!audioManager) audioManager = new AudioManager();
-
-    menuManager = new MenuManager(uiManager);
-    levelManager = new LevelManager(uiManager, saveManager, levelDatabase);
-    levelManager.audioManager = audioManager;
-
-    interactionManager = new InteractionManager(camera, scene, player, {}, [], levelManager, uiManager, preloadedModels, null);
-    interactionManager.audioManager = audioManager;
-
-    levelEditor = new LevelEditor(camera, renderer, scene, interactionManager);
-
-    // --- APPLY SAVED SETTINGS ---
-    const savedLang = saveManager.getSetting('language') || 'en';
-    uiManager.setLanguage(savedLang);
-    setWorldLanguage(savedLang); // Set for World builder
-
-    const savedLabels = saveManager.getSetting('showLabels'); // Could be true, false, or undefined
-    // If undefined, default to true (handled by getSetting in previous file, but safe here)
-    const showLabels = savedLabels !== false;
-    toggleLabels(showLabels);
-    uiManager.setLabelToggleState(showLabels);
-
-    addEventListeners();
-    console.log("Kitchen Simulator Initialized.");
-}
-
-function addEventListeners() {
-    document.body.addEventListener('mousedown', (event) => {
-        audioManager.resume(); 
-        if (isMenuState(currentGameState) && inputCooldownTimer <= 0) {
-            handleMenuAction(event);
-        }
-    });
-    window.addEventListener('keydown', (e) => {
-        audioManager.resume();
-        if (e.key === 'F1') {
-            if (currentGameState === GameState.GAME_RUNNING) changeGameState(GameState.EDITOR);
-            else if (currentGameState === GameState.EDITOR) changeGameState(GameState.GAME_RUNNING);
-        }
-    });
-
-    // --- FIX: Label Toggle Listener ---
-    // Ensure this listener persists state to SaveManager
-    const labelToggle = document.getElementById('toggle-labels-setting');
-    if (labelToggle) {
-        // Clone to clear old listeners if any
-        const newToggle = labelToggle.cloneNode(true);
-        labelToggle.parentNode.replaceChild(newToggle, labelToggle);
-        
-        newToggle.addEventListener('change', (event) => {
-            const isChecked = event.target.checked;
-            toggleLabels(isChecked);
-            saveManager.saveSetting('showLabels', isChecked); // Persist to localStorage
-            
-            // Sync with MenuManager focus
-            if (menuManager?.activeMenuElement === uiManager.settingsScreen) {
-                menuManager.setSelectedIndex(menuManager.focusableElements.indexOf(event.target));
-            }
-        });
-        // Update ref in UI Manager
-        uiManager.toggleLabelsCheckbox = newToggle;
-    } else { console.error("Label toggle checkbox not found!"); }
-
-    window.addEventListener('gamepadconnected', (event) => { console.log('Gamepad connected:', event.gamepad.id); });
-    window.addEventListener('gamepaddisconnected', (event) => { console.log('Gamepad disconnected:', event.gamepad.id); activeGamepad = null; });
-}
-
-function changeGameState(newState) {
-    const previousState = currentGameState;
-    if (isMenuState(previousState) && !isMenuState(newState)) menuManager.deactivateMenu();
-    if ((previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS) && newState !== GameState.PAUSED && newState !== GameState.VIEWING_INSTRUCTIONS && newState !== GameState.EDITOR) {
-        if (playerControls) playerControls.unlock();
-    }
-    if (newState === GameState.EDITOR) {
-        if (playerControls) playerControls.unlock();
-        uiManager.hideGameUI();
-        levelEditor.enable();
-    } else if (previousState === GameState.EDITOR) {
-        levelEditor.disable();
-        if (newState === GameState.GAME_RUNNING && player) {
-            const pos = player.getPosition();
-            camera.position.copy(pos);
-            camera.rotation.set(0,0,0);
-        }
-    }
-    currentGameState = newState;
-    switch (newState) {
-        case GameState.MAIN_MENU: uiManager.showMainMenu(); menuManager.activateMenu(uiManager.mainMenu); break;
-        case GameState.SETTINGS:
-            const isPause = previousState === GameState.PAUSED || previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS;
-            uiManager.showSettings(isPause); menuManager.activateMenu(uiManager.settingsScreen);
-            break;
-        case GameState.LEVEL_SELECT: uiManager.populateLevelSelect(levelDatabase, saveManager); uiManager.showLevelSelect(); menuManager.activateMenu(uiManager.levelSelectScreen); break;
-        case GameState.LEVEL_INSTRUCTIONS: menuManager.activateMenu(uiManager.levelInstructionsScreen); break;
-        case GameState.VIEWING_INSTRUCTIONS: 
-            if (currentLevelData) uiManager.showLevelInstructions(currentLevelData, true); 
-            else changeGameState(GameState.GAME_RUNNING); 
-            break;
-        case GameState.GAME_RUNNING:
-            if (uiManager.settingsScreen.classList.contains('active')) uiManager.settingsScreen.classList.remove('active');
-            if (uiManager.levelInstructionsScreen.classList.contains('active')) uiManager.levelInstructionsScreen.classList.remove('active');
-            uiManager.showGameUI();
-            if (playerControls) playerControls.lock();
-            break;
-        case GameState.PAUSED: uiManager.showSettings(true); menuManager.activateMenu(uiManager.settingsScreen); break;
-        case GameState.LEVEL_END: currentLevelData = null; menuManager.activateMenu(uiManager.levelEndScreen); break;
-        case GameState.LOADING: uiManager.showLoading(); menuManager.deactivateMenu(); break;
-    }
-}
-
-function isMenuState(state) { return [GameState.MAIN_MENU, GameState.SETTINGS, GameState.LEVEL_SELECT, GameState.LEVEL_INSTRUCTIONS, GameState.PAUSED, GameState.LEVEL_END].includes(state); }
-
-function handleMenuAction(eventOrAction) {
-    let action = null, element = null;
-    if (inputCooldownTimer > 0) return;
-    if (eventOrAction instanceof Event) {
-        const target = eventOrAction.target.closest('[data-action]');
-        if (!target) return;
-        action = target.dataset.action;
-        element = target;
-        if (element.tagName === 'A' && action !== 'link') eventOrAction.preventDefault();
-        if (action === 'toggle-labels') return;
-    } else if (eventOrAction?.action) {
-        action = eventOrAction.action;
-        element = eventOrAction.element;
-        if (action === 'toggle-labels') { inputCooldownTimer = INPUT_COOLDOWN_DURATION; return; }
-    } else { return; }
-    if (!action || !element) return;
-
-    let actionTaken = true;
-    audioManager.play('pop'); 
-
-    switch (action) {
-        case 'play': changeGameState(GameState.LEVEL_SELECT); break;
-        case 'settings': changeGameState(GameState.SETTINGS); break;
-        case 'back-to-main': changeGameState(GameState.MAIN_MENU); break;
-        case 'start-level':
-            const levelIndex = parseInt(element.dataset.levelIndex, 10);
-            if (!isNaN(levelIndex) && saveManager.isLevelUnlocked(levelIndex)) prepareStartLevel(levelIndex);
-            else { if (!isNaN(levelIndex)) uiManager.showTemporaryMessage("Level Locked!", 1500); actionTaken = false; }
-            break;
-        case 'start-level-confirm':
-            if (currentGameState === GameState.LEVEL_INSTRUCTIONS) { confirmStartLevel(); audioManager.play('music_start'); } else actionTaken = false;
-            break;
-        case 'set-language':
-            const lang = element.dataset.lang;
-            uiManager.setLanguage(lang);
-            setWorldLanguage(lang); // Set for future levels
-            saveManager.saveSetting('language', lang); // Persist
-            break;
-        case 'resume': resumeGame(); break;
-        case 'next-level':
-            const currentLevelIdx = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
-            const nextLevelIndex = currentLevelIdx + 1;
-            if (!isNaN(currentLevelIdx) && nextLevelIndex < levelDatabase.length && saveManager.isLevelUnlocked(nextLevelIndex)) prepareStartLevel(nextLevelIndex);
-            else actionTaken = false;
-            break;
-        case 'restart-level':
-            const levelToRestart = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
-            if (!isNaN(levelToRestart) && levelToRestart >= 0) prepareStartLevel(levelToRestart);
-            else prepareStartLevel(0);
-            break;
-        case 'link': window.open(element.href, '_blank'); break;
-        default: actionTaken = false;
-    }
-    if (actionTaken) inputCooldownTimer = INPUT_COOLDOWN_DURATION;
-}
-
-function prepareStartLevel(levelIndex) {
-    if (!levelManager || !interactionManager || !scene || !uiManager) { changeGameState(GameState.MAIN_MENU); return; }
-    if (levelIndex < 0 || levelIndex >= levelDatabase.length) { changeGameState(GameState.LEVEL_SELECT); return; }
-    resetWorldState();
-    clearKitchen(scene);
-    const levelData = levelDatabase[levelIndex];
-    // Pass preloadedModels to buildKitchen so preplaced items can be instantiated
-    const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout, preloadedModels);
-    interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
-    pendingLevelIndex = levelIndex;
-    pendingLevelData = levelData;
-    currentLevelData = null; 
-    uiManager.showLevelInstructions(levelData, false);
-    changeGameState(GameState.LEVEL_INSTRUCTIONS);
-}
-
-function confirmStartLevel() {
-    if (pendingLevelIndex < 0 || !pendingLevelData || !levelManager) { changeGameState(GameState.LEVEL_SELECT); return; }
-    currentLevelData = pendingLevelData;
-    const loaded = levelManager.loadLevel(pendingLevelIndex, pendingLevelData);
-    pendingLevelIndex = -1;
-    pendingLevelData = null;
-    if (loaded && levelManager.isRunning()) changeGameState(GameState.GAME_RUNNING);
-    else { currentLevelData = null; changeGameState(GameState.LEVEL_SELECT); }
-}
-
-function resetWorldState() {
-    if (player) player.forceDropItem();
-    if (interactionManager) {
-        if (interactionManager.currentlyHighlighted) {
-            interactionManager.revertHighlight(interactionManager.currentlyHighlighted);
-            interactionManager.currentlyHighlighted = null;
-        }
-        interactionManager.clearDynamicItems();
-    }
-    if (uiManager) { uiManager.clearOrderList(); uiManager.updateHolding(null); }
-    pendingLevelIndex = -1;
-    pendingLevelData = null;
-}
-
-function pauseGame() { if (currentGameState === GameState.GAME_RUNNING) changeGameState(GameState.PAUSED); }
-function resumeGame() {
-    if (currentGameState === GameState.PAUSED || currentGameState === GameState.SETTINGS || currentGameState === GameState.VIEWING_INSTRUCTIONS) {
-         if (levelManager?.isRunning()) changeGameState(GameState.GAME_RUNNING);
-         else changeGameState(GameState.MAIN_MENU);
-    }
-}
-function handleLevelEnd(score, stars, levelIndex) {
-    currentLevelData = null; 
-    if (saveManager) saveManager.updateLevelCompletion(levelIndex, score, stars);
-    const hasNextLevel = (levelIndex + 1) < levelDatabase.length;
-    uiManager.showLevelEnd(score, stars, levelIndex, hasNextLevel);
-    changeGameState(GameState.LEVEL_END);
-}
-function handleGameEnd() {
-    currentLevelData = null; 
-    uiManager.showGameEnd();
-    changeGameState(GameState.LEVEL_END);
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    if (!renderer || !uiManager || !menuManager || !playerControls || !player || !interactionManager) return;
-    const delta = clock.getDelta();
-    if (inputCooldownTimer > 0) inputCooldownTimer -= delta;
-    const gamepads = navigator.getGamepads();
-    activeGamepad = null;
-    for (const gp of gamepads) { if (gp?.connected) { activeGamepad = gp; break; } }
-    if (uiManager) uiManager.updateGamepadStatus(!!activeGamepad);
-    let pausePressed = false;
-    let instructionPressed = false;
-    if (activeGamepad) {
-        playerControls.handleGamepadInput(activeGamepad, delta); 
-        pausePressed = playerControls.consumePauseToggleRequest();
-        instructionPressed = playerControls.consumeInstructionToggleRequest();
-    } else {
-        playerControls.handleGamepadInput(null, delta); 
-        pausePressed = playerControls.consumePauseToggleRequest(); 
-        instructionPressed = playerControls.consumeInstructionToggleRequest(); 
-    }
-    if (currentGameState === GameState.GAME_RUNNING) {
-        if (pausePressed) { pauseGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
-        if (instructionPressed) { changeGameState(GameState.VIEWING_INSTRUCTIONS); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
-        if (levelManager && interactionManager && player) {
-            levelManager.update(delta); 
-            if (playerControls.isLocked) {
-                player.update(delta, playerControls.getMovementInput()); 
-                interactionManager.updateAimHighlight();
-                if (inputCooldownTimer <= 0 && playerControls.consumeInteractionRequest()) interactionManager.handleInteractionRequest();
-                if (uiManager) uiManager.updateHolding(player.getHeldItemName());
-            } else {
-                 if (uiManager) uiManager.updateHolding(null);
-                 if (interactionManager.currentlyHighlighted) { interactionManager.revertHighlight(interactionManager.currentlyHighlighted); interactionManager.currentlyHighlighted = null; }
-            }
-        }
-    }
-    else if (currentGameState === GameState.PAUSED) {
-        if (pausePressed) { resumeGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
-        if (inputCooldownTimer <= 0 && isMenuState(currentGameState) && activeGamepad) { const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); if (menuAction) handleMenuAction(menuAction); }
-    }
-    else if (currentGameState === GameState.VIEWING_INSTRUCTIONS) { if (instructionPressed || pausePressed) { resumeGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; } }
-    else if (currentGameState === GameState.EDITOR) { levelEditor.update(delta); renderer.render(scene, camera); return; }
-    else if (isMenuState(currentGameState)) { if (inputCooldownTimer <= 0 && activeGamepad) { const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); if (menuAction) handleMenuAction(menuAction); } }
-    if (currentGameState !== GameState.EDITOR) renderer.render(scene, camera);
-}
-
-async function runGame() {
-    try {
-        saveManager = new SaveManager();
-        uiManager = new UIManager(saveManager);
-        await preloadAssets();
-        await loadLevelData();
-        initializeGameComponents();
-        levelManager.onLevelEnd = handleLevelEnd;
-        levelManager.onGameEnd = handleGameEnd;
-        changeGameState(GameState.MAIN_MENU);
-        animate();
-    } catch (error) {
-        console.error(error);
-    }
-}
-runGame();
+/* New Editor Handle Cursor */
+body.resizing-n-s { cursor: ns-resize; }
+body.resizing-e-w { cursor: ew-resize; }
 </file>
 
 <file path="src/constants.js">
@@ -5258,6 +6705,649 @@ export const CATALOG_ITEMS = [
     { name: "Granola Jar", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#D2691E", config: { ingredient: "granola" } },
     { name: "Coating Mix", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F5F5DC", config: { ingredient: "coating_mix" } },
 ];
+</file>
+
+<file path="src/main.js">
+// src/main.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { setupScene, setupCamera, setupRenderer, setupLighting, setupResizeHandler } from './setup.js';
+import { PlayerControls } from './controls.js';
+import { Player } from './player.js';
+import { buildKitchen, clearKitchen, toggleLabels, setWorldLanguage } from './world.js';
+import { InteractionManager } from './interaction.js';
+import { LevelManager } from './LevelManager.js';
+import { UIManager } from './ui.js';
+import { MenuManager } from './menuManager.js';
+import { SaveManager } from './saveManager.js';
+import { LevelEditor } from './editor.js';
+import { AudioManager } from './audioManager.js'; 
+
+const GameState = { 
+    LOADING: 'LOADING', 
+    MAIN_MENU: 'MAIN_MENU', 
+    SETTINGS: 'SETTINGS', 
+    LEVEL_SELECT: 'LEVEL_SELECT', 
+    LEVEL_INSTRUCTIONS: 'LEVEL_INSTRUCTIONS', 
+    GAME_RUNNING: 'GAME_RUNNING', 
+    PAUSED: 'PAUSED', 
+    VIEWING_INSTRUCTIONS: 'VIEWING_INSTRUCTIONS', 
+    LEVEL_END: 'LEVEL_END',
+    EDITOR: 'EDITOR',
+    EDITOR_HUB: 'EDITOR_HUB'
+};
+
+let currentGameState = GameState.LOADING;
+let preloadedModels = {};
+let activeGamepad = null;
+const clock = new THREE.Clock();
+
+let scene, camera, renderer, playerControls, player, interactionManager, levelManager, uiManager, menuManager, saveManager, levelEditor, audioManager;
+let levelDatabase = []; 
+let levelDataCache = {}; // Cache level contents: filename/id -> json data
+let pendingLevelIndex = -1;
+let pendingLevelData = null;
+let currentLevelData = null; 
+let inputCooldownTimer = 0;
+const INPUT_COOLDOWN_DURATION = 0.2;
+
+const loadingManager = new THREE.LoadingManager();
+const gltfLoader = new GLTFLoader(loadingManager);
+const assetsToLoad = { 
+    tomato: 'models/tomato.glb',
+    potato: 'models/potato.glb',
+    chopped_tomato: 'models/chopped_tomato.glb',
+    lettuce: 'models/lettuce.glb',
+    banana: 'models/banana.glb',
+    strawberry: 'models/strawberry.glb',
+    milk: 'models/milk.glb',
+    yogurt: 'models/yogurt.glb',
+    cup: 'models/cup.glb',
+    egg: 'models/egg.glb',
+    pancake_mix: 'models/pancake_mix.glb',
+    syrup: 'models/syrup.glb',
+    bowl: 'models/bowl.glb',
+    granola: 'models/granola.glb',
+};
+
+async function preloadAssets() {
+    if (!saveManager) saveManager = new SaveManager();
+    if (!uiManager) uiManager = new UIManager(saveManager);
+    if (!audioManager) audioManager = new AudioManager();
+
+    uiManager.showLoading();
+    currentGameState = GameState.LOADING;
+    const promises = [];
+    console.log("Starting asset preloading...");
+
+    for (const key in assetsToLoad) {
+        promises.push(
+            gltfLoader.loadAsync(assetsToLoad[key]).then(gltf => {
+                console.log(`Loaded ${key}`);
+                const model = gltf.scene;
+                model.visible = false; 
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
+                preloadedModels[key] = model; 
+            }).catch(error => {
+                console.error(`Failed to load ${key}:`, error);
+            })
+        );
+    }
+    loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => { };
+    loadingManager.onError = (url) => console.error('There was an error loading ' + url);
+    await Promise.all(promises);
+    console.log("Asset preloading complete.");
+}
+
+async function loadLevelData() {
+    try {
+        // Load roadmap instead of a giant monolithic file
+        const response = await fetch('levels/game_roadmap.json'); 
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        levelDatabase = await response.json();
+        if (!Array.isArray(levelDatabase) || levelDatabase.length === 0) throw new Error("Loaded level roadmap is not a valid non-empty array.");
+    } catch (error) {
+        console.error("Failed to load level data:", error);
+        levelDatabase = [];
+        if (uiManager && uiManager.loadingScreen) {
+            uiManager.loadingScreen.innerHTML = `<h2>Error loading game roadmap!</h2><p>${error.message}</p>`;
+        }
+    }
+}
+
+function initializeGameComponents() {
+    console.log("Initializing game components...");
+    scene = setupScene();
+    camera = setupCamera();
+    renderer = setupRenderer();
+    setupLighting(scene);
+    setupResizeHandler(camera, renderer);
+
+    playerControls = new PlayerControls(camera, renderer.domElement);
+    scene.add(playerControls.object);
+
+    player = new Player(playerControls);
+    player.setScene(scene);
+
+    if (!saveManager) saveManager = new SaveManager();
+    if (!uiManager) uiManager = new UIManager(saveManager);
+    if (!audioManager) audioManager = new AudioManager();
+
+    menuManager = new MenuManager(uiManager);
+    levelManager = new LevelManager(uiManager, saveManager, levelDatabase);
+    levelManager.audioManager = audioManager;
+
+    interactionManager = new InteractionManager(camera, scene, player, {}, [], levelManager, uiManager, preloadedModels, null);
+    interactionManager.audioManager = audioManager;
+
+    // Pass an exit callback to the editor to return to the editor hub
+    levelEditor = new LevelEditor(camera, renderer, scene, interactionManager, () => {
+        changeGameState(GameState.EDITOR_HUB);
+    });
+
+    // --- APPLY SAVED SETTINGS ---
+    const savedLang = saveManager.getSetting('language') || 'en';
+    uiManager.setLanguage(savedLang);
+    setWorldLanguage(savedLang); // Set for World builder
+
+    const savedLabels = saveManager.getSetting('showLabels'); // Could be true, false, or undefined
+    // If undefined, default to true (handled by getSetting in previous file, but safe here)
+    const showLabels = savedLabels !== false;
+    toggleLabels(showLabels);
+    uiManager.setLabelToggleState(showLabels);
+
+    addEventListeners();
+    console.log("Kitchen Simulator Initialized.");
+}
+
+function addEventListeners() {
+    document.body.addEventListener('mousedown', (event) => {
+        audioManager.resume(); 
+        // Allow handling interaction if we are in a menu OR editor hub
+        if ((isMenuState(currentGameState) || currentGameState === GameState.EDITOR_HUB) && inputCooldownTimer <= 0) {
+            handleMenuAction(event);
+        }
+    });
+    window.addEventListener('keydown', (e) => {
+        audioManager.resume();
+        // Removed F1 toggle, using Editor Exit button now
+    });
+
+    // --- FIX: Label Toggle Listener ---
+    const labelToggle = document.getElementById('toggle-labels-setting');
+    if (labelToggle) {
+        // Clone to clear old listeners if any
+        const newToggle = labelToggle.cloneNode(true);
+        labelToggle.parentNode.replaceChild(newToggle, labelToggle);
+        
+        newToggle.addEventListener('change', (event) => {
+            const isChecked = event.target.checked;
+            toggleLabels(isChecked);
+            saveManager.saveSetting('showLabels', isChecked); // Persist to localStorage
+            
+            // Sync with MenuManager focus
+            if (menuManager?.activeMenuElement === uiManager.settingsScreen) {
+                menuManager.setSelectedIndex(menuManager.focusableElements.indexOf(event.target));
+            }
+        });
+        // Update ref in UI Manager
+        uiManager.toggleLabelsCheckbox = newToggle;
+    } else { console.error("Label toggle checkbox not found!"); }
+
+    window.addEventListener('gamepadconnected', (event) => { console.log('Gamepad connected:', event.gamepad.id); });
+    window.addEventListener('gamepaddisconnected', (event) => { console.log('Gamepad disconnected:', event.gamepad.id); activeGamepad = null; });
+}
+
+function changeGameState(newState) {
+    const previousState = currentGameState;
+    if (isMenuState(previousState) && !isMenuState(newState) && newState !== GameState.EDITOR_HUB) menuManager.deactivateMenu();
+    
+    if ((previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS) && newState !== GameState.PAUSED && newState !== GameState.VIEWING_INSTRUCTIONS && newState !== GameState.EDITOR) {
+        if (playerControls) playerControls.unlock();
+    }
+
+    if (newState === GameState.EDITOR) {
+        if (playerControls) playerControls.unlock();
+        uiManager.hideGameUI();
+        levelEditor.enable();
+    } else if (previousState === GameState.EDITOR) {
+        levelEditor.disable();
+        if (newState === GameState.GAME_RUNNING && player) {
+            const pos = player.getPosition();
+            camera.position.copy(pos);
+            camera.rotation.set(0,0,0);
+        }
+    }
+
+    currentGameState = newState;
+    const editorHubScreen = document.getElementById('editor-hub-screen');
+    if (editorHubScreen) editorHubScreen.classList.remove('active');
+
+    switch (newState) {
+        case GameState.MAIN_MENU: uiManager.showMainMenu(); menuManager.activateMenu(uiManager.mainMenu); break;
+        case GameState.EDITOR_HUB: 
+            uiManager.hideGameUI();
+            renderEditorHub();
+            editorHubScreen.classList.add('active');
+            menuManager.activateMenu(editorHubScreen);
+            break;
+        case GameState.SETTINGS:
+            const isPause = previousState === GameState.PAUSED || previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS;
+            uiManager.showSettings(isPause); menuManager.activateMenu(uiManager.settingsScreen);
+            break;
+        case GameState.LEVEL_SELECT: uiManager.populateLevelSelect(levelDatabase, saveManager); uiManager.showLevelSelect(); menuManager.activateMenu(uiManager.levelSelectScreen); break;
+        case GameState.LEVEL_INSTRUCTIONS: menuManager.activateMenu(uiManager.levelInstructionsScreen); break;
+        case GameState.VIEWING_INSTRUCTIONS: 
+            if (currentLevelData) uiManager.showLevelInstructions(currentLevelData, true); 
+            else changeGameState(GameState.GAME_RUNNING); 
+            break;
+        case GameState.GAME_RUNNING:
+            if (uiManager.settingsScreen.classList.contains('active')) uiManager.settingsScreen.classList.remove('active');
+            if (uiManager.levelInstructionsScreen.classList.contains('active')) uiManager.levelInstructionsScreen.classList.remove('active');
+            uiManager.showGameUI();
+            if (playerControls) playerControls.lock();
+            break;
+        case GameState.PAUSED: uiManager.showSettings(true); menuManager.activateMenu(uiManager.settingsScreen); break;
+        case GameState.LEVEL_END: currentLevelData = null; menuManager.activateMenu(uiManager.levelEndScreen); break;
+        case GameState.LOADING: uiManager.showLoading(); menuManager.deactivateMenu(); break;
+    }
+}
+
+function isMenuState(state) { return [GameState.MAIN_MENU, GameState.SETTINGS, GameState.LEVEL_SELECT, GameState.LEVEL_INSTRUCTIONS, GameState.PAUSED, GameState.LEVEL_END].includes(state); }
+
+function handleMenuAction(eventOrAction) {
+    let action = null, element = null;
+    if (inputCooldownTimer > 0) return;
+    if (eventOrAction instanceof Event) {
+        const target = eventOrAction.target.closest('[data-action]');
+        if (!target) return;
+        action = target.dataset.action;
+        element = target;
+        if (element.tagName === 'A' && action !== 'link') eventOrAction.preventDefault();
+        if (action === 'toggle-labels') return;
+    } else if (eventOrAction?.action) {
+        action = eventOrAction.action;
+        element = eventOrAction.element;
+        if (action === 'toggle-labels') { inputCooldownTimer = INPUT_COOLDOWN_DURATION; return; }
+    } else { return; }
+    if (!action || !element) return;
+
+    let actionTaken = true;
+    // Only play pop sound for menu clicks, not generic editor clicks if already in editor
+    if (currentGameState !== GameState.EDITOR) audioManager.play('pop'); 
+
+    // --- Editor Hub Actions ---
+    if (currentGameState === GameState.EDITOR_HUB) {
+        const idx = parseInt(element.dataset.index, 10);
+        switch (action) {
+            case 'back-to-main': changeGameState(GameState.MAIN_MENU); break;
+            case 'create-level': createNewLevel(); break;
+            case 'save-roadmap': downloadRoadmap(); break;
+            case 'edit-level': if (!isNaN(idx)) prepareEditLevel(idx); break;
+            case 'move-up': if (!isNaN(idx)) reorderLevel(idx, -1); break;
+            case 'move-down': if (!isNaN(idx)) reorderLevel(idx, 1); break;
+            case 'duplicate': if (!isNaN(idx)) duplicateLevel(idx); break;
+            case 'delete-level': if (!isNaN(idx)) deleteLevel(idx); break;
+            default: actionTaken = false;
+        }
+        if (actionTaken) {
+            inputCooldownTimer = INPUT_COOLDOWN_DURATION;
+            return;
+        }
+    }
+
+    switch (action) {
+        case 'play': changeGameState(GameState.LEVEL_SELECT); break;
+        case 'editor-hub': changeGameState(GameState.EDITOR_HUB); break; 
+        case 'settings': changeGameState(GameState.SETTINGS); break;
+        case 'back-to-main': changeGameState(GameState.MAIN_MENU); break;
+        case 'start-level':
+            const levelIndex = parseInt(element.dataset.levelIndex, 10);
+            if (!isNaN(levelIndex) && saveManager.isLevelUnlocked(levelIndex)) {
+                prepareStartLevel(levelIndex);
+            } else { 
+                if (!isNaN(levelIndex)) uiManager.showTemporaryMessage("Level Locked!", 1500); 
+                actionTaken = false; 
+            }
+            break;
+        case 'start-level-confirm':
+            if (currentGameState === GameState.LEVEL_INSTRUCTIONS) { confirmStartLevel(); audioManager.play('music_start'); } else actionTaken = false;
+            break;
+        case 'set-language':
+            const lang = element.dataset.lang;
+            uiManager.setLanguage(lang);
+            setWorldLanguage(lang); // Set for future levels
+            saveManager.saveSetting('language', lang); // Persist
+            break;
+        case 'resume': resumeGame(); break;
+        case 'next-level':
+            const currentLevelIdx = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
+            const nextLevelIndex = currentLevelIdx + 1;
+            if (!isNaN(currentLevelIdx) && nextLevelIndex < levelDatabase.length && saveManager.isLevelUnlocked(nextLevelIndex)) prepareStartLevel(nextLevelIndex);
+            else actionTaken = false;
+            break;
+        case 'restart-level':
+            const levelToRestart = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
+            if (!isNaN(levelToRestart) && levelToRestart >= 0) prepareStartLevel(levelToRestart);
+            else prepareStartLevel(0);
+            break;
+        case 'link': window.open(element.href, '_blank'); break;
+        default: actionTaken = false;
+    }
+    if (actionTaken) inputCooldownTimer = INPUT_COOLDOWN_DURATION;
+}
+
+// --- Editor Hub Logic ---
+
+function renderEditorHub() {
+    const container = document.getElementById('editor-level-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    levelDatabase.forEach((level, index) => {
+        const row = document.createElement('div');
+        row.className = 'editor-level-row';
+        row.innerHTML = `
+            <div class="editor-level-actions">
+                <button class="icon-btn" data-action="move-up" data-index="${index}" title="Move Up">▲</button>
+                <button class="icon-btn" data-action="move-down" data-index="${index}" title="Move Down">▼</button>
+            </div>
+            <div class="editor-level-info">
+                <span class="level-name-display">${level.name}</span>
+                <span class="level-id-badge">ID: ${level.levelId} | File: ${level.filename || 'unsaved'}</span>
+            </div>
+            <div class="editor-level-actions">
+                <button class="icon-btn" data-action="edit-level" data-index="${index}" title="Edit">✏️</button>
+                <button class="icon-btn" data-action="duplicate" data-index="${index}" title="Duplicate">📋</button>
+                <button class="icon-btn delete" data-action="delete-level" data-index="${index}" title="Delete">🗑️</button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+function createNewLevel() {
+    const newId = levelDatabase.length > 0 ? Math.max(...levelDatabase.map(l => l.levelId)) + 1 : 1;
+    const filename = `level_${newId}.json`;
+    const newEntry = {
+        levelId: newId,
+        name: `New Level ${newId}`,
+        filename: filename
+    };
+    
+    // Create default content in cache
+    levelDataCache[filename] = {
+        levelId: newId,
+        name: `New Level ${newId}`,
+        duration: 180,
+        starThresholds: [100, 200, 300],
+        availableMeals: [],
+        maxActiveOrders: 2,
+        newOrderDelay: 15,
+        layout: []
+    };
+
+    levelDatabase.push(newEntry);
+    renderEditorHub();
+}
+
+function reorderLevel(index, direction) {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= levelDatabase.length) return;
+    
+    // Swap
+    const temp = levelDatabase[index];
+    levelDatabase[index] = levelDatabase[newIndex];
+    levelDatabase[newIndex] = temp;
+    
+    renderEditorHub();
+}
+
+function deleteLevel(index) {
+    if (!confirm("Delete this level reference? (Files cannot be deleted by web browser)")) return;
+    levelDatabase.splice(index, 1);
+    renderEditorHub();
+}
+
+// Fetch logic helper
+async function getLevelData(entry) {
+    // Check cache first
+    if (levelDataCache[entry.filename]) {
+        return JSON.parse(JSON.stringify(levelDataCache[entry.filename])); // Deep copy
+    }
+    
+    // Fetch from server
+    try {
+        const res = await fetch(`levels/${entry.filename}`);
+        if (!res.ok) throw new Error("File not found");
+        const data = await res.json();
+        levelDataCache[entry.filename] = data; // Cache it
+        return data;
+    } catch (e) {
+        console.warn(`Could not load ${entry.filename}, creating empty template.`);
+        const tmpl = { levelId: entry.levelId, name: entry.name, layout: [] };
+        levelDataCache[entry.filename] = tmpl;
+        return tmpl;
+    }
+}
+
+async function duplicateLevel(index) {
+    const sourceEntry = levelDatabase[index];
+    const sourceData = await getLevelData(sourceEntry);
+    
+    const newId = Math.max(...levelDatabase.map(l => l.levelId)) + 1;
+    const newFilename = `level_${newId}.json`;
+    
+    // Clone data
+    const newData = JSON.parse(JSON.stringify(sourceData));
+    newData.levelId = newId;
+    newData.name = `${sourceData.name} (Copy)`;
+    
+    // Update Roadmap
+    const newEntry = {
+        levelId: newId,
+        name: newData.name,
+        filename: newFilename
+    };
+    levelDatabase.push(newEntry);
+    
+    // Update Cache
+    levelDataCache[newFilename] = newData;
+    
+    renderEditorHub();
+}
+
+async function prepareEditLevel(index) {
+    const entry = levelDatabase[index];
+    uiManager.showLoading();
+    try {
+        const data = await getLevelData(entry);
+        
+        resetWorldState();
+        clearKitchen(scene);
+        
+        // Use builder to show current state
+        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, data.layout || [], preloadedModels);
+        interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
+        
+        // Initialize Editor with this data
+        levelEditor.loadLevel(data);
+        
+        uiManager.hideLoading();
+        changeGameState(GameState.EDITOR);
+    } catch (e) {
+        console.error(e);
+        uiManager.hideLoading();
+        alert("Failed to load level for editing");
+    }
+}
+
+function downloadRoadmap() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(levelDatabase, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "game_roadmap.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    alert("Roadmap downloaded. Overwrite levels/game_roadmap.json in your project.");
+}
+
+// --- Game Load Logic ---
+
+// Converted to async to handle fetching individual level files
+async function prepareStartLevel(levelIndex) {
+    if (!levelManager || !interactionManager || !scene || !uiManager) { changeGameState(GameState.MAIN_MENU); return; }
+    if (levelIndex < 0 || levelIndex >= levelDatabase.length) { changeGameState(GameState.LEVEL_SELECT); return; }
+    
+    uiManager.showLoading();
+    
+    try {
+        const levelEntry = levelDatabase[levelIndex];
+        // Fetch specific level data
+        const levelData = await getLevelData(levelEntry);
+
+        resetWorldState();
+        clearKitchen(scene);
+        
+        // Pass preloadedModels to buildKitchen so preplaced items can be instantiated
+        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout, preloadedModels);
+        interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
+        
+        pendingLevelIndex = levelIndex;
+        pendingLevelData = levelData;
+        currentLevelData = null; 
+        
+        uiManager.hideLoading();
+        uiManager.showLevelInstructions(levelData, false);
+        changeGameState(GameState.LEVEL_INSTRUCTIONS);
+    } catch (e) {
+        console.error(e);
+        uiManager.hideLoading();
+        uiManager.showTemporaryMessage("Error loading level", 2000);
+        changeGameState(GameState.LEVEL_SELECT);
+    }
+}
+
+function confirmStartLevel() {
+    if (pendingLevelIndex < 0 || !pendingLevelData || !levelManager) { changeGameState(GameState.LEVEL_SELECT); return; }
+    currentLevelData = pendingLevelData;
+    const loaded = levelManager.loadLevel(pendingLevelIndex, pendingLevelData);
+    pendingLevelIndex = -1;
+    pendingLevelData = null;
+    if (loaded && levelManager.isRunning()) changeGameState(GameState.GAME_RUNNING);
+    else { currentLevelData = null; changeGameState(GameState.LEVEL_SELECT); }
+}
+
+function resetWorldState() {
+    if (player) player.forceDropItem();
+    if (interactionManager) {
+        if (interactionManager.currentlyHighlighted) {
+            interactionManager.revertHighlight(interactionManager.currentlyHighlighted);
+            interactionManager.currentlyHighlighted = null;
+        }
+        interactionManager.clearDynamicItems();
+    }
+    if (uiManager) { uiManager.clearOrderList(); uiManager.updateHolding(null); }
+    pendingLevelIndex = -1;
+    pendingLevelData = null;
+}
+
+function pauseGame() { if (currentGameState === GameState.GAME_RUNNING) changeGameState(GameState.PAUSED); }
+function resumeGame() {
+    if (currentGameState === GameState.PAUSED || currentGameState === GameState.SETTINGS || currentGameState === GameState.VIEWING_INSTRUCTIONS) {
+         if (levelManager?.isRunning()) changeGameState(GameState.GAME_RUNNING);
+         else changeGameState(GameState.MAIN_MENU);
+    }
+}
+function handleLevelEnd(score, stars, levelIndex) {
+    currentLevelData = null; 
+    if (saveManager) saveManager.updateLevelCompletion(levelIndex, score, stars);
+    const hasNextLevel = (levelIndex + 1) < levelDatabase.length;
+    uiManager.showLevelEnd(score, stars, levelIndex, hasNextLevel);
+    changeGameState(GameState.LEVEL_END);
+}
+function handleGameEnd() {
+    currentLevelData = null; 
+    uiManager.showGameEnd();
+    changeGameState(GameState.LEVEL_END);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    if (!renderer || !uiManager || !menuManager || !playerControls || !player || !interactionManager) return;
+    const delta = clock.getDelta();
+    if (inputCooldownTimer > 0) inputCooldownTimer -= delta;
+    const gamepads = navigator.getGamepads();
+    activeGamepad = null;
+    for (const gp of gamepads) { if (gp?.connected) { activeGamepad = gp; break; } }
+    if (uiManager) uiManager.updateGamepadStatus(!!activeGamepad);
+    let pausePressed = false;
+    let instructionPressed = false;
+    if (activeGamepad) {
+        playerControls.handleGamepadInput(activeGamepad, delta); 
+        pausePressed = playerControls.consumePauseToggleRequest();
+        instructionPressed = playerControls.consumeInstructionToggleRequest();
+    } else {
+        playerControls.handleGamepadInput(null, delta); 
+        pausePressed = playerControls.consumePauseToggleRequest(); 
+        instructionPressed = playerControls.consumeInstructionToggleRequest(); 
+    }
+    
+    // Handle gamepad in editor hub
+    if (currentGameState === GameState.EDITOR_HUB && activeGamepad && inputCooldownTimer <= 0) {
+        const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); 
+        if (menuAction) handleMenuAction(menuAction);
+    }
+
+    if (currentGameState === GameState.GAME_RUNNING) {
+        if (pausePressed) { pauseGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
+        if (instructionPressed) { changeGameState(GameState.VIEWING_INSTRUCTIONS); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
+        if (levelManager && interactionManager && player) {
+            levelManager.update(delta); 
+            if (playerControls.isLocked) {
+                player.update(delta, playerControls.getMovementInput()); 
+                interactionManager.updateAimHighlight();
+                if (inputCooldownTimer <= 0 && playerControls.consumeInteractionRequest()) interactionManager.handleInteractionRequest();
+                if (uiManager) uiManager.updateHolding(player.getHeldItemName());
+            } else {
+                 if (uiManager) uiManager.updateHolding(null);
+                 if (interactionManager.currentlyHighlighted) { interactionManager.revertHighlight(interactionManager.currentlyHighlighted); interactionManager.currentlyHighlighted = null; }
+            }
+        }
+    }
+    else if (currentGameState === GameState.PAUSED) {
+        if (pausePressed) { resumeGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
+        if (inputCooldownTimer <= 0 && isMenuState(currentGameState) && activeGamepad) { const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); if (menuAction) handleMenuAction(menuAction); }
+    }
+    else if (currentGameState === GameState.VIEWING_INSTRUCTIONS) { if (instructionPressed || pausePressed) { resumeGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; } }
+    else if (currentGameState === GameState.EDITOR) { levelEditor.update(delta); renderer.render(scene, camera); return; }
+    else if (isMenuState(currentGameState)) { if (inputCooldownTimer <= 0 && activeGamepad) { const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); if (menuAction) handleMenuAction(menuAction); } }
+    
+    if (currentGameState !== GameState.EDITOR) renderer.render(scene, camera);
+}
+
+async function runGame() {
+    try {
+        saveManager = new SaveManager();
+        uiManager = new UIManager(saveManager);
+        await preloadAssets();
+        await loadLevelData();
+        initializeGameComponents();
+        levelManager.onLevelEnd = handleLevelEnd;
+        levelManager.onGameEnd = handleGameEnd;
+        changeGameState(GameState.MAIN_MENU);
+        animate();
+    } catch (error) {
+        console.error(error);
+    }
+}
+runGame();
 </file>
 
 <file path="src/interaction.js">
@@ -5730,7 +7820,7 @@ import {
     createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, createStoveMesh, createSinkMesh, 
     createIngredientBinMesh, createPlateStackMesh, createCupStackMesh, createBowlStackMesh,
     createToasterMesh, createMixerMesh, createBlenderMesh, createDoughPressMesh, createPizzaOvenMesh,
-    createItemMesh
+    createItemMesh, createTableMesh
 } from './voxelBuilder.js';
 import { getTrans } from './i18nData.js';
 import { createItem } from './items.js';
@@ -5743,6 +7833,85 @@ let currentLabelVisibility = true;
 
 export function setWorldLanguage(lang) {
     currentLang = lang;
+}
+
+export function refreshSmartObjects(scene) {
+    // Updates the mesh of smart objects (Tables) based on their neighbors
+    scene.traverse(c => {
+        if (c.userData && (c.userData.stationType === STATION_TYPES.TABLE)) {
+            updateSmartObjectMesh(c, scene);
+        }
+    });
+}
+
+function updateSmartObjectMesh(object, scene) {
+    const type = object.userData.stationType;
+    const x = object.position.x;
+    const z = object.position.z;
+    const w = GRID_UNIT; 
+    
+    // Check neighbors in the scene
+    const checkNeighbor = (dx, dz) => {
+        const targetX = x + dx;
+        const targetZ = z + dz;
+        let found = false;
+        
+        // Iterate scene children manually to be robust in editor
+        for(let i=0; i<scene.children.length; i++) {
+            const c = scene.children[i];
+            if (c !== object && c.userData && c.userData.stationType === type) {
+                if (Math.abs(c.position.x - targetX) < 0.1 && Math.abs(c.position.z - targetZ) < 0.1) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        return found;
+    };
+
+    const neighbors = {
+        n: checkNeighbor(0, -w),
+        s: checkNeighbor(0, w),
+        e: checkNeighbor(w, 0),
+        w: checkNeighbor(-w, 0)
+    };
+
+    // Remove old visual child
+    const oldVisual = object.children.find(c => c.type === 'Mesh' || c.type === 'Group');
+    if (oldVisual) {
+        object.remove(oldVisual);
+        if(oldVisual.geometry) oldVisual.geometry.dispose();
+        if(oldVisual.material) {
+            if(Array.isArray(oldVisual.material)) oldVisual.material.forEach(m=>m.dispose());
+            else oldVisual.material.dispose();
+        }
+    }
+
+    // Create new visual
+    if (type === STATION_TYPES.TABLE) {
+        const visual = createTableMesh(neighbors);
+        object.add(visual);
+    }
+}
+
+export function resizeWall(wallObject, width, depth) {
+    if (wallObject.userData.stationType !== STATION_TYPES.WALL) return;
+
+    const h = 2.5; // Wall height
+    const oldMesh = wallObject.children.find(c => c.isMesh);
+    
+    if (oldMesh) {
+        // Reuse geometry if possible, but easier to recreate box
+        oldMesh.geometry.dispose();
+        oldMesh.geometry = new THREE.BoxGeometry(width, h, depth);
+        // Re-center geometry vertically so origin is bottom
+        oldMesh.position.y = h/2;
+    }
+
+    // Update userData
+    wallObject.userData.size = { width, depth };
+    
+    // Ensure object name reflects resize if it helps debugging, or keep generic
 }
 
 function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
@@ -5800,21 +7969,6 @@ function createCounterMesh(isServing, isCorner) {
     } else if (isServing) {
         vb.addBox(1, 3, 15, 14, 13, 15, PALETTE.PLASTIC_RED);
     }
-    const mesh = vb.buildMesh();
-    mesh.scale.set(1, MODULE_HEIGHT / GRID_UNIT, 1);
-    mesh.position.y = MODULE_HEIGHT / 2;
-    return mesh;
-}
-
-function createTableMesh(neighbors) {
-    const vb = new VoxelBuilder();
-    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.METAL_SHINY);
-    vb.addBox(1, 5, 1, 14, 5, 14, PALETTE.METAL_DARK);
-    const addLeg = (x, z) => vb.addBox(x, 0, z, x+1, 14, z+1, PALETTE.METAL_LIGHT);
-    if(!neighbors.w && !neighbors.n) addLeg(1, 1);   
-    if(!neighbors.e && !neighbors.n) addLeg(13, 1);  
-    if(!neighbors.w && !neighbors.s) addLeg(1, 13);  
-    if(!neighbors.e && !neighbors.s) addLeg(13, 13); 
     const mesh = vb.buildMesh();
     mesh.scale.set(1, MODULE_HEIGHT / GRID_UNIT, 1);
     mesh.position.y = MODULE_HEIGHT / 2;

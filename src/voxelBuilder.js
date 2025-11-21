@@ -226,6 +226,47 @@ export function createPizzaOvenMesh() {
     return mesh;
 }
 
+export function createTableMesh(neighbors) {
+    const vb = new VoxelBuilder();
+    // Top
+    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.METAL_SHINY);
+    vb.addBox(1, 5, 1, 14, 5, 14, PALETTE.METAL_DARK); // Underside brace
+    
+    // Smart Legs Logic: Add leg only if no neighbor in that direction
+    // Corners need legs if either adjacent side is open? 
+    // Standard logic: 4 corners. 
+    // NW Leg (x=1, z=1) - Remove if N or W has neighbor?
+    // Actually, tables usually fuse. If there is a table to the West, we don't need the West legs? 
+    // Or rather, shared legs?
+    // Let's simply: Only place a leg if NO neighbor is present on the two adjacent sides.
+    
+    const addLeg = (x, z) => vb.addBox(x, 0, z, x+1, 14, z+1, PALETTE.METAL_LIGHT);
+    
+    // NW Corner (1,1)
+    if(!neighbors.w && !neighbors.n) addLeg(1, 1);
+    
+    // NE Corner (13,1)
+    if(!neighbors.e && !neighbors.n) addLeg(13, 1);
+    
+    // SW Corner (1,13)
+    if(!neighbors.w && !neighbors.s) addLeg(1, 13);
+    
+    // SE Corner (13,13)
+    if(!neighbors.e && !neighbors.s) addLeg(13, 13);
+
+    const mesh = vb.buildMesh();
+    mesh.scale.set(1, GRID_UNIT*1.8 / GRID_UNIT, 1); // Adjust height scalar (1.8 units ~ 0.9 world height)
+    // Wait, normal voxel scale is 1.
+    // GRID_UNIT is 0.5. 
+    // Voxel Size = 0.5/16.
+    // Mesh is 16 voxels high = 0.5 height.
+    // We want 0.9 height. Scale Y by 1.8.
+    mesh.scale.set(1, 1.8, 1);
+    
+    mesh.position.y = (GRID_UNIT * 1.8) / 2;
+    return mesh;
+}
+
 // --- SOURCES ---
 
 export function createIngredientBinMesh(ingredientType) {

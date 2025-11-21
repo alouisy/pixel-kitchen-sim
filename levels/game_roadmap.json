@@ -1,7 +1,12 @@
 [
-    {
-        "levelId": 1,
-        "name": "Fry Cook Training",
-        "filename": "level_1.json"
-    }
+  {
+    "levelId": 1,
+    "name": "Fry Cook Training",
+    "filename": "level_1.json"
+  },
+  {
+    "levelId": 2,
+    "name": "Burger & Fries",
+    "filename": "level_2.json"
+  }
 ]

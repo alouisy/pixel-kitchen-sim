@@ -843,3 +843,7 @@ canvas {
     margin-top: 10px;
     text-align: center;
 }
+
+/* New Editor Handle Cursor */
+body.resizing-n-s { cursor: ns-resize; }
+body.resizing-e-w { cursor: ew-resize; }

@@ -7,7 +7,7 @@ import {
     createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, createStoveMesh, createSinkMesh, 
     createIngredientBinMesh, createPlateStackMesh, createCupStackMesh, createBowlStackMesh,
     createToasterMesh, createMixerMesh, createBlenderMesh, createDoughPressMesh, createPizzaOvenMesh,
-    createItemMesh
+    createItemMesh, createTableMesh
 } from './voxelBuilder.js';
 import { getTrans } from './i18nData.js';
 import { createItem } from './items.js';
@@ -20,6 +20,85 @@ let currentLabelVisibility = true;
 
 export function setWorldLanguage(lang) {
     currentLang = lang;
+}
+
+export function refreshSmartObjects(scene) {
+    // Updates the mesh of smart objects (Tables) based on their neighbors
+    scene.traverse(c => {
+        if (c.userData && (c.userData.stationType === STATION_TYPES.TABLE)) {
+            updateSmartObjectMesh(c, scene);
+        }
+    });
+}
+
+function updateSmartObjectMesh(object, scene) {
+    const type = object.userData.stationType;
+    const x = object.position.x;
+    const z = object.position.z;
+    const w = GRID_UNIT; 
+    
+    // Check neighbors in the scene
+    const checkNeighbor = (dx, dz) => {
+        const targetX = x + dx;
+        const targetZ = z + dz;
+        let found = false;
+        
+        // Iterate scene children manually to be robust in editor
+        for(let i=0; i<scene.children.length; i++) {
+            const c = scene.children[i];
+            if (c !== object && c.userData && c.userData.stationType === type) {
+                if (Math.abs(c.position.x - targetX) < 0.1 && Math.abs(c.position.z - targetZ) < 0.1) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        return found;
+    };
+
+    const neighbors = {
+        n: checkNeighbor(0, -w),
+        s: checkNeighbor(0, w),
+        e: checkNeighbor(w, 0),
+        w: checkNeighbor(-w, 0)
+    };
+
+    // Remove old visual child
+    const oldVisual = object.children.find(c => c.type === 'Mesh' || c.type === 'Group');
+    if (oldVisual) {
+        object.remove(oldVisual);
+        if(oldVisual.geometry) oldVisual.geometry.dispose();
+        if(oldVisual.material) {
+            if(Array.isArray(oldVisual.material)) oldVisual.material.forEach(m=>m.dispose());
+            else oldVisual.material.dispose();
+        }
+    }
+
+    // Create new visual
+    if (type === STATION_TYPES.TABLE) {
+        const visual = createTableMesh(neighbors);
+        object.add(visual);
+    }
+}
+
+export function resizeWall(wallObject, width, depth) {
+    if (wallObject.userData.stationType !== STATION_TYPES.WALL) return;
+
+    const h = 2.5; // Wall height
+    const oldMesh = wallObject.children.find(c => c.isMesh);
+    
+    if (oldMesh) {
+        // Reuse geometry if possible, but easier to recreate box
+        oldMesh.geometry.dispose();
+        oldMesh.geometry = new THREE.BoxGeometry(width, h, depth);
+        // Re-center geometry vertically so origin is bottom
+        oldMesh.position.y = h/2;
+    }
+
+    // Update userData
+    wallObject.userData.size = { width, depth };
+    
+    // Ensure object name reflects resize if it helps debugging, or keep generic
 }
 
 function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
@@ -77,21 +156,6 @@ function createCounterMesh(isServing, isCorner) {
     } else if (isServing) {
         vb.addBox(1, 3, 15, 14, 13, 15, PALETTE.PLASTIC_RED);
     }
-    const mesh = vb.buildMesh();
-    mesh.scale.set(1, MODULE_HEIGHT / GRID_UNIT, 1);
-    mesh.position.y = MODULE_HEIGHT / 2;
-    return mesh;
-}
-
-function createTableMesh(neighbors) {
-    const vb = new VoxelBuilder();
-    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.METAL_SHINY);
-    vb.addBox(1, 5, 1, 14, 5, 14, PALETTE.METAL_DARK);
-    const addLeg = (x, z) => vb.addBox(x, 0, z, x+1, 14, z+1, PALETTE.METAL_LIGHT);
-    if(!neighbors.w && !neighbors.n) addLeg(1, 1);   
-    if(!neighbors.e && !neighbors.n) addLeg(13, 1);  
-    if(!neighbors.w && !neighbors.s) addLeg(1, 13);  
-    if(!neighbors.e && !neighbors.s) addLeg(13, 13); 
     const mesh = vb.buildMesh();
     mesh.scale.set(1, MODULE_HEIGHT / GRID_UNIT, 1);
     mesh.position.y = MODULE_HEIGHT / 2;
