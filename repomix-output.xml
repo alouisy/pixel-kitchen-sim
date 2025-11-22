@@ -32,7 +32,7 @@ The content is organized as follows:
 <notes>
 - Some files may have been excluded based on .gitignore rules and Repomix's configuration
 - Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
-- Only files matching these patterns are included: levels, levels/game_roadmap.json, levels/level_1.json, levels/level_2.json, src, src/audioManager.js, src/constants.js, src/controls.js, src/editor.js, src/gameData.js, src/grid.js, src/i18nData.js, src/interaction.js, src/items.js, src/LevelManager.js, src/main.js, src/menuManager.js, src/player.js, src/saveLoad.js, src/saveManager.js, src/setup.js, src/ui.js, src/voxelBuilder.js, src/world.js, vendor, index.html, levels.json, style.css
+- Only files matching these patterns are included: docs/DOCS_GAMEPLAY_LOOP.md, docs/DOCS_INTERACTIONS_COOKING.md, docs/DOCS_LEVELS_EDITOR.md, docs/GAME_SYSTEM_DESIGN.md, docs/REFACTOR_MASTER_PLAN.md, levels, levels/game_roadmap.json, levels/level_1.json, levels/level_2.json, models, src, index.html, levels.json, style.css
 - Files matching patterns in .gitignore are excluded
 - Files matching default ignore patterns are excluded
 - Files are sorted by Git change count (files with more changes are at the bottom)
@@ -41,6 +41,12 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+docs/
+  DOCS_GAMEPLAY_LOOP.md
+  DOCS_INTERACTIONS_COOKING.md
+  DOCS_LEVELS_EDITOR.md
+  GAME_SYSTEM_DESIGN.md
+  REFACTOR_MASTER_PLAN.md
 levels/
   game_roadmap.json
   level_1.json
@@ -72,6 +78,808 @@ style.css
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="docs/DOCS_GAMEPLAY_LOOP.md">
+# Gameplay Loop & Progression
+
+## 1. The Core Loop
+The moment-to-moment experience follows a strict cycle: **Receive Order → Prepare → Cook → Plate → Serve**.
+
+### 1.1 The Order System (`LevelManager.js`)
+*   **Generation:** Orders are generated automatically based on `newOrderDelay`.
+*   **Capacity:** A level has a `maxActiveOrders` limit. No new orders spawn if this limit is reached.
+*   **Life Cycle:**
+    1.  Order appears in UI with a countdown timer.
+    2.  **Timer Green:** >50% time remaining.
+    3.  **Timer Yellow:** >25% time remaining.
+    4.  **Timer Red:** <25% time remaining (Critical State).
+    5.  **Failure:** If timer hits 0, the order fails, and a score penalty is applied.
+
+### 1.2 The Chef (Player)
+*   **Perspective:** First-person.
+*   **Movement:** WASD + Mouse Look (Pointer Lock).
+*   **Capacity:** The player can hold exactly **one** object at a time.
+*   **Actions:**
+    *   `Pick Up`: Grab item from counter/station.
+    *   `Drop/Place`: Put item onto a valid surface/grid slot.
+    *   `Interact`: Trigger a station (e.g., turn on mixer) or combine items (add tomato to plate).
+    *   `Throw/Drop`: (Safety feature) Force drop item if stuck.
+
+## 2. Scoring & Progression
+
+### 2.1 Scoring Rules
+Scores are calculated per order completion:
+*   **Base Score:** Defined in `RECIPES` (e.g., Fries = 60pts, Burger = 100pts).
+*   **Time Bonus:** Awarded for fast service. `Min(20, RemainingTime / 2)`.
+*   **Penalty:** Deducted if an order times out or if the wrong meal is served (`baseScore / 2` approx).
+
+### 2.2 Star System
+Levels define three score thresholds in JSON:
+*   ★: Minimum required to "Pass" (internally usually tracked, though not strictly enforced for next level unlock in v1).
+*   ★★: Good performance.
+*   ★★★: Mastery.
+
+### 2.3 Unlocking
+*   Levels are linear (1 -> 2 -> 3).
+*   Completing Level N unlocks Level N+1.
+*   Progress is saved via `localStorage` key `pixelKitchenSaveData`.
+
+## 3. Game States
+
+### 3.1 Level Start
+1.  **Briefing:** Player sees the list of recipes available in the level.
+2.  **Initialization:** Kitchen generates. Orders populate immediately up to `maxActiveOrders`.
+
+### 3.2 Win/Loss Conditions
+*   **Win:** The level timer reaches `0:00`. The game ends, and the final score is tallied against Star Thresholds.
+*   **Loss:** There is no "Game Over" state in v1. The player simply gets 0 stars if they perform poorly, but the level always runs to completion of the timer.
+
+### 3.3 Pause
+Pressing `Esc` or `Start` (Gamepad) pauses the game loop. The timer stops, and input is blocked until resumed.
+</file>
+
+<file path="docs/DOCS_INTERACTIONS_COOKING.md">
+# Interactions & Cooking Systems
+
+## 1. Interaction Model (`InteractionManager.js`)
+Interaction is determined by a **Raycast** from the center of the camera.
+
+### 1.1 Target Validation
+1.  Raycast detects the first object with `userData`.
+2.  **Distance Check:** Interaction is valid only within `3.0` units.
+3.  **Highlighting:** Valid targets scale up (1.1x) or show a green grid cursor (`slotHighlight`) on surfaces.
+
+### 1.2 Interaction Matrix
+The result of an interaction depends on what the player is holding (Hand) and what they are looking at (Target).
+
+| Hand State | Target State | Action | Result |
+| :--- | :--- | :--- | :--- |
+| **Empty** | **Item** | Pick Up | Item attaches to Player View. |
+| **Empty** | **Station (Occupied)** | Pick Up | Player picks up the item *on* the station. |
+| **Empty** | **Source (Bin)** | Spawn | Player receives a new raw ingredient (e.g., Potato). |
+| **Item** | **Surface (Empty)** | Place | Item is placed on the grid. |
+| **Item** | **Surface (Occupied)** | **Fail** | "Slot Occupied" message. |
+| **Ingredient** | **Processor (Empty)** | Process | Item placed on processor (e.g., Potato on Board). |
+| **Ingredient** | **Container (Plate)** | **Combine** | Ingredient is added to the Plate/Bowl/Cup. |
+| **Container** | **Ingredient** | **Combine** | Ingredient is picked up into the Container. |
+| **Meal** | **Serving Window** | Serve | Order is checked. If correct, score goes up. |
+
+---
+
+## 2. Item Architecture (`items.js`, `constants.js`)
+
+### 2.1 Item Types
+1.  **Ingredient:** Raw or processed food (e.g., `potato`, `chopped_tomato`, `patty`).
+2.  **Container:** Holds ingredients (e.g., `plate`, `bowl`, `cup`).
+    *   *Logic:* Contains an array `userData.contents`.
+3.  **Meal:** A container that matches a specific Recipe definition.
+
+### 2.2 State Transitions
+Ingredients change names/states via Processors.
+*   *Example:* `potato` (Raw) -> [Cutting Board] -> `raw_fries` (Chopped) -> [Fryer] -> `cooked_fries` (Cooked).
+
+---
+
+## 3. Station Mechanics
+
+### 3.1 Processors (`Station Type: processor`)
+Processors transform items based on `config.processes` and `config.result`.
+
+*   **Instant Processors (e.g., Cutting Board):**
+    *   Action: Place valid item.
+    *   Effect: Immediate transformation (Mesh swap).
+    *   Audio: `chop`.
+
+*   **Timed Processors (e.g., Fryer, Stove):**
+    *   Action: Place valid item.
+    *   Effect: Item waits for `processingTime` (ms).
+    *   Result: Transforms after timeout.
+    *   Audio: `fry` (loop) -> `ding` (complete).
+
+### 3.2 Sources (`Station Type: ingredient_source`)
+Infinite dispensers. Interacting spawns a new instance of the defined item into the player's hand.
+
+### 3.3 Assembly (Containers)
+*   Items are combined physically by parenting the ingredient mesh to the container mesh.
+*   **Validation:** Every time an ingredient is added, `checkPlateCompletion()` runs against `RECIPES`.
+*   **Visuals:** Added ingredients are randomized slightly in rotation/position on the plate to look organic.
+
+---
+
+## 4. Recipes (`gameData.js`)
+Recipes determine if a collection of ingredients on a plate constitutes a valid meal.
+
+*   **Structure:**
+    ```javascript
+    'Burger': {
+        ingredients: ['bun', 'cooked_patty'], // Must match exactly (sorted)
+        timeLimit: 100,
+        baseScore: 100
+    }
+    ```
+*   **Matching:** The game sorts the contents of a plate alphabetically and compares them to the sorted ingredient lists of all known recipes.
+</file>
+
+<file path="docs/DOCS_LEVELS_EDITOR.md">
+# Level Design & Editor Guide
+
+## 1. Level Data Structure
+Levels are stored as `.json` files in the `levels/` directory.
+
+### 1.1 JSON Schema
+```json
+{
+  "levelId": 1,
+  "name": "Fry Cook Training",
+  "duration": 180,           // Seconds
+  "starThresholds": [300, 500, 700], // 1, 2, 3 Stars
+  "availableMeals": ["French Fries"], // Must match keys in RECIPES
+  "maxActiveOrders": 2,
+  "newOrderDelay": 15,
+  "layout": [ ... ]          // Array of Objects
+}
+```
+
+### 1.2 Layout Objects
+Every object in the scene is defined here.
+*   **Coordinates:** `x, z` (Float). 1 Unit = 2 Grid Blocks.
+*   **Rotation:** Radians (Y-axis).
+*   **Types:** `wall`, `counter`, `processor`, `ingredient_source`, `serving`, `trash`, `table`.
+
+**Example Entry:**
+```json
+{
+  "name": "Fryer1",
+  "type": "processor",
+  "position": { "x": -1, "z": -3.5 },
+  "config": {
+    "processes": ["raw_fries"],
+    "result": { "raw_fries": "cooked_fries" },
+    "processingTime": 3000
+  }
+}
+```
+
+---
+
+## 2. In-Game Editor (`editor.js`)
+The game includes a WYSIWYG editor accessible from the Main Menu.
+
+### 2.1 Navigation
+*   **Pan:** Right-Click Drag.
+*   **Zoom:** Scroll Wheel.
+*   **Select:** Left-Click on object.
+
+### 2.2 Placement & Manipulation
+*   **Library:** Bottom panel contains all available assets. Click to select a ghost template.
+*   **Snapping:** Objects snap to `0.5` grid units automatically.
+*   **Stacking:** Objects verify what is beneath them. Stations will automatically snap to the top of Counters (`y=0.9`), or the floor (`y=0`) if no counter exists.
+*   **Rotation:** Press `R` to rotate 90 degrees.
+*   **Clone:** Press `C` to duplicate selected.
+*   **Delete:** Press `Del` to remove.
+
+### 2.3 Intelligent Features
+*   **Wall Resizing:** Select a wall to see drag handles (Blue dots). Dragging resizes the wall dynamically.
+*   **Counter Tiling:** Dragging handles on a Counter/Table creates *copies* of the object in that direction (Arraying), rather than stretching the mesh.
+*   **Smart Meshing:** Placing Tables next to each other automatically updates their geometry (legs disappear) to form a cohesive surface.
+
+### 2.4 Configuration
+When a generic station (like a Processor or Source) is selected, the **Inspector Panel** (Right) allows editing its JSON `config` property directly. This allows creating custom stations (e.g., a "Magic Box" that turns potatoes into burgers) without code changes.
+
+### 2.5 Exporting
+1.  Click **Save JSON**.
+2.  The browser downloads a `.json` file.
+3.  **Manual Step:** This file must be moved into the project's `levels/` folder and referenced in `levels/game_roadmap.json` to be playable in the main game loop.
+</file>
+
+<file path="docs/GAME_SYSTEM_DESIGN.md">
+# Game System Design & Architecture (v1.0)
+
+## 1. Overview
+**Pixel Kitchen Simulator** is a first-person, time-management cooking simulation built with **Three.js**. The player acts as a chef in a voxel-based kitchen, receiving orders, preparing ingredients through various stations (chopping, frying, grilling), assembling meals, and serving them within a time limit.
+
+This document serves as the authoritative **Game Bible**. It outlines the high-level architecture and references specific subsystem documentation.
+
+## 2. Documentation Index
+For detailed implementation specifics, refer to the following sub-documents:
+
+*   **[DOCS_GAMEPLAY_LOOP.md](./DOCS_GAMEPLAY_LOOP.md)**  
+    *Covers the Order System, Scoring, Win/Loss conditions, Player Controls, and the core Game Loop.*
+*   **[DOCS_INTERACTIONS_COOKING.md](./DOCS_INTERACTIONS_COOKING.md)**  
+    *Covers the Interaction Manager, raycasting logic, ingredient states, recipe validation, and station mechanics.*
+*   **[DOCS_LEVELS_EDITOR.md](./DOCS_LEVELS_EDITOR.md)**  
+    *Covers the JSON level format, the in-game Level Editor tools, grid systems, and world generation.*
+
+---
+
+## 3. Technical Architecture
+
+### 3.1 Core Technology
+*   **Engine:** Three.js (Rendering, Scenegraph, Math).
+*   **Physics/Movement:** Custom implementation utilizing `PointerLockControls` and basic AABB collision logic via `GridSystem`.
+*   **State Management:** Vanilla JS Modules managing singleton-like instances (`LevelManager`, `InteractionManager`, `UIManager`).
+*   **Persistence:** `localStorage` via `SaveManager`.
+
+### 3.2 System Hierarchy
+The application entry point is `main.js`, which orchestrates the following subsystems:
+
+1.  **World & Rendering (`setup.js`, `world.js`, `voxelBuilder.js`)**
+    *   Sets up the scene, lighting, and camera.
+    *   Generates procedural voxel meshes for items and stations.
+    *   Constructs the level geometry based on JSON data.
+
+2.  **Game Logic (`LevelManager.js`, `gameData.js`)**
+    *   Manages the session timer and active orders.
+    *   Validates served meals against active orders.
+    *   Calculates scores and star ratings.
+
+3.  **Input & Interaction (`controls.js`, `interaction.js`, `player.js`)**
+    *   Handles First-Person movement and view.
+    *   Performs raycasting to detect interactable objects.
+    *   Manages the "Hand" state (Holding items vs. Empty hands).
+
+4.  **UI & Menus (`ui.js`, `menuManager.js`)**
+    *   Draws the HUD (Orders, Score, Crosshair).
+    *   Manages DOM overlays (Main Menu, Settings, Level Select).
+
+### 3.3 Game State Machine
+The game operates on a strict state machine defined in `main.js`:
+*   `LOADING`: Preloading GLTF assets and textures.
+*   `MAIN_MENU`: Entry point.
+*   `LEVEL_SELECT`: Grid view of available levels.
+*   `LEVEL_INSTRUCTIONS`: Recipe briefing before start.
+*   `GAME_RUNNING`: The core simulation loop.
+*   `PAUSED`: Overlay menu stopping the delta time updates.
+*   `LEVEL_END`: Score summary and "Next Level" logic.
+*   `EDITOR`: The creative mode for building layouts.
+
+### 3.4 Data Flow
+1.  **Level Load:** `LevelManager` fetches JSON -> `world.js` builds meshes -> `InteractionManager` indexes interactables.
+2.  **Update Loop:** `main.js` calls `LevelManager.update(delta)` (timers) and `Player.update(delta)`.
+3.  **Interaction:** Input -> `InteractionManager` -> Modify State (e.g., chop vegetable) -> Update Visuals -> Check Recipe.
+
+---
+
+## 4. Global Standards
+*   **Grid System:** The world is divided into `0.5` unit blocks (`GRID_UNIT`).
+*   **Y-Axis:** Y is Up. Floor is `0`. Counter height is `0.9`. Player height is `1.8`.
+*   **UserData:** Most logic relies on `Mesh.userData` to store state (e.g., `userData.type = 'ingredient'`, `userData.state = 'cooked'`).
+</file>
+
+<file path="docs/REFACTOR_MASTER_PLAN.md">
+This document is the **Technical Master Plan** for the architectural refactor of "Pixel Kitchen Simulator." It serves as the authoritative guide for the development team.
+
+**Version:** 2.1 (Asset Pipeline Update)
+**Target:** Production-Ready, Scalable WebGL Architecture
+**Author Authority:** Senior Systems Architect
+
+---
+
+# REFACTOR_MASTER_PLAN.md
+
+## 1. Executive Summary
+The objective is to transition from a prototype-grade Vanilla JS implementation to a **Declarative, Component-Based Architecture** using the "Golden Stack" of WebGL.
+
+**Key Architectural Shifts:**
+1.  **Rendering:** From imperative `new Mesh()` calls to declarative **React Three Fiber (R3F)** components.
+2.  **Assets:** From hardcoded JS voxel arrays to an external **GLB Asset Pipeline** (MagicaVoxel → GLB → React Component).
+3.  **Performance:** From individual draw calls to **Hardware Instancing** for static geometry.
+4.  **Logic:** From array iteration to **O(1) Hash Maps** for recipe validation.
+
+---
+
+## 2. Technology Stack
+
+| Layer | Technology | Rationale |
+| :--- | :--- | :--- |
+| **Core** | **Vite + React 18** | Fast HMR, ecosystem support, component lifecycle. |
+| **Language** | **TypeScript 5.x** | Strict typing for entities, recipes, and state. |
+| **3D Engine** | **React Three Fiber (R3F)** | Declarative Three.js. Handles resize, loop, and disposal. |
+| **Assets** | **GLB + gltfjsx** | Industry standard. Compressed binary assets, auto-generated types. |
+| **State** | **Zustand** | Transient state management (updates without re-renders). |
+| **Physics** | **Simple AABB (Custom)** | Grid-based logic is sufficient and faster than a physics engine. |
+| **Art Tool** | **MagicaVoxel** | For creating `.vox` source files (Export to GLB). |
+
+---
+
+## 3. Directory Structure
+
+```text
+/public
+  /models           # Optimized GLB files (Draco compressed)
+/src
+  /assets           # Static Textures, Icons
+  /config           # Game Tuning values (GameData)
+  /types            # Global TypeScript Interfaces (Domain Driven)
+  /store            # Zustand Stores
+    useGameStore.ts # Reactive State (Score, Menu)
+    useRefs.ts      # Transient State (Refs to objects)
+  /systems          # Pure Logic Functions
+    RecipeSystem.ts # Hashing Logic
+    Interaction.ts  # Strategy Pattern Handlers
+  /components
+    /Core           # Canvas, Lights, PlayerController
+    /World          # Scene Composition
+      LevelGeometry.tsx # Handles InstancedMesh for Walls/Floors
+    /Models         # Auto-generated by gltfjsx
+      Burger.tsx
+      Stove.tsx
+    /UI             # HTML Overlays (HUD, Menus)
+  /hooks            # Custom R3F Hooks
+```
+
+---
+
+## 4. Phase 1: The Asset Pipeline (The "Golden Standard")
+**Goal:** Decouple code from art. remove `VoxelBuilder.js`.
+
+### 4.1 The Workflow
+1.  **Creation:** Artist creates assets in **MagicaVoxel**.
+2.  **Export:** Export to **GLB**.
+3.  **Optimization & Code Gen:** Developer runs `npx gltfjsx public/models/item.glb --transform --types`.
+4.  **Result:** A TypeScript React Component (`src/components/Models/Item.tsx`) that loads the compressed asset from the CDN/Public folder.
+
+### 4.2 Component Strategy
+*   **Dynamic Items (Food, Tools):** Use the generated React Components directly. They allow for independent movement, animation, and parent changing.
+*   **Static World (Walls, Floors):** Do **not** render 1000 `<Wall />` components.
+    *   Extract the geometry from the GLB hook: `const { nodes } = useGLTF('/wall.glb')`.
+    *   Feed this geometry into `<Instances>` from `@react-three/drei`.
+
+---
+
+## 5. Phase 2: Domain Modeling (TypeScript)
+
+### 5.1 Interfaces (`/src/types/GameTypes.ts`)
+*   **`ItemType`**: Union of keys mapping to GLB files (e.g., `'burger_bun' | 'tomato'`).
+*   **`EntityId`**: String (UUID).
+*   **`LevelSchema`**: Strict typing for JSON level files.
+*   **`RecipeHash`**: Number (Prime Product).
+
+---
+
+## 6. Phase 3: The Rendering Core
+
+### 6.1 Level Geometry (`/components/World/LevelGeometry.tsx`)
+This component receives the JSON layout.
+*   Filters layout for static types (Walls, Floor, Counters).
+*   Uses `useMemo` to calculate transformation matrices.
+*   Renders `<InstancedMesh>` nodes.
+*   **Benefit:** 1 Draw call per asset type, regardless of level size.
+
+### 6.2 Dynamic Entities
+*   Rendered as standard React components based on the `useGameStore` entity list.
+*   Managed by R3F for automatic disposal (preventing memory leaks).
+
+---
+
+## 7. Phase 4: Logic Systems (The "Brain")
+
+### 7.1 State Management (`/store/useGameStore.ts`)
+Split state to prevent React performance bottlenecks.
+*   **Reactive (Zustand):** Score, Current Level, Inventory UI. (Triggers DOM updates).
+*   **Transient (Refs):** Player Position, Camera Rotation. (Accessed directly in `useFrame` loop).
+
+### 7.2 The Recipe System (Optimization: O(1))
+Replace array iteration with **Prime Number Hashing**.
+*   **Concept:** Every ingredient has a unique prime number ID.
+*   **Calculation:** Plate Content Value = Product of Ingredient Primes.
+    *   *Example:* Bun(2) * Patty(3) * Cheese(5) = 30.
+*   **Validation:** `RECIPES[30] = 'Cheeseburger'`.
+*   **Benefit:** Constant time lookup. No sorting arrays. Instant validation.
+
+### 7.3 Interaction System (Strategy Pattern)
+*   **Strategies:** `PickupStrategy`, `PlaceStrategy`, `CombineStrategy`, `ProcessStrategy`.
+*   **Logic:**
+    ```typescript
+    // Inside useInteraction hook
+    const handler = strategies.find(s => s.canExecute(heldItem, target));
+    handler?.execute();
+    ```
+
+---
+
+## 8. Phase 5: The Player & Controls
+
+### 8.1 Player Controller
+*   Use `@react-three/drei` `KeyboardControls` for input mapping.
+*   **Physics:** Simple AABB collision against the Grid Map (calculated from Level JSON).
+*   **Interaction Raycaster:**
+    *   Only active when `GameState === 'PLAYING'`.
+    *   Throttled: Run logic every frame, but only update React State if the hit target *changes* (deduplication).
+
+---
+
+## 9. Performance Mandates (Strict)
+
+1.  **Assets:** All GLBs must be processed with `--transform` (Draco Compression).
+2.  **Instancing:** Any static object appearing >3 times must be Instanced.
+3.  **Loops:** No `new` keyword allocations inside `useFrame` (Vector3, Quaternion, etc., must be reused).
+4.  **Re-renders:** The HUD must pull specific state slices (e.g., `useGameStore(state => state.score)`), never the whole state object.
+
+---
+
+## 10. Migration Checklist
+
+1.  [ ] **Setup:** Init Vite + React + TS + R3F.
+2.  [ ] **Assets:**
+    *   Create/Source Voxel models for all items.
+    *   Run `gltfjsx` pipeline on all models.
+3.  [ ] **Core:** Implement `LevelGeometry` with Instancing.
+4.  [ ] **Logic:** Port Recipe system to Prime Hashing.
+5.  [ ] **Store:** Build Zustand store for Game State.
+6.  [ ] **Player:** Implement First Person Camera & Raycaster.
+7.  [ ] **Interaction:** Implement Strategy Pattern handlers.
+8.  [ ] **UI:** Rebuild HUD in React (HTML Overlay).
+9.  [ ] **Editor:** Port Editor to use R3F `TransformControls` (Gizmos).
+</file>
+
+<file path="levels/level_1.json">
+{
+    "levelId": 1,
+    "name": "Fry Cook Training",
+    "duration": 180,
+    "starThresholds": [
+        300,
+        500,
+        700
+    ],
+    "availableMeals": [
+        "French Fries"
+    ],
+    "maxActiveOrders": 2,
+    "newOrderDelay": 15,
+    "layout": [
+        {
+            "name": "Wall_Back",
+            "type": "wall",
+            "position": { "x": 0, "z": -4 },
+            "size": { "width": 8.5, "depth": 0.5 }
+        },
+        {
+            "name": "Wall_Front_L",
+            "type": "wall",
+            "position": { "x": -2.5, "z": 4 },
+            "size": { "width": 3.5, "depth": 0.5 }
+        },
+        {
+            "name": "Wall_Front_R",
+            "type": "wall",
+            "position": { "x": 2.5, "z": 4 },
+            "size": { "width": 3.5, "depth": 0.5 }
+        },
+        {
+            "name": "Wall_Left",
+            "type": "wall",
+            "position": { "x": -4, "z": 0 },
+            "size": { "width": 0.5, "depth": 7.5 }
+        },
+        {
+            "name": "Wall_Right",
+            "type": "wall",
+            "position": { "x": 4, "z": 0 },
+            "size": { "width": 0.5, "depth": 7.5 }
+        },
+        {
+            "name": "C_Serve_1",
+            "type": "serving",
+            "position": { "x": -0.5, "z": 4 },
+            "rotation": -3.14
+        },
+        {
+            "name": "C_Serve_2",
+            "type": "serving",
+            "position": { "x": 0, "z": 4 },
+            "rotation": -3.14
+        },
+        {
+            "name": "C_Serve_3",
+            "type": "serving",
+            "position": { "x": 0.5, "z": 4 },
+            "rotation": -3.14
+        },
+        {
+            "name": "C_Back_1",
+            "type": "counter",
+            "position": { "x": -3, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_2",
+            "type": "counter",
+            "position": { "x": -2.5, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_3",
+            "type": "counter",
+            "position": { "x": -1, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_4",
+            "type": "counter",
+            "position": { "x": 1, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_5",
+            "type": "counter",
+            "position": { "x": 2.5, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_6",
+            "type": "counter",
+            "position": { "x": 3, "z": -3.5 }
+        },
+        {
+            "name": "C_Side_L1",
+            "type": "counter",
+            "position": { "x": -3.5, "z": -3 },
+            "rotation": -4.71
+        },
+        {
+            "name": "C_Side_L2",
+            "type": "counter",
+            "position": { "x": -3.5, "z": -2.5 },
+            "rotation": -4.71
+        },
+        {
+            "name": "C_Side_R1",
+            "type": "counter",
+            "position": { "x": 3.5, "z": -3 },
+            "rotation": -1.57
+        },
+        {
+            "name": "C_Side_R2",
+            "type": "counter",
+            "position": { "x": 3.5, "z": -2.5 },
+            "rotation": -1.57
+        },
+        {
+            "name": "CuttingBoard1",
+            "type": "processor",
+            "position": { "x": -2.5, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["potato"],
+                "result": { "potato": "raw_fries" }
+            }
+        },
+        {
+            "name": "Fryer1",
+            "type": "processor",
+            "position": { "x": -1, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["raw_fries"],
+                "result": { "raw_fries": "cooked_fries" },
+                "processingTime": 3000
+            }
+        },
+        {
+            "name": "Trash",
+            "type": "trash",
+            "position": { "x": 3.5, "z": -2 },
+            "rotation": -1.57,
+            "size": { "width": 0.5, "depth": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base1",
+            "type": "table",
+            "position": { "x": -1.5, "z": -0.5 }
+        },
+        {
+            "name": "T_Assem_Base2",
+            "type": "table",
+            "position": { "x": -1, "z": -0.5 }
+        },
+        {
+            "name": "T_Assem_Base3",
+            "type": "table",
+            "position": { "x": -0.5, "z": -0.5 }
+        },
+        {
+            "name": "Counter (Corner)",
+            "type": "counter",
+            "position": { "x": -3.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Corner)",
+            "type": "counter",
+            "position": { "x": 3.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": -2, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": -1.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": -0.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 0, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 0.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 1.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 2, "z": -3.5 }
+        },
+        {
+            "name": "T_Assem_Base7",
+            "type": "table",
+            "position": { "x": 0.5, "z": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base8",
+            "type": "table",
+            "position": { "x": 1, "z": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base9",
+            "type": "table",
+            "position": { "x": 1.5, "z": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base10",
+            "type": "table",
+            "position": { "x": 0.5, "z": 1 }
+        },
+        {
+            "name": "T_Assem_Base11",
+            "type": "table",
+            "position": { "x": 1, "z": 1 }
+        },
+        {
+            "name": "T_Assem_Base12",
+            "type": "table",
+            "position": { "x": 1.5, "z": 1 }
+        },
+        {
+            "name": "CuttingBoard2",
+            "type": "processor",
+            "position": { "x": -3.5, "z": -2.5 },
+            "rotation": -11,
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["potato"],
+                "result": { "potato": "raw_fries" }
+            }
+        },
+        {
+            "name": "Fryer2",
+            "type": "processor",
+            "position": { "x": -0.5, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["raw_fries"],
+                "result": { "raw_fries": "cooked_fries" },
+                "processingTime": 3000
+            }
+        },
+        {
+            "name": "TrashBin2",
+            "type": "trash",
+            "position": { "x": -3.5, "z": -2 },
+            "rotation": -4.71,
+            "size": { "width": 0.5, "depth": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base4",
+            "type": "table",
+            "position": { "x": -1.5, "z": -1 }
+        },
+        {
+            "name": "T_Assem_Base5",
+            "type": "table",
+            "position": { "x": -1, "z": -1 }
+        },
+        {
+            "name": "T_Assem_Base6",
+            "type": "table",
+            "position": { "x": -0.5, "z": -1 }
+        },
+        {
+            "name": "PotatoBin_1",
+            "type": "ingredient_source",
+            "position": { "x": -3.5, "z": -3 },
+            "rotation": -4.71,
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "ingredient": "potato" }
+        },
+        {
+            "name": "PotatoBin_2",
+            "type": "ingredient_source",
+            "position": { "x": -3, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "ingredient": "potato" }
+        },
+        {
+            "name": "PlateStack",
+            "type": "item_source",
+            "position": { "x": 3.5, "z": -3 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": -1.5, "z": -1 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": -1, "z": -1 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": -0.5, "z": -1 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": 0.5, "z": 0.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": 1, "z": 0.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": 1.5, "z": 0.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        }
+    ]
+}
+</file>
 
 <file path="levels/level_2.json">
 {
@@ -1089,369 +1897,6 @@ This section contains the contents of the repository's files.
 }
 </file>
 
-<file path="levels/game_roadmap.json">
-[
-  {
-    "levelId": 1,
-    "name": "Fry Cook Training",
-    "filename": "level_1.json"
-  },
-  {
-    "levelId": 2,
-    "name": "Burger & Fries",
-    "filename": "level_2.json"
-  }
-]
-</file>
-
-<file path="levels/level_1.json">
-{
-    "levelId": 1,
-    "name": "Fry Cook Training",
-    "duration": 180,
-    "starThresholds": [
-        300,
-        500,
-        700
-    ],
-    "availableMeals": [
-        "French Fries"
-    ],
-    "maxActiveOrders": 2,
-    "newOrderDelay": 15,
-    "layout": [
-        {
-            "name": "Wall_Back",
-            "type": "wall",
-            "position": { "x": 0, "z": -4 },
-            "size": { "width": 8.5, "depth": 0.5 }
-        },
-        {
-            "name": "Wall_Front_L",
-            "type": "wall",
-            "position": { "x": -2.5, "z": 4 },
-            "size": { "width": 3.5, "depth": 0.5 }
-        },
-        {
-            "name": "Wall_Front_R",
-            "type": "wall",
-            "position": { "x": 2.5, "z": 4 },
-            "size": { "width": 3.5, "depth": 0.5 }
-        },
-        {
-            "name": "Wall_Left",
-            "type": "wall",
-            "position": { "x": -4, "z": 0 },
-            "size": { "width": 0.5, "depth": 7.5 }
-        },
-        {
-            "name": "Wall_Right",
-            "type": "wall",
-            "position": { "x": 4, "z": 0 },
-            "size": { "width": 0.5, "depth": 7.5 }
-        },
-        {
-            "name": "C_Serve_1",
-            "type": "serving",
-            "position": { "x": -0.5, "z": 4 },
-            "rotation": -3.14
-        },
-        {
-            "name": "C_Serve_2",
-            "type": "serving",
-            "position": { "x": 0, "z": 4 },
-            "rotation": -3.14
-        },
-        {
-            "name": "C_Serve_3",
-            "type": "serving",
-            "position": { "x": 0.5, "z": 4 },
-            "rotation": -3.14
-        },
-        {
-            "name": "C_Back_1",
-            "type": "counter",
-            "position": { "x": -3, "z": -3.5 }
-        },
-        {
-            "name": "C_Back_2",
-            "type": "counter",
-            "position": { "x": -2.5, "z": -3.5 }
-        },
-        {
-            "name": "C_Back_3",
-            "type": "counter",
-            "position": { "x": -1, "z": -3.5 }
-        },
-        {
-            "name": "C_Back_4",
-            "type": "counter",
-            "position": { "x": 1, "z": -3.5 }
-        },
-        {
-            "name": "C_Back_5",
-            "type": "counter",
-            "position": { "x": 2.5, "z": -3.5 }
-        },
-        {
-            "name": "C_Back_6",
-            "type": "counter",
-            "position": { "x": 3, "z": -3.5 }
-        },
-        {
-            "name": "C_Side_L1",
-            "type": "counter",
-            "position": { "x": -3.5, "z": -3 },
-            "rotation": -4.71
-        },
-        {
-            "name": "C_Side_L2",
-            "type": "counter",
-            "position": { "x": -3.5, "z": -2.5 },
-            "rotation": -4.71
-        },
-        {
-            "name": "C_Side_R1",
-            "type": "counter",
-            "position": { "x": 3.5, "z": -3 },
-            "rotation": -1.57
-        },
-        {
-            "name": "C_Side_R2",
-            "type": "counter",
-            "position": { "x": 3.5, "z": -2.5 },
-            "rotation": -1.57
-        },
-        {
-            "name": "CuttingBoard1",
-            "type": "processor",
-            "position": { "x": -2.5, "z": -3.5 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": {
-                "processes": ["potato"],
-                "result": { "potato": "raw_fries" }
-            }
-        },
-        {
-            "name": "Fryer1",
-            "type": "processor",
-            "position": { "x": -1, "z": -3.5 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": {
-                "processes": ["raw_fries"],
-                "result": { "raw_fries": "cooked_fries" },
-                "processingTime": 3000
-            }
-        },
-        {
-            "name": "Trash",
-            "type": "trash",
-            "position": { "x": 3.5, "z": -2 },
-            "rotation": -1.57,
-            "size": { "width": 0.5, "depth": 0.5 }
-        },
-        {
-            "name": "T_Assem_Base1",
-            "type": "table",
-            "position": { "x": -1.5, "z": -0.5 }
-        },
-        {
-            "name": "T_Assem_Base2",
-            "type": "table",
-            "position": { "x": -1, "z": -0.5 }
-        },
-        {
-            "name": "T_Assem_Base3",
-            "type": "table",
-            "position": { "x": -0.5, "z": -0.5 }
-        },
-        {
-            "name": "Counter (Corner)",
-            "type": "counter",
-            "position": { "x": -3.5, "z": -3.5 }
-        },
-        {
-            "name": "Counter (Corner)",
-            "type": "counter",
-            "position": { "x": 3.5, "z": -3.5 }
-        },
-        {
-            "name": "Counter (Wood)",
-            "type": "counter",
-            "position": { "x": -2, "z": -3.5 }
-        },
-        {
-            "name": "Counter (Wood)",
-            "type": "counter",
-            "position": { "x": -1.5, "z": -3.5 }
-        },
-        {
-            "name": "Counter (Wood)",
-            "type": "counter",
-            "position": { "x": -0.5, "z": -3.5 }
-        },
-        {
-            "name": "Counter (Wood)",
-            "type": "counter",
-            "position": { "x": 0, "z": -3.5 }
-        },
-        {
-            "name": "Counter (Wood)",
-            "type": "counter",
-            "position": { "x": 0.5, "z": -3.5 }
-        },
-        {
-            "name": "Counter (Wood)",
-            "type": "counter",
-            "position": { "x": 1.5, "z": -3.5 }
-        },
-        {
-            "name": "Counter (Wood)",
-            "type": "counter",
-            "position": { "x": 2, "z": -3.5 }
-        },
-        {
-            "name": "T_Assem_Base7",
-            "type": "table",
-            "position": { "x": 0.5, "z": 0.5 }
-        },
-        {
-            "name": "T_Assem_Base8",
-            "type": "table",
-            "position": { "x": 1, "z": 0.5 }
-        },
-        {
-            "name": "T_Assem_Base9",
-            "type": "table",
-            "position": { "x": 1.5, "z": 0.5 }
-        },
-        {
-            "name": "T_Assem_Base10",
-            "type": "table",
-            "position": { "x": 0.5, "z": 1 }
-        },
-        {
-            "name": "T_Assem_Base11",
-            "type": "table",
-            "position": { "x": 1, "z": 1 }
-        },
-        {
-            "name": "T_Assem_Base12",
-            "type": "table",
-            "position": { "x": 1.5, "z": 1 }
-        },
-        {
-            "name": "CuttingBoard2",
-            "type": "processor",
-            "position": { "x": -3.5, "z": -2.5 },
-            "rotation": -11,
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": {
-                "processes": ["potato"],
-                "result": { "potato": "raw_fries" }
-            }
-        },
-        {
-            "name": "Fryer2",
-            "type": "processor",
-            "position": { "x": -0.5, "z": -3.5 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": {
-                "processes": ["raw_fries"],
-                "result": { "raw_fries": "cooked_fries" },
-                "processingTime": 3000
-            }
-        },
-        {
-            "name": "TrashBin2",
-            "type": "trash",
-            "position": { "x": -3.5, "z": -2 },
-            "rotation": -4.71,
-            "size": { "width": 0.5, "depth": 0.5 }
-        },
-        {
-            "name": "T_Assem_Base4",
-            "type": "table",
-            "position": { "x": -1.5, "z": -1 }
-        },
-        {
-            "name": "T_Assem_Base5",
-            "type": "table",
-            "position": { "x": -1, "z": -1 }
-        },
-        {
-            "name": "T_Assem_Base6",
-            "type": "table",
-            "position": { "x": -0.5, "z": -1 }
-        },
-        {
-            "name": "PotatoBin_1",
-            "type": "ingredient_source",
-            "position": { "x": -3.5, "z": -3 },
-            "rotation": -4.71,
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": { "ingredient": "potato" }
-        },
-        {
-            "name": "PotatoBin_2",
-            "type": "ingredient_source",
-            "position": { "x": -3, "z": -3.5 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": { "ingredient": "potato" }
-        },
-        {
-            "name": "PlateStack",
-            "type": "item_source",
-            "position": { "x": 3.5, "z": -3 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": { "item": "plate" }
-        },
-        {
-            "name": "Plate (Single)",
-            "type": "preplaced_item",
-            "position": { "x": -1.5, "z": -1 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": { "item": "plate" }
-        },
-        {
-            "name": "Plate (Single)",
-            "type": "preplaced_item",
-            "position": { "x": -1, "z": -1 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": { "item": "plate" }
-        },
-        {
-            "name": "Plate (Single)",
-            "type": "preplaced_item",
-            "position": { "x": -0.5, "z": -1 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": { "item": "plate" }
-        },
-        {
-            "name": "Plate (Single)",
-            "type": "preplaced_item",
-            "position": { "x": 0.5, "z": 0.5 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": { "item": "plate" }
-        },
-        {
-            "name": "Plate (Single)",
-            "type": "preplaced_item",
-            "position": { "x": 1, "z": 0.5 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": { "item": "plate" }
-        },
-        {
-            "name": "Plate (Single)",
-            "type": "preplaced_item",
-            "position": { "x": 1.5, "z": 0.5 },
-            "size": { "width": 0.5, "depth": 0.5 },
-            "config": { "item": "plate" }
-        }
-    ]
-}
-</file>
-
 <file path="src/audioManager.js">
 // src/audioManager.js
 
@@ -1570,6 +2015,21 @@ export class AudioManager {
         osc.stop(time + duration);
     }
 }
+</file>
+
+<file path="levels/game_roadmap.json">
+[
+  {
+    "levelId": 1,
+    "name": "Fry Cook Training",
+    "filename": "level_1.json"
+  },
+  {
+    "levelId": 2,
+    "name": "Burger & Fries",
+    "filename": "level_2.json"
+  }
+]
 </file>
 
 <file path="src/grid.js">
@@ -2211,6 +2671,251 @@ export class MenuManager {
 }
 </file>
 
+<file path="src/controls.js">
+// src/controls.js
+import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
+import {
+    GAMEPAD_DEADZONE, GAMEPAD_INTERACT_BUTTON, GAMEPAD_PAUSE_BUTTON,
+    GAMEPAD_LOOK_SENSITIVITY_X, GAMEPAD_LOOK_SENSITIVITY_Y,
+    GAMEPAD_INSTRUCTIONS_BUTTON, KEYBOARD_INSTRUCTIONS_KEY,
+} from './constants.js';
+
+export class PlayerControls {
+    constructor(camera, domElement) {
+        this._pointerLockControls = new PointerLockControls(camera, domElement);
+        this._domElement = domElement;
+
+        // Keyboard states
+        this.kbMovingForward = false;
+        this.kbMovingBackward = false;
+        this.kbMovingLeft = false;
+        this.kbMovingRight = false;
+
+        // Gamepad movement states
+        this.gpMovingForward = false;
+        this.gpMovingBackward = false;
+        this.gpMovingLeft = false;
+        this.gpMovingRight = false;
+
+        this.gamepadConnected = false;
+        this.prevGamepadButtons = [];
+
+        this.interactRequested = false;
+        this.pauseToggleRequested = false;
+        this.instructionToggleRequested = false;
+
+        this.crosshair = document.getElementById('crosshair'); // Keep crosshair reference
+
+        this._addEventListeners();
+    }
+
+    _addEventListeners() {
+        this._pointerLockControls.addEventListener('lock', () => {
+            if (this.crosshair) this.crosshair.style.display = 'block'; // Show crosshair on lock
+        });
+
+        this._pointerLockControls.addEventListener('unlock', () => {
+            if (this.crosshair) this.crosshair.style.display = 'none'; // Hide crosshair on unlock
+            // Reset movement keys on unlock
+            this.kbMovingForward = this.kbMovingBackward = this.kbMovingLeft = this.kbMovingRight = false;
+            this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
+        });
+
+        document.addEventListener('keydown', (event) => this._onKeyDown(event));
+        document.addEventListener('keyup', (event) => this._onKeyUp(event));
+        document.addEventListener('click', () => this._onClick());
+
+        window.addEventListener('gamepadconnected', (event) => {
+            console.log('Gamepad connected:', event.gamepad.id);
+            this.gamepadConnected = true;
+        });
+
+        window.addEventListener('gamepaddisconnected', (event) => {
+            console.log('Gamepad disconnected:', event.gamepad.id);
+            this.gamepadConnected = false;
+            this.prevGamepadButtons = [];
+            this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
+        });
+    }
+
+    handleGamepadInput(gamepad, delta) {
+        const wasConnected = this.gamepadConnected;
+        this.gamepadConnected = !!gamepad;
+
+        if (!gamepad) {
+            if (wasConnected) {
+                this.prevGamepadButtons = [];
+                this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
+            }
+            return;
+        }
+
+        // --- Movement (Left Stick) ---
+        const leftStickX = gamepad.axes[0] ?? 0;
+        const leftStickY = gamepad.axes[1] ?? 0;
+        const moveZ = Math.abs(leftStickY) > GAMEPAD_DEADZONE ? -leftStickY : 0;
+        const moveX = Math.abs(leftStickX) > GAMEPAD_DEADZONE ? leftStickX : 0;
+        this.gpMovingForward = moveZ > 0;
+        this.gpMovingBackward = moveZ < 0;
+        this.gpMovingLeft = moveX < 0;
+        this.gpMovingRight = moveX > 0;
+
+        // --- Button Presses (Edge Detection) ---
+        const currentButtons = gamepad.buttons.map(b => b.pressed);
+        const buttonJustPressed = (index) => currentButtons[index] && !(this.prevGamepadButtons[index] ?? false);
+
+        // --- Request Flags ---
+        // Interaction (Cross/A) - only if pointer locked
+        if (this._pointerLockControls.isLocked && buttonJustPressed(GAMEPAD_INTERACT_BUTTON)) {
+            this.interactRequested = true;
+        }
+        // Pause (Options/Menu)
+        if (buttonJustPressed(GAMEPAD_PAUSE_BUTTON)) {
+            this.pauseToggleRequested = true;
+        }
+        // Instructions (Triangle/Y)
+        if (buttonJustPressed(GAMEPAD_INSTRUCTIONS_BUTTON)) {
+            this.instructionToggleRequested = true;
+        }
+        // Editor Toggle (No standard gamepad button assigned yet)
+
+        // Store current button states for next frame's edge detection
+        this.prevGamepadButtons = currentButtons;
+
+        // --- Right Stick Look (Synthetic Mouse Events) ---
+        if (this._pointerLockControls.isLocked) {
+            const rightStickX = gamepad.axes[2] ?? 0;
+            const rightStickY = gamepad.axes[3] ?? 0;
+            let movementX = 0;
+            let movementY = 0;
+
+            if (Math.abs(rightStickX) > GAMEPAD_DEADZONE) {
+                movementX = rightStickX * GAMEPAD_LOOK_SENSITIVITY_X * delta;
+            }
+            if (Math.abs(rightStickY) > GAMEPAD_DEADZONE) {
+                movementY = rightStickY * GAMEPAD_LOOK_SENSITIVITY_Y * delta;
+            }
+
+            if (movementX !== 0 || movementY !== 0) {
+                const event = new MouseEvent('mousemove', {
+                    movementX: movementX,
+                    movementY: movementY,
+                    bubbles: true,
+                    cancelable: true
+                });
+                this._domElement.dispatchEvent(event);
+            }
+        }
+    }
+
+    _onKeyDown(event) {
+        // Handle non-movement keys first, regardless of lock state
+        if (event.code === 'KeyP') { // Pause
+            this.pauseToggleRequested = true;
+            return;
+        }
+        if (event.code === KEYBOARD_INSTRUCTIONS_KEY) { // Instructions
+            this.instructionToggleRequested = true;
+            return;
+        }
+
+        // Only process movement if pointer is locked
+        if (!this._pointerLockControls.isLocked) return;
+        switch (event.code) {
+            case 'KeyW': case 'ArrowUp': this.kbMovingForward = true; break;
+            case 'KeyA': case 'ArrowLeft': this.kbMovingLeft = true; break;
+            case 'KeyS': case 'ArrowDown': this.kbMovingBackward = true; break;
+            case 'KeyD': case 'ArrowRight': this.kbMovingRight = true; break;
+        }
+    }
+
+    _onKeyUp(event) {
+        // Always reset keys on keyup, regardless of lock state
+        switch (event.code) {
+            case 'KeyW': case 'ArrowUp': this.kbMovingForward = false; break;
+            case 'KeyA': case 'ArrowLeft': this.kbMovingLeft = false; break;
+            case 'KeyS': case 'ArrowDown': this.kbMovingBackward = false; break;
+            case 'KeyD': case 'ArrowRight': this.kbMovingRight = false; break;
+        }
+    }
+
+    _onClick() {
+        // Request interaction only if pointer is locked (GAME_RUNNING state)
+        // Editor clicks are handled differently in main.js
+        if (this._pointerLockControls.isLocked) {
+            this.interactRequested = true;
+        }
+    }
+
+    getMovementInput() {
+        const direction = { x: 0, z: 0 };
+        const forward = this.kbMovingForward || this.gpMovingForward;
+        const backward = this.kbMovingBackward || this.gpMovingBackward;
+        const left = this.kbMovingLeft || this.gpMovingLeft;
+        const right = this.kbMovingRight || this.gpMovingRight;
+
+        if (forward) direction.z -= 1;
+        if (backward) direction.z += 1;
+        if (left) direction.x -= 1;
+        if (right) direction.x += 1;
+
+        // Reset gamepad flags each frame after reading (movement only)
+        this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
+
+        return direction;
+    }
+
+    consumeInteractionRequest() {
+        if (this.interactRequested) {
+            this.interactRequested = false;
+            return true;
+        }
+        return false;
+    }
+
+    consumePauseToggleRequest() {
+        if (this.pauseToggleRequested) {
+            this.pauseToggleRequested = false;
+            return true;
+        }
+        return false;
+    }
+
+    consumeInstructionToggleRequest() {
+        if (this.instructionToggleRequested) {
+            this.instructionToggleRequested = false;
+            return true;
+        }
+        return false;
+    }
+
+    get isLocked() {
+        return this._pointerLockControls.isLocked;
+    }
+
+    get object() {
+        return this._pointerLockControls.getObject();
+    }
+
+    // Explicit lock/unlock methods called by main.js state changes
+    lock() {
+        this._pointerLockControls.lock();
+    }
+
+    unlock() {
+        this._pointerLockControls.unlock();
+    }
+
+    moveForward(distance) {
+        this._pointerLockControls.moveForward(distance);
+    }
+
+    moveRight(distance) {
+        this._pointerLockControls.moveRight(distance);
+    }
+}
+</file>
+
 <file path="src/voxelBuilder.js">
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
@@ -2664,251 +3369,6 @@ export function createItemMesh(type) {
 }
 </file>
 
-<file path="src/controls.js">
-// src/controls.js
-import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
-import {
-    GAMEPAD_DEADZONE, GAMEPAD_INTERACT_BUTTON, GAMEPAD_PAUSE_BUTTON,
-    GAMEPAD_LOOK_SENSITIVITY_X, GAMEPAD_LOOK_SENSITIVITY_Y,
-    GAMEPAD_INSTRUCTIONS_BUTTON, KEYBOARD_INSTRUCTIONS_KEY,
-} from './constants.js';
-
-export class PlayerControls {
-    constructor(camera, domElement) {
-        this._pointerLockControls = new PointerLockControls(camera, domElement);
-        this._domElement = domElement;
-
-        // Keyboard states
-        this.kbMovingForward = false;
-        this.kbMovingBackward = false;
-        this.kbMovingLeft = false;
-        this.kbMovingRight = false;
-
-        // Gamepad movement states
-        this.gpMovingForward = false;
-        this.gpMovingBackward = false;
-        this.gpMovingLeft = false;
-        this.gpMovingRight = false;
-
-        this.gamepadConnected = false;
-        this.prevGamepadButtons = [];
-
-        this.interactRequested = false;
-        this.pauseToggleRequested = false;
-        this.instructionToggleRequested = false;
-
-        this.crosshair = document.getElementById('crosshair'); // Keep crosshair reference
-
-        this._addEventListeners();
-    }
-
-    _addEventListeners() {
-        this._pointerLockControls.addEventListener('lock', () => {
-            if (this.crosshair) this.crosshair.style.display = 'block'; // Show crosshair on lock
-        });
-
-        this._pointerLockControls.addEventListener('unlock', () => {
-            if (this.crosshair) this.crosshair.style.display = 'none'; // Hide crosshair on unlock
-            // Reset movement keys on unlock
-            this.kbMovingForward = this.kbMovingBackward = this.kbMovingLeft = this.kbMovingRight = false;
-            this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
-        });
-
-        document.addEventListener('keydown', (event) => this._onKeyDown(event));
-        document.addEventListener('keyup', (event) => this._onKeyUp(event));
-        document.addEventListener('click', () => this._onClick());
-
-        window.addEventListener('gamepadconnected', (event) => {
-            console.log('Gamepad connected:', event.gamepad.id);
-            this.gamepadConnected = true;
-        });
-
-        window.addEventListener('gamepaddisconnected', (event) => {
-            console.log('Gamepad disconnected:', event.gamepad.id);
-            this.gamepadConnected = false;
-            this.prevGamepadButtons = [];
-            this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
-        });
-    }
-
-    handleGamepadInput(gamepad, delta) {
-        const wasConnected = this.gamepadConnected;
-        this.gamepadConnected = !!gamepad;
-
-        if (!gamepad) {
-            if (wasConnected) {
-                this.prevGamepadButtons = [];
-                this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
-            }
-            return;
-        }
-
-        // --- Movement (Left Stick) ---
-        const leftStickX = gamepad.axes[0] ?? 0;
-        const leftStickY = gamepad.axes[1] ?? 0;
-        const moveZ = Math.abs(leftStickY) > GAMEPAD_DEADZONE ? -leftStickY : 0;
-        const moveX = Math.abs(leftStickX) > GAMEPAD_DEADZONE ? leftStickX : 0;
-        this.gpMovingForward = moveZ > 0;
-        this.gpMovingBackward = moveZ < 0;
-        this.gpMovingLeft = moveX < 0;
-        this.gpMovingRight = moveX > 0;
-
-        // --- Button Presses (Edge Detection) ---
-        const currentButtons = gamepad.buttons.map(b => b.pressed);
-        const buttonJustPressed = (index) => currentButtons[index] && !(this.prevGamepadButtons[index] ?? false);
-
-        // --- Request Flags ---
-        // Interaction (Cross/A) - only if pointer locked
-        if (this._pointerLockControls.isLocked && buttonJustPressed(GAMEPAD_INTERACT_BUTTON)) {
-            this.interactRequested = true;
-        }
-        // Pause (Options/Menu)
-        if (buttonJustPressed(GAMEPAD_PAUSE_BUTTON)) {
-            this.pauseToggleRequested = true;
-        }
-        // Instructions (Triangle/Y)
-        if (buttonJustPressed(GAMEPAD_INSTRUCTIONS_BUTTON)) {
-            this.instructionToggleRequested = true;
-        }
-        // Editor Toggle (No standard gamepad button assigned yet)
-
-        // Store current button states for next frame's edge detection
-        this.prevGamepadButtons = currentButtons;
-
-        // --- Right Stick Look (Synthetic Mouse Events) ---
-        if (this._pointerLockControls.isLocked) {
-            const rightStickX = gamepad.axes[2] ?? 0;
-            const rightStickY = gamepad.axes[3] ?? 0;
-            let movementX = 0;
-            let movementY = 0;
-
-            if (Math.abs(rightStickX) > GAMEPAD_DEADZONE) {
-                movementX = rightStickX * GAMEPAD_LOOK_SENSITIVITY_X * delta;
-            }
-            if (Math.abs(rightStickY) > GAMEPAD_DEADZONE) {
-                movementY = rightStickY * GAMEPAD_LOOK_SENSITIVITY_Y * delta;
-            }
-
-            if (movementX !== 0 || movementY !== 0) {
-                const event = new MouseEvent('mousemove', {
-                    movementX: movementX,
-                    movementY: movementY,
-                    bubbles: true,
-                    cancelable: true
-                });
-                this._domElement.dispatchEvent(event);
-            }
-        }
-    }
-
-    _onKeyDown(event) {
-        // Handle non-movement keys first, regardless of lock state
-        if (event.code === 'KeyP') { // Pause
-            this.pauseToggleRequested = true;
-            return;
-        }
-        if (event.code === KEYBOARD_INSTRUCTIONS_KEY) { // Instructions
-            this.instructionToggleRequested = true;
-            return;
-        }
-
-        // Only process movement if pointer is locked
-        if (!this._pointerLockControls.isLocked) return;
-        switch (event.code) {
-            case 'KeyW': case 'ArrowUp': this.kbMovingForward = true; break;
-            case 'KeyA': case 'ArrowLeft': this.kbMovingLeft = true; break;
-            case 'KeyS': case 'ArrowDown': this.kbMovingBackward = true; break;
-            case 'KeyD': case 'ArrowRight': this.kbMovingRight = true; break;
-        }
-    }
-
-    _onKeyUp(event) {
-        // Always reset keys on keyup, regardless of lock state
-        switch (event.code) {
-            case 'KeyW': case 'ArrowUp': this.kbMovingForward = false; break;
-            case 'KeyA': case 'ArrowLeft': this.kbMovingLeft = false; break;
-            case 'KeyS': case 'ArrowDown': this.kbMovingBackward = false; break;
-            case 'KeyD': case 'ArrowRight': this.kbMovingRight = false; break;
-        }
-    }
-
-    _onClick() {
-        // Request interaction only if pointer is locked (GAME_RUNNING state)
-        // Editor clicks are handled differently in main.js
-        if (this._pointerLockControls.isLocked) {
-            this.interactRequested = true;
-        }
-    }
-
-    getMovementInput() {
-        const direction = { x: 0, z: 0 };
-        const forward = this.kbMovingForward || this.gpMovingForward;
-        const backward = this.kbMovingBackward || this.gpMovingBackward;
-        const left = this.kbMovingLeft || this.gpMovingLeft;
-        const right = this.kbMovingRight || this.gpMovingRight;
-
-        if (forward) direction.z -= 1;
-        if (backward) direction.z += 1;
-        if (left) direction.x -= 1;
-        if (right) direction.x += 1;
-
-        // Reset gamepad flags each frame after reading (movement only)
-        this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
-
-        return direction;
-    }
-
-    consumeInteractionRequest() {
-        if (this.interactRequested) {
-            this.interactRequested = false;
-            return true;
-        }
-        return false;
-    }
-
-    consumePauseToggleRequest() {
-        if (this.pauseToggleRequested) {
-            this.pauseToggleRequested = false;
-            return true;
-        }
-        return false;
-    }
-
-    consumeInstructionToggleRequest() {
-        if (this.instructionToggleRequested) {
-            this.instructionToggleRequested = false;
-            return true;
-        }
-        return false;
-    }
-
-    get isLocked() {
-        return this._pointerLockControls.isLocked;
-    }
-
-    get object() {
-        return this._pointerLockControls.getObject();
-    }
-
-    // Explicit lock/unlock methods called by main.js state changes
-    lock() {
-        this._pointerLockControls.lock();
-    }
-
-    unlock() {
-        this._pointerLockControls.unlock();
-    }
-
-    moveForward(distance) {
-        this._pointerLockControls.moveForward(distance);
-    }
-
-    moveRight(distance) {
-        this._pointerLockControls.moveRight(distance);
-    }
-}
-</file>
-
 <file path="src/player.js">
 // src/player.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
@@ -3031,800 +3491,6 @@ export class Player {
 
     getPosition() { return this.cameraObject.position; }
     setScene(scene) { this.scene = scene; }
-}
-</file>
-
-<file path="src/editor.js">
-// src/editor.js
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT } from './constants.js';
-import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh, resizeWall, refreshSmartObjects } from './world.js';
-import { RECIPES } from './gameData.js';
-
-export class LevelEditor {
-    constructor(camera, renderer, scene, interactionManager, onExit) {
-        this.camera = camera;
-        this.renderer = renderer;
-        this.scene = scene;
-        this.interactionManager = interactionManager;
-        this.onExit = onExit;
-        this.enabled = false;
-        this.raycaster = new THREE.Raycaster();
-        
-        // Loaded Level Metadata
-        this.currentLevelData = {};
-
-        // State
-        this.selectedObject = null;
-        this.ghostObject = null; // Object currently being placed
-        this.isDragging = false;
-        this.placementMode = false; // If true, we are trying to place a new item
-        
-        // Resize/Extend State
-        this.activeHandle = null;
-        this.startDragPos = new THREE.Vector3();
-        this.originalSize = { width: 0, depth: 0 };
-        this.originalPos = new THREE.Vector3();
-        this.extendingGhosts = []; // For counters/tables
-
-        // Ground Plane for Raycasting (Y=0)
-        this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-
-        // Grid Helper (Visible only in Editor)
-        // 8x8 size, 0.5 unit cells = 16 divisions
-        this.gridHelper = new THREE.GridHelper(8, 16, 0xFFD700, 0x444444);
-        this.gridHelper.position.y = 0.01; // Slight offset to avoid z-fighting if floor was visible
-        this.gridHelper.visible = false;
-        this.scene.add(this.gridHelper);
-
-        // Controls
-        this.orbit = new OrbitControls(camera, renderer.domElement);
-        this.orbit.enabled = false;
-        this.orbit.enableDamping = true;
-        this.orbit.dampingFactor = 0.1;
-
-        // Visual Helpers
-        this.selectionBox = new THREE.BoxHelper(new THREE.Mesh(), 0xffff00);
-        this.selectionBox.visible = false;
-        this.scene.add(this.selectionBox);
-
-        // Resize Handles
-        this.handlesGroup = new THREE.Group();
-        this.scene.add(this.handlesGroup);
-        this.handles = {};
-        ['n', 's', 'e', 'w'].forEach(dir => {
-            const g = new THREE.SphereGeometry(0.25, 16, 16);
-            const m = new THREE.MeshBasicMaterial({ color: 0x00FFFF, depthTest: false, transparent: true, opacity: 0.8 });
-            const mesh = new THREE.Mesh(g, m);
-            mesh.userData = { isHandle: true, direction: dir };
-            mesh.renderOrder = 999;
-            mesh.visible = false;
-            this.handlesGroup.add(mesh);
-            this.handles[dir] = mesh;
-        });
-
-
-        // Init UI
-        this.ui = document.getElementById('editor-ui');
-        this.libraryContent = document.getElementById('library-content');
-        this.inspector = document.getElementById('editor-inspector');
-        this.inspectorName = document.getElementById('inspector-name');
-        this.inspectorX = document.getElementById('val-x');
-        this.inspectorZ = document.getElementById('val-z');
-
-        // Meta Modal
-        this.metaModal = document.getElementById('editor-meta-modal');
-
-        this._initUI();
-        this._bindEvents();
-    }
-
-    _initUI() {
-        // Populate Library
-        this._renderLibrary('all');
-
-        // Populate Meals for Meta
-        const mealsSelect = document.getElementById('meta-meals');
-        Object.keys(RECIPES).forEach(r => {
-            const opt = document.createElement('option');
-            opt.value = r;
-            opt.textContent = r;
-            mealsSelect.appendChild(opt);
-        });
-
-        // Bind Tab Switching
-        const tabs = document.querySelectorAll('.tab-btn');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                tabs.forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
-                this._renderLibrary(e.target.dataset.category);
-            });
-        });
-
-        // Bind Inspector Actions
-        document.getElementById('btn-rotate').addEventListener('click', () => this.rotateSelected());
-        document.getElementById('btn-clone').addEventListener('click', () => this.cloneSelected());
-        document.getElementById('btn-delete').addEventListener('click', () => this.deleteSelected());
-        document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLayout());
-        document.getElementById('editor-exit-btn').addEventListener('click', () => {
-            if (this.onExit) this.onExit();
-        });
-
-        // Meta Button
-        document.getElementById('editor-meta-btn').addEventListener('click', () => {
-            this.openMetaModal();
-        });
-        document.getElementById('meta-close-btn').addEventListener('click', () => {
-            this.saveMetaFromModal();
-            this.metaModal.style.display = 'none';
-        });
-
-        // Bind Config Editor
-        this.inspectorConfig = document.getElementById('inspector-config');
-        document.getElementById('btn-save-config').addEventListener('click', () => this.saveConfig());
-    }
-
-    _renderLibrary(category) {
-        this.libraryContent.innerHTML = '';
-        const items = category === 'all' 
-            ? CATALOG_ITEMS 
-            : CATALOG_ITEMS.filter(i => i.category === category);
-
-        items.forEach(item => {
-            const el = document.createElement('div');
-            el.className = 'library-item';
-            
-            // Simple icon selection based on type
-            let icon = '📦';
-            if(item.type.includes('wall')) icon = '🧱';
-            else if(item.type.includes('counter')) icon = '🟫';
-            else if(item.type.includes('processor')) icon = '🍳';
-            else if(item.type.includes('source')) icon = '🧺';
-            else if(item.isServing) icon = '🛎️';
-            else if(item.category === 'Items') icon = '🍽️';
-
-            el.innerHTML = `
-                <div class="library-item-icon">${icon}</div>
-                <div class="library-item-name">${item.name}</div>
-            `;
-            
-            el.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent canvas click
-                this.startPlacement(item);
-            });
-            
-            this.libraryContent.appendChild(el);
-        });
-    }
-
-    _bindEvents() {
-        // Mouse Events
-        this.renderer.domElement.addEventListener('pointerdown', (e) => this.onPointerDown(e));
-        this.renderer.domElement.addEventListener('pointermove', (e) => this.onPointerMove(e));
-        this.renderer.domElement.addEventListener('pointerup', (e) => this.onPointerUp(e));
-        
-        // Keyboard Shortcuts
-        window.addEventListener('keydown', (e) => {
-            if (!this.enabled) return;
-            // Do not trigger shortcuts if user is typing in textarea or inputs
-            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-
-            switch(e.key.toLowerCase()) {
-                case 'escape': 
-                    this.cancelPlacement(); 
-                    this.deselect(); 
-                    break;
-                case 'delete': 
-                case 'backspace':
-                    this.deleteSelected(); 
-                    break;
-                case 'r': 
-                    this.rotateSelected(); 
-                    break;
-                case 'c': 
-                    this.cloneSelected(); 
-                    break;
-                case 't':
-                    this.exportLayout();
-                    break;
-            }
-        });
-    }
-
-    // Called when opening editor for a specific level
-    loadLevel(levelData) {
-        // We store the metadata locally. The 3D objects are already added by main.js using buildKitchen
-        // We just need to sync our internal state.
-        this.currentLevelData = JSON.parse(JSON.stringify(levelData)); // Deep copy
-        document.getElementById('editor-current-level-name').textContent = levelData.name || "Untitled";
-    }
-
-    enable() {
-        this.enabled = true;
-        this.orbit.enabled = true;
-        this.ui.style.display = 'block';
-        
-        // Show Schematic Grid
-        this.gridHelper.visible = true;
-        
-        // Hide textured floor for clean CAD look
-        const gameFloor = getFloorMesh();
-        if(gameFloor) gameFloor.visible = false;
-
-        // Set optimal editor view
-        this.camera.position.set(0, 12, 8);
-        this.camera.lookAt(0, 0, 0);
-        this.orbit.target.set(0,0,0);
-    }
-
-    disable() {
-        this.enabled = false;
-        this.orbit.enabled = false;
-        this.ui.style.display = 'none';
-        this.cancelPlacement();
-        this.deselect();
-
-        // Revert Visuals
-        this.gridHelper.visible = false;
-        const gameFloor = getFloorMesh();
-        if(gameFloor) gameFloor.visible = true;
-    }
-
-    update(delta) {
-        if (!this.enabled) return;
-        this.orbit.update();
-        
-        if (this.selectedObject) {
-            this.selectionBox.update();
-            this._updateInspectorData();
-            this._updateHandles();
-        }
-    }
-
-    // --- Meta Modal ---
-
-    openMetaModal() {
-        this.metaModal.style.display = 'flex';
-        const d = this.currentLevelData;
-        document.getElementById('meta-name').value = d.name || "";
-        document.getElementById('meta-duration').value = d.duration || 180;
-        document.getElementById('meta-delay').value = d.newOrderDelay || 15;
-        document.getElementById('meta-max-orders').value = d.maxActiveOrders || 2;
-        document.getElementById('meta-star1').value = d.starThresholds ? d.starThresholds[0] : 100;
-        document.getElementById('meta-star2').value = d.starThresholds ? d.starThresholds[1] : 200;
-        document.getElementById('meta-star3').value = d.starThresholds ? d.starThresholds[2] : 300;
-        
-        const mealsSelect = document.getElementById('meta-meals');
-        Array.from(mealsSelect.options).forEach(opt => {
-            opt.selected = d.availableMeals ? d.availableMeals.includes(opt.value) : false;
-        });
-    }
-
-    saveMetaFromModal() {
-        const d = this.currentLevelData;
-        d.name = document.getElementById('meta-name').value;
-        d.duration = parseInt(document.getElementById('meta-duration').value);
-        d.newOrderDelay = parseInt(document.getElementById('meta-delay').value);
-        d.maxActiveOrders = parseInt(document.getElementById('meta-max-orders').value);
-        d.starThresholds = [
-            parseInt(document.getElementById('meta-star1').value),
-            parseInt(document.getElementById('meta-star2').value),
-            parseInt(document.getElementById('meta-star3').value),
-        ];
-        
-        const mealsSelect = document.getElementById('meta-meals');
-        d.availableMeals = Array.from(mealsSelect.selectedOptions).map(opt => opt.value);
-
-        document.getElementById('editor-current-level-name').textContent = d.name;
-    }
-
-    // --- Core Logic ---
-
-    startPlacement(template) {
-        this.cancelPlacement(); // Clear existing ghost
-        this.deselect(); // Clear selection
-        
-        this.placementMode = true;
-        this.ghostObject = this._createObjectFromTemplate(template);
-        
-        // Make ghost transparent
-        this.ghostObject.traverse(c => {
-            if (c.isMesh) {
-                c.material = c.material.clone();
-                c.material.transparent = true;
-                c.material.opacity = 0.6;
-                c.material.emissive = new THREE.Color(0x00FF00);
-                c.material.emissiveIntensity = 0.2;
-            }
-        });
-
-        this.scene.add(this.ghostObject);
-    }
-
-    cancelPlacement() {
-        if (this.ghostObject) {
-            this.scene.remove(this.ghostObject);
-            this.ghostObject = null;
-        }
-        this.placementMode = false;
-    }
-
-    confirmPlacement() {
-        if (this.ghostObject) {
-            // Create a real solid instance
-            const template = this.ghostObject.userData.template;
-            const realObject = this._createObjectFromTemplate(template);
-            
-            realObject.position.copy(this.ghostObject.position);
-            realObject.rotation.copy(this.ghostObject.rotation);
-            
-            this.scene.add(realObject);
-            
-            // Auto-fuse visuals
-            refreshSmartObjects(this.scene);
-        }
-    }
-
-    _createObjectFromTemplate(t) {
-        // Map template to world.js creation functions
-        let obj;
-        const fakeColor = t.color || '#FFFFFF';
-        const dummyPos = { x: 0, z: 0 }; // Position set later
-
-        if (t.type === STATION_TYPES.COUNTER || t.type === STATION_TYPES.SERVING) {
-            obj = createCounterPrefab(t.name, fakeColor, t.isServing);
-        } else if (t.type === STATION_TYPES.TABLE) {
-            // Neighbors default to false, will fuse later
-            obj = createTablePrefab(t.name, fakeColor, {n:false, s:false, e:false, w:false});
-        } else {
-            // Generic Station / Wall / Source / Preplaced Item
-            const def = {
-                name: t.name,
-                type: t.type,
-                size: t.size,
-                color: fakeColor,
-                config: t.config,
-                position: dummyPos
-            };
-            obj = createStationPrefab(def);
-        }
-
-        // Store template data for serialization later
-        obj.userData.template = t; 
-        // Y position will be handled by onPointerMove snapping
-        obj.position.y = 0;
-
-        return obj;
-    }
-
-    select(object) {
-        if (this.selectedObject === object) return;
-        this.selectedObject = object;
-        this.selectionBox.setFromObject(object);
-        this.selectionBox.visible = true;
-        
-        // Update UI
-        this.inspector.style.display = 'flex';
-        this.inspectorName.textContent = object.name;
-
-        // Populate Config
-        // Use existing userData.config if set, otherwise fallback to template config
-        const config = object.userData.config || object.userData.template?.config || {};
-        this.inspectorConfig.value = JSON.stringify(config, null, 2);
-        
-        this._updateHandles();
-    }
-
-    deselect() {
-        this.selectedObject = null;
-        this.selectionBox.visible = false;
-        this.inspector.style.display = 'none';
-        this.handlesGroup.visible = false;
-    }
-
-    // --- Manipulation ---
-
-    saveConfig() {
-        if (!this.selectedObject) return;
-        try {
-            const newConfig = JSON.parse(this.inspectorConfig.value);
-            this.selectedObject.userData.config = newConfig;
-            
-            // Visual feedback
-            const btn = document.getElementById('btn-save-config');
-            const originalText = btn.innerText;
-            btn.innerText = "✅ Saved!";
-            setTimeout(() => btn.innerText = originalText, 1000);
-            
-        } catch (e) {
-            alert("Invalid JSON syntax! Check your brackets and quotes.");
-        }
-    }
-
-    rotateSelected() {
-        const target = this.placementMode ? this.ghostObject : this.selectedObject;
-        if (target) {
-            target.rotation.y -= Math.PI / 2;
-            target.updateMatrixWorld();
-            if (this.selectionBox.visible) this.selectionBox.update();
-            // If rotating placed object, refresh visuals
-            if (!this.placementMode) refreshSmartObjects(this.scene);
-        }
-    }
-
-    deleteSelected() {
-        if (this.selectedObject) {
-            this.scene.remove(this.selectedObject);
-            this.deselect();
-            refreshSmartObjects(this.scene);
-        }
-    }
-
-    cloneSelected() {
-        if (this.selectedObject) {
-            const template = this.selectedObject.userData.template || {
-                name: this.selectedObject.name,
-                type: this.selectedObject.userData.stationType || this.selectedObject.userData.type,
-            };
-            
-            if (this.selectedObject.userData.template) {
-                this.startPlacement(this.selectedObject.userData.template);
-            } else {
-                const clone = this.selectedObject.clone();
-                clone.position.x += GRID_UNIT;
-                this.scene.add(clone);
-                this.select(clone);
-                refreshSmartObjects(this.scene);
-            }
-        }
-    }
-
-    _updateInspectorData() {
-        if (this.selectedObject) {
-            this.inspectorX.textContent = this.selectedObject.position.x.toFixed(1);
-            this.inspectorZ.textContent = this.selectedObject.position.z.toFixed(1);
-        }
-    }
-    
-    // --- Handle Management ---
-
-    _updateHandles() {
-        const obj = this.selectedObject;
-        if (!obj) {
-            this.handlesGroup.visible = false;
-            return;
-        }
-        
-        const type = obj.userData.stationType || obj.userData.type;
-        const resizable = type === STATION_TYPES.WALL;
-        const extendable = type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING;
-        
-        if (!resizable && !extendable) {
-            this.handlesGroup.visible = false;
-            return;
-        }
-        
-        this.handlesGroup.visible = true;
-        
-        // Calculate bounds
-        const box = new THREE.Box3().setFromObject(obj);
-        const center = obj.position;
-        // Use simple box dimensions based on userData for walls to be precise, or bounding box for others
-        let w, d;
-        if (resizable && obj.userData.size) {
-            w = obj.userData.size.width;
-            d = obj.userData.size.depth;
-        } else {
-            w = box.max.x - box.min.x;
-            d = box.max.z - box.min.z;
-        }
-        
-        const y = center.y;
-        const offset = 0.3;
-
-        this.handles.n.position.set(center.x, y, center.z - d/2 - offset);
-        this.handles.s.position.set(center.x, y, center.z + d/2 + offset);
-        this.handles.e.position.set(center.x + w/2 + offset, y, center.z);
-        this.handles.w.position.set(center.x - w/2 - offset, y, center.z);
-        
-        Object.values(this.handles).forEach(h => h.visible = true);
-    }
-
-    // --- Input Handling ---
-
-    onPointerDown(e) {
-        if (!this.enabled || e.button !== 0) return;
-        
-        // Ignore clicks on UI panels
-        if (e.target.closest('.editor-panel') || e.target.closest('.editor-top-bar')) return;
-
-        const mouse = { 
-            x: (e.clientX / window.innerWidth) * 2 - 1, 
-            y: -(e.clientY / window.innerHeight) * 2 + 1 
-        };
-        this.raycaster.setFromCamera(mouse, this.camera);
-
-        // Check Handle Click first
-        if (this.handlesGroup.visible) {
-            const handleIntersects = this.raycaster.intersectObjects(this.handlesGroup.children);
-            if (handleIntersects.length > 0) {
-                this.activeHandle = handleIntersects[0].object;
-                this.isDragging = true;
-                this.orbit.enabled = false;
-                
-                // Setup drag state
-                const planeIntersect = new THREE.Vector3();
-                this.raycaster.ray.intersectPlane(this.groundPlane, planeIntersect);
-                this.startDragPos.copy(planeIntersect);
-                this.originalPos.copy(this.selectedObject.position);
-                
-                if (this.selectedObject.userData.stationType === STATION_TYPES.WALL) {
-                    this.originalSize = { ...this.selectedObject.userData.size };
-                }
-                
-                return; // Consumed
-            }
-        }
-
-        if (this.placementMode) {
-            this.confirmPlacement();
-        } else {
-            // Raycast for selection
-            const candidates = [];
-            this.scene.traverse(c => {
-                // Find root objects
-                if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.stationType)) {
-                    candidates.push(c);
-                }
-            });
-
-            const hits = this.raycaster.intersectObjects(candidates, true);
-            
-            if (hits.length > 0) {
-                // Walk up to the root group
-                let root = hits[0].object;
-                while(root.parent && root.parent !== this.scene) { root = root.parent; }
-                
-                if (this.selectedObject !== root) {
-                    this.select(root);
-                }
-                this.isDragging = true;
-                this.orbit.enabled = false; 
-            } else {
-                this.deselect();
-            }
-        }
-    }
-
-    onPointerMove(e) {
-        if (!this.enabled) return;
-
-        const mouse = { 
-            x: (e.clientX / window.innerWidth) * 2 - 1, 
-            y: -(e.clientY / window.innerHeight) * 2 + 1 
-        };
-        this.raycaster.setFromCamera(mouse, this.camera);
-        
-        // --- RESIZE / EXTEND LOGIC ---
-        if (this.isDragging && this.activeHandle && this.selectedObject) {
-            const intersect = new THREE.Vector3();
-            if (this.raycaster.ray.intersectPlane(this.groundPlane, intersect)) {
-                const delta = intersect.clone().sub(this.startDragPos);
-                const type = this.selectedObject.userData.stationType;
-                
-                // Direction multipliers based on handle
-                const dir = this.activeHandle.userData.direction;
-                // n: z-, s: z+, e: x+, w: x-
-                
-                if (type === STATION_TYPES.WALL) {
-                    // Resize Logic
-                    let dw = 0; 
-                    let dd = 0;
-                    let dx = 0;
-                    let dz = 0;
-                    
-                    // Calculate dimension changes locally aligned
-                    if (dir === 'e') dw = delta.x;
-                    if (dir === 'w') dw = -delta.x;
-                    if (dir === 's') dd = delta.z;
-                    if (dir === 'n') dd = -delta.z;
-                    
-                    // Snap to grid unit
-                    let newW = Math.max(GRID_UNIT, Math.round((this.originalSize.width + dw) * 2) / 2);
-                    let newD = Math.max(GRID_UNIT, Math.round((this.originalSize.depth + dd) * 2) / 2);
-                    
-                    // Shift center to compensate anchor
-                    if (dir === 'e') dx = (newW - this.originalSize.width) / 2;
-                    if (dir === 'w') dx = -(newW - this.originalSize.width) / 2;
-                    if (dir === 's') dz = (newD - this.originalSize.depth) / 2;
-                    if (dir === 'n') dz = -(newD - this.originalSize.depth) / 2;
-
-                    // Update Wall
-                    resizeWall(this.selectedObject, newW, newD);
-                    this.selectedObject.position.set(
-                        this.originalPos.x + dx,
-                        this.originalPos.y,
-                        this.originalPos.z + dz
-                    );
-                    this.selectionBox.setFromObject(this.selectedObject);
-                } 
-                else if (type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING) {
-                    // Tiling Logic
-                    // Calculate how many units moved along axis
-                    let axisDelta = 0;
-                    let axisVector = new THREE.Vector3();
-                    
-                    if (dir === 'e') { axisDelta = delta.x; axisVector.set(1,0,0); }
-                    if (dir === 'w') { axisDelta = -delta.x; axisVector.set(-1,0,0); }
-                    if (dir === 's') { axisDelta = delta.z; axisVector.set(0,0,1); }
-                    if (dir === 'n') { axisDelta = -delta.z; axisVector.set(0,0,-1); }
-                    
-                    const count = Math.floor((axisDelta + (GRID_UNIT/2)) / GRID_UNIT);
-                    
-                    // Cleanup old ghosts
-                    this.extendingGhosts.forEach(g => this.scene.remove(g));
-                    this.extendingGhosts = [];
-                    
-                    if (count > 0) {
-                        // Create ghosts
-                        const t = this.selectedObject.userData.template;
-                        for(let i=1; i<=count; i++) {
-                            const ghost = this._createObjectFromTemplate(t);
-                            ghost.position.copy(this.originalPos).add(axisVector.clone().multiplyScalar(i * GRID_UNIT));
-                            
-                            // Make ghost transparent
-                             ghost.traverse(c => {
-                                if (c.isMesh) {
-                                    c.material = c.material.clone();
-                                    c.material.transparent = true;
-                                    c.material.opacity = 0.5;
-                                    c.material.color.setHex(0x00FF00);
-                                }
-                            });
-                            
-                            this.scene.add(ghost);
-                            this.extendingGhosts.push(ghost);
-                        }
-                    }
-                }
-                
-                // Update handle positions to follow the expansion
-                this._updateHandles(); 
-            }
-            return;
-        }
-
-        // --- STACKING LOGIC (Existing) ---
-        // 1. Find potential support objects (Counters, Tables)
-        const supports = [];
-        this.scene.traverse(c => {
-            // Must be visible, and not the object currently being dragged/placed
-            if (c.visible && c !== this.ghostObject && c !== this.selectedObject) {
-                if (c.userData && (c.userData.stationType === STATION_TYPES.COUNTER || c.userData.stationType === STATION_TYPES.TABLE || c.userData.stationType === STATION_TYPES.SERVING)) {
-                    supports.push(c);
-                }
-            }
-        });
-
-        // 2. Check intersections with supports
-        const hits = this.raycaster.intersectObjects(supports, true);
-        
-        let targetY = 0;
-        let targetX = 0;
-        let targetZ = 0;
-        let foundSupport = false;
-
-        if (hits.length > 0) {
-            // Hit a counter/table -> Stack on top
-            foundSupport = true;
-            const hit = hits[0];
-            const p = hit.point;
-            targetX = p.x;
-            targetZ = p.z;
-            targetY = MODULE_HEIGHT; // Place on top of counter (0.9)
-        } else {
-            // Hit nothing valid -> Check Ground Plane (Y=0)
-            const target = new THREE.Vector3();
-            if (this.raycaster.ray.intersectPlane(this.groundPlane, target)) {
-                foundSupport = true;
-                targetX = target.x;
-                targetZ = target.z;
-                targetY = 0;
-            }
-        }
-
-        if (foundSupport) {
-            // Snap X/Z to grid
-            const finalX = Math.round(targetX * 2) / 2; 
-            const finalZ = Math.round(targetZ * 2) / 2;
-
-            if (this.placementMode && this.ghostObject) {
-                this.ghostObject.position.set(finalX, targetY, finalZ);
-            } else if (this.isDragging && this.selectedObject) {
-                this.selectedObject.position.set(finalX, targetY, finalZ);
-            }
-        }
-    }
-
-    onPointerUp() {
-        if (this.enabled) {
-            if (this.activeHandle) {
-                // Finish Extend/Resize
-                if (this.extendingGhosts.length > 0) {
-                    // Solidify ghosts
-                    this.extendingGhosts.forEach(g => {
-                         const t = g.userData.template;
-                         const real = this._createObjectFromTemplate(t);
-                         real.position.copy(g.position);
-                         real.rotation.copy(g.rotation);
-                         this.scene.add(real);
-                         this.scene.remove(g);
-                    });
-                    this.extendingGhosts = [];
-                    refreshSmartObjects(this.scene); // Fuse visuals
-                }
-                
-                this.activeHandle = null;
-                this._updateHandles();
-            }
-            
-            this.isDragging = false;
-            this.orbit.enabled = true;
-        }
-    }
-
-    // --- Export ---
-
-    exportLayout() {
-        const layout = [];
-        this.scene.traverse(c => {
-            if (c.parent === this.scene && c.userData && (c.userData.type === 'station' || c.userData.type === 'counter')) {
-                const entry = {
-                    name: c.name,
-                    type: c.userData.stationType || c.userData.type,
-                    position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
-                };
-                
-                // Include rotation if not zero
-                if (c.rotation.y !== 0) {
-                    entry.rotation = parseFloat(c.rotation.y.toFixed(2));
-                }
-
-                if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
-                if (c.userData.template?.color) entry.color = c.userData.template.color;
-                if (c.userData.isServing) entry.isServing = true;
-                
-                // Config: Prioritize userData.config (preserved from loaded levels)
-                // Fallback to template config if available (editor-created items)
-                if (c.userData.config) {
-                    entry.config = c.userData.config;
-                } else if (c.userData.template?.config) {
-                    entry.config = c.userData.template.config;
-                }
-
-                layout.push(entry);
-            }
-        });
-        
-        // Update current level data with new layout
-        this.currentLevelData.layout = layout;
-        
-        const jsonStr = JSON.stringify(this.currentLevelData, null, 2);
-        const fileName = `level_${this.currentLevelData.levelId || 'custom'}.json`;
-
-        // Trigger Download
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", fileName);
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-        
-        alert(`Level Exported! Replace the file in 'levels/${fileName}' to persist changes.`);
-    }
 }
 </file>
 
@@ -5479,6 +5145,800 @@ export class UIManager {
         ]
     }
 ]
+</file>
+
+<file path="src/editor.js">
+// src/editor.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT } from './constants.js';
+import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh, resizeWall, refreshSmartObjects } from './world.js';
+import { RECIPES } from './gameData.js';
+
+export class LevelEditor {
+    constructor(camera, renderer, scene, interactionManager, onExit) {
+        this.camera = camera;
+        this.renderer = renderer;
+        this.scene = scene;
+        this.interactionManager = interactionManager;
+        this.onExit = onExit;
+        this.enabled = false;
+        this.raycaster = new THREE.Raycaster();
+        
+        // Loaded Level Metadata
+        this.currentLevelData = {};
+
+        // State
+        this.selectedObject = null;
+        this.ghostObject = null; // Object currently being placed
+        this.isDragging = false;
+        this.placementMode = false; // If true, we are trying to place a new item
+        
+        // Resize/Extend State
+        this.activeHandle = null;
+        this.startDragPos = new THREE.Vector3();
+        this.originalSize = { width: 0, depth: 0 };
+        this.originalPos = new THREE.Vector3();
+        this.extendingGhosts = []; // For counters/tables
+
+        // Ground Plane for Raycasting (Y=0)
+        this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+        // Grid Helper (Visible only in Editor)
+        // 8x8 size, 0.5 unit cells = 16 divisions
+        this.gridHelper = new THREE.GridHelper(8, 16, 0xFFD700, 0x444444);
+        this.gridHelper.position.y = 0.01; // Slight offset to avoid z-fighting if floor was visible
+        this.gridHelper.visible = false;
+        this.scene.add(this.gridHelper);
+
+        // Controls
+        this.orbit = new OrbitControls(camera, renderer.domElement);
+        this.orbit.enabled = false;
+        this.orbit.enableDamping = true;
+        this.orbit.dampingFactor = 0.1;
+
+        // Visual Helpers
+        this.selectionBox = new THREE.BoxHelper(new THREE.Mesh(), 0xffff00);
+        this.selectionBox.visible = false;
+        this.scene.add(this.selectionBox);
+
+        // Resize Handles
+        this.handlesGroup = new THREE.Group();
+        this.scene.add(this.handlesGroup);
+        this.handles = {};
+        ['n', 's', 'e', 'w'].forEach(dir => {
+            const g = new THREE.SphereGeometry(0.25, 16, 16);
+            const m = new THREE.MeshBasicMaterial({ color: 0x00FFFF, depthTest: false, transparent: true, opacity: 0.8 });
+            const mesh = new THREE.Mesh(g, m);
+            mesh.userData = { isHandle: true, direction: dir };
+            mesh.renderOrder = 999;
+            mesh.visible = false;
+            this.handlesGroup.add(mesh);
+            this.handles[dir] = mesh;
+        });
+
+
+        // Init UI
+        this.ui = document.getElementById('editor-ui');
+        this.libraryContent = document.getElementById('library-content');
+        this.inspector = document.getElementById('editor-inspector');
+        this.inspectorName = document.getElementById('inspector-name');
+        this.inspectorX = document.getElementById('val-x');
+        this.inspectorZ = document.getElementById('val-z');
+
+        // Meta Modal
+        this.metaModal = document.getElementById('editor-meta-modal');
+
+        this._initUI();
+        this._bindEvents();
+    }
+
+    _initUI() {
+        // Populate Library
+        this._renderLibrary('all');
+
+        // Populate Meals for Meta
+        const mealsSelect = document.getElementById('meta-meals');
+        Object.keys(RECIPES).forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r;
+            opt.textContent = r;
+            mealsSelect.appendChild(opt);
+        });
+
+        // Bind Tab Switching
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                tabs.forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                this._renderLibrary(e.target.dataset.category);
+            });
+        });
+
+        // Bind Inspector Actions
+        document.getElementById('btn-rotate').addEventListener('click', () => this.rotateSelected());
+        document.getElementById('btn-clone').addEventListener('click', () => this.cloneSelected());
+        document.getElementById('btn-delete').addEventListener('click', () => this.deleteSelected());
+        document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLayout());
+        document.getElementById('editor-exit-btn').addEventListener('click', () => {
+            if (this.onExit) this.onExit();
+        });
+
+        // Meta Button
+        document.getElementById('editor-meta-btn').addEventListener('click', () => {
+            this.openMetaModal();
+        });
+        document.getElementById('meta-close-btn').addEventListener('click', () => {
+            this.saveMetaFromModal();
+            this.metaModal.style.display = 'none';
+        });
+
+        // Bind Config Editor
+        this.inspectorConfig = document.getElementById('inspector-config');
+        document.getElementById('btn-save-config').addEventListener('click', () => this.saveConfig());
+    }
+
+    _renderLibrary(category) {
+        this.libraryContent.innerHTML = '';
+        const items = category === 'all' 
+            ? CATALOG_ITEMS 
+            : CATALOG_ITEMS.filter(i => i.category === category);
+
+        items.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'library-item';
+            
+            // Simple icon selection based on type
+            let icon = '📦';
+            if(item.type.includes('wall')) icon = '🧱';
+            else if(item.type.includes('counter')) icon = '🟫';
+            else if(item.type.includes('processor')) icon = '🍳';
+            else if(item.type.includes('source')) icon = '🧺';
+            else if(item.isServing) icon = '🛎️';
+            else if(item.category === 'Items') icon = '🍽️';
+
+            el.innerHTML = `
+                <div class="library-item-icon">${icon}</div>
+                <div class="library-item-name">${item.name}</div>
+            `;
+            
+            el.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent canvas click
+                this.startPlacement(item);
+            });
+            
+            this.libraryContent.appendChild(el);
+        });
+    }
+
+    _bindEvents() {
+        // Mouse Events
+        this.renderer.domElement.addEventListener('pointerdown', (e) => this.onPointerDown(e));
+        this.renderer.domElement.addEventListener('pointermove', (e) => this.onPointerMove(e));
+        this.renderer.domElement.addEventListener('pointerup', (e) => this.onPointerUp(e));
+        
+        // Keyboard Shortcuts
+        window.addEventListener('keydown', (e) => {
+            if (!this.enabled) return;
+            // Do not trigger shortcuts if user is typing in textarea or inputs
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+
+            switch(e.key.toLowerCase()) {
+                case 'escape': 
+                    this.cancelPlacement(); 
+                    this.deselect(); 
+                    break;
+                case 'delete': 
+                case 'backspace':
+                    this.deleteSelected(); 
+                    break;
+                case 'r': 
+                    this.rotateSelected(); 
+                    break;
+                case 'c': 
+                    this.cloneSelected(); 
+                    break;
+                case 't':
+                    this.exportLayout();
+                    break;
+            }
+        });
+    }
+
+    // Called when opening editor for a specific level
+    loadLevel(levelData) {
+        // We store the metadata locally. The 3D objects are already added by main.js using buildKitchen
+        // We just need to sync our internal state.
+        this.currentLevelData = JSON.parse(JSON.stringify(levelData)); // Deep copy
+        document.getElementById('editor-current-level-name').textContent = levelData.name || "Untitled";
+    }
+
+    enable() {
+        this.enabled = true;
+        this.orbit.enabled = true;
+        this.ui.style.display = 'block';
+        
+        // Show Schematic Grid
+        this.gridHelper.visible = true;
+        
+        // Hide textured floor for clean CAD look
+        const gameFloor = getFloorMesh();
+        if(gameFloor) gameFloor.visible = false;
+
+        // Set optimal editor view
+        this.camera.position.set(0, 12, 8);
+        this.camera.lookAt(0, 0, 0);
+        this.orbit.target.set(0,0,0);
+    }
+
+    disable() {
+        this.enabled = false;
+        this.orbit.enabled = false;
+        this.ui.style.display = 'none';
+        this.cancelPlacement();
+        this.deselect();
+
+        // Revert Visuals
+        this.gridHelper.visible = false;
+        const gameFloor = getFloorMesh();
+        if(gameFloor) gameFloor.visible = true;
+    }
+
+    update(delta) {
+        if (!this.enabled) return;
+        this.orbit.update();
+        
+        if (this.selectedObject) {
+            this.selectionBox.update();
+            this._updateInspectorData();
+            this._updateHandles();
+        }
+    }
+
+    // --- Meta Modal ---
+
+    openMetaModal() {
+        this.metaModal.style.display = 'flex';
+        const d = this.currentLevelData;
+        document.getElementById('meta-name').value = d.name || "";
+        document.getElementById('meta-duration').value = d.duration || 180;
+        document.getElementById('meta-delay').value = d.newOrderDelay || 15;
+        document.getElementById('meta-max-orders').value = d.maxActiveOrders || 2;
+        document.getElementById('meta-star1').value = d.starThresholds ? d.starThresholds[0] : 100;
+        document.getElementById('meta-star2').value = d.starThresholds ? d.starThresholds[1] : 200;
+        document.getElementById('meta-star3').value = d.starThresholds ? d.starThresholds[2] : 300;
+        
+        const mealsSelect = document.getElementById('meta-meals');
+        Array.from(mealsSelect.options).forEach(opt => {
+            opt.selected = d.availableMeals ? d.availableMeals.includes(opt.value) : false;
+        });
+    }
+
+    saveMetaFromModal() {
+        const d = this.currentLevelData;
+        d.name = document.getElementById('meta-name').value;
+        d.duration = parseInt(document.getElementById('meta-duration').value);
+        d.newOrderDelay = parseInt(document.getElementById('meta-delay').value);
+        d.maxActiveOrders = parseInt(document.getElementById('meta-max-orders').value);
+        d.starThresholds = [
+            parseInt(document.getElementById('meta-star1').value),
+            parseInt(document.getElementById('meta-star2').value),
+            parseInt(document.getElementById('meta-star3').value),
+        ];
+        
+        const mealsSelect = document.getElementById('meta-meals');
+        d.availableMeals = Array.from(mealsSelect.selectedOptions).map(opt => opt.value);
+
+        document.getElementById('editor-current-level-name').textContent = d.name;
+    }
+
+    // --- Core Logic ---
+
+    startPlacement(template) {
+        this.cancelPlacement(); // Clear existing ghost
+        this.deselect(); // Clear selection
+        
+        this.placementMode = true;
+        this.ghostObject = this._createObjectFromTemplate(template);
+        
+        // Make ghost transparent
+        this.ghostObject.traverse(c => {
+            if (c.isMesh) {
+                c.material = c.material.clone();
+                c.material.transparent = true;
+                c.material.opacity = 0.6;
+                c.material.emissive = new THREE.Color(0x00FF00);
+                c.material.emissiveIntensity = 0.2;
+            }
+        });
+
+        this.scene.add(this.ghostObject);
+    }
+
+    cancelPlacement() {
+        if (this.ghostObject) {
+            this.scene.remove(this.ghostObject);
+            this.ghostObject = null;
+        }
+        this.placementMode = false;
+    }
+
+    confirmPlacement() {
+        if (this.ghostObject) {
+            // Create a real solid instance
+            const template = this.ghostObject.userData.template;
+            const realObject = this._createObjectFromTemplate(template);
+            
+            realObject.position.copy(this.ghostObject.position);
+            realObject.rotation.copy(this.ghostObject.rotation);
+            
+            this.scene.add(realObject);
+            
+            // Auto-fuse visuals
+            refreshSmartObjects(this.scene);
+        }
+    }
+
+    _createObjectFromTemplate(t) {
+        // Map template to world.js creation functions
+        let obj;
+        const fakeColor = t.color || '#FFFFFF';
+        const dummyPos = { x: 0, z: 0 }; // Position set later
+
+        if (t.type === STATION_TYPES.COUNTER || t.type === STATION_TYPES.SERVING) {
+            obj = createCounterPrefab(t.name, fakeColor, t.isServing);
+        } else if (t.type === STATION_TYPES.TABLE) {
+            // Neighbors default to false, will fuse later
+            obj = createTablePrefab(t.name, fakeColor, {n:false, s:false, e:false, w:false});
+        } else {
+            // Generic Station / Wall / Source / Preplaced Item
+            const def = {
+                name: t.name,
+                type: t.type,
+                size: t.size,
+                color: fakeColor,
+                config: t.config,
+                position: dummyPos
+            };
+            obj = createStationPrefab(def);
+        }
+
+        // Store template data for serialization later
+        obj.userData.template = t; 
+        // Y position will be handled by onPointerMove snapping
+        obj.position.y = 0;
+
+        return obj;
+    }
+
+    select(object) {
+        if (this.selectedObject === object) return;
+        this.selectedObject = object;
+        this.selectionBox.setFromObject(object);
+        this.selectionBox.visible = true;
+        
+        // Update UI
+        this.inspector.style.display = 'flex';
+        this.inspectorName.textContent = object.name;
+
+        // Populate Config
+        // Use existing userData.config if set, otherwise fallback to template config
+        const config = object.userData.config || object.userData.template?.config || {};
+        this.inspectorConfig.value = JSON.stringify(config, null, 2);
+        
+        this._updateHandles();
+    }
+
+    deselect() {
+        this.selectedObject = null;
+        this.selectionBox.visible = false;
+        this.inspector.style.display = 'none';
+        this.handlesGroup.visible = false;
+    }
+
+    // --- Manipulation ---
+
+    saveConfig() {
+        if (!this.selectedObject) return;
+        try {
+            const newConfig = JSON.parse(this.inspectorConfig.value);
+            this.selectedObject.userData.config = newConfig;
+            
+            // Visual feedback
+            const btn = document.getElementById('btn-save-config');
+            const originalText = btn.innerText;
+            btn.innerText = "✅ Saved!";
+            setTimeout(() => btn.innerText = originalText, 1000);
+            
+        } catch (e) {
+            alert("Invalid JSON syntax! Check your brackets and quotes.");
+        }
+    }
+
+    rotateSelected() {
+        const target = this.placementMode ? this.ghostObject : this.selectedObject;
+        if (target) {
+            target.rotation.y -= Math.PI / 2;
+            target.updateMatrixWorld();
+            if (this.selectionBox.visible) this.selectionBox.update();
+            // If rotating placed object, refresh visuals
+            if (!this.placementMode) refreshSmartObjects(this.scene);
+        }
+    }
+
+    deleteSelected() {
+        if (this.selectedObject) {
+            this.scene.remove(this.selectedObject);
+            this.deselect();
+            refreshSmartObjects(this.scene);
+        }
+    }
+
+    cloneSelected() {
+        if (this.selectedObject) {
+            const template = this.selectedObject.userData.template || {
+                name: this.selectedObject.name,
+                type: this.selectedObject.userData.stationType || this.selectedObject.userData.type,
+            };
+            
+            if (this.selectedObject.userData.template) {
+                this.startPlacement(this.selectedObject.userData.template);
+            } else {
+                const clone = this.selectedObject.clone();
+                clone.position.x += GRID_UNIT;
+                this.scene.add(clone);
+                this.select(clone);
+                refreshSmartObjects(this.scene);
+            }
+        }
+    }
+
+    _updateInspectorData() {
+        if (this.selectedObject) {
+            this.inspectorX.textContent = this.selectedObject.position.x.toFixed(1);
+            this.inspectorZ.textContent = this.selectedObject.position.z.toFixed(1);
+        }
+    }
+    
+    // --- Handle Management ---
+
+    _updateHandles() {
+        const obj = this.selectedObject;
+        if (!obj) {
+            this.handlesGroup.visible = false;
+            return;
+        }
+        
+        const type = obj.userData.stationType || obj.userData.type;
+        const resizable = type === STATION_TYPES.WALL;
+        const extendable = type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING;
+        
+        if (!resizable && !extendable) {
+            this.handlesGroup.visible = false;
+            return;
+        }
+        
+        this.handlesGroup.visible = true;
+        
+        // Calculate bounds
+        const box = new THREE.Box3().setFromObject(obj);
+        const center = obj.position;
+        // Use simple box dimensions based on userData for walls to be precise, or bounding box for others
+        let w, d;
+        if (resizable && obj.userData.size) {
+            w = obj.userData.size.width;
+            d = obj.userData.size.depth;
+        } else {
+            w = box.max.x - box.min.x;
+            d = box.max.z - box.min.z;
+        }
+        
+        const y = center.y;
+        const offset = 0.3;
+
+        this.handles.n.position.set(center.x, y, center.z - d/2 - offset);
+        this.handles.s.position.set(center.x, y, center.z + d/2 + offset);
+        this.handles.e.position.set(center.x + w/2 + offset, y, center.z);
+        this.handles.w.position.set(center.x - w/2 - offset, y, center.z);
+        
+        Object.values(this.handles).forEach(h => h.visible = true);
+    }
+
+    // --- Input Handling ---
+
+    onPointerDown(e) {
+        if (!this.enabled || e.button !== 0) return;
+        
+        // Ignore clicks on UI panels
+        if (e.target.closest('.editor-panel') || e.target.closest('.editor-top-bar')) return;
+
+        const mouse = { 
+            x: (e.clientX / window.innerWidth) * 2 - 1, 
+            y: -(e.clientY / window.innerHeight) * 2 + 1 
+        };
+        this.raycaster.setFromCamera(mouse, this.camera);
+
+        // Check Handle Click first
+        if (this.handlesGroup.visible) {
+            const handleIntersects = this.raycaster.intersectObjects(this.handlesGroup.children);
+            if (handleIntersects.length > 0) {
+                this.activeHandle = handleIntersects[0].object;
+                this.isDragging = true;
+                this.orbit.enabled = false;
+                
+                // Setup drag state
+                const planeIntersect = new THREE.Vector3();
+                this.raycaster.ray.intersectPlane(this.groundPlane, planeIntersect);
+                this.startDragPos.copy(planeIntersect);
+                this.originalPos.copy(this.selectedObject.position);
+                
+                if (this.selectedObject.userData.stationType === STATION_TYPES.WALL) {
+                    this.originalSize = { ...this.selectedObject.userData.size };
+                }
+                
+                return; // Consumed
+            }
+        }
+
+        if (this.placementMode) {
+            this.confirmPlacement();
+        } else {
+            // Raycast for selection
+            const candidates = [];
+            this.scene.traverse(c => {
+                // Find root objects
+                if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.stationType)) {
+                    candidates.push(c);
+                }
+            });
+
+            const hits = this.raycaster.intersectObjects(candidates, true);
+            
+            if (hits.length > 0) {
+                // Walk up to the root group
+                let root = hits[0].object;
+                while(root.parent && root.parent !== this.scene) { root = root.parent; }
+                
+                if (this.selectedObject !== root) {
+                    this.select(root);
+                }
+                this.isDragging = true;
+                this.orbit.enabled = false; 
+            } else {
+                this.deselect();
+            }
+        }
+    }
+
+    onPointerMove(e) {
+        if (!this.enabled) return;
+
+        const mouse = { 
+            x: (e.clientX / window.innerWidth) * 2 - 1, 
+            y: -(e.clientY / window.innerHeight) * 2 + 1 
+        };
+        this.raycaster.setFromCamera(mouse, this.camera);
+        
+        // --- RESIZE / EXTEND LOGIC ---
+        if (this.isDragging && this.activeHandle && this.selectedObject) {
+            const intersect = new THREE.Vector3();
+            if (this.raycaster.ray.intersectPlane(this.groundPlane, intersect)) {
+                const delta = intersect.clone().sub(this.startDragPos);
+                const type = this.selectedObject.userData.stationType;
+                
+                // Direction multipliers based on handle
+                const dir = this.activeHandle.userData.direction;
+                // n: z-, s: z+, e: x+, w: x-
+                
+                if (type === STATION_TYPES.WALL) {
+                    // Resize Logic
+                    let dw = 0; 
+                    let dd = 0;
+                    let dx = 0;
+                    let dz = 0;
+                    
+                    // Calculate dimension changes locally aligned
+                    if (dir === 'e') dw = delta.x;
+                    if (dir === 'w') dw = -delta.x;
+                    if (dir === 's') dd = delta.z;
+                    if (dir === 'n') dd = -delta.z;
+                    
+                    // Snap to grid unit
+                    let newW = Math.max(GRID_UNIT, Math.round((this.originalSize.width + dw) * 2) / 2);
+                    let newD = Math.max(GRID_UNIT, Math.round((this.originalSize.depth + dd) * 2) / 2);
+                    
+                    // Shift center to compensate anchor
+                    if (dir === 'e') dx = (newW - this.originalSize.width) / 2;
+                    if (dir === 'w') dx = -(newW - this.originalSize.width) / 2;
+                    if (dir === 's') dz = (newD - this.originalSize.depth) / 2;
+                    if (dir === 'n') dz = -(newD - this.originalSize.depth) / 2;
+
+                    // Update Wall
+                    resizeWall(this.selectedObject, newW, newD);
+                    this.selectedObject.position.set(
+                        this.originalPos.x + dx,
+                        this.originalPos.y,
+                        this.originalPos.z + dz
+                    );
+                    this.selectionBox.setFromObject(this.selectedObject);
+                } 
+                else if (type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING) {
+                    // Tiling Logic
+                    // Calculate how many units moved along axis
+                    let axisDelta = 0;
+                    let axisVector = new THREE.Vector3();
+                    
+                    if (dir === 'e') { axisDelta = delta.x; axisVector.set(1,0,0); }
+                    if (dir === 'w') { axisDelta = -delta.x; axisVector.set(-1,0,0); }
+                    if (dir === 's') { axisDelta = delta.z; axisVector.set(0,0,1); }
+                    if (dir === 'n') { axisDelta = -delta.z; axisVector.set(0,0,-1); }
+                    
+                    const count = Math.floor((axisDelta + (GRID_UNIT/2)) / GRID_UNIT);
+                    
+                    // Cleanup old ghosts
+                    this.extendingGhosts.forEach(g => this.scene.remove(g));
+                    this.extendingGhosts = [];
+                    
+                    if (count > 0) {
+                        // Create ghosts
+                        const t = this.selectedObject.userData.template;
+                        for(let i=1; i<=count; i++) {
+                            const ghost = this._createObjectFromTemplate(t);
+                            ghost.position.copy(this.originalPos).add(axisVector.clone().multiplyScalar(i * GRID_UNIT));
+                            
+                            // Make ghost transparent
+                             ghost.traverse(c => {
+                                if (c.isMesh) {
+                                    c.material = c.material.clone();
+                                    c.material.transparent = true;
+                                    c.material.opacity = 0.5;
+                                    c.material.color.setHex(0x00FF00);
+                                }
+                            });
+                            
+                            this.scene.add(ghost);
+                            this.extendingGhosts.push(ghost);
+                        }
+                    }
+                }
+                
+                // Update handle positions to follow the expansion
+                this._updateHandles(); 
+            }
+            return;
+        }
+
+        // --- STACKING LOGIC (Existing) ---
+        // 1. Find potential support objects (Counters, Tables)
+        const supports = [];
+        this.scene.traverse(c => {
+            // Must be visible, and not the object currently being dragged/placed
+            if (c.visible && c !== this.ghostObject && c !== this.selectedObject) {
+                if (c.userData && (c.userData.stationType === STATION_TYPES.COUNTER || c.userData.stationType === STATION_TYPES.TABLE || c.userData.stationType === STATION_TYPES.SERVING)) {
+                    supports.push(c);
+                }
+            }
+        });
+
+        // 2. Check intersections with supports
+        const hits = this.raycaster.intersectObjects(supports, true);
+        
+        let targetY = 0;
+        let targetX = 0;
+        let targetZ = 0;
+        let foundSupport = false;
+
+        if (hits.length > 0) {
+            // Hit a counter/table -> Stack on top
+            foundSupport = true;
+            const hit = hits[0];
+            const p = hit.point;
+            targetX = p.x;
+            targetZ = p.z;
+            targetY = MODULE_HEIGHT; // Place on top of counter (0.9)
+        } else {
+            // Hit nothing valid -> Check Ground Plane (Y=0)
+            const target = new THREE.Vector3();
+            if (this.raycaster.ray.intersectPlane(this.groundPlane, target)) {
+                foundSupport = true;
+                targetX = target.x;
+                targetZ = target.z;
+                targetY = 0;
+            }
+        }
+
+        if (foundSupport) {
+            // Snap X/Z to grid
+            const finalX = Math.round(targetX * 2) / 2; 
+            const finalZ = Math.round(targetZ * 2) / 2;
+
+            if (this.placementMode && this.ghostObject) {
+                this.ghostObject.position.set(finalX, targetY, finalZ);
+            } else if (this.isDragging && this.selectedObject) {
+                this.selectedObject.position.set(finalX, targetY, finalZ);
+            }
+        }
+    }
+
+    onPointerUp() {
+        if (this.enabled) {
+            if (this.activeHandle) {
+                // Finish Extend/Resize
+                if (this.extendingGhosts.length > 0) {
+                    // Solidify ghosts
+                    this.extendingGhosts.forEach(g => {
+                         const t = g.userData.template;
+                         const real = this._createObjectFromTemplate(t);
+                         real.position.copy(g.position);
+                         real.rotation.copy(g.rotation);
+                         this.scene.add(real);
+                         this.scene.remove(g);
+                    });
+                    this.extendingGhosts = [];
+                    refreshSmartObjects(this.scene); // Fuse visuals
+                }
+                
+                this.activeHandle = null;
+                this._updateHandles();
+            }
+            
+            this.isDragging = false;
+            this.orbit.enabled = true;
+        }
+    }
+
+    // --- Export ---
+
+    exportLayout() {
+        const layout = [];
+        this.scene.traverse(c => {
+            if (c.parent === this.scene && c.userData && (c.userData.type === 'station' || c.userData.type === 'counter')) {
+                const entry = {
+                    name: c.name,
+                    type: c.userData.stationType || c.userData.type,
+                    position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
+                };
+                
+                // Include rotation if not zero
+                if (c.rotation.y !== 0) {
+                    entry.rotation = parseFloat(c.rotation.y.toFixed(2));
+                }
+
+                if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
+                if (c.userData.template?.color) entry.color = c.userData.template.color;
+                if (c.userData.isServing) entry.isServing = true;
+                
+                // Config: Prioritize userData.config (preserved from loaded levels)
+                // Fallback to template config if available (editor-created items)
+                if (c.userData.config) {
+                    entry.config = c.userData.config;
+                } else if (c.userData.template?.config) {
+                    entry.config = c.userData.template.config;
+                }
+
+                layout.push(entry);
+            }
+        });
+        
+        // Update current level data with new layout
+        this.currentLevelData.layout = layout;
+        
+        const jsonStr = JSON.stringify(this.currentLevelData, null, 2);
+        const fileName = `level_${this.currentLevelData.levelId || 'custom'}.json`;
+
+        // Trigger Download
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", fileName);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        
+        alert(`Level Exported! Replace the file in 'levels/${fileName}' to persist changes.`);
+    }
+}
 </file>
 
 <file path="src/items.js">
