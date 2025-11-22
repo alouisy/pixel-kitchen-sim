@@ -1,104 +1,248 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../../store/useGameStore';
-import type { LevelObject, StationType } from '../../types/GameTypes';
-
-const CATEGORIES = {
-    'Architecture': ['wall', 'floor'],
-    'Stations': ['counter', 'processor', 'serving', 'trash', 'table'],
-    'Sources': ['ingredient_source', 'item_source']
-};
-
-const PREFABS: Record<string, Partial<LevelObject>> = {
-    'Wall': { type: 'wall', size: { width: 0.5, depth: 0.5 } },
-    'Counter': { type: 'counter' },
-    'Serving': { type: 'serving' },
-    'Trash': { type: 'trash' },
-    'Table': { type: 'table' },
-    'Fryer': { type: 'processor', name: 'Fryer', config: { processes: ['raw_fries'], result: { 'raw_fries': 'cooked_fries' }, processingTime: 3000 } },
-    'CuttingBoard': { type: 'processor', name: 'CuttingBoard', config: { processes: ['potato', 'lettuce', 'tomato'], result: { 'potato': 'raw_fries', 'lettuce': 'chopped_lettuce', 'tomato': 'chopped_tomato' } } },
-    'Stove': { type: 'processor', name: 'Stove', config: { processes: ['raw_patty'], result: { 'raw_patty': 'cooked_patty' }, processingTime: 5000 } },
-    'PotatoBin': { type: 'ingredient_source', name: 'PotatoBin', config: { ingredient: 'potato' } },
-    'TomatoBin': { type: 'ingredient_source', name: 'TomatoBin', config: { ingredient: 'tomato' } },
-    'LettuceBin': { type: 'ingredient_source', name: 'LettuceBin', config: { ingredient: 'lettuce' } },
-    'PlateStack': { type: 'item_source', name: 'PlateStack', config: { item: 'plate' } },
-};
+import type { LevelObject } from '../../types/GameTypes';
+import { CATALOG_ITEMS, CATALOG_CATEGORIES } from '../../config/editorCatalog';
+import './EditorUI.css';
 
 export const EditorUI: React.FC = () => {
-    const { gameState, setGameState, currentLevel, setLevel } = useGameStore();
-    const [selectedCategory, setSelectedCategory] = useState('Stations');
+    const { gameState, setGameState, currentLevel, setLevel, selectedObject, setSelectedObject } = useGameStore();
+    const [selectedCategory, setSelectedCategory] = useState<typeof CATALOG_CATEGORIES[number]>('all');
+    const [showMetaModal, setShowMetaModal] = useState(false);
+    const [configText, setConfigText] = useState('{}');
 
-    if (gameState !== 'EDITOR') return null;
+    // Filter items by category
+    const filteredItems = selectedCategory === 'all'
+        ? CATALOG_ITEMS
+        : CATALOG_ITEMS.filter(item => item.category === selectedCategory);
 
-    const handleAdd = (key: string) => {
-        const prefab = PREFABS[key];
-        if (!prefab) return;
-
+    const handleAddObject = (template: typeof CATALOG_ITEMS[0]) => {
         const newObj: LevelObject = {
-            name: key + '_' + Date.now(),
-            type: prefab.type as StationType,
+            name: template.name,
+            type: template.type as any,
             position: { x: 0, z: 0 },
-            ...prefab
+            ...(template.size && { size: template.size }),
+            ...(template.color && { color: template.color }),
+            ...(template.config && { config: template.config }),
+            ...(template.isServing && { isServing: template.isServing }),
         };
 
         if (currentLevel) {
             const newLayout = [...currentLevel.layout, newObj];
             setLevel({ ...currentLevel, layout: newLayout });
+            setSelectedObject(newObj);
         }
     };
 
-    const handleSave = () => {
-        if (!currentLevel) return;
-        const json = JSON.stringify(currentLevel, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `level_${currentLevel.levelId}.json`;
-        a.click();
+    const handleRotateSelected = () => {
+        if (!selectedObject || !currentLevel) return;
+        const idx = currentLevel.layout.indexOf(selectedObject);
+        if (idx !== -1) {
+            const newLayout = [...currentLevel.layout];
+            const currentRotation = newLayout[idx].rotation || 0;
+            newLayout[idx] = { ...selectedObject, rotation: currentRotation + Math.PI / 2 };
+            setLevel({ ...currentLevel, layout: newLayout });
+            setSelectedObject(newLayout[idx]);
+        }
     };
 
+    const handleCloneSelected = () => {
+        if (!selectedObject || !currentLevel) return;
+        const clone: LevelObject = {
+            ...selectedObject,
+            name: selectedObject.name + '_clone',
+            position: { x: selectedObject.position.x + 0.5, z: selectedObject.position.z }
+        };
+        const newLayout = [...currentLevel.layout, clone];
+        setLevel({ ...currentLevel, layout: newLayout });
+        setSelectedObject(clone);
+    };
+
+    const handleDeleteSelected = () => {
+        if (!selectedObject || !currentLevel) return;
+        const idx = currentLevel.layout.indexOf(selectedObject);
+        if (idx !== -1) {
+            const newLayout = [...currentLevel.layout];
+            newLayout.splice(idx, 1);
+            setLevel({ ...currentLevel, layout: newLayout });
+            setSelectedObject(null);
+        }
+    };
+
+    const handleSaveConfig = () => {
+        if (!selectedObject || !currentLevel) return;
+        try {
+            const newConfig = JSON.parse(configText);
+            const idx = currentLevel.layout.indexOf(selectedObject);
+            if (idx !== -1) {
+                const newLayout = [...currentLevel.layout];
+                newLayout[idx] = { ...selectedObject, config: newConfig };
+                setLevel({ ...currentLevel, layout: newLayout });
+                setSelectedObject(newLayout[idx]);
+            }
+        } catch (e) {
+            alert('Invalid JSON format!');
+        }
+    };
+
+    const handleExportLevel = () => {
+        if (!currentLevel) return;
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentLevel, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", `level_${currentLevel.levelId || 'custom'}.json`);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    };
+
+    const handleExitEditor = () => {
+        setGameState('MENU');
+    };
+
+    // Update config text when selection changes - MUST be before early return
+    React.useEffect(() => {
+        if (selectedObject?.config) {
+            setConfigText(JSON.stringify(selectedObject.config, null, 2));
+        } else {
+            setConfigText('{}');
+        }
+    }, [selectedObject]);
+
+    // Early return AFTER all hooks
+    if (gameState !== 'EDITOR') return null;
+
     return (
-        <div className="editor-ui" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 20 }}>
+        <div id="editor-ui">
             {/* Top Bar */}
             <div className="editor-top-bar">
-                <div className="editor-title">Level Editor: {currentLevel?.name}</div>
-                <div className="editor-controls-hint">
-                    <span>WASD: Move Camera</span>
-                    <span>Click: Select</span>
-                    <span>Drag: Move Object</span>
+                <div className="editor-title">
+                    🏗️ LEVEL EDITOR: <span>{currentLevel?.name || 'Untitled'}</span>
                 </div>
-                <div>
-                    <button className="menu-button small" onClick={handleSave}>Save JSON</button>
-                    <button className="menu-button small" onClick={() => setGameState('MENU')} style={{ marginLeft: '10px' }}>Exit</button>
+                <div className="editor-controls-hint">
+                    <span><b>Left Click:</b> Select/Place</span> |
+                    <span><b>Drag:</b> Move</span> |
+                    <span><b>Delete:</b> Remove</span> |
+                    <span><b>R:</b> Rotate</span>
+                </div>
+                <div className="editor-top-actions">
+                    <button className="editor-action-btn small" onClick={() => setShowMetaModal(true)}>
+                        ⚙️ Settings
+                    </button>
+                    <button className="editor-action-btn small" onClick={handleExportLevel}>
+                        💾 Save JSON
+                    </button>
+                    <button className="editor-action-btn small delete" onClick={handleExitEditor}>
+                        Exit
+                    </button>
                 </div>
             </div>
 
-            {/* Bottom Panel (Library) */}
-            <div className="editor-bottom-panel">
+            {/* Level Metadata Modal */}
+            {showMetaModal && (
+                <div className="editor-panel center-panel">
+                    <h3>Level Settings</h3>
+                    <div className="meta-row">
+                        <label>Name:</label>
+                        <input
+                            type="text"
+                            value={currentLevel?.name || ''}
+                            onChange={(e) => currentLevel && setLevel({ ...currentLevel, name: e.target.value })}
+                        />
+                    </div>
+                    <div className="meta-row">
+                        <label>Duration (s):</label>
+                        <input
+                            type="number"
+                            value={currentLevel?.duration || 180}
+                            onChange={(e) => currentLevel && setLevel({ ...currentLevel, duration: parseInt(e.target.value) })}
+                        />
+                    </div>
+                    <div className="meta-row">
+                        <label>Order Delay (s):</label>
+                        <input
+                            type="number"
+                            value={currentLevel?.newOrderDelay || 15}
+                            onChange={(e) => currentLevel && setLevel({ ...currentLevel, newOrderDelay: parseInt(e.target.value) })}
+                        />
+                    </div>
+                    <div className="meta-row">
+                        <label>Max Orders:</label>
+                        <input
+                            type="number"
+                            value={currentLevel?.maxActiveOrders || 2}
+                            onChange={(e) => currentLevel && setLevel({ ...currentLevel, maxActiveOrders: parseInt(e.target.value) })}
+                        />
+                    </div>
+                    <button className="editor-action-btn" onClick={() => setShowMetaModal(false)}>Close</button>
+                </div>
+            )}
+
+            {/* Bottom Library Panel */}
+            <div className="editor-panel bottom-panel">
                 <div className="library-tabs">
-                    {Object.keys(CATEGORIES).map(cat => (
+                    {CATALOG_CATEGORIES.map(cat => (
                         <button
                             key={cat}
                             className={`tab-btn ${selectedCategory === cat ? 'active' : ''}`}
                             onClick={() => setSelectedCategory(cat)}
                         >
-                            {cat}
+                            {cat === 'all' ? 'All' : cat}
                         </button>
                     ))}
                 </div>
                 <div className="library-grid">
-                    {Object.keys(PREFABS).filter(key => {
-                        if (selectedCategory === 'Architecture') return ['Wall'].includes(key);
-                        if (selectedCategory === 'Sources') return key.includes('Bin') || key.includes('Stack');
-                        return !['Wall'].includes(key) && !key.includes('Bin') && !key.includes('Stack');
-                    }).map(key => (
-                        <div key={key} className="library-item" onClick={() => handleAdd(key)}>
-                            <div className="library-item-icon">📦</div>
-                            <div className="library-item-name">{key}</div>
+                    {filteredItems.map((item, idx) => (
+                        <div
+                            key={idx}
+                            className="library-item"
+                            onClick={() => handleAddObject(item)}
+                        >
+                            <div className="library-item-icon">{item.icon}</div>
+                            <div className="library-item-name">{item.name}</div>
                         </div>
                     ))}
                 </div>
             </div>
-        </div>
+
+            {/* Right Inspector Panel */}
+            {selectedObject && (
+                <div className="editor-panel right-panel">
+                    <h3>Selected Object</h3>
+                    <div className="inspector-field">{selectedObject.name}</div>
+
+                    <div className="inspector-coords">
+                        <div>X: {selectedObject.position.x.toFixed(1)}</div>
+                        <div>Z: {selectedObject.position.z.toFixed(1)}</div>
+                        {selectedObject.rotation && <div>Rot: {(selectedObject.rotation * 180 / Math.PI).toFixed(0)}°</div>}
+                    </div>
+
+                    <div className="inspector-actions">
+                        <button className="editor-action-btn" onClick={handleRotateSelected}>
+                            🔄 Rotate
+                        </button>
+                        <button className="editor-action-btn" onClick={handleCloneSelected}>
+                            📋 Clone
+                        </button>
+                        <button className="editor-action-btn delete" onClick={handleDeleteSelected}>
+                            🗑️ Delete
+                        </button>
+                    </div>
+
+                    <div className="inspector-config-section">
+                        <label>Config (JSON):</label>
+                        <textarea
+                            id="inspector-config"
+                            rows={6}
+                            value={configText}
+                            onChange={(e) => setConfigText(e.target.value)}
+                        />
+                        <button className="editor-action-btn" onClick={handleSaveConfig}>
+                            💾 Save Config
+                        </button>
+                    </div>
+                </div>
+            )
+            }
+        </div >
     );
 };

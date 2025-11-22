@@ -9,6 +9,9 @@ const TRANSLATIONS = {
         resume: "Resume",
         quit: "Quit to Menu",
         paused: "PAUSED",
+        levelComplete: "Level Complete!",
+        restart: "Restart Level",
+        mainMenu: "Main Menu",
         language: "Language",
         showLabels: "Show Labels",
         levelSelect: "Select Level",
@@ -42,7 +45,9 @@ const TRANSLATIONS = {
         plate: "Plate",
         plate_stack: "Plate Stack",
         counter: "Counter",
-        table: "Table"
+        table: "Table",
+        editorHub: "Level Editor",
+        credits: "Credits"
     },
     fr: {
         play: "Jouer",
@@ -135,6 +140,7 @@ const TRANSLATIONS = {
 export const useTranslation = () => {
     const language = useGameStore(state => state.settings.language);
     const t = (key: keyof typeof TRANSLATIONS['en']) => {
+        // @ts-ignore - Typescript is being pedantic about keys not existing on all languages yet
         return TRANSLATIONS[language][key] || TRANSLATIONS['en'][key] || key;
     };
     return { t, language };

@@ -1,0 +1,271 @@
+/* Editor UI Styles - Matching V1 */
+
+#editor-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    pointer-events: none;
+    font-family: 'Courier New', monospace;
+}
+
+.editor-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #555;
+    pointer-events: auto;
+}
+
+.editor-title {
+    color: orange;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.editor-controls-hint {
+    color: #ccc;
+    font-size: 0.8em;
+}
+
+.editor-controls-hint span {
+    margin: 0 10px;
+}
+
+.editor-top-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.editor-panel {
+    background: rgba(30, 30, 30, 0.95);
+    border: 2px solid #666;
+    pointer-events: auto;
+}
+
+.center-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 300px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    z-index: 30;
+}
+
+.center-panel h3 {
+    color: #87CEEB;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.meta-row label {
+    font-size: 0.8em;
+    color: #ddd;
+    min-width: 120px;
+}
+
+.meta-row input,
+.meta-row select {
+    background: #111;
+    border: 1px solid #555;
+    color: white;
+    padding: 5px;
+    font-family: inherit;
+    flex: 1;
+}
+
+.bottom-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+}
+
+.library-tabs {
+    display: flex;
+    background: #222;
+    border-bottom: 1px solid #555;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.2s, background 0.2s;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    background: #444;
+}
+
+.tab-btn.active {
+    color: #FFD700;
+    border-bottom: 2px solid #FFD700;
+    background: #333;
+}
+
+.library-grid {
+    flex-grow: 1;
+    overflow-x: auto;
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    align-items: center;
+}
+
+.library-item {
+    min-width: 90px;
+    height: 90px;
+    background: #444;
+    border: 2px solid #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+    text-align: center;
+    padding: 5px;
+}
+
+.library-item:hover {
+    transform: scale(1.05);
+    border-color: #FFF;
+    background: #555;
+}
+
+.library-item-icon {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.library-item-name {
+    font-size: 0.6em;
+    line-height: 1.2;
+    color: #fff;
+}
+
+.right-panel {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    width: 240px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.right-panel h3 {
+    color: #87CEEB;
+    font-size: 0.9em;
+    border-bottom: 1px solid #555;
+    padding-bottom: 5px;
+}
+
+.inspector-field {
+    background: #222;
+    padding: 8px;
+    font-size: 0.8em;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.inspector-coords {
+    font-size: 0.7em;
+    color: #aaa;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.inspector-coords div {
+    margin: 2px 0;
+}
+
+.inspector-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.inspector-config-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+    border-top: 1px solid #555;
+    padding-top: 10px;
+}
+
+.inspector-config-section label {
+    font-size: 0.7em;
+    color: #ccc;
+}
+
+#inspector-config {
+    background: #111;
+    color: #0f0;
+    border: 1px solid #444;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7em;
+    resize: vertical;
+    padding: 5px;
+    min-height: 100px;
+}
+
+.editor-action-btn {
+    background: #444;
+    color: white;
+    border: 1px solid #666;
+    padding: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8em;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.editor-action-btn:hover {
+    background: #666;
+}
+
+.editor-action-btn.small {
+    padding: 5px 10px;
+}
+
+.editor-action-btn.delete {
+    background: #622;
+    border-color: #844;
+}
+
+.editor-action-btn.delete:hover {
+    background: #922;
+}

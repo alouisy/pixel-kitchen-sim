@@ -100,19 +100,23 @@ const ServeStrategy: InteractionStrategy = {
 
                     if (matchingOrder) {
                         // Success
-                        useGameStore.getState().addScore(recipe.baseScore); // Add time bonus logic later
+                        useGameStore.getState().addScore(recipe.baseScore);
                         useGameStore.getState().removeOrder(matchingOrder.id);
-                        useGameStore.getState().removeEntity(heldEntity.id); // Remove plate
-                        // Also remove contents? Yes, they are children or referenced.
-                        // We should cleanup referenced entities.
-                        heldEntity.contents.forEach(id => useGameStore.getState().removeEntity(id));
+                        useGameStore.getState().removeEntity(heldEntity.id);
+                        // Cleanup contents
+                        if (heldEntity.contents) {
+                            heldEntity.contents.forEach(id => useGameStore.getState().removeEntity(id));
+                        }
+                        useGameStore.getState().setTempMessage(`Served ${recipe.name}! +${recipe.baseScore}`);
                     } else {
                         // Wrong order penalty
                         useGameStore.getState().addScore(-10);
+                        useGameStore.getState().setTempMessage("Wrong Order! -10");
                     }
                 } else {
                     // Invalid recipe penalty
                     useGameStore.getState().addScore(-5);
+                    useGameStore.getState().setTempMessage("Invalid Recipe! -5");
                 }
             }
             // If not a plate or empty, maybe just fail or nothing?
@@ -190,28 +194,27 @@ const ProcessStrategy: InteractionStrategy = {
             });
 
             // Start processing logic
-            // This should ideally be handled by a system that watches entities on processors.
-            // For now, we can just set a timeout or state.
-            // Let's set state to 'processing' and start a timer.
-
             const resultType = t.config.result[heldEntity.type];
             const time = t.config.processingTime || 0;
 
-            if (time > 0) {
-                setTimeout(() => {
+            // We should store 'processingStart' on the entity to resume if game reloads
+            // For now, setTimeout is okay for prototype but bad for ECS.
+            // Better: Set state='processing' and let a System handle it?
+            // Let's stick to setTimeout for simplicity in this refactor phase, 
+            // but ensure we update state to 'processing' so UI can show progress if needed.
+
+            useGameStore.getState().updateEntity(heldEntity.id, { state: 'processing' });
+
+            setTimeout(() => {
+                // Check if entity is still there and processing (hasn't been picked up)
+                const currentEntity = useGameStore.getState().entities.find(e => e.id === heldEntity.id);
+                if (currentEntity && !currentEntity.heldBy && currentEntity.state === 'processing') {
                     useGameStore.getState().updateEntity(heldEntity.id, {
                         type: resultType,
-                        state: 'processed'
+                        state: 'processed' // or 'cooked', 'chopped'
                     });
-                }, time);
-            } else {
-                // Instant (Cutting Board) - usually requires clicks in v1, but let's make it instant for v2 prototype first
-                // or maybe instant interaction?
-                useGameStore.getState().updateEntity(heldEntity.id, {
-                    type: resultType,
-                    state: 'processed'
-                });
-            }
+                }
+            }, time);
         }
     }
 };

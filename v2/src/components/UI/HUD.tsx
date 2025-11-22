@@ -2,7 +2,7 @@ import React from 'react';
 import { useGameStore } from '../../store/useGameStore';
 
 export const HUD: React.FC = () => {
-    const { score, timeRemaining, orders, gameState, entities } = useGameStore();
+    const { score, timeRemaining, orders, gameState, entities, tempMessage } = useGameStore();
     const heldEntity = entities.find(e => e.heldBy === 'player');
 
     if (gameState !== 'PLAYING') return null;
@@ -39,6 +39,22 @@ export const HUD: React.FC = () => {
                         <div style={{ fontSize: '0.8em' }}>{Math.floor(order.duration)}s</div>
                     </div>
                 ))}
+            </div>
+
+            {/* Temp Message */}
+            {tempMessage && (
+                <div style={{
+                    position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
+                    background: 'rgba(0,0,0,0.8)', color: '#ffeb3b', padding: '10px 20px', borderRadius: '20px',
+                    fontSize: '1.2em', fontWeight: 'bold', animation: 'fadeInOut 2s forwards'
+                }}>
+                    {tempMessage}
+                </div>
+            )}
+
+            {/* Bottom HUD */}
+            <div style={{ position: 'absolute', bottom: '20px', left: '20px', color: 'white', textShadow: '1px 1px 0 #000' }}>
+                <span id="gamepad-status">🎮 Gamepad: Disconnected</span>
             </div>
 
             {/* Held Item */}

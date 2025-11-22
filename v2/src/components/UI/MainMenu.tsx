@@ -41,21 +41,26 @@ export const MainMenu: React.FC = () => {
                             {t('play')}
                         </button>
                         <button onClick={startEditor} className="menu-button">
-                            {t('editor')}
+                            {t('editorHub')}
                         </button>
                         <button onClick={() => setGameState('SETTINGS')} className="menu-button">
                             {t('settings')}
                         </button>
+
+                        <div className="credits-section" style={{ marginTop: '20px', fontSize: '0.8em', color: '#aaa' }}>
+                            <p>{t('credits')}: A Game By [Your Name]</p>
+                        </div>
                     </>
                 )}
 
                 {view === 'LEVEL_SELECT' && (
                     <>
                         <h2>{t('levelSelect')}</h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+                        <div className="level-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', maxHeight: '400px', overflowY: 'auto', padding: '10px' }}>
                             {levels.map(l => (
-                                <button key={l.levelId} onClick={() => startLevel(l)} className="menu-button">
-                                    {l.name}
+                                <button key={l.levelId} onClick={() => startLevel(l)} className="menu-button level-card" style={{ height: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>{l.name}</span>
+                                    <span style={{ fontSize: '0.8em' }}>{l.filename}</span>
                                 </button>
                             ))}
                         </div>

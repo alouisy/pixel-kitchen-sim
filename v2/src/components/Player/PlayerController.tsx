@@ -62,12 +62,12 @@ export const PlayerController: React.FC = () => {
             // Traverse up to find userData
             let curr: THREE.Object3D | null = obj;
             while (curr) {
-                if (curr.userData && (curr.userData.type === 'station' || curr.userData.type === 'ingredient_source' || curr.userData.type === 'item_source' || curr.userData.type === 'trash' || curr.userData.type === 'serving' || curr.userData.type === 'counter' || curr.userData.type === 'processor')) {
+                // Check for stations using stationType (as set by LevelGeometry)
+                if (curr.userData && curr.userData.stationType) {
                     found = curr;
                     break;
                 }
                 // Also check for Entities (Items)
-                // We need to tag Entity meshes with userData
                 if (curr.userData && curr.userData.entityId) {
                     found = curr;
                     break;

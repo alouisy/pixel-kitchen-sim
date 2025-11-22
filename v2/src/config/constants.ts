@@ -1,4 +1,5 @@
 export const GRID_UNIT = 0.5;
+export const MODULE_HEIGHT = 0.9; // Height of counters/tables for slot-based placement
 export const VOXEL_RESOLUTION = 16;
 export const VOXEL_SIZE = GRID_UNIT / VOXEL_RESOLUTION;
 
@@ -10,7 +11,7 @@ export const PALETTE = {
     METAL_LIGHT: 0xbdbdbd,
     METAL_SHINY: 0xe0e0e0,
     BLACK: 0x1a1a1a,
-    COUNTER_TOP: 0xf5f5f5, 
+    COUNTER_TOP: 0xf5f5f5,
     TRASH_GREEN: 0x2e7d32,
     TRASH_LID: 0x1b5e20,
     PLASTIC_RED: 0xc62828,

@@ -47,38 +47,17 @@ export const OrderSystem = {
     // Called every second by GameLoop
     tick: () => {
         const state = useGameStore.getState();
-        const { currentLevel, orders, addOrder, removeOrder, addScore } = state;
+        const { currentLevel, orders, addOrder, tickOrders } = state;
 
-        if (!currentLevel) return;
+        if (!currentLevel || state.gameState !== 'PLAYING') return;
 
-        // 1. Decrement Order Timers
-        const updatedOrders = orders.map(o => ({ ...o, duration: o.duration - 1 }));
+        // 1. Update Timers & Remove Expired
+        tickOrders();
 
-        // 2. Check Expiration
-        updatedOrders.forEach(o => {
-            if (o.duration <= 0) {
-                // Fail order
-                addScore(-10); // Penalty
-                removeOrder(o.id);
-            }
-        });
-
-        // Update store with non-expired orders (that changed duration)
-        // We can't easily batch this with current store API without replacing all orders.
-        // Let's add setOrders to store or just use what we have.
-        // We'll just update the ones that are still alive.
-        // Actually, removeOrder removes it. We need to update the remaining ones.
-        // This is getting messy with the current store API.
-        // Let's just add a `tickOrders` action to store?
-
-        // 3. Generate New Orders
+        // 2. Generate New Orders
         if (orders.length < currentLevel.maxActiveOrders) {
-            // Chance to spawn? Or fixed interval?
-            // Level has newOrderDelay.
-            // We need to track time since last order.
-            // Let's use a random chance for now approx based on delay.
-            // 1/delay chance per second?
-
+            // Simple random chance based on delay
+            // If delay is 10s, chance is 1/10 per second.
             if (Math.random() < 1 / currentLevel.newOrderDelay) {
                 const recipeName = currentLevel.availableMeals[Math.floor(Math.random() * currentLevel.availableMeals.length)];
                 const recipe = RECIPES[recipeName];
@@ -95,9 +74,5 @@ export const OrderSystem = {
                 }
             }
         }
-
-        // Update durations in store
-        // We need a bulk update or just iterate.
-        // Let's add `tickOrders` to store for efficiency.
     }
 };

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { LevelObject } from '../types/GameTypes';
 import type { LevelSchema, Order } from '../types/GameTypes';
 
 interface GameState {
@@ -8,7 +9,9 @@ interface GameState {
     currentLevel: LevelSchema | null;
     orders: Order[];
     entities: import('../types/GameTypes').Entity[];
-    gameState: 'MENU' | 'PLAYING' | 'PAUSED' | 'LEVEL_END' | 'EDITOR' | 'EDITOR_HUB' | 'SETTINGS';
+    gameState: 'MENU' | 'PLAYING' | 'PAUSED' | 'LEVEL_END' | 'EDITOR' | 'EDITOR_HUB' | 'SETTINGS' | 'INSTRUCTIONS';
+    tempMessage: string | null;
+    selectedObject: LevelObject | null; // For editor
     settings: {
         language: 'en' | 'fr' | 'es';
         showLabels: boolean;
@@ -18,7 +21,7 @@ interface GameState {
     addScore: (amount: number) => void;
     setTimeRemaining: (time: number) => void;
     setLevel: (level: LevelSchema) => void;
-    setGameState: (state: 'MENU' | 'PLAYING' | 'PAUSED' | 'LEVEL_END' | 'EDITOR' | 'EDITOR_HUB' | 'SETTINGS') => void;
+    setGameState: (state: 'MENU' | 'PLAYING' | 'PAUSED' | 'LEVEL_END' | 'EDITOR' | 'EDITOR_HUB' | 'SETTINGS' | 'INSTRUCTIONS') => void;
     addOrder: (order: Order) => void;
     removeOrder: (id: string) => void;
     addEntity: (entity: import('../types/GameTypes').Entity) => void;
@@ -26,6 +29,8 @@ interface GameState {
     updateEntity: (id: string, updates: Partial<import('../types/GameTypes').Entity>) => void;
     tickOrders: () => void;
     setSettings: (settings: Partial<GameState['settings']>) => void;
+    setTempMessage: (msg: string | null) => void;
+    setSelectedObject: (obj: LevelObject | null) => void;
     reset: () => void;
 }
 
@@ -38,6 +43,8 @@ export const useGameStore = create<GameState>()(
             orders: [],
             entities: [],
             gameState: 'MENU',
+            tempMessage: '',
+            selectedObject: null,
             settings: {
                 language: 'en',
                 showLabels: true
@@ -56,14 +63,35 @@ export const useGameStore = create<GameState>()(
                 entities: state.entities.map(e => e.id === id ? { ...e, ...updates } : e)
             })),
             tickOrders: () => set((state) => {
+                if (state.gameState !== 'PLAYING') return {};
+
                 const updatedOrders = state.orders.map(o => ({ ...o, duration: o.duration - 1 }));
                 const activeOrders = updatedOrders.filter(o => o.duration > 0);
                 const expiredCount = state.orders.length - activeOrders.length;
+
+                // If orders expired, penalize
+                let newScore = state.score;
+                if (expiredCount > 0) {
+                    newScore -= (expiredCount * 10);
+                    // Optional: Show message?
+                }
+
                 return {
                     orders: activeOrders,
-                    score: state.score - (expiredCount * 10) // Penalty for expired
+                    score: newScore
                 };
             }),
+            setTempMessage: (msg: string | null) => {
+                set({ tempMessage: msg || '' });
+                if (msg) {
+                    setTimeout(() => {
+                        if (useGameStore.getState().tempMessage === msg) {
+                            set({ tempMessage: '' });
+                        }
+                    }, 3000);
+                }
+            },
+            setSelectedObject: (obj: LevelObject | null) => set({ selectedObject: obj }),
             setSettings: (newSettings) => set((state) => ({ settings: { ...state.settings, ...newSettings } })),
             reset: () => set({ score: 0, orders: [], timeRemaining: 0, entities: [] })
         }),

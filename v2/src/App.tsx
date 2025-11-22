@@ -12,6 +12,9 @@ import { SettingsMenu } from './components/UI/SettingsMenu';
 import { EditorUI } from './components/UI/EditorUI';
 import { LevelManager } from './components/UI/LevelManager';
 import { LevelEditor } from './components/Editor/LevelEditor';
+import { LevelEndMenu } from './components/UI/LevelEndMenu';
+import { LevelInstructions } from './components/UI/LevelInstructions';
+import { LoadingScreen } from './components/UI/LoadingScreen';
 import { useGameStore } from './store/useGameStore';
 
 const App: React.FC = () => {
@@ -35,12 +38,12 @@ const App: React.FC = () => {
           <pointLight position={[10, 10, 10]} castShadow />
 
           <Suspense fallback={null}>
-            {gameState === 'PLAYING' && (
+            {(gameState === 'PLAYING' || gameState === 'INSTRUCTIONS' || gameState === 'LEVEL_END' || gameState === 'PAUSED') && (
               <>
                 <LevelGeometry />
                 <EntityManager />
-                <PlayerController />
-                <GameLoop />
+                {gameState === 'PLAYING' && <PlayerController />}
+                {gameState === 'PLAYING' && <GameLoop />}
               </>
             )}
             {gameState === 'EDITOR' && (
@@ -55,6 +58,11 @@ const App: React.FC = () => {
         {gameState === 'SETTINGS' && <SettingsMenu onClose={() => setGameState('MENU')} />}
         <LevelManager />
         <EditorUI />
+        <LevelEndMenu />
+        <LevelInstructions />
+        <Suspense fallback={<LoadingScreen />}>
+          {/* Loading handled by Suspense boundaries mostly */}
+        </Suspense>
       </KeyboardControls>
     </div>
   );

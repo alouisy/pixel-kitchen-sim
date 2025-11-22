@@ -10,6 +10,8 @@ const WALL_HEIGHT = 2.5;
 
 export const LevelGeometry: React.FC = () => {
     const currentLevel = useGameStore(state => state.currentLevel);
+    const selectedObject = useGameStore(state => state.selectedObject);
+    const gameState = useGameStore(state => state.gameState);
 
     const { walls, stations } = useMemo(() => {
         if (!currentLevel) return { walls: [], stations: [] };
@@ -55,6 +57,11 @@ export const LevelGeometry: React.FC = () => {
         }
     };
 
+    const getStationMat = () => {
+        const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.1 });
+        return mat;
+    };
+
     return (
         <group>
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
@@ -68,28 +75,70 @@ export const LevelGeometry: React.FC = () => {
                         key={i}
                         position={[wall.position.x, WALL_HEIGHT / 2, wall.position.z]}
                         scale={[wall.size?.width ?? 0.5, WALL_HEIGHT, wall.size?.depth ?? 0.5]}
+                        rotation={[0, wall.rotation || 0, 0]}
+                        userData={{
+                            layoutIndex: currentLevel?.layout.indexOf(wall),
+                            stationType: 'wall'
+                        }}
                     />
                 ))}
             </Instances>
 
-            {/* Render Stations individually since they have different geometries */}
-            {stations.map((station, i) => {
-                const geo = useMemo(() => getStationGeo(station.type, station.config), [station.type, station.config]);
+            {/* Stations (individual) */}
+            {stations.map((station, index) => {
+                const geo = getStationGeo(station.type, station.config);
+                const mat = getStationMat();
+                const isSelected = gameState === 'EDITOR' && selectedObject === station;
+
+                // Check if this object is placed on top of a surface
+                let yPosition = 0;
+
+                // Small objects (processors, sources, items) should check if they're on a surface
+                const isSmallObject = ['processor', 'ingredient_source', 'item_source', 'trash'].includes(station.type);
+
+                if (isSmallObject) {
+                    // Check if there's a counter/table/serving at the same X/Z position
+                    const hasSurfaceBelow = stations.some(other =>
+                        (other.type === 'counter' || other.type === 'table' || other.type === 'serving') &&
+                        Math.abs(other.position.x - station.position.x) < 0.1 &&
+                        Math.abs(other.position.z - station.position.z) < 0.1 &&
+                        other !== station
+                    );
+
+                    if (hasSurfaceBelow) {
+                        yPosition = 0.9; // MODULE_HEIGHT - place on top of surface
+                    }
+                }
+
                 return (
-                    <group key={i} position={[station.position.x, 0, station.position.z]} rotation={[0, station.rotation || 0, 0]}>
+                    <group key={`${station.type}-${index}`}>
                         <mesh
+                            position={[station.position.x, yPosition, station.position.z]}
+                            rotation={[0, station.rotation || 0, 0]}
                             geometry={geo}
+                            material={mat}
                             castShadow
                             receiveShadow
+                            userData={{
+                                layoutIndex: currentLevel?.layout.indexOf(station),
+                                stationType: station.type // For surface detection
+                            }}
                         >
-                            <meshStandardMaterial vertexColors roughness={0.8} metalness={0.1} />
+                            {!['counter', 'table', 'serving'].includes(station.type) && (
+                                <LabelRenderer position={[0, 2, 0]} text={station.name || station.type} />
+                            )}
                         </mesh>
-                        {!['counter', 'table', 'serving'].includes(station.type) && (
-                            <LabelRenderer position={[0, 2, 0]} text={station.name || station.type} />
+
+                        {/* Selection Highlight */}
+                        {isSelected && (
+                            <mesh position={[station.position.x, yPosition + 0.5, station.position.z]}>
+                                <boxGeometry args={[0.6, 1, 0.6]} />
+                                <meshBasicMaterial color="#00ff00" wireframe transparent opacity={0.5} />
+                            </mesh>
                         )}
                     </group>
                 );
             })}
         </group>
     );
-}
+};
