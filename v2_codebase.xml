@@ -1,0 +1,4467 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: v2/public, v2/public/levels, v2/public/levels/game_roadmap.json, v2/public/levels/level_1.json, v2/src, v2/eslint.config.js, v2/index.html, v2/package.json, v2/tsconfig.app.json, v2/tsconfig.json, v2/tsconfig.node.json, v2/vite.config.ts
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+v2/
+  public/
+    levels/
+      game_roadmap.json
+      level_1.json
+      level_2.json
+    vite.svg
+  src/
+    assets/
+      react.svg
+    components/
+      Core/
+        GameLoop.tsx
+      Editor/
+        LevelEditor.tsx
+      Player/
+        PlayerController.tsx
+      UI/
+        EditorUI.tsx
+        HUD.tsx
+        LevelManager.tsx
+        MainMenu.tsx
+        PauseMenu.tsx
+        SettingsMenu.tsx
+      World/
+        EntityManager.tsx
+        LabelRenderer.tsx
+        LevelGeometry.tsx
+    config/
+      constants.ts
+    store/
+      useGameStore.ts
+    systems/
+      Interaction.ts
+      OrderSystem.ts
+      RecipeSystem.ts
+    types/
+      GameTypes.ts
+    utils/
+      i18n.ts
+      LevelLoader.ts
+      VoxelFactory.ts
+    App.css
+    App.tsx
+    index.css
+    main.tsx
+  eslint.config.js
+  index.html
+  package.json
+  tsconfig.app.json
+  tsconfig.json
+  tsconfig.node.json
+  vite.config.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="v2/public/levels/game_roadmap.json">
+[
+  {
+    "levelId": 1,
+    "name": "Fry Cook Training",
+    "filename": "level_1.json"
+  },
+  {
+    "levelId": 2,
+    "name": "Burger & Fries",
+    "filename": "level_2.json"
+  }
+]
+</file>
+
+<file path="v2/public/levels/level_1.json">
+{
+    "levelId": 1,
+    "name": "Fry Cook Training",
+    "duration": 180,
+    "starThresholds": [
+        300,
+        500,
+        700
+    ],
+    "availableMeals": [
+        "French Fries"
+    ],
+    "maxActiveOrders": 2,
+    "newOrderDelay": 15,
+    "layout": [
+        {
+            "name": "wall_back",
+            "type": "wall",
+            "position": {
+                "x": 0,
+                "z": -4
+            },
+            "size": {
+                "width": 8.5,
+                "depth": 0.5
+            }
+        },
+        {
+            "name": "wall_front_l",
+            "type": "wall",
+            "position": {
+                "x": -2.5,
+                "z": 4
+            },
+            "size": {
+                "width": 3.5,
+                "depth": 0.5
+            }
+        },
+        {
+            "name": "wall_front_r",
+            "type": "wall",
+            "position": {
+                "x": 2.5,
+                "z": 4
+            },
+            "size": {
+                "width": 3.5,
+                "depth": 0.5
+            }
+        },
+        {
+            "name": "wall_left",
+            "type": "wall",
+            "position": {
+                "x": -4,
+                "z": 0
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 7.5
+            }
+        },
+        {
+            "name": "wall_right",
+            "type": "wall",
+            "position": {
+                "x": 4,
+                "z": 0
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 7.5
+            }
+        },
+        {
+            "name": "serving",
+            "type": "serving",
+            "position": {
+                "x": -0.5,
+                "z": 4
+            },
+            "rotation": -3.14
+        },
+        {
+            "name": "serving",
+            "type": "serving",
+            "position": {
+                "x": 0,
+                "z": 4
+            },
+            "rotation": -3.14
+        },
+        {
+            "name": "serving",
+            "type": "serving",
+            "position": {
+                "x": 0.5,
+                "z": 4
+            },
+            "rotation": -3.14
+        },
+        {
+            "name": "c_back_1",
+            "type": "counter",
+            "position": {
+                "x": -3,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "c_back_2",
+            "type": "counter",
+            "position": {
+                "x": -2.5,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "c_back_3",
+            "type": "counter",
+            "position": {
+                "x": -1,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "c_back_4",
+            "type": "counter",
+            "position": {
+                "x": 1,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "c_back_5",
+            "type": "counter",
+            "position": {
+                "x": 2.5,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "c_back_6",
+            "type": "counter",
+            "position": {
+                "x": 3,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "c_side_l1",
+            "type": "counter",
+            "position": {
+                "x": -3.5,
+                "z": -3
+            },
+            "rotation": -4.71
+        },
+        {
+            "name": "c_side_l2",
+            "type": "counter",
+            "position": {
+                "x": -3.5,
+                "z": -2.5
+            },
+            "rotation": -4.71
+        },
+        {
+            "name": "c_side_r1",
+            "type": "counter",
+            "position": {
+                "x": 3.5,
+                "z": -3
+            },
+            "rotation": -1.57
+        },
+        {
+            "name": "c_side_r2",
+            "type": "counter",
+            "position": {
+                "x": 3.5,
+                "z": -2.5
+            },
+            "rotation": -1.57
+        },
+        {
+            "name": "cutting_board",
+            "type": "processor",
+            "position": {
+                "x": -2.5,
+                "z": -3.5
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "processes": [
+                    "potato"
+                ],
+                "result": {
+                    "potato": "raw_fries"
+                }
+            }
+        },
+        {
+            "name": "fryer",
+            "type": "processor",
+            "position": {
+                "x": -1,
+                "z": -3.5
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "processes": [
+                    "raw_fries"
+                ],
+                "result": {
+                    "raw_fries": "cooked_fries"
+                },
+                "processingTime": 3000
+            }
+        },
+        {
+            "name": "trash",
+            "type": "trash",
+            "position": {
+                "x": 3.5,
+                "z": -2
+            },
+            "rotation": -1.57,
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            }
+        },
+        {
+            "name": "t_assem_base1",
+            "type": "table",
+            "position": {
+                "x": -1.5,
+                "z": -0.5
+            }
+        },
+        {
+            "name": "t_assem_base2",
+            "type": "table",
+            "position": {
+                "x": -1,
+                "z": -0.5
+            }
+        },
+        {
+            "name": "t_assem_base3",
+            "type": "table",
+            "position": {
+                "x": -0.5,
+                "z": -0.5
+            }
+        },
+        {
+            "name": "counter (corner)",
+            "type": "counter",
+            "position": {
+                "x": -3.5,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "counter (corner)",
+            "type": "counter",
+            "position": {
+                "x": 3.5,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "counter (wood)",
+            "type": "counter",
+            "position": {
+                "x": -2,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "counter (wood)",
+            "type": "counter",
+            "position": {
+                "x": -1.5,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "counter (wood)",
+            "type": "counter",
+            "position": {
+                "x": -0.5,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "counter (wood)",
+            "type": "counter",
+            "position": {
+                "x": 0,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "counter (wood)",
+            "type": "counter",
+            "position": {
+                "x": 0.5,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "counter (wood)",
+            "type": "counter",
+            "position": {
+                "x": 1.5,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "counter (wood)",
+            "type": "counter",
+            "position": {
+                "x": 2,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "t_assem_base7",
+            "type": "table",
+            "position": {
+                "x": 0.5,
+                "z": 0.5
+            }
+        },
+        {
+            "name": "t_assem_base8",
+            "type": "table",
+            "position": {
+                "x": 1,
+                "z": 0.5
+            }
+        },
+        {
+            "name": "t_assem_base9",
+            "type": "table",
+            "position": {
+                "x": 1.5,
+                "z": 0.5
+            }
+        },
+        {
+            "name": "t_assem_base10",
+            "type": "table",
+            "position": {
+                "x": 0.5,
+                "z": 1
+            }
+        },
+        {
+            "name": "t_assem_base11",
+            "type": "table",
+            "position": {
+                "x": 1,
+                "z": 1
+            }
+        },
+        {
+            "name": "t_assem_base12",
+            "type": "table",
+            "position": {
+                "x": 1.5,
+                "z": 1
+            }
+        },
+        {
+            "name": "cutting_board",
+            "type": "processor",
+            "position": {
+                "x": -3.5,
+                "z": -2.5
+            },
+            "rotation": -11,
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "processes": [
+                    "potato"
+                ],
+                "result": {
+                    "potato": "raw_fries"
+                }
+            }
+        },
+        {
+            "name": "fryer",
+            "type": "processor",
+            "position": {
+                "x": -0.5,
+                "z": -3.5
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "processes": [
+                    "raw_fries"
+                ],
+                "result": {
+                    "raw_fries": "cooked_fries"
+                },
+                "processingTime": 3000
+            }
+        },
+        {
+            "name": "trash",
+            "type": "trash",
+            "position": {
+                "x": -3.5,
+                "z": -2
+            },
+            "rotation": -4.71,
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            }
+        },
+        {
+            "name": "t_assem_base4",
+            "type": "table",
+            "position": {
+                "x": -1.5,
+                "z": -1
+            }
+        },
+        {
+            "name": "t_assem_base5",
+            "type": "table",
+            "position": {
+                "x": -1,
+                "z": -1
+            }
+        },
+        {
+            "name": "t_assem_base6",
+            "type": "table",
+            "position": {
+                "x": -0.5,
+                "z": -1
+            }
+        },
+        {
+            "name": "potato_source",
+            "type": "ingredient_source",
+            "position": {
+                "x": -3.5,
+                "z": -3
+            },
+            "rotation": -4.71,
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "ingredient": "potato"
+            }
+        },
+        {
+            "name": "potato_source",
+            "type": "ingredient_source",
+            "position": {
+                "x": -3,
+                "z": -3.5
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "ingredient": "potato"
+            }
+        },
+        {
+            "name": "plate_stack",
+            "type": "item_source",
+            "position": {
+                "x": 3.5,
+                "z": -3
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "item": "plate"
+            }
+        },
+        {
+            "name": "plate",
+            "type": "preplaced_item",
+            "position": {
+                "x": -1.5,
+                "z": -1
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "item": "plate"
+            }
+        },
+        {
+            "name": "plate",
+            "type": "preplaced_item",
+            "position": {
+                "x": -1,
+                "z": -1
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "item": "plate"
+            }
+        },
+        {
+            "name": "plate",
+            "type": "preplaced_item",
+            "position": {
+                "x": -0.5,
+                "z": -1
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "item": "plate"
+            }
+        },
+        {
+            "name": "plate",
+            "type": "preplaced_item",
+            "position": {
+                "x": 0.5,
+                "z": 0.5
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "item": "plate"
+            }
+        },
+        {
+            "name": "plate",
+            "type": "preplaced_item",
+            "position": {
+                "x": 1,
+                "z": 0.5
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "item": "plate"
+            }
+        },
+        {
+            "name": "plate",
+            "type": "preplaced_item",
+            "position": {
+                "x": 1.5,
+                "z": 0.5
+            },
+            "size": {
+                "width": 0.5,
+                "depth": 0.5
+            },
+            "config": {
+                "item": "plate"
+            }
+        }
+    ]
+}
+</file>
+
+<file path="v2/public/levels/level_2.json">
+{
+  "levelId": 2,
+  "name": "Burger & Fries",
+  "duration": 180,
+  "starThresholds": [
+    100,
+    200,
+    300
+  ],
+  "availableMeals": [
+    "French Fries",
+    "Salad",
+    "Hamburger",
+    "Cheeseburger"
+  ],
+  "maxActiveOrders": 2,
+  "newOrderDelay": 15,
+  "layout": [
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": -2.5,
+        "z": 4
+      },
+      "size": {
+        "width": 3.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Wall (Long)",
+      "type": "wall",
+      "position": {
+        "x": -4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 7.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Wall (Long)",
+      "type": "wall",
+      "position": {
+        "x": 4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 7.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": -4,
+        "z": -4
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": 4,
+        "z": -4
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": 2.5,
+        "z": 4
+      },
+      "size": {
+        "width": 3.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Wall (Long)",
+      "type": "wall",
+      "position": {
+        "x": 0,
+        "z": -4
+      },
+      "size": {
+        "width": 8,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": 0.5,
+        "z": 4
+      },
+      "rotation": -3.14
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": 0,
+        "z": 4
+      },
+      "rotation": -3.14
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": -0.5,
+        "z": 4
+      },
+      "rotation": -3.14
+    },
+    {
+      "name": "Counter (Corner)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Corner)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -2.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -2,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -1,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 0,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 1,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 2,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 2.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -4,
+        "z": -3
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -4.5,
+        "z": -3
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -4,
+        "z": -3
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1.5
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3
+      },
+      "rotation": -7.85,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2.5
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1.5
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -2,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -1.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -2,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -1.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -0.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -0.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 1.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 2,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 1.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 2,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": 0.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": 0,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": -0.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": 1.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": -1.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": -1
+      },
+      "rotation": -4.71,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": 3.5,
+        "z": -1
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Deep Fryer",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": -2
+      },
+      "rotation": -4.71,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#555",
+      "config": {
+        "processes": [
+          "raw_fries",
+          "onion_rings_coated",
+          "coated_chicken_strips"
+        ],
+        "result": {
+          "raw_fries": "cooked_fries",
+          "onion_rings_coated": "cooked_onion_rings",
+          "coated_chicken_strips": "cooked_chicken_tenders"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "Stove Top",
+      "type": "processor",
+      "position": {
+        "x": -3,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#333",
+      "config": {
+        "processes": [
+          "patty",
+          "raw_bacon",
+          "pancake_batter",
+          "omelette_mix",
+          "grilled_cheese_raw"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "raw_bacon": "cooked_bacon",
+          "pancake_batter": "cooked_pancakes",
+          "omelette_mix": "cooked_omelette",
+          "grilled_cheese_raw": "grilled_cheese_cooked"
+        },
+        "processingTime": 4000
+      }
+    },
+    {
+      "name": "Stove Top",
+      "type": "processor",
+      "position": {
+        "x": 3,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#333",
+      "config": {
+        "processes": [
+          "patty",
+          "raw_bacon",
+          "pancake_batter",
+          "omelette_mix",
+          "grilled_cheese_raw"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "raw_bacon": "cooked_bacon",
+          "pancake_batter": "cooked_pancakes",
+          "omelette_mix": "cooked_omelette",
+          "grilled_cheese_raw": "grilled_cheese_cooked"
+        },
+        "processingTime": 4000
+      }
+    },
+    {
+      "name": "Deep Fryer",
+      "type": "processor",
+      "position": {
+        "x": 3.5,
+        "z": -2
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#555",
+      "config": {
+        "processes": [
+          "raw_fries",
+          "onion_rings_coated",
+          "coated_chicken_strips"
+        ],
+        "result": {
+          "raw_fries": "cooked_fries",
+          "onion_rings_coated": "cooked_onion_rings",
+          "coated_chicken_strips": "cooked_chicken_tenders"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "Potato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#CD853F",
+      "config": {
+        "ingredient": "potato"
+      }
+    },
+    {
+      "name": "Potato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#CD853F",
+      "config": {
+        "ingredient": "potato"
+      }
+    },
+    {
+      "name": "Bun Rack",
+      "type": "ingredient_source",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#F4A460",
+      "config": {
+        "ingredient": "bun"
+      }
+    },
+    {
+      "name": "Tomato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#FF6347",
+      "config": {
+        "ingredient": "tomato"
+      }
+    },
+    {
+      "name": "Lettuce Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -1,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#90EE90",
+      "config": {
+        "ingredient": "lettuce"
+      }
+    },
+    {
+      "name": "Plate Stack",
+      "type": "item_source",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate Stack",
+      "type": "item_source",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Cheese Fridge",
+      "type": "ingredient_source",
+      "position": {
+        "x": 1,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#FFD700",
+      "config": {
+        "ingredient": "cheese_slice"
+      }
+    },
+    {
+      "name": "Patty Box",
+      "type": "ingredient_source",
+      "position": {
+        "x": 0,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#A52A2A",
+      "config": {
+        "ingredient": "patty"
+      }
+    }
+  ]
+}
+</file>
+
+<file path="v2/public/vite.svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="31.88" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 257"><defs><linearGradient id="IconifyId1813088fe1fbc01fb466" x1="-.828%" x2="57.636%" y1="7.652%" y2="78.411%"><stop offset="0%" stop-color="#41D1FF"></stop><stop offset="100%" stop-color="#BD34FE"></stop></linearGradient><linearGradient id="IconifyId1813088fe1fbc01fb467" x1="43.376%" x2="50.316%" y1="2.242%" y2="89.03%"><stop offset="0%" stop-color="#FFEA83"></stop><stop offset="8.333%" stop-color="#FFDD35"></stop><stop offset="100%" stop-color="#FFA800"></stop></linearGradient></defs><path fill="url(#IconifyId1813088fe1fbc01fb466)" d="M255.153 37.938L134.897 252.976c-2.483 4.44-8.862 4.466-11.382.048L.875 37.958c-2.746-4.814 1.371-10.646 6.827-9.67l120.385 21.517a6.537 6.537 0 0 0 2.322-.004l117.867-21.483c5.438-.991 9.574 4.796 6.877 9.62Z"></path><path fill="url(#IconifyId1813088fe1fbc01fb467)" d="M185.432.063L96.44 17.501a3.268 3.268 0 0 0-2.634 3.014l-5.474 92.456a3.268 3.268 0 0 0 3.997 3.378l24.777-5.718c2.318-.535 4.413 1.507 3.936 3.838l-7.361 36.047c-.495 2.426 1.782 4.5 4.151 3.78l15.304-4.649c2.372-.72 4.652 1.36 4.15 3.788l-11.698 56.621c-.732 3.542 3.979 5.473 5.943 2.437l1.313-2.028l72.516-144.72c1.215-2.423-.88-5.186-3.54-4.672l-25.505 4.922c-2.396.462-4.435-1.77-3.759-4.114l16.646-57.705c.677-2.35-1.37-4.583-3.769-4.113Z"></path></svg>
+</file>
+
+<file path="v2/src/assets/react.svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+</file>
+
+<file path="v2/src/components/Core/GameLoop.tsx">
+import React, { useEffect } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { useGameStore } from '../../store/useGameStore';
+import { OrderSystem } from '../../systems/OrderSystem';
+
+export const GameLoop: React.FC = () => {
+    const { gameState, timeRemaining, setTimeRemaining, setGameState } = useGameStore();
+
+    // Timer Logic
+    useEffect(() => {
+        let interval: ReturnType<typeof setInterval>;
+        if (gameState === 'PLAYING' && timeRemaining > 0) {
+            interval = setInterval(() => {
+                useGameStore.getState().setTimeRemaining(Math.max(0, useGameStore.getState().timeRemaining - 1));
+                OrderSystem.tick();
+            }, 1000);
+        } else if (timeRemaining === 0 && gameState === 'PLAYING') {
+            setGameState('LEVEL_END');
+        }
+        return () => clearInterval(interval);
+    }, [gameState, timeRemaining, setTimeRemaining, setGameState]);
+
+    // Frame Loop (for things that need per-frame updates, currently handled by React state for timer)
+    useFrame(() => {
+        // Future: Update order timers here for smooth progress bars
+    });
+
+    return null;
+};
+</file>
+
+<file path="v2/src/components/Editor/LevelEditor.tsx">
+import React, { useState, useRef } from 'react';
+import { TransformControls } from '@react-three/drei';
+// import { useThree } from '@react-three/fiber';
+import * as THREE from 'three';
+import { useGameStore } from '../../store/useGameStore';
+import { VoxelFactory } from '../../utils/VoxelFactory';
+import type { LevelObject } from '../../types/GameTypes';
+import { PALETTE } from '../../config/constants';
+
+export const LevelEditor: React.FC = () => {
+    const { currentLevel, setLevel } = useGameStore();
+    const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+    // const { scene } = useThree();
+
+    if (!currentLevel) return null;
+
+    const handleSelect = (index: number, e: any) => {
+        e.stopPropagation();
+        setSelectedIndices([index]);
+    };
+
+    const handleTransformChange = (index: number, newPos: THREE.Vector3) => {
+        const newLayout = [...currentLevel.layout];
+        const obj = { ...newLayout[index] };
+
+        // Snap to grid
+        const snap = 0.5;
+        obj.position = {
+            x: Math.round(newPos.x / snap) * snap,
+            z: Math.round(newPos.z / snap) * snap
+        };
+        // obj.rotation = newRot.y; // Handle rotation later
+
+        newLayout[index] = obj;
+        setLevel({ ...currentLevel, layout: newLayout });
+    };
+
+    return (
+        <group>
+            {/* Floor (Non-editable for now) */}
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow onPointerMissed={() => setSelectedIndices([])}>
+                <planeGeometry args={[8, 8]} />
+                <meshStandardMaterial color="#37474F" roughness={0.5} metalness={0.1} />
+            </mesh>
+
+            {currentLevel.layout.map((obj, i) => (
+                <EditorObject
+                    key={i}
+                    obj={obj}
+                    isSelected={selectedIndices.includes(i)}
+                    onSelect={(e) => handleSelect(i, e)}
+                    onTransform={(pos) => handleTransformChange(i, pos)}
+                />
+            ))}
+        </group>
+    );
+};
+
+const EditorObject: React.FC<{
+    obj: LevelObject;
+    isSelected: boolean;
+    onSelect: (e: any) => void;
+    onTransform: (pos: THREE.Vector3, rot: THREE.Euler) => void;
+}> = ({ obj, isSelected, onSelect, onTransform }) => {
+    const meshRef = useRef<THREE.Mesh>(null);
+    const geometry = React.useMemo(() => {
+        if (obj.type === 'wall') return new THREE.BoxGeometry(obj.size?.width || 0.5, 2.5, obj.size?.depth || 0.5);
+        if (obj.type === 'counter') return VoxelFactory.createCounter();
+        if (obj.type === 'processor') {
+            if (obj.name.includes('Fryer')) return VoxelFactory.createFryer();
+            if (obj.name.includes('Cutting')) return VoxelFactory.createCuttingBoard();
+            if (obj.name.includes('Stove')) return VoxelFactory.createStove();
+            return VoxelFactory.createCounter(); // Fallback
+        }
+        if (obj.type === 'ingredient_source') return VoxelFactory.createIngredientBin(obj.config?.ingredient || 'generic');
+        if (obj.type === 'item_source') return VoxelFactory.createPlateStack(); // Fallback
+        if (obj.type === 'serving') return VoxelFactory.createCounter(); // Reuse counter
+        if (obj.type === 'trash') return VoxelFactory.createTrashBin();
+        if (obj.type === 'table') return VoxelFactory.createTable({ n: false, s: false, e: false, w: false }); // Generic table
+        return new THREE.BoxGeometry(0.5, 0.5, 0.5);
+    }, [obj.type, obj.name, obj.config, obj.size]);
+
+    const yPos = obj.type === 'wall' ? 1.25 : 0; // Wall center is at 1.25 (height 2.5)
+
+    return (
+        <>
+            <mesh
+                ref={meshRef}
+                position={[obj.position.x, yPos, obj.position.z]}
+                rotation={[0, obj.rotation || 0, 0]}
+                geometry={geometry}
+                onClick={onSelect}
+            >
+                <meshStandardMaterial
+                    vertexColors={obj.type !== 'wall'}
+                    color={obj.type === 'wall' ? PALETTE.WALL_WHITE : undefined}
+                    emissive={isSelected ? 0x444444 : 0x000000}
+                />
+            </mesh>
+            {isSelected && meshRef.current && (
+                <TransformControls
+                    object={meshRef.current}
+                    mode="translate"
+                    onMouseUp={() => {
+                        if (meshRef.current) {
+                            onTransform(meshRef.current.position, meshRef.current.rotation);
+                        }
+                    }}
+                />
+            )}
+        </>
+    );
+};
+</file>
+
+<file path="v2/src/components/Player/PlayerController.tsx">
+import React, { useRef, useEffect, useState } from 'react';
+import { useThree, useFrame } from '@react-three/fiber';
+import { PointerLockControls, useKeyboardControls } from '@react-three/drei';
+import * as THREE from 'three';
+import { useGameStore } from '../../store/useGameStore';
+import { InteractionManager } from '../../systems/Interaction';
+import { VoxelFactory } from '../../utils/VoxelFactory';
+
+
+export const PlayerController: React.FC = () => {
+    const { camera, scene } = useThree();
+    const [, getKeys] = useKeyboardControls();
+    const moveSpeed = 5;
+    // const velocity = useRef(new THREE.Vector3());
+    const { entities } = useGameStore();
+    const raycaster = useRef(new THREE.Raycaster());
+    // const crosshairRef = useRef<HTMLDivElement>(null); // We'll use HTML overlay for crosshair actually
+
+    // Held Item Logic
+    const heldEntity = entities.find(e => e.heldBy === 'player');
+
+    // Raycast State
+    const [hoverTarget, setHoverTarget] = useState<any>(null);
+
+    useEffect(() => {
+        raycaster.current.far = 3; // Interaction distance
+    }, []);
+
+    useFrame((_state, delta) => {
+        // Movement Logic
+        const { forward, backward, left, right } = getKeys();
+
+        const direction = new THREE.Vector3();
+        const frontVector = new THREE.Vector3(0, 0, Number(backward) - Number(forward));
+        const sideVector = new THREE.Vector3(Number(left) - Number(right), 0, 0);
+
+        direction.subVectors(frontVector, sideVector).normalize().multiplyScalar(moveSpeed * delta);
+
+        // Apply to camera
+        // We need to move relative to camera direction but ignore Y for walking
+        // PointerLockControls moves camera directly.
+
+        // Helper to move
+        if (forward || backward || left || right) {
+            camera.translateX(direction.x);
+            camera.translateZ(direction.z);
+            // Lock Y
+            camera.position.y = 1.6;
+        }
+        // Raycast from center of screen
+        raycaster.current.setFromCamera(new THREE.Vector2(0, 0), camera);
+
+        // Intersect with World Objects (Stations, Walls) and Entities
+        // We need to traverse scene or have a list of interactables.
+        // For now, let's intersect everything and filter.
+        const intersects = raycaster.current.intersectObjects(scene.children, true);
+
+        let found = null;
+        for (const hit of intersects) {
+            // Check if it's a valid target
+            const obj = hit.object;
+            // Traverse up to find userData
+            let curr: THREE.Object3D | null = obj;
+            while (curr) {
+                if (curr.userData && (curr.userData.type === 'station' || curr.userData.type === 'ingredient_source' || curr.userData.type === 'item_source' || curr.userData.type === 'trash' || curr.userData.type === 'serving' || curr.userData.type === 'counter' || curr.userData.type === 'processor')) {
+                    found = curr;
+                    break;
+                }
+                // Also check for Entities (Items)
+                // We need to tag Entity meshes with userData
+                if (curr.userData && curr.userData.entityId) {
+                    found = curr;
+                    break;
+                }
+                curr = curr.parent;
+            }
+            if (found) break;
+        }
+
+        if (found !== hoverTarget) {
+            setHoverTarget(found);
+            // Optional: Update cursor or highlight
+        }
+    });
+
+    useEffect(() => {
+        const handleClick = () => {
+            if (hoverTarget) {
+                // Resolve target to LevelObject or Entity
+                let target: any = null;
+                if (hoverTarget.userData.entityId) {
+                    // It's an entity
+                    target = entities.find(e => e.id === hoverTarget.userData.entityId);
+                } else {
+                    // It's a station/level object
+                    // We need to reconstruct the LevelObject from userData or find it in layout
+                    // userData should store the config/type
+                    target = {
+                        ...hoverTarget.userData,
+                        position: hoverTarget.position // Vector3
+                    };
+                }
+
+                if (target) {
+                    InteractionManager.handleInteraction(heldEntity || null, target);
+                }
+            }
+        };
+
+        window.addEventListener('mousedown', handleClick);
+        return () => window.removeEventListener('mousedown', handleClick);
+    }, [hoverTarget, heldEntity, entities]);
+
+    return (
+        <>
+            <PointerLockControls />
+
+            {/* Render Held Item attached to Camera */}
+            {heldEntity && (
+                <group position={[0.5, -0.5, -1]} parent={camera}>
+                    {/* We need to render the mesh for heldEntity.type */}
+                    {/* Using VoxelFactory.createItem(heldEntity.type) */}
+                    {/* Note: creating geometry in render loop is bad. Should be memoized or componentized. */}
+                    <HeldItemRenderer type={heldEntity.type} />
+                </group>
+            )}
+        </>
+    );
+};
+
+const HeldItemRenderer: React.FC<{ type: string }> = ({ type }) => {
+    const meshRef = useRef<THREE.Mesh>(null);
+
+    useEffect(() => {
+        if (meshRef.current) {
+            const geo = VoxelFactory.createItem(type);
+            meshRef.current.geometry = geo;
+        }
+    }, [type]);
+
+    return (
+        <mesh ref={meshRef} scale={[0.5, 0.5, 0.5]} rotation={[0, Math.PI / 4, 0]}>
+            <meshStandardMaterial vertexColors />
+        </mesh>
+    );
+};
+</file>
+
+<file path="v2/src/components/UI/EditorUI.tsx">
+import React, { useState } from 'react';
+import { useGameStore } from '../../store/useGameStore';
+import type { LevelObject, StationType } from '../../types/GameTypes';
+
+const CATEGORIES = {
+    'Architecture': ['wall', 'floor'],
+    'Stations': ['counter', 'processor', 'serving', 'trash', 'table'],
+    'Sources': ['ingredient_source', 'item_source']
+};
+
+const PREFABS: Record<string, Partial<LevelObject>> = {
+    'Wall': { type: 'wall', size: { width: 0.5, depth: 0.5 } },
+    'Counter': { type: 'counter' },
+    'Serving': { type: 'serving' },
+    'Trash': { type: 'trash' },
+    'Table': { type: 'table' },
+    'Fryer': { type: 'processor', name: 'Fryer', config: { processes: ['raw_fries'], result: { 'raw_fries': 'cooked_fries' }, processingTime: 3000 } },
+    'CuttingBoard': { type: 'processor', name: 'CuttingBoard', config: { processes: ['potato', 'lettuce', 'tomato'], result: { 'potato': 'raw_fries', 'lettuce': 'chopped_lettuce', 'tomato': 'chopped_tomato' } } },
+    'Stove': { type: 'processor', name: 'Stove', config: { processes: ['raw_patty'], result: { 'raw_patty': 'cooked_patty' }, processingTime: 5000 } },
+    'PotatoBin': { type: 'ingredient_source', name: 'PotatoBin', config: { ingredient: 'potato' } },
+    'TomatoBin': { type: 'ingredient_source', name: 'TomatoBin', config: { ingredient: 'tomato' } },
+    'LettuceBin': { type: 'ingredient_source', name: 'LettuceBin', config: { ingredient: 'lettuce' } },
+    'PlateStack': { type: 'item_source', name: 'PlateStack', config: { item: 'plate' } },
+};
+
+export const EditorUI: React.FC = () => {
+    const { gameState, setGameState, currentLevel, setLevel } = useGameStore();
+    const [selectedCategory, setSelectedCategory] = useState('Stations');
+
+    if (gameState !== 'EDITOR') return null;
+
+    const handleAdd = (key: string) => {
+        const prefab = PREFABS[key];
+        if (!prefab) return;
+
+        const newObj: LevelObject = {
+            name: key + '_' + Date.now(),
+            type: prefab.type as StationType,
+            position: { x: 0, z: 0 },
+            ...prefab
+        };
+
+        if (currentLevel) {
+            const newLayout = [...currentLevel.layout, newObj];
+            setLevel({ ...currentLevel, layout: newLayout });
+        }
+    };
+
+    const handleSave = () => {
+        if (!currentLevel) return;
+        const json = JSON.stringify(currentLevel, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `level_${currentLevel.levelId}.json`;
+        a.click();
+    };
+
+    return (
+        <div className="editor-ui" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 20 }}>
+            {/* Top Bar */}
+            <div className="editor-top-bar">
+                <div className="editor-title">Level Editor: {currentLevel?.name}</div>
+                <div className="editor-controls-hint">
+                    <span>WASD: Move Camera</span>
+                    <span>Click: Select</span>
+                    <span>Drag: Move Object</span>
+                </div>
+                <div>
+                    <button className="menu-button small" onClick={handleSave}>Save JSON</button>
+                    <button className="menu-button small" onClick={() => setGameState('MENU')} style={{ marginLeft: '10px' }}>Exit</button>
+                </div>
+            </div>
+
+            {/* Bottom Panel (Library) */}
+            <div className="editor-bottom-panel">
+                <div className="library-tabs">
+                    {Object.keys(CATEGORIES).map(cat => (
+                        <button
+                            key={cat}
+                            className={`tab-btn ${selectedCategory === cat ? 'active' : ''}`}
+                            onClick={() => setSelectedCategory(cat)}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+                <div className="library-grid">
+                    {Object.keys(PREFABS).filter(key => {
+                        if (selectedCategory === 'Architecture') return ['Wall'].includes(key);
+                        if (selectedCategory === 'Sources') return key.includes('Bin') || key.includes('Stack');
+                        return !['Wall'].includes(key) && !key.includes('Bin') && !key.includes('Stack');
+                    }).map(key => (
+                        <div key={key} className="library-item" onClick={() => handleAdd(key)}>
+                            <div className="library-item-icon">📦</div>
+                            <div className="library-item-name">{key}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+</file>
+
+<file path="v2/src/components/UI/HUD.tsx">
+import React from 'react';
+import { useGameStore } from '../../store/useGameStore';
+
+export const HUD: React.FC = () => {
+    const { score, timeRemaining, orders, gameState, entities } = useGameStore();
+    const heldEntity = entities.find(e => e.heldBy === 'player');
+
+    if (gameState !== 'PLAYING') return null;
+
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
+
+    return (
+        <div id="game-hud" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5 }}>
+            {/* Crosshair */}
+            <div style={{
+                position: 'absolute', top: '50%', left: '50%', width: '10px', height: '10px',
+                backgroundColor: 'white', borderRadius: '50%', transform: 'translate(-50%, -50%)',
+                border: '1px solid black', opacity: 0.8
+            }} />
+
+            {/* Top Bar */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '20px', color: 'white', fontSize: '24px', textShadow: '2px 2px 0 #000' }}>
+                <div>Time: {formatTime(timeRemaining)}</div>
+                <div>Score: {score}</div>
+            </div>
+
+            {/* Orders */}
+            <div style={{ position: 'absolute', top: '60px', left: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {orders.map(order => (
+                    <div key={order.id} style={{
+                        background: 'rgba(0,0,0,0.7)', color: 'white', padding: '10px', borderRadius: '5px',
+                        borderLeft: '5px solid ' + (order.duration < 30 ? 'red' : 'green')
+                    }}>
+                        <div style={{ fontWeight: 'bold' }}>{order.recipeName}</div>
+                        <div style={{ fontSize: '0.8em' }}>{Math.floor(order.duration)}s</div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Held Item */}
+            {heldEntity && (
+                <div style={{
+                    position: 'absolute', bottom: '20px', right: '20px',
+                    background: 'rgba(0,0,0,0.5)', color: 'white', padding: '10px', borderRadius: '5px',
+                    display: 'flex', alignItems: 'center', gap: '10px'
+                }}>
+                    <div style={{ fontSize: '20px' }}>Held: {heldEntity.type}</div>
+                    {heldEntity.contents && heldEntity.contents.length > 0 && (
+                        <div style={{ fontSize: '14px', color: '#ccc' }}>
+                            (+ {heldEntity.contents.length} items)
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+</file>
+
+<file path="v2/src/components/UI/LevelManager.tsx">
+import React, { useEffect, useState } from 'react';
+import { useGameStore } from '../../store/useGameStore';
+import { useTranslation } from '../../utils/i18n';
+import type { LevelSchema } from '../../types/GameTypes';
+import { LevelLoader } from '../../utils/LevelLoader';
+import type { RoadmapLevel } from '../../utils/LevelLoader';
+
+export const LevelManager: React.FC = () => {
+    const { gameState, setGameState, setLevel } = useGameStore();
+    const { t } = useTranslation();
+    const [levels, setLevels] = useState<RoadmapLevel[]>([]);
+
+    useEffect(() => {
+        if (gameState === 'EDITOR_HUB') {
+            LevelLoader.fetchRoadmap().then(setLevels);
+        }
+    }, [gameState]);
+
+    if (gameState !== 'EDITOR_HUB') return null;
+
+    const handleNewLevel = () => {
+        const newLevel: LevelSchema = {
+            levelId: Date.now(),
+            name: "New Level",
+            duration: 300,
+            starThresholds: [100, 200, 300],
+            availableMeals: [],
+            maxActiveOrders: 3,
+            newOrderDelay: 10,
+            layout: []
+        };
+        setLevel(newLevel);
+        setGameState('EDITOR');
+    };
+
+    const handleEditLevel = async (levelInfo: RoadmapLevel) => {
+        const levelData = await LevelLoader.fetchLevel(levelInfo.filename);
+        if (levelData) {
+            setLevel(levelData);
+            setGameState('EDITOR');
+        }
+    };
+
+    return (
+        <div className="overlay active" style={{ zIndex: 10 }}>
+            <div className="menu-container" style={{ minWidth: '600px' }}>
+                <h1>{t('levelManager')}</h1>
+
+                <div className="editor-toolbar" style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                    <button className="menu-button small" onClick={handleNewLevel}>➕ {t('newLevel')}</button>
+                </div>
+
+                <div className="level-list-editor" style={{
+                    display: 'flex', flexDirection: 'column', gap: '10px',
+                    maxHeight: '400px', overflowY: 'auto', background: 'rgba(0,0,0,0.3)', padding: '10px'
+                }}>
+                    {levels.map(level => (
+                        <div key={level.levelId} style={{
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            background: '#444', padding: '10px', border: '1px solid #666'
+                        }}>
+                            <span>{level.name} (ID: {level.levelId})</span>
+                            <div style={{ display: 'flex', gap: '5px' }}>
+                                <button className="menu-button small" onClick={() => handleEditLevel(level)}>{t('edit')}</button>
+                                <button className="menu-button small delete" style={{ background: '#822' }}>{t('delete')}</button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <button className="menu-button" onClick={() => setGameState('MENU')} style={{ marginTop: '20px' }}>{t('back')}</button>
+            </div>
+        </div>
+    );
+};
+</file>
+
+<file path="v2/src/components/UI/MainMenu.tsx">
+import { useGameStore } from '../../store/useGameStore';
+import { useTranslation } from '../../utils/i18n';
+import { useState, useEffect } from 'react';
+import { LevelLoader } from '../../utils/LevelLoader';
+import type { RoadmapLevel } from '../../utils/LevelLoader';
+
+export const MainMenu: React.FC = () => {
+    const { gameState, setGameState, setLevel } = useGameStore();
+    const { t } = useTranslation();
+    const [view, setView] = useState<'MAIN' | 'LEVEL_SELECT'>('MAIN');
+    const [levels, setLevels] = useState<RoadmapLevel[]>([]);
+
+    useEffect(() => {
+        LevelLoader.fetchRoadmap().then(setLevels);
+    }, []);
+
+    if (gameState !== 'MENU') return null;
+
+    const startLevel = async (levelInfo: RoadmapLevel) => {
+        const levelData = await LevelLoader.fetchLevel(levelInfo.filename);
+        if (levelData) {
+            setLevel(levelData);
+            setGameState('PLAYING');
+        }
+    };
+
+    const startEditor = () => {
+        setGameState('EDITOR_HUB');
+    };
+
+    if (gameState !== 'MENU') return null;
+
+    return (
+        <div className="overlay active" style={{ zIndex: 10 }}>
+            <div className="menu-container">
+                <h1>Pixel Kitchen Sim v2</h1>
+
+                {view === 'MAIN' && (
+                    <>
+                        <button onClick={() => setView('LEVEL_SELECT')} className="menu-button">
+                            {t('play')}
+                        </button>
+                        <button onClick={startEditor} className="menu-button">
+                            {t('editor')}
+                        </button>
+                        <button onClick={() => setGameState('SETTINGS')} className="menu-button">
+                            {t('settings')}
+                        </button>
+                    </>
+                )}
+
+                {view === 'LEVEL_SELECT' && (
+                    <>
+                        <h2>{t('levelSelect')}</h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+                            {levels.map(l => (
+                                <button key={l.levelId} onClick={() => startLevel(l)} className="menu-button">
+                                    {l.name}
+                                </button>
+                            ))}
+                        </div>
+                        <button onClick={() => setView('MAIN')} className="menu-button" style={{ marginTop: '20px' }}>
+                            {t('back')}
+                        </button>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+</file>
+
+<file path="v2/src/components/UI/PauseMenu.tsx">
+import React, { useEffect } from 'react';
+import { useGameStore } from '../../store/useGameStore';
+import { useTranslation } from '../../utils/i18n';
+
+export const PauseMenu: React.FC = () => {
+    const { gameState, setGameState } = useGameStore();
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                if (gameState === 'PLAYING') setGameState('PAUSED');
+                else if (gameState === 'PAUSED') setGameState('PLAYING');
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [gameState, setGameState]);
+
+    if (gameState !== 'PAUSED') return null;
+
+    return (
+        <div className="overlay active" style={{ zIndex: 20 }}>
+            <div className="menu-container">
+                <h1>{t('paused')}</h1>
+                <button onClick={() => setGameState('PLAYING')} className="menu-button">{t('resume')}</button>
+                <button onClick={() => setGameState('MENU')} className="menu-button">{t('quit')}</button>
+            </div>
+        </div>
+    );
+};
+</file>
+
+<file path="v2/src/components/UI/SettingsMenu.tsx">
+import React from 'react';
+import { useGameStore } from '../../store/useGameStore';
+import { useTranslation } from '../../utils/i18n';
+
+export const SettingsMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+    const { settings, setSettings } = useGameStore();
+    const { t } = useTranslation();
+
+    return (
+        <div className="overlay active">
+            <div className="menu-container">
+                <h1>{t('settings')}</h1>
+
+                <div className="setting-group">
+                    <label>{t('language')}:</label>
+                    <div className="button-group">
+                        {['en', 'fr', 'es'].map(lang => (
+                            <button
+                                key={lang}
+                                className={`lang-button ${settings.language === lang ? 'active' : ''}`}
+                                onClick={() => setSettings({ language: lang as any })}
+                            >
+                                {lang.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="setting-group">
+                    <label>{t('showLabels')}:</label>
+                    <input
+                        type="checkbox"
+                        className="menu-toggle"
+                        checked={settings.showLabels}
+                        onChange={(e) => setSettings({ showLabels: e.target.checked })}
+                    />
+                </div>
+
+                <button className="menu-button" onClick={onClose}>{t('back')}</button>
+            </div>
+        </div>
+    );
+};
+</file>
+
+<file path="v2/src/components/World/EntityManager.tsx">
+import React, { useMemo } from 'react';
+import { useGameStore } from '../../store/useGameStore';
+import { VoxelFactory } from '../../utils/VoxelFactory';
+import type { Entity } from '../../types/GameTypes';
+import * as THREE from 'three';
+
+export const EntityManager: React.FC = () => {
+    const entities = useGameStore(state => state.entities);
+
+    // Filter out items held by player (rendered by PlayerController)
+    // Items held by stations (heldBy = stationID) should be rendered at station position?
+    // Or we update their position in InteractionManager?
+    // InteractionManager updates position when placing.
+    // So we just render based on position.
+    // But if heldBy is set, maybe we should attach to the parent object?
+    // For now, we assume position is updated in world coordinates for station-held items.
+    // Only player-held items are excluded.
+
+    const worldEntities = entities.filter(e => {
+        if (e.heldBy === 'player') return false;
+        // If held by another entity (e.g. ingredient on plate), don't render at top level
+        if (e.heldBy && entities.some(parent => parent.id === e.heldBy)) return false;
+        return true;
+    });
+
+    return (
+        <group>
+            {worldEntities.map(entity => (
+                <EntityMesh key={entity.id} entity={entity} />
+            ))}
+        </group>
+    );
+};
+
+const EntityMesh: React.FC<{ entity: Entity }> = ({ entity }) => {
+    const geometry = useMemo(() => VoxelFactory.createItem(entity.type), [entity.type]);
+
+    // If it's a plate, we might need to render contents?
+    // VoxelFactory.createItem('plate') just creates the plate.
+    // Contents are separate entities?
+    // In Interaction.ts, we added contents to `contents` array of plate.
+    // But we also kept them in `entities` list?
+    // "useGameStore.getState().updateEntity(ingredient.id, { heldBy: container.id ... })"
+    // So ingredients are still in entities list, but heldBy = container.id.
+    // So they are in `worldEntities` (since heldBy !== 'player').
+    // But their position is {0,0,0} relative to container?
+    // If we render them here at {0,0,0}, they will be at world origin if we don't parent them.
+    // We need to parent them to the container or calculate world position.
+    // R3F doesn't easily support dynamic parenting across the tree without portals.
+    // Easier approach: Calculate world position for ingredients or just render them relative to container if we can find it.
+
+    // Alternative: EntityManager renders containers. Container renders its contents.
+    // So we filter out entities that are held by *another entity*.
+
+    // Let's check if heldBy is another entity ID.
+    // We need to know if heldBy is a station or entity.
+    // Stations don't have IDs in the same pool usually, or we use names.
+    // In Interaction.ts, we didn't set heldBy for stations, we just set position.
+    // So heldBy is only used for Player or Containers.
+
+    // So:
+    // If heldBy is set and it's NOT 'player', it's likely a container.
+    // So we should NOT render it at top level.
+    // The Container should render it.
+
+    // But wait, `EntityMesh` for container needs to render children.
+
+    // Let's update the filter.
+
+    return (
+        <group position={[entity.position.x, entity.position.y, entity.position.z]} rotation={[entity.rotation.x, entity.rotation.y, entity.rotation.z]}>
+            <mesh geometry={geometry} castShadow receiveShadow>
+                <meshStandardMaterial vertexColors roughness={0.8} metalness={0.1} />
+            </mesh>
+            {/* Render Contents if any */}
+            {entity.contents && <EntityContents contentIds={entity.contents} />}
+
+            {/* UserData for Raycasting */}
+            <primitive object={new THREE.Group()} userData={{ entityId: entity.id, type: 'entity' }} />
+            {/* Actually attach userData to the mesh or group */}
+        </group>
+    );
+};
+
+const EntityContents: React.FC<{ contentIds: string[] }> = ({ contentIds }) => {
+    const allEntities = useGameStore(state => state.entities);
+    const contents = contentIds.map(id => allEntities.find(e => e.id === id)).filter(e => e) as Entity[];
+
+    return (
+        <group>
+            {contents.map((item, i) => (
+                <group key={item.id} position={[0, 0.1 + (i * 0.05), 0]}>
+                    {/* Stack them slightly? or randomize? */}
+                    <EntityMesh entity={item} />
+                </group>
+            ))}
+        </group>
+    );
+};
+</file>
+
+<file path="v2/src/components/World/LabelRenderer.tsx">
+import React from 'react';
+import { Html } from '@react-three/drei';
+import { useGameStore } from '../../store/useGameStore';
+import { useTranslation } from '../../utils/i18n';
+
+interface LabelRendererProps {
+    position: [number, number, number];
+    text: string;
+}
+
+export const LabelRenderer: React.FC<LabelRendererProps> = ({ position, text }) => {
+    const showLabels = useGameStore(state => state.settings.showLabels);
+    const { t } = useTranslation();
+
+    if (!showLabels) return null;
+
+    return (
+        <Html position={position} center distanceFactor={10} zIndexRange={[100, 0]}>
+            <div style={{
+                background: 'rgba(0, 0, 0, 0.6)',
+                color: 'white',
+                padding: '2px 5px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                fontFamily: 'Courier New',
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                userSelect: 'none'
+            }}>
+                {t(text as any)}
+            </div>
+        </Html>
+    );
+};
+</file>
+
+<file path="v2/src/components/World/LevelGeometry.tsx">
+import React, { useMemo } from 'react';
+import * as THREE from 'three';
+import { Instances, Instance } from '@react-three/drei';
+import { useGameStore } from '../../store/useGameStore';
+import { VoxelFactory } from '../../utils/VoxelFactory';
+import { PALETTE } from '../../config/constants';
+import { LabelRenderer } from './LabelRenderer';
+
+const WALL_HEIGHT = 2.5;
+
+export const LevelGeometry: React.FC = () => {
+    const currentLevel = useGameStore(state => state.currentLevel);
+
+    const { walls, stations } = useMemo(() => {
+        if (!currentLevel) return { walls: [], stations: [] };
+        const walls = currentLevel.layout.filter(o => o.type === 'wall');
+        const stations = currentLevel.layout.filter(o => o.type !== 'wall');
+        return { walls, stations };
+    }, [currentLevel]);
+
+    const wallGeo = useMemo(() => new THREE.BoxGeometry(1, 1, 1), []);
+    const wallMat = useMemo(() => new THREE.MeshStandardMaterial({ color: PALETTE.WALL_WHITE }), []);
+
+    // Floor
+    const floorTex = useMemo(() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128; canvas.height = 128;
+        const ctx = canvas.getContext('2d')!;
+        ctx.fillStyle = '#37474F'; ctx.fillRect(0, 0, 128, 128);
+        ctx.fillStyle = '#546E7A'; ctx.fillRect(0, 0, 64, 64); ctx.fillRect(64, 64, 64, 64);
+        ctx.strokeStyle = '#263238'; ctx.lineWidth = 4; ctx.strokeRect(0, 0, 128, 128);
+        ctx.beginPath(); ctx.moveTo(64, 0); ctx.lineTo(64, 128); ctx.moveTo(0, 64); ctx.lineTo(128, 64); ctx.stroke();
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(4, 4);
+        tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter;
+        return tex;
+    }, []);
+    const getStationGeo = (type: string, config?: any) => {
+        switch (type) {
+            case 'counter': return VoxelFactory.createCounter();
+            case 'serving': return VoxelFactory.createCounter(); // Tint red later?
+            case 'trash': return VoxelFactory.createTrashBin();
+            case 'processor':
+                if (config?.processes?.includes('raw_fries')) return VoxelFactory.createFryer();
+                if (config?.processes?.includes('potato')) return VoxelFactory.createCuttingBoard();
+                if (config?.processes?.includes('raw_patty')) return VoxelFactory.createStove();
+                return VoxelFactory.createCounter(); // Fallback
+            case 'ingredient_source': return VoxelFactory.createIngredientBin(config?.ingredient || 'tomato');
+            case 'item_source':
+                if (config?.item === 'plate') return VoxelFactory.createPlateStack();
+                return VoxelFactory.createCounter();
+            case 'table': return VoxelFactory.createTable({ n: false, s: false, e: false, w: false }); // TODO: Neighbors
+            default: return VoxelFactory.createCounter();
+        }
+    };
+
+    return (
+        <group>
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+                <planeGeometry args={[8, 8]} />
+                <meshStandardMaterial map={floorTex} roughness={0.5} metalness={0.1} />
+            </mesh>
+
+            <Instances range={walls.length} geometry={wallGeo} material={wallMat} castShadow receiveShadow>
+                {walls.map((wall, i) => (
+                    <Instance
+                        key={i}
+                        position={[wall.position.x, WALL_HEIGHT / 2, wall.position.z]}
+                        scale={[wall.size?.width ?? 0.5, WALL_HEIGHT, wall.size?.depth ?? 0.5]}
+                    />
+                ))}
+            </Instances>
+
+            {/* Render Stations individually since they have different geometries */}
+            {stations.map((station, i) => {
+                const geo = useMemo(() => getStationGeo(station.type, station.config), [station.type, station.config]);
+                return (
+                    <group key={i} position={[station.position.x, 0, station.position.z]} rotation={[0, station.rotation || 0, 0]}>
+                        <mesh
+                            geometry={geo}
+                            castShadow
+                            receiveShadow
+                        >
+                            <meshStandardMaterial vertexColors roughness={0.8} metalness={0.1} />
+                        </mesh>
+                        {!['counter', 'table', 'serving'].includes(station.type) && (
+                            <LabelRenderer position={[0, 2, 0]} text={station.name || station.type} />
+                        )}
+                    </group>
+                );
+            })}
+        </group>
+    );
+}
+</file>
+
+<file path="v2/src/config/constants.ts">
+export const GRID_UNIT = 0.5;
+export const VOXEL_RESOLUTION = 16;
+export const VOXEL_SIZE = GRID_UNIT / VOXEL_RESOLUTION;
+
+export const PALETTE = {
+    WOOD_DARK: 0x5d4037,
+    WOOD_LIGHT: 0x8d6e63,
+    WOOD_BOARD: 0xeecfa1,
+    METAL_DARK: 0x424242,
+    METAL_LIGHT: 0xbdbdbd,
+    METAL_SHINY: 0xe0e0e0,
+    BLACK: 0x1a1a1a,
+    COUNTER_TOP: 0xf5f5f5, 
+    TRASH_GREEN: 0x2e7d32,
+    TRASH_LID: 0x1b5e20,
+    PLASTIC_RED: 0xc62828,
+    PLASTIC_BLUE: 0x1565c0,
+    OIL_GOLD: 0xffd700,
+    WATER_BLUE: 0x29b6f6,
+    FIRE_ORANGE: 0xff5722,
+    TOMATO: 0xd32f2f,
+    LETTUCE: 0x43a047,
+    CHEESE: 0xfbc02d,
+    BUN: 0xf4a460,
+    MEAT_RAW: 0xe57373,
+    MEAT_COOKED: 0x5d4037,
+    POTATO: 0xd7ccc8,
+    FRIES_RAW: 0xffecb3,
+    FRIES_COOKED: 0xffeb3b,
+    PLATE_WHITE: 0xffffff,
+    ONION: 0xeceff1,
+    MUSHROOM: 0xa1887f,
+    WALL_WHITE: 0xEFEBE9,
+    // New Colors
+    CHICKEN_RAW: 0xFFB6C1,
+    CHICKEN_COOKED: 0xCD853F,
+    BACON_RAW: 0xFA8072,
+    BACON_COOKED: 0x8B0000,
+    EGG_WHITE: 0xFFFFFF,
+    EGG_YOLK: 0xFFD700,
+    PANCAKE: 0xF4A460,
+    PIZZA_CRUST: 0xDEB887,
+    SAUCE_RED: 0xB22222,
+    MOZZARELLA: 0xFFFFF0,
+    BANANA: 0xFFE135,
+    STRAWBERRY: 0xFC5A8D,
+    GLASS_BLUE: 0xAADDFF,
+    WHITE: 0xFFFFFF
+};
+</file>
+
+<file path="v2/src/store/useGameStore.ts">
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { LevelSchema, Order } from '../types/GameTypes';
+
+interface GameState {
+    score: number;
+    timeRemaining: number;
+    currentLevel: LevelSchema | null;
+    orders: Order[];
+    entities: import('../types/GameTypes').Entity[];
+    gameState: 'MENU' | 'PLAYING' | 'PAUSED' | 'LEVEL_END' | 'EDITOR' | 'EDITOR_HUB' | 'SETTINGS';
+    settings: {
+        language: 'en' | 'fr' | 'es';
+        showLabels: boolean;
+    };
+
+    setScore: (score: number) => void;
+    addScore: (amount: number) => void;
+    setTimeRemaining: (time: number) => void;
+    setLevel: (level: LevelSchema) => void;
+    setGameState: (state: 'MENU' | 'PLAYING' | 'PAUSED' | 'LEVEL_END' | 'EDITOR' | 'EDITOR_HUB' | 'SETTINGS') => void;
+    addOrder: (order: Order) => void;
+    removeOrder: (id: string) => void;
+    addEntity: (entity: import('../types/GameTypes').Entity) => void;
+    removeEntity: (id: string) => void;
+    updateEntity: (id: string, updates: Partial<import('../types/GameTypes').Entity>) => void;
+    tickOrders: () => void;
+    setSettings: (settings: Partial<GameState['settings']>) => void;
+    reset: () => void;
+}
+
+export const useGameStore = create<GameState>()(
+    persist(
+        (set) => ({
+            score: 0,
+            timeRemaining: 0,
+            currentLevel: null,
+            orders: [],
+            entities: [],
+            gameState: 'MENU',
+            settings: {
+                language: 'en',
+                showLabels: true
+            },
+
+            setScore: (score) => set({ score }),
+            addScore: (amount) => set((state) => ({ score: state.score + amount })),
+            setTimeRemaining: (time) => set({ timeRemaining: time }),
+            setLevel: (level) => set({ currentLevel: level, timeRemaining: level.duration }),
+            setGameState: (state) => set({ gameState: state }),
+            addOrder: (order) => set((state) => ({ orders: [...state.orders, order] })),
+            removeOrder: (id) => set((state) => ({ orders: state.orders.filter(o => o.id !== id) })),
+            addEntity: (entity) => set((state) => ({ entities: [...state.entities, entity] })),
+            removeEntity: (id) => set((state) => ({ entities: state.entities.filter(e => e.id !== id) })),
+            updateEntity: (id, updates) => set((state) => ({
+                entities: state.entities.map(e => e.id === id ? { ...e, ...updates } : e)
+            })),
+            tickOrders: () => set((state) => {
+                const updatedOrders = state.orders.map(o => ({ ...o, duration: o.duration - 1 }));
+                const activeOrders = updatedOrders.filter(o => o.duration > 0);
+                const expiredCount = state.orders.length - activeOrders.length;
+                return {
+                    orders: activeOrders,
+                    score: state.score - (expiredCount * 10) // Penalty for expired
+                };
+            }),
+            setSettings: (newSettings) => set((state) => ({ settings: { ...state.settings, ...newSettings } })),
+            reset: () => set({ score: 0, orders: [], timeRemaining: 0, entities: [] })
+        }),
+        {
+            name: 'kitchen-sim-storage',
+            partialize: (state) => ({ settings: state.settings }), // Only persist settings
+        }
+    )
+);
+</file>
+
+<file path="v2/src/systems/Interaction.ts">
+import { useGameStore } from '../store/useGameStore';
+import type { Entity, LevelObject } from '../types/GameTypes';
+import { RecipeSystem } from './RecipeSystem';
+import { v4 as uuidv4 } from 'uuid';
+
+interface InteractionContext {
+    heldEntity: Entity | null;
+    target: LevelObject | Entity;
+    targetEntity?: Entity | null; // If target is a station, this is the item on it
+}
+
+interface InteractionStrategy {
+    canExecute: (ctx: InteractionContext) => boolean;
+    execute: (ctx: InteractionContext) => void;
+}
+
+const PickupStrategy: InteractionStrategy = {
+    canExecute: ({ heldEntity, target, targetEntity }) => {
+        return !heldEntity && (!!targetEntity || (target as any).type === 'preplaced_item');
+    },
+    execute: ({ targetEntity }) => {
+        if (targetEntity) {
+            useGameStore.getState().updateEntity(targetEntity.id, { heldBy: 'player', position: { x: 0, y: 0, z: 0 } });
+        }
+    }
+};
+
+const PlaceStrategy: InteractionStrategy = {
+    canExecute: ({ heldEntity, target, targetEntity }) => {
+        if (!heldEntity) return false;
+        // Can place on Counter, Table, or empty Processor
+        const type = (target as any).type; // StationType or Entity type
+        const isSurface = type === 'counter' || type === 'table' || type === 'processor';
+        return isSurface && !targetEntity;
+    },
+    execute: ({ heldEntity, target }) => {
+        if (heldEntity) {
+            // Snap to center of target
+            const pos = (target as LevelObject).position;
+            // If target is a LevelObject, it has x, z. y is usually counter height.
+            // We need to know the height.
+            // For now assume counter height 0.9
+            useGameStore.getState().updateEntity(heldEntity.id, {
+                heldBy: undefined,
+                position: { x: pos.x, y: 0.9, z: pos.z }
+            });
+        }
+    }
+};
+
+const SpawnStrategy: InteractionStrategy = {
+    canExecute: ({ heldEntity, target }) => {
+        return !heldEntity && ((target as any).type === 'ingredient_source' || (target as any).type === 'item_source');
+    },
+    execute: ({ target }) => {
+        const t = target as LevelObject;
+        const itemType = t.config?.ingredient || t.config?.item;
+        if (itemType) {
+            const newEntity: Entity = {
+                id: uuidv4(),
+                type: itemType,
+                position: { x: 0, y: 0, z: 0 }, // Will be attached to player
+                rotation: { x: 0, y: 0, z: 0 },
+                heldBy: 'player'
+            };
+            useGameStore.getState().addEntity(newEntity);
+        }
+    }
+};
+
+const TrashStrategy: InteractionStrategy = {
+    canExecute: ({ heldEntity, target }) => {
+        return !!heldEntity && (target as any).type === 'trash';
+    },
+    execute: ({ heldEntity }) => {
+        if (heldEntity) {
+            useGameStore.getState().removeEntity(heldEntity.id);
+        }
+    }
+};
+
+const ServeStrategy: InteractionStrategy = {
+    canExecute: ({ heldEntity, target }) => {
+        return !!heldEntity && (target as any).type === 'serving';
+    },
+    execute: ({ heldEntity }) => {
+        if (heldEntity) {
+            // Validate Recipe
+            // Assume heldEntity is a plate with contents
+            if (heldEntity.contents) {
+                // Get types of contents
+                const entities = useGameStore.getState().entities;
+                const ingredients = heldEntity.contents.map(id => entities.find(e => e.id === id)?.type).filter(t => t) as string[];
+
+                const recipe = RecipeSystem.validatePlate(ingredients);
+                if (recipe) {
+                    // Check active orders
+                    const orders = useGameStore.getState().orders;
+                    const matchingOrder = orders.find(o => o.recipeName === recipe.name && o.status === 'active');
+
+                    if (matchingOrder) {
+                        // Success
+                        useGameStore.getState().addScore(recipe.baseScore); // Add time bonus logic later
+                        useGameStore.getState().removeOrder(matchingOrder.id);
+                        useGameStore.getState().removeEntity(heldEntity.id); // Remove plate
+                        // Also remove contents? Yes, they are children or referenced.
+                        // We should cleanup referenced entities.
+                        heldEntity.contents.forEach(id => useGameStore.getState().removeEntity(id));
+                    } else {
+                        // Wrong order penalty
+                        useGameStore.getState().addScore(-10);
+                    }
+                } else {
+                    // Invalid recipe penalty
+                    useGameStore.getState().addScore(-5);
+                }
+            }
+            // If not a plate or empty, maybe just fail or nothing?
+        }
+    }
+};
+
+// Combine Strategy (Plate assembly)
+const CombineStrategy: InteractionStrategy = {
+    canExecute: ({ heldEntity, targetEntity }) => {
+        if (!heldEntity) return false;
+        // Case 1: Holding Ingredient, Target is Plate (on counter)
+        if (targetEntity && (targetEntity.type === 'plate' || targetEntity.type === 'bowl')) {
+            return true; // Add ingredient to plate
+        }
+        // Case 2: Holding Plate, Target is Ingredient (on counter)
+        if ((heldEntity.type === 'plate' || heldEntity.type === 'bowl') && targetEntity) {
+            return true; // Pick up ingredient onto plate
+        }
+        return false;
+    },
+    execute: ({ heldEntity, targetEntity }) => {
+        // Logic for combining
+        // We need to know which is container and which is ingredient
+        let container = heldEntity!;
+        let ingredient = targetEntity!;
+
+        if (targetEntity?.type === 'plate' || targetEntity?.type === 'bowl') {
+            container = targetEntity;
+            ingredient = heldEntity!;
+        }
+
+        // Add ingredient to container
+        const currentContents = container.contents || [];
+        useGameStore.getState().updateEntity(container.id, {
+            contents: [...currentContents, ingredient.id]
+        });
+
+        // Hide ingredient or attach it to container visually
+        // We'll set heldBy to container ID? Or just remove from world and keep in contents list?
+        // If we remove from entities list, we lose its data.
+        // Better to keep it but set heldBy to container.
+        useGameStore.getState().updateEntity(ingredient.id, {
+            heldBy: container.id,
+            position: { x: 0, y: 0, z: 0 } // Relative to container
+        });
+
+        // If we were holding the ingredient, we are now holding nothing (if we put it on a plate on counter)
+        if (heldEntity === ingredient) {
+            // We placed it.
+            // heldEntity is now null (handled by updateEntity heldBy change)
+        }
+    }
+};
+
+// Process Strategy (Chopping, Frying)
+const ProcessStrategy: InteractionStrategy = {
+    canExecute: ({ heldEntity, target, targetEntity }) => {
+        if (!heldEntity) return false;
+        if ((target as any).type !== 'processor') return false;
+        if (targetEntity) return false; // Processor occupied
+
+        // Check if processor supports this ingredient
+        const config = (target as LevelObject).config;
+        if (!config || !config.processes) return false;
+        return config.processes.includes(heldEntity.type);
+    },
+    execute: ({ heldEntity, target }) => {
+        if (heldEntity) {
+            const t = target as LevelObject;
+            // Place on processor
+            useGameStore.getState().updateEntity(heldEntity.id, {
+                heldBy: undefined,
+                position: { x: t.position.x, y: 0.9, z: t.position.z }
+            });
+
+            // Start processing logic
+            // This should ideally be handled by a system that watches entities on processors.
+            // For now, we can just set a timeout or state.
+            // Let's set state to 'processing' and start a timer.
+
+            const resultType = t.config.result[heldEntity.type];
+            const time = t.config.processingTime || 0;
+
+            if (time > 0) {
+                setTimeout(() => {
+                    useGameStore.getState().updateEntity(heldEntity.id, {
+                        type: resultType,
+                        state: 'processed'
+                    });
+                }, time);
+            } else {
+                // Instant (Cutting Board) - usually requires clicks in v1, but let's make it instant for v2 prototype first
+                // or maybe instant interaction?
+                useGameStore.getState().updateEntity(heldEntity.id, {
+                    type: resultType,
+                    state: 'processed'
+                });
+            }
+        }
+    }
+};
+
+
+const strategies = [
+    TrashStrategy,
+    ServeStrategy,
+    CombineStrategy,
+    ProcessStrategy,
+    PickupStrategy,
+    PlaceStrategy,
+    SpawnStrategy
+];
+
+export const InteractionManager = {
+    handleInteraction: (heldEntity: Entity | null, target: LevelObject | Entity) => {
+        // Find if there is an entity on the target (if target is a station)
+        let targetEntity: Entity | null | undefined = undefined;
+
+        if ((target as any).position) { // It's a LevelObject or Entity
+            // const pos = (target as any).position; // LevelObject has x,z. Entity has x,y,z.
+            // Find entity at this position (approx)
+            // This is expensive to do here. Ideally Raycaster gives us the Entity directly if we hit it.
+            // If we hit a Station, we check if any entity is resting on it.
+
+            // If 'target' passed in IS an Entity, then targetEntity is that entity.
+            if ((target as any).id) {
+                targetEntity = target as Entity;
+                // But wait, if we clicked an Entity, what is the 'target'?
+                // The Raycaster hits objects.
+                // If we hit a Station Mesh, target is LevelObject.
+                // If we hit an Item Mesh, target is Entity.
+            } else {
+                // Target is LevelObject (Station)
+                // Check if any entity is heldBy this station? 
+                // Entities on stations usually have heldBy = undefined but position = station position.
+                // Or we can introduce 'heldBy: stationID' concept?
+                // For now, let's check position overlap.
+                const entities = useGameStore.getState().entities;
+                targetEntity = entities.find(e =>
+                    !e.heldBy &&
+                    Math.abs(e.position.x - (target as LevelObject).position.x) < 0.1 &&
+                    Math.abs(e.position.z - (target as LevelObject).position.z) < 0.1
+                );
+            }
+        }
+
+        const ctx: InteractionContext = { heldEntity, target, targetEntity };
+
+        for (const strategy of strategies) {
+            if (strategy.canExecute(ctx)) {
+                strategy.execute(ctx);
+                return;
+            }
+        }
+    }
+};
+</file>
+
+<file path="v2/src/systems/OrderSystem.ts">
+import { useGameStore } from '../store/useGameStore';
+import { RECIPES } from './RecipeSystem';
+import { v4 as uuidv4 } from 'uuid';
+import type { Order } from '../types/GameTypes';
+
+export const OrderSystem = {
+    update: () => {
+        const state = useGameStore.getState();
+        const { currentLevel } = state;
+
+        if (!currentLevel) return;
+
+        // 1. Update existing orders
+        // We need to update order duration. 
+        // Since orders are in store, we might need a way to update them efficiently.
+        // Or we just let GameLoop handle the timer decrement?
+        // GameLoop decrements main timer. Order timers need to be decremented too.
+        // Let's do it here.
+
+        // Note: Updating store every frame for every order might be heavy for React.
+        // But for < 10 orders it's fine.
+
+        // However, useGameStore doesn't have updateOrder method exposed easily for batch updates.
+        // Let's just check for expiration here and maybe update time every second?
+        // Or better: Store 'startTime' and 'duration' and calculate remaining time in UI?
+        // That's better for performance. 
+        // But we need to fail orders when time runs out.
+
+        // Let's stick to checking expiration.
+        // const now = Date.now();
+
+        // We need to store when the order was added to calculate remaining time properly without updating store every frame.
+        // But our Order type has 'duration' which implies remaining time?
+        // Let's assume 'duration' is remaining time for now as per previous HUD code.
+
+        // Actually, let's update 'duration' (remaining time) every tick.
+        // To avoid too many re-renders, maybe we only update it in the store every second?
+        // Or we use a ref for the loop and only sync to store occasionally?
+
+        // Simplest approach for now: Update every frame (or 100ms).
+        // But wait, HUD uses it for progress bar.
+
+        // Let's implement a tick accumulator.
+
+    },
+
+    // Called every second by GameLoop
+    tick: () => {
+        const state = useGameStore.getState();
+        const { currentLevel, orders, addOrder, removeOrder, addScore } = state;
+
+        if (!currentLevel) return;
+
+        // 1. Decrement Order Timers
+        const updatedOrders = orders.map(o => ({ ...o, duration: o.duration - 1 }));
+
+        // 2. Check Expiration
+        updatedOrders.forEach(o => {
+            if (o.duration <= 0) {
+                // Fail order
+                addScore(-10); // Penalty
+                removeOrder(o.id);
+            }
+        });
+
+        // Update store with non-expired orders (that changed duration)
+        // We can't easily batch this with current store API without replacing all orders.
+        // Let's add setOrders to store or just use what we have.
+        // We'll just update the ones that are still alive.
+        // Actually, removeOrder removes it. We need to update the remaining ones.
+        // This is getting messy with the current store API.
+        // Let's just add a `tickOrders` action to store?
+
+        // 3. Generate New Orders
+        if (orders.length < currentLevel.maxActiveOrders) {
+            // Chance to spawn? Or fixed interval?
+            // Level has newOrderDelay.
+            // We need to track time since last order.
+            // Let's use a random chance for now approx based on delay.
+            // 1/delay chance per second?
+
+            if (Math.random() < 1 / currentLevel.newOrderDelay) {
+                const recipeName = currentLevel.availableMeals[Math.floor(Math.random() * currentLevel.availableMeals.length)];
+                const recipe = RECIPES[recipeName];
+                if (recipe) {
+                    const newOrder: Order = {
+                        id: uuidv4(),
+                        recipeName: recipe.name,
+                        status: 'active',
+                        duration: recipe.timeLimit,
+                        startTime: Date.now(),
+                        score: recipe.baseScore
+                    };
+                    addOrder(newOrder);
+                }
+            }
+        }
+
+        // Update durations in store
+        // We need a bulk update or just iterate.
+        // Let's add `tickOrders` to store for efficiency.
+    }
+};
+</file>
+
+<file path="v2/src/systems/RecipeSystem.ts">
+import type { Recipe } from '../types/GameTypes';
+
+// Prime numbers for ingredients
+export const INGREDIENT_PRIMES: Record<string, number> = {
+    'cooked_fries': 2,
+    'chopped_lettuce': 3,
+    'chopped_tomato': 5,
+    'bun': 7,
+    'cooked_patty': 11,
+    'cheese_slice': 13,
+    'cooked_onion_rings': 17,
+    'cooked_chicken_tenders': 19,
+    'cooked_bacon': 23,
+    'toasted_bread': 29,
+    'grilled_cheese_cooked': 31,
+    'cooked_pancakes': 37,
+    'syrup': 41,
+    'cooked_omelette': 43,
+    'granola': 47,
+    'sliced_banana': 53,
+    'sliced_strawberry': 59,
+    'yogurt': 61,
+    'smoothie_ready': 67,
+    'cooked_pizza_margherita': 71,
+    // Add more as needed
+    'plate': 1, // Containers don't contribute to hash usually, or we multiply by 1
+};
+
+export const RECIPES: Record<string, Recipe> = {
+    'French Fries': {
+        name: 'French Fries',
+        ingredients: ['cooked_fries'],
+        timeLimit: 75, baseScore: 60,
+        primesProduct: 2
+    },
+    'Salad': {
+        name: 'Salad',
+        ingredients: ['chopped_lettuce', 'chopped_tomato'],
+        timeLimit: 90, baseScore: 75,
+        primesProduct: 3 * 5
+    },
+    'Hamburger': {
+        name: 'Hamburger',
+        ingredients: ['bun', 'cooked_patty'],
+        timeLimit: 100, baseScore: 100,
+        primesProduct: 7 * 11
+    },
+    'Cheeseburger': {
+        name: 'Cheeseburger',
+        ingredients: ['bun', 'cheese_slice', 'cooked_patty'],
+        timeLimit: 110, baseScore: 120,
+        primesProduct: 7 * 13 * 11
+    },
+    'Onion Rings': {
+        name: 'Onion Rings',
+        ingredients: ['cooked_onion_rings'],
+        timeLimit: 80, baseScore: 70,
+        primesProduct: 17
+    },
+    'Chicken Tenders': {
+        name: 'Chicken Tenders',
+        ingredients: ['cooked_chicken_tenders'],
+        timeLimit: 95, baseScore: 90,
+        primesProduct: 19
+    },
+    'BLT Sandwich': {
+        name: 'BLT Sandwich',
+        ingredients: ['cooked_bacon', 'chopped_lettuce', 'chopped_tomato', 'toasted_bread'],
+        timeLimit: 120, baseScore: 110,
+        primesProduct: 23 * 3 * 5 * 29
+    },
+    'Grilled Cheese Sandwich': {
+        name: 'Grilled Cheese Sandwich',
+        ingredients: ['grilled_cheese_cooked'],
+        timeLimit: 85, baseScore: 80,
+        primesProduct: 31
+    },
+    'Pancakes': {
+        name: 'Pancakes',
+        ingredients: ['cooked_pancakes', 'syrup'],
+        timeLimit: 120, baseScore: 90,
+        primesProduct: 37 * 41
+    },
+    'Omelette': {
+        name: 'Omelette',
+        ingredients: ['cooked_omelette'],
+        timeLimit: 90, baseScore: 80,
+        primesProduct: 43
+    },
+    'Fruit & Yogurt Bowl': {
+        name: 'Fruit & Yogurt Bowl',
+        ingredients: ['granola', 'sliced_banana', 'sliced_strawberry', 'yogurt'],
+        timeLimit: 70, baseScore: 70,
+        primesProduct: 47 * 53 * 59 * 61
+    },
+    'Smoothie': {
+        name: 'Smoothie',
+        ingredients: ['smoothie_ready'],
+        timeLimit: 60, baseScore: 65,
+        primesProduct: 67
+    },
+    'Pizza Margherita': {
+        name: 'Pizza Margherita',
+        ingredients: ['cooked_pizza_margherita'],
+        timeLimit: 150, baseScore: 150,
+        primesProduct: 71
+    }
+};
+
+// Reverse lookup map for O(1) validation
+const RECIPE_HASH_MAP = new Map<number, Recipe>();
+Object.values(RECIPES).forEach(r => {
+    if (r.primesProduct) RECIPE_HASH_MAP.set(r.primesProduct, r);
+});
+
+export const RecipeSystem = {
+    validatePlate: (ingredients: string[]): Recipe | null => {
+        let product = 1;
+        for (const ing of ingredients) {
+            const prime = INGREDIENT_PRIMES[ing];
+            if (prime) product *= prime;
+        }
+        return RECIPE_HASH_MAP.get(product) || null;
+    },
+
+    getRecipeByName: (name: string): Recipe | undefined => {
+        return RECIPES[name];
+    }
+};
+</file>
+
+<file path="v2/src/types/GameTypes.ts">
+export type Vector3 = { x: number, y: number, z: number };
+export type Vector2 = { x: number, z: number };
+
+export type ItemType =
+    | 'plate' | 'bowl' | 'cup'
+    | 'tomato' | 'chopped_tomato' | 'tomato_sauce'
+    | 'lettuce' | 'chopped_lettuce'
+    | 'potato' | 'raw_fries' | 'cooked_fries'
+    | 'patty' | 'cooked_patty'
+    | 'bun' | 'toasted_bun'
+    | 'cheese'
+    | 'chicken' | 'coated_chicken' | 'cooked_chicken'
+    | 'bacon' | 'cooked_bacon'
+    | 'onion' | 'chopped_onion'
+    | 'banana' | 'sliced_banana'
+    | 'strawberry' | 'sliced_strawberry'
+    | 'pizza_dough' | 'pizza_base' | 'pizza_margherita' | 'cooked_pizza'
+    | 'egg' | 'fried_egg'
+    | 'pancake_mix' | 'pancake'
+    | 'omelette'
+    | 'milk' | 'yogurt';
+
+export type StationType = 'wall' | 'counter' | 'processor' | 'ingredient_source' | 'item_source' | 'serving' | 'trash' | 'table' | 'preplaced_item';
+
+export interface LevelObject {
+    name: string;
+    type: StationType;
+    position: Vector2; // x, z
+    rotation?: number; // y-axis radians
+    size?: { width: number, depth: number };
+    config?: any;
+}
+
+export interface LevelSchema {
+    levelId: number;
+    name: string;
+    duration: number;
+    starThresholds: [number, number, number];
+    availableMeals: string[];
+    maxActiveOrders: number;
+    newOrderDelay: number;
+    layout: LevelObject[];
+}
+
+export interface Entity {
+    id: string;
+    type: ItemType;
+    position: Vector3;
+    rotation: Vector3;
+    heldBy?: string; // 'player' or station ID
+    state?: string; // 'raw', 'cooked', 'chopped', etc.
+    contents?: string[]; // IDs of other entities contained within (for plates)
+}
+
+export interface Recipe {
+    name: string;
+    ingredients: string[]; // Sorted list of ingredients
+    timeLimit: number;
+    baseScore: number;
+    primesProduct?: number; // Pre-calculated hash
+}
+
+export interface Order {
+    id: string;
+    recipeName: string;
+    startTime: number;
+    duration: number;
+    status: 'active' | 'completed' | 'failed';
+    score: number;
+}
+</file>
+
+<file path="v2/src/utils/i18n.ts">
+import { useGameStore } from '../store/useGameStore';
+
+const TRANSLATIONS = {
+    en: {
+        play: "Play",
+        editor: "Level Editor",
+        settings: "Settings",
+        back: "Back",
+        resume: "Resume",
+        quit: "Quit to Menu",
+        paused: "PAUSED",
+        language: "Language",
+        showLabels: "Show Labels",
+        levelSelect: "Select Level",
+        loading: "Loading...",
+        score: "Score",
+        time: "Time",
+        orders: "Orders",
+        empty: "Empty",
+        levelManager: "Level Manager",
+        newLevel: "New Level",
+        edit: "Edit",
+        delete: "Delete",
+        // Stations & Items
+        fryer: "Fryer",
+        cutting_board: "Cutting Board",
+        stove: "Stove",
+        trash: "Trash",
+        serving: "Serving Window",
+        potato: "Potato",
+        potato_source: "Potato Bin",
+        meat: "Meat",
+        meat_source: "Meat Bin",
+        bun: "Bun",
+        bun_source: "Bun Bin",
+        lettuce: "Lettuce",
+        lettuce_source: "Lettuce Bin",
+        tomato: "Tomato",
+        tomato_source: "Tomato Bin",
+        cheese: "Cheese",
+        cheese_source: "Cheese Refrigerator",
+        plate: "Plate",
+        plate_stack: "Plate Stack",
+        counter: "Counter",
+        table: "Table"
+    },
+    fr: {
+        play: "Jouer",
+        editor: "Éditeur de Niveau",
+        settings: "Paramètres",
+        back: "Retour",
+        resume: "Reprendre",
+        quit: "Quitter vers Menu",
+        paused: "PAUSE",
+        language: "Langue",
+        showLabels: "Afficher Étiquettes",
+        levelSelect: "Choisir Niveau",
+        loading: "Chargement...",
+        score: "Score",
+        time: "Temps",
+        orders: "Commandes",
+        empty: "Vide",
+        levelManager: "Gestionnaire de Niveaux",
+        newLevel: "Nouveau Niveau",
+        edit: "Éditer",
+        delete: "Supprimer",
+        // Stations & Items
+        fryer: "Friteuse",
+        cutting_board: "Planche à découper",
+        stove: "Poêle",
+        trash: "Poubelle",
+        serving: "Passe-plat",
+        potato: "Pomme de terre",
+        potato_source: "Panier de Pommes de Terre",
+        meat: "Viande",
+        meat_source: "Panier de Viande",
+        bun: "Pain",
+        bun_source: "Panier de Pain",
+        lettuce: "Laitue",
+        lettuce_source: "Panier de Laitue",
+        tomato: "Tomate",
+        tomato_source: "Panier de Tomate",
+        cheese: "Fromage",
+        cheese_source: "Réfrigérateur de Fromage",
+        plate: "Assiette",
+        plate_stack: "Pile d'Assiettes",
+        counter: "Comptoir",
+        table: "Table"
+    },
+    es: {
+        play: "Jugar",
+        editor: "Editor de Niveles",
+        settings: "Ajustes",
+        back: "Atrás",
+        resume: "Reanudar",
+        quit: "Salir al Menú",
+        paused: "PAUSA",
+        language: "Idioma",
+        showLabels: "Mostrar Etiquetas",
+        levelSelect: "Seleccionar Nivel",
+        loading: "Cargando...",
+        score: "Puntuación",
+        time: "Tiempo",
+        orders: "Pedidos",
+        empty: "Vacío",
+        levelManager: "Gestor de Niveles",
+        newLevel: "Nuevo Nivel",
+        edit: "Editar",
+        delete: "Eliminar",
+        // Stations & Items
+        fryer: "Freidora",
+        cutting_board: "Tabla de cortar",
+        stove: "Estufa",
+        trash: "Basura",
+        serving: "Ventanilla",
+        potato: "Patata",
+        potato_source: "Cesta de Patatas",
+        meat: "Carne",
+        meat_source: "Cesta de Carne",
+        bun: "Pan",
+        bun_source: "Cesta de Pan",
+        lettuce: "Lechuga",
+        lettuce_source: "Cesta de Lechugas",
+        tomato: "Tomate",
+        tomato_source: "Cesta de Tomates",
+        cheese: "Queso",
+        cheese_source: "Refrigerador de Queso",
+        plate: "Plato",
+        plate_stack: "Pila de Platos",
+        counter: "Mostrador",
+        table: "Mesa"
+    }
+};
+
+export const useTranslation = () => {
+    const language = useGameStore(state => state.settings.language);
+    const t = (key: keyof typeof TRANSLATIONS['en']) => {
+        return TRANSLATIONS[language][key] || TRANSLATIONS['en'][key] || key;
+    };
+    return { t, language };
+};
+</file>
+
+<file path="v2/src/utils/LevelLoader.ts">
+import type { LevelSchema } from '../types/GameTypes';
+
+export interface RoadmapLevel {
+    levelId: number;
+    name: string;
+    filename: string;
+}
+
+export const LevelLoader = {
+    fetchRoadmap: async (): Promise<RoadmapLevel[]> => {
+        try {
+            const response = await fetch('/levels/game_roadmap.json');
+            if (!response.ok) throw new Error('Failed to load roadmap');
+            return await response.json();
+        } catch (error) {
+            console.error('Error loading roadmap:', error);
+            return [];
+        }
+    },
+
+    fetchLevel: async (filename: string): Promise<LevelSchema | null> => {
+        try {
+            const response = await fetch(`/levels/${filename}`);
+            if (!response.ok) throw new Error(`Failed to load level: ${filename}`);
+            return await response.json();
+        } catch (error) {
+            console.error(`Error loading level ${filename}:`, error);
+            return null;
+        }
+    }
+};
+</file>
+
+<file path="v2/src/utils/VoxelFactory.ts">
+import * as THREE from 'three';
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { GRID_UNIT, PALETTE, VOXEL_SIZE } from '../config/constants';
+
+export class VoxelBuilder {
+    private geometries: THREE.BufferGeometry[] = [];
+    private baseGeometry: THREE.BoxGeometry;
+
+    constructor() {
+        this.baseGeometry = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE);
+    }
+
+    add(x: number, y: number, z: number, color: number): this {
+        const matrix = new THREE.Matrix4();
+        const offset = (VOXEL_SIZE / 2);
+        const tx = (x * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
+        const ty = (y * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
+        const tz = (z * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
+        matrix.makeTranslation(tx, ty, tz);
+
+        const geometry = this.baseGeometry.clone();
+        geometry.applyMatrix4(matrix);
+
+        const colors: number[] = [];
+        const c = new THREE.Color(color);
+        const count = geometry.attributes.position.count;
+        for (let i = 0; i < count; i++) {
+            colors.push(c.r, c.g, c.b);
+        }
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        this.geometries.push(geometry);
+        return this;
+    }
+
+    addBox(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, color: number): this {
+        for (let x = x1; x <= x2; x++) {
+            for (let y = y1; y <= y2; y++) {
+                for (let z = z1; z <= z2; z++) {
+                    this.add(x, y, z, color);
+                }
+            }
+        }
+        return this;
+    }
+
+    buildGeometry(): THREE.BufferGeometry {
+        if (this.geometries.length === 0) return new THREE.BufferGeometry();
+        const mergedGeometry = BufferGeometryUtils.mergeGeometries(this.geometries, false);
+        this.geometries.forEach(g => g.dispose());
+        this.geometries = [];
+        return mergedGeometry;
+    }
+}
+
+export const VoxelFactory = {
+    createTrashBin: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(3, 0, 3, 12, 10, 12, PALETTE.TRASH_GREEN);
+        vb.addBox(2, 10, 2, 13, 11, 13, PALETTE.TRASH_LID);
+        vb.addBox(6, 0, 13, 9, 1, 15, PALETTE.METAL_LIGHT);
+        vb.addBox(4, 9, 4, 11, 10, 11, PALETTE.BLACK);
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createFryer: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(1, 0, 1, 14, 8, 14, PALETTE.METAL_SHINY);
+        vb.addBox(2, 5, 2, 13, 7, 13, PALETTE.OIL_GOLD);
+        vb.addBox(1, 8, 1, 14, 12, 3, PALETTE.METAL_DARK);
+        vb.addBox(4, 9, 4, 4, 14, 4, PALETTE.BLACK);
+        vb.addBox(11, 9, 4, 11, 14, 4, PALETTE.BLACK);
+        vb.addBox(4, 5, 4, 11, 8, 11, PALETTE.METAL_DARK);
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createCuttingBoard: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.WOOD_BOARD);
+        vb.addBox(10, 1, 3, 10, 1, 10, PALETTE.METAL_SHINY);
+        vb.addBox(10, 1, 11, 10, 1, 13, PALETTE.BLACK);
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createStove: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(1, 0, 1, 14, 2, 14, PALETTE.METAL_DARK);
+        vb.addBox(2, 2, 2, 13, 2, 13, PALETTE.BLACK);
+        vb.addBox(4, 2, 4, 5, 2, 5, PALETTE.FIRE_ORANGE);
+        vb.addBox(10, 2, 10, 11, 2, 11, PALETTE.FIRE_ORANGE);
+        vb.addBox(3, 1, 14, 4, 1, 15, PALETTE.PLASTIC_RED);
+        vb.addBox(11, 1, 14, 12, 1, 15, PALETTE.PLASTIC_RED);
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createSink: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(1, 0, 1, 14, 4, 14, PALETTE.METAL_SHINY);
+        vb.addBox(2, 2, 2, 13, 3, 13, PALETTE.WATER_BLUE);
+        vb.addBox(7, 4, 1, 8, 10, 2, PALETTE.METAL_LIGHT);
+        vb.addBox(7, 10, 2, 8, 11, 8, PALETTE.METAL_LIGHT);
+        vb.addBox(7, 8, 8, 8, 9, 8, PALETTE.METAL_LIGHT);
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createToaster: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(3, 0, 3, 12, 6, 12, PALETTE.METAL_SHINY);
+        vb.addBox(4, 6, 5, 11, 6, 6, PALETTE.BLACK);
+        vb.addBox(4, 6, 9, 11, 6, 10, PALETTE.BLACK);
+        vb.addBox(13, 2, 7, 14, 4, 8, PALETTE.BLACK);
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createMixer: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(4, 0, 4, 11, 1, 11, PALETTE.METAL_LIGHT);
+        vb.addBox(4, 1, 4, 6, 10, 6, PALETTE.METAL_LIGHT);
+        vb.addBox(4, 10, 4, 11, 12, 6, PALETTE.METAL_LIGHT);
+        vb.addBox(9, 2, 6, 11, 6, 11, PALETTE.METAL_SHINY);
+        vb.addBox(9, 6, 8, 9, 10, 9, PALETTE.METAL_DARK);
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createBlender: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.METAL_DARK);
+        vb.addBox(6, 4, 6, 9, 11, 9, PALETTE.GLASS_BLUE);
+        vb.addBox(6, 11, 6, 9, 12, 9, PALETTE.BLACK);
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createDoughPress: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.METAL_LIGHT);
+        vb.addBox(7, 1, 2, 8, 8, 3, PALETTE.METAL_DARK);
+        vb.addBox(3, 8, 3, 12, 9, 12, PALETTE.METAL_LIGHT);
+        vb.addBox(7, 9, 7, 8, 12, 8, PALETTE.BLACK);
+        vb.addBox(5, 12, 7, 10, 13, 8, PALETTE.BLACK);
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createPizzaOven: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(1, 0, 1, 14, 1, 14, PALETTE.METAL_DARK);
+        vb.addBox(1, 1, 1, 3, 10, 14, PALETTE.WOOD_DARK);
+        vb.addBox(12, 1, 1, 14, 10, 14, PALETTE.WOOD_DARK);
+        vb.addBox(1, 1, 1, 14, 10, 3, PALETTE.WOOD_DARK);
+        vb.addBox(1, 10, 1, 14, 12, 14, PALETTE.WOOD_DARK);
+        vb.addBox(6, 2, 6, 9, 4, 9, PALETTE.FIRE_ORANGE);
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createTable: (neighbors: { n: boolean, s: boolean, e: boolean, w: boolean }) => {
+        const vb = new VoxelBuilder();
+        vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.METAL_SHINY);
+        vb.addBox(1, 5, 1, 14, 5, 14, PALETTE.METAL_DARK);
+
+        const addLeg = (x: number, z: number) => vb.addBox(x, 0, z, x + 1, 14, z + 1, PALETTE.METAL_LIGHT);
+
+        if (!neighbors.w && !neighbors.n) addLeg(1, 1);
+        if (!neighbors.e && !neighbors.n) addLeg(13, 1);
+        if (!neighbors.w && !neighbors.s) addLeg(1, 13);
+        if (!neighbors.e && !neighbors.s) addLeg(13, 13);
+
+        const geo = vb.buildGeometry();
+        geo.scale(1, 1.8, 1);
+        geo.translate(0, (GRID_UNIT * 1.8) / 2, 0);
+        return geo;
+    },
+
+    createIngredientBin: (ingredientType: string) => {
+        const vb = new VoxelBuilder();
+        vb.addBox(1, 0, 1, 14, 6, 14, PALETTE.WOOD_LIGHT);
+        vb.addBox(2, 1, 2, 13, 6, 13, PALETTE.BLACK);
+
+        const c = getIngredientColor(ingredientType);
+        if (c) {
+            vb.addBox(3, 2, 3, 6, 5, 6, c);
+            vb.addBox(7, 3, 4, 10, 5, 8, c);
+            vb.addBox(4, 4, 8, 8, 6, 11, c);
+        }
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createPlateStack: () => {
+        const vb = new VoxelBuilder();
+        for (let y = 0; y < 8; y += 2) {
+            vb.addBox(3, y, 3, 12, y + 1, 12, PALETTE.PLATE_WHITE);
+        }
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createCupStack: () => {
+        const vb = new VoxelBuilder();
+        for (let i = 0; i < 3; i++) {
+            let y = i * 3;
+            vb.addBox(5, y, 5, 10, y + 2, 10, PALETTE.WATER_BLUE);
+        }
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createBowlStack: () => {
+        const vb = new VoxelBuilder();
+        for (let i = 0; i < 4; i++) {
+            let y = i * 2;
+            vb.addBox(4, y, 4, 11, y + 1, 11, PALETTE.WOOD_BOARD);
+        }
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createItem: (type: string) => {
+        const vb = new VoxelBuilder();
+
+        if (type === 'plate') {
+            vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.PLATE_WHITE);
+            vb.addBox(2, 1, 2, 13, 2, 3, PALETTE.PLATE_WHITE);
+            vb.addBox(2, 1, 12, 13, 2, 13, PALETTE.PLATE_WHITE);
+            vb.addBox(2, 1, 3, 3, 2, 12, PALETTE.PLATE_WHITE);
+            vb.addBox(12, 1, 3, 13, 2, 12, PALETTE.PLATE_WHITE);
+        }
+        else if (type === 'bowl') {
+            vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.WOOD_BOARD);
+            vb.addBox(3, 1, 3, 12, 4, 4, PALETTE.WOOD_BOARD);
+            vb.addBox(3, 1, 11, 12, 4, 12, PALETTE.WOOD_BOARD);
+            vb.addBox(3, 1, 4, 4, 4, 11, PALETTE.WOOD_BOARD);
+            vb.addBox(11, 1, 4, 12, 4, 11, PALETTE.WOOD_BOARD);
+        }
+        else if (type === 'cup') {
+            vb.addBox(5, 0, 5, 10, 6, 10, PALETTE.GLASS_BLUE);
+        }
+        else if (type.includes('tomato')) {
+            if (type.includes('sauce')) {
+                vb.addBox(4, 0, 4, 11, 5, 11, PALETTE.METAL_LIGHT);
+                vb.addBox(4, 2, 4, 11, 4, 11, PALETTE.SAUCE_RED);
+            } else {
+                vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.TOMATO);
+                if (!type.includes('chopped')) vb.addBox(6, 4, 6, 9, 5, 9, PALETTE.LETTUCE);
+            }
+        }
+        else if (type.includes('lettuce')) {
+            vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.LETTUCE);
+        }
+        else if (type.includes('potato')) {
+            vb.addBox(5, 0, 4, 10, 3, 11, PALETTE.POTATO);
+        }
+        else if (type === 'raw_fries') {
+            vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_RAW); vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_RAW); vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_RAW);
+        }
+        else if (type === 'cooked_fries') {
+            vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_COOKED); vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_COOKED); vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_COOKED);
+        }
+        else if (type.includes('patty')) {
+            const c = type.includes('cooked') ? PALETTE.MEAT_COOKED : PALETTE.MEAT_RAW;
+            vb.addBox(3, 0, 3, 12, 2, 12, c);
+        }
+        else if (type === 'bun' || type.includes('bread')) {
+            const c = type.includes('toasted') ? PALETTE.WOOD_DARK : PALETTE.BUN;
+            vb.addBox(3, 0, 3, 12, 2, 12, c);
+        }
+        else if (type.includes('cheese') || type.includes('mozzarella')) {
+            vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.CHEESE);
+        }
+        else if (type.includes('chicken')) {
+            const c = type.includes('cooked') ? PALETTE.CHICKEN_COOKED : (type.includes('coated') ? PALETTE.WOOD_BOARD : PALETTE.CHICKEN_RAW);
+            vb.addBox(4, 0, 4, 11, 3, 9, c);
+        }
+        else if (type.includes('bacon')) {
+            const c = type.includes('cooked') ? PALETTE.BACON_COOKED : PALETTE.BACON_RAW;
+            vb.addBox(2, 0, 6, 13, 1, 9, c);
+        }
+        else if (type.includes('onion')) {
+            vb.addBox(5, 0, 5, 10, 5, 10, PALETTE.ONION);
+        }
+        else if (type.includes('banana')) {
+            vb.addBox(3, 0, 7, 12, 3, 9, PALETTE.BANANA);
+        }
+        else if (type.includes('strawberry')) {
+            vb.addBox(6, 0, 6, 9, 3, 9, PALETTE.STRAWBERRY);
+        }
+        else if (type.includes('pizza_dough') || type.includes('pizza_base')) {
+            vb.addBox(3, 0, 3, 12, 2, 12, PALETTE.PIZZA_CRUST);
+        }
+        else if (type.includes('pizza_margherita')) {
+            const c = type.includes('cooked') ? PALETTE.PIZZA_CRUST : PALETTE.PIZZA_CRUST;
+            vb.addBox(3, 0, 3, 12, 2, 12, c);
+            vb.addBox(4, 2, 4, 11, 3, 11, PALETTE.SAUCE_RED);
+            vb.addBox(5, 3, 5, 10, 4, 10, PALETTE.MOZZARELLA);
+        }
+        else if (type.includes('egg')) {
+            vb.addBox(6, 0, 6, 9, 4, 9, PALETTE.EGG_WHITE);
+        }
+        else if (type.includes('pancake')) {
+            if (type.includes('mix') || type.includes('batter')) vb.addBox(5, 0, 5, 10, 6, 10, PALETTE.WOOD_BOARD);
+            else vb.addBox(3, 0, 3, 12, 2, 12, PALETTE.PANCAKE);
+        }
+        else if (type.includes('omelette')) {
+            vb.addBox(3, 0, 6, 12, 3, 10, PALETTE.EGG_YOLK);
+        }
+        else if (type.includes('milk') || type.includes('yogurt')) {
+            vb.addBox(5, 0, 5, 10, 8, 10, PALETTE.WHITE);
+        }
+        else {
+            vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.PLASTIC_BLUE);
+        }
+
+        const geo = vb.buildGeometry();
+        geo.translate(0, GRID_UNIT / 2, 0);
+        return geo;
+    },
+
+    createWall: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(0, 0, 0, 15, 15, 15, PALETTE.WALL_WHITE);
+        const geo = vb.buildGeometry();
+        return geo;
+    },
+
+    createCounter: () => {
+        const vb = new VoxelBuilder();
+        vb.addBox(0, 0, 0, 15, 15, 15, PALETTE.WOOD_LIGHT);
+        vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.COUNTER_TOP);
+        const geo = vb.buildGeometry();
+        // Scale to 0.9 height?
+        // In v1, counters are 0.9 height.
+        // Here we build 16 voxels high = 0.5 height.
+        // We need to scale Y by 1.8.
+        geo.scale(1, 1.8, 1);
+        geo.translate(0, (GRID_UNIT * 1.8) / 2, 0);
+        return geo;
+    }
+};
+
+function getIngredientColor(type: string): number | null {
+    if (type.includes('tomato')) return type.includes('sauce') ? PALETTE.SAUCE_RED : PALETTE.TOMATO;
+    if (type.includes('lettuce')) return PALETTE.LETTUCE;
+    if (type.includes('cheese') || type.includes('mozzarella')) return PALETTE.CHEESE;
+    if (type.includes('bun') || type.includes('bread')) return PALETTE.BUN;
+    if (type.includes('patty')) return PALETTE.MEAT_RAW;
+    if (type.includes('cooked_patty')) return PALETTE.MEAT_COOKED;
+    if (type.includes('potato')) return PALETTE.POTATO;
+    if (type.includes('fries')) return PALETTE.FRIES_RAW;
+    if (type.includes('onion')) return PALETTE.ONION;
+    if (type.includes('chicken')) return PALETTE.CHICKEN_RAW;
+    if (type.includes('bacon')) return PALETTE.BACON_RAW;
+    if (type.includes('banana')) return PALETTE.BANANA;
+    if (type.includes('strawberry')) return PALETTE.STRAWBERRY;
+    if (type.includes('egg')) return PALETTE.EGG_WHITE;
+    if (type.includes('pizza')) return PALETTE.PIZZA_CRUST;
+    if (type.includes('coating')) return PALETTE.WOOD_BOARD;
+    return null;
+}
+</file>
+
+<file path="v2/src/App.css">
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+</file>
+
+<file path="v2/src/App.tsx">
+import React, { Suspense } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { KeyboardControls, Sky, Stars } from '@react-three/drei';
+import { LevelGeometry } from './components/World/LevelGeometry';
+import { PlayerController } from './components/Player/PlayerController';
+import { EntityManager } from './components/World/EntityManager';
+import { GameLoop } from './components/Core/GameLoop';
+import { HUD } from './components/UI/HUD';
+import { MainMenu } from './components/UI/MainMenu';
+import { PauseMenu } from './components/UI/PauseMenu';
+import { SettingsMenu } from './components/UI/SettingsMenu';
+import { EditorUI } from './components/UI/EditorUI';
+import { LevelManager } from './components/UI/LevelManager';
+import { LevelEditor } from './components/Editor/LevelEditor';
+import { useGameStore } from './store/useGameStore';
+
+const App: React.FC = () => {
+  const { gameState, setGameState } = useGameStore(state => state);
+
+  return (
+    <div style={{ width: '100vw', height: '100vh' }}>
+      <KeyboardControls
+        map={[
+          { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
+          { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
+          { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
+          { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
+          { name: 'jump', keys: ['Space'] },
+        ]}
+      >
+        <Canvas shadows camera={{ fov: 75, position: [0, 1.8, 0] }}>
+          <Sky sunPosition={[100, 20, 100]} />
+          <Stars />
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} castShadow />
+
+          <Suspense fallback={null}>
+            {gameState === 'PLAYING' && (
+              <>
+                <LevelGeometry />
+                <EntityManager />
+                <PlayerController />
+                <GameLoop />
+              </>
+            )}
+            {gameState === 'EDITOR' && (
+              <LevelEditor />
+            )}
+          </Suspense>
+        </Canvas>
+
+        <HUD />
+        <MainMenu />
+        <PauseMenu />
+        {gameState === 'SETTINGS' && <SettingsMenu onClose={() => setGameState('MENU')} />}
+        <LevelManager />
+        <EditorUI />
+      </KeyboardControls>
+    </div>
+  );
+};
+
+export default App;
+</file>
+
+<file path="v2/src/index.css">
+/* Reset and Base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+  /* Fallback if font not loaded */
+  background-color: #222;
+  color: #FFF;
+  user-select: none;
+  -webkit-user-select: none;
+  image-rendering: pixelated;
+}
+
+canvas {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* Overlays (Menus, Loading) */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(20, 20, 30, 0.95);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Menu Screens General Styling */
+.menu-screen h1 {
+  font-size: 2.5em;
+  margin-bottom: 30px;
+  color: #FFD700;
+  text-shadow: 2px 2px #000;
+}
+
+.menu-container {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 25px;
+  border: 4px solid #888;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-width: 300px;
+  max-width: 500px;
+}
+
+.menu-button {
+  font-family: inherit;
+  font-size: 1.2em;
+  color: #FFF;
+  background-color: #555;
+  border: 3px solid #333;
+  padding: 10px 15px;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.1s ease, background-color 0.1s ease;
+  outline: none;
+}
+
+.menu-button:hover {
+  background-color: #777;
+  transform: scale(1.02);
+}
+
+.menu-button:active {
+  background-color: #444;
+  transform: scale(0.98);
+}
+
+/* Settings Screen */
+.setting-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 15px;
+  width: 100%;
+}
+
+.button-group {
+  display: flex;
+  gap: 5px;
+}
+
+.lang-button {
+  font-size: 0.9em;
+  padding: 5px 8px;
+  background: #444;
+  border: 1px solid #666;
+  color: white;
+  cursor: pointer;
+}
+
+.lang-button.active {
+  background-color: #4CAF50;
+  border-color: #FFF;
+}
+
+/* Toggle Switch */
+.menu-toggle {
+  appearance: none;
+  width: 40px;
+  height: 20px;
+  background-color: #555;
+  border: 2px solid #333;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  vertical-align: middle;
+}
+
+.menu-toggle::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background-color: #FFF;
+  top: 1px;
+  left: 1px;
+  transition: transform 0.2s ease;
+}
+
+.menu-toggle:checked {
+  background-color: #4CAF50;
+}
+
+.menu-toggle:checked::after {
+  transform: translateX(20px);
+}
+
+/* Editor UI */
+.editor-ui {
+  font-family: 'Courier New', monospace;
+}
+
+.editor-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #555;
+  pointer-events: auto;
+}
+
+.editor-bottom-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #222;
+  padding: 10px;
+  pointer-events: auto;
+  border-top: 2px solid #555;
+}
+
+.library-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tab-btn {
+  background: #333;
+  border: 1px solid #555;
+  color: #888;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  color: #FFD700;
+  border-color: #FFD700;
+}
+
+.library-grid {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.library-item {
+  min-width: 80px;
+  height: 80px;
+  background: #444;
+  border: 2px solid #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  font-size: 0.8em;
+  text-align: center;
+}
+
+.library-item:hover {
+  background: #555;
+  border-color: #FFF;
+}
+</file>
+
+<file path="v2/src/main.tsx">
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+</file>
+
+<file path="v2/eslint.config.js">
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import tseslint from 'typescript-eslint'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+  },
+])
+</file>
+
+<file path="v2/index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>v2</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="v2/package.json">
+{
+  "name": "v2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.4.0",
+    "@types/three": "^0.181.0",
+    "@types/uuid": "^10.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "three": "^0.181.2",
+    "uuid": "^13.0.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4"
+  }
+}
+</file>
+
+<file path="v2/tsconfig.app.json">
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "types": ["vite/client"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["src"]
+}
+</file>
+
+<file path="v2/tsconfig.json">
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
+</file>
+
+<file path="v2/tsconfig.node.json">
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "types": ["node"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["vite.config.ts"]
+}
+</file>
+
+<file path="v2/vite.config.ts">
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+})
+</file>
+
+</files>
