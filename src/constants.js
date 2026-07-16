@@ -40,6 +40,21 @@ export const INGREDIENT_STATES = {
     READY: 'ready',
 };
 
+export const INGREDIENT_RENDER_ORDER = [
+    'bread',
+    'toasted_bread',
+    'bun',            // Handled as bottom bun during assembly
+    'bun_bottom',
+    'chopped_lettuce',
+    'chopped_tomato',
+    'cooked_patty',
+    'patty',
+    'cooked_bacon',
+    'bacon',
+    'cheese_slice',
+    'bun_top'
+];
+
 // --- INPUT ---
 export const GAMEPAD_DEADZONE = 0.15;
 export const GAMEPAD_INTERACT_BUTTON = 0; // Cross/A

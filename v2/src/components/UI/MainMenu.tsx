@@ -1,74 +1,98 @@
 import { useGameStore } from '../../store/useGameStore';
 import { useTranslation } from '../../utils/i18n';
-import { useState, useEffect } from 'react';
-import { LevelLoader } from '../../utils/LevelLoader';
-import type { RoadmapLevel } from '../../utils/LevelLoader';
 
 export const MainMenu: React.FC = () => {
-    const { gameState, setGameState, setLevel } = useGameStore();
+    const { gameState, setGameState } = useGameStore();
     const { t } = useTranslation();
-    const [view, setView] = useState<'MAIN' | 'LEVEL_SELECT'>('MAIN');
-    const [levels, setLevels] = useState<RoadmapLevel[]>([]);
-
-    useEffect(() => {
-        LevelLoader.fetchRoadmap().then(setLevels);
-    }, []);
-
-    if (gameState !== 'MENU') return null;
-
-    const startLevel = async (levelInfo: RoadmapLevel) => {
-        const levelData = await LevelLoader.fetchLevel(levelInfo.filename);
-        if (levelData) {
-            setLevel(levelData);
-            setGameState('PLAYING');
-        }
-    };
-
-    const startEditor = () => {
-        setGameState('EDITOR_HUB');
-    };
 
     if (gameState !== 'MENU') return null;
 
     return (
         <div className="overlay active" style={{ zIndex: 10 }}>
-            <div className="menu-container">
-                <h1>Pixel Kitchen Sim v2</h1>
+            <div className="menu-container" style={{
+                maxWidth: '500px',
+                margin: '0 auto',
+                marginTop: '10vh',
+                backgroundColor: '#1a1a2e',
+                padding: '40px',
+                borderRadius: '10px',
+                textAlign: 'center'
+            }}>
+                <h1 style={{ color: '#FFD700', fontSize: '3em', marginBottom: '30px' }}>
+                    {t('title')}
+                </h1>
 
-                {view === 'MAIN' && (
-                    <>
-                        <button onClick={() => setView('LEVEL_SELECT')} className="menu-button">
-                            {t('play')}
-                        </button>
-                        <button onClick={startEditor} className="menu-button">
-                            {t('editorHub')}
-                        </button>
-                        <button onClick={() => setGameState('SETTINGS')} className="menu-button">
-                            {t('settings')}
-                        </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <button
+                        onClick={() => setGameState('LEVEL_SELECT')}
+                        className="menu-button"
+                        style={{
+                            padding: '15px 30px',
+                            fontSize: '1.5em',
+                            backgroundColor: '#4CAF50',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        {t('play')}
+                    </button>
 
-                        <div className="credits-section" style={{ marginTop: '20px', fontSize: '0.8em', color: '#aaa' }}>
-                            <p>{t('credits')}: A Game By [Your Name]</p>
-                        </div>
-                    </>
-                )}
+                    <button
+                        onClick={() => setGameState('EDITOR_HUB')}
+                        className="menu-button"
+                        style={{
+                            padding: '12px 25px',
+                            fontSize: '1.2em',
+                            backgroundColor: '#2196F3',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {t('editorHub')}
+                    </button>
 
-                {view === 'LEVEL_SELECT' && (
-                    <>
-                        <h2>{t('levelSelect')}</h2>
-                        <div className="level-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', maxHeight: '400px', overflowY: 'auto', padding: '10px' }}>
-                            {levels.map(l => (
-                                <button key={l.levelId} onClick={() => startLevel(l)} className="menu-button level-card" style={{ height: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>{l.name}</span>
-                                    <span style={{ fontSize: '0.8em' }}>{l.filename}</span>
-                                </button>
-                            ))}
-                        </div>
-                        <button onClick={() => setView('MAIN')} className="menu-button" style={{ marginTop: '20px' }}>
-                            {t('back')}
-                        </button>
-                    </>
-                )}
+                    <button
+                        onClick={() => setGameState('SETTINGS')}
+                        className="menu-button"
+                        style={{
+                            padding: '12px 25px',
+                            fontSize: '1.2em',
+                            backgroundColor: '#16213e',
+                            color: 'white',
+                            border: '2px solid #0f3460',
+                            borderRadius: '8px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {t('settings')}
+                    </button>
+                </div>
+
+                <div className="credits-section" style={{
+                    marginTop: '40px',
+                    fontSize: '0.9em',
+                    color: '#888'
+                }}>
+                    <p>{t('credits')}: A Game By [Your Name]</p>
+                    <p style={{ marginTop: '10px' }}>
+                        <a href="#" style={{ color: '#4CAF50', textDecoration: 'none', margin: '0 10px' }}>X</a>
+                        <a href="#" style={{ color: '#4CAF50', textDecoration: 'none', margin: '0 10px' }}>Instagram</a>
+                        <a href="#" style={{ color: '#4CAF50', textDecoration: 'none', margin: '0 10px' }}>GitHub</a>
+                    </p>
+                </div>
+
+                <p className="menu-hint" style={{
+                    marginTop: '30px',
+                    fontSize: '0.85em',
+                    color: '#666'
+                }}>
+                    Navigate: Arrows/Stick | {t('select')}
+                </p>
             </div>
         </div>
     );

@@ -34,28 +34,28 @@
             <button id="editor-button" class="menu-button" data-action="editor-hub">Level Editor</button>
             <button id="settings-button" class="menu-button" data-action="settings">Settings</button>
             <div id="credits">
-                <p>A Game By [Your Name/Studio]</p>
+                <p id="credits-text">A Game By Azzxl Studio</p>
                 <p>
                     <a href="#" class="menu-link" data-action="link">X (Twitter)</a> |
-                    <a href="#" class="menu-link" data-action="link">Instagram</a> |
                     <a href="#" class="menu-link" data-action="link">GitHub</a>
                 </p>
             </div>
         </div>
-        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+        <p id="main-menu-hint" class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
     </div>
 
     <!-- Editor Hub (New) -->
     <div id="editor-hub-screen" class="overlay menu-screen">
-        <h1>Level Manager</h1>
+        <h1 id="editor-hub-title">Level Manager</h1>
         <div class="editor-toolbar">
-            <button class="menu-button small" data-action="create-level">➕ New Level</button>
-            <button class="menu-button small" data-action="save-roadmap">💾 Download Roadmap</button>
+            <button id="create-level-btn" class="menu-button small" data-action="create-level">➕ New Level</button>
+            <button id="download-roadmap-btn" class="menu-button small" data-action="save-roadmap">💾 Download
+                Roadmap</button>
         </div>
         <div id="editor-level-list" class="menu-container level-list-editor">
             <!-- List items injected by JS -->
         </div>
-        <button class="menu-button" data-action="back-to-main">Back to Menu</button>
+        <button id="editor-hub-back-btn" class="menu-button" data-action="back-to-main">Back to Menu</button>
     </div>
 
     <!-- Settings Screen -->
@@ -77,9 +77,10 @@
             </div>
             <p id="game-version">Version: 1.0 Beta</p>
             <button id="back-to-main-button" class="menu-button" data-action="back-to-main">Back</button>
-            <button id="resume-button-settings" class="menu-button" data-action="resume" style="display: none;">Resume Game</button>
+            <button id="resume-button-settings" class="menu-button" data-action="resume" style="display: none;">Resume
+                Game</button>
         </div>
-        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
+        <p id="settings-hint" class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
     </div>
 
     <!-- Level Select Screen -->
@@ -87,7 +88,8 @@
         <h1>Select Level</h1>
         <div id="level-list" class="menu-container level-grid"></div>
         <button id="back-to-main-from-level-select" class="menu-button" data-action="back-to-main">Back</button>
-        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
+        <p id="level-select-hint" class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]
+        </p>
     </div>
 
     <!-- In-Game HUD -->
@@ -165,7 +167,7 @@
                 <button id="btn-clone" class="editor-action-btn" title="Clone (C)">📋 Duplicate</button>
                 <button id="btn-delete" class="editor-action-btn delete" title="Delete (Del)">🗑️ Delete</button>
             </div>
-            
+
             <div class="inspector-config-section">
                 <label for="inspector-config">Config (JSON):</label>
                 <textarea id="inspector-config" rows="5" spellcheck="false"></textarea>
@@ -188,7 +190,7 @@
             <button id="restart-level-button" class="menu-button" data-action="restart-level">Restart Level</button>
             <button id="level-end-main-menu-button" class="menu-button" data-action="back-to-main">Main Menu</button>
         </div>
-        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+        <p id="level-end-hint" class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
     </div>
 
     <!-- Level Instructions Screen -->
@@ -196,11 +198,13 @@
         <h1 id="instructions-title">Level Instructions</h1>
         <div id="instructions-container" class="menu-container instructions-box">
             <div id="instructions-content"></div>
-            <button id="start-level-instructions-button" class="menu-button" data-action="start-level-confirm">Start Level</button>
+            <button id="start-level-instructions-button" class="menu-button" data-action="start-level-confirm">Start
+                Level</button>
         </div>
-         <p class="menu-hint">Select: Enter/[X]/[A]</p>
+        <p id="level-instructions-hint" class="menu-hint">Select: Enter/[X]/[A]</p>
     </div>
 
     <script type="module" src="src/main.js"></script>
 </body>
+
 </html>

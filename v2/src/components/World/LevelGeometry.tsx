@@ -57,10 +57,7 @@ export const LevelGeometry: React.FC = () => {
         }
     };
 
-    const getStationMat = () => {
-        const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.1 });
-        return mat;
-    };
+    const stationMat = useMemo(() => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.1 }), []);
 
     return (
         <group>
@@ -87,7 +84,7 @@ export const LevelGeometry: React.FC = () => {
             {/* Stations (individual) */}
             {stations.map((station, index) => {
                 const geo = getStationGeo(station.type, station.config);
-                const mat = getStationMat();
+                const mat = stationMat;
                 const isSelected = gameState === 'EDITOR' && selectedObject === station;
 
                 // Check if this object is placed on top of a surface
@@ -121,7 +118,8 @@ export const LevelGeometry: React.FC = () => {
                             receiveShadow
                             userData={{
                                 layoutIndex: currentLevel?.layout.indexOf(station),
-                                stationType: station.type // For surface detection
+                                stationType: station.type,
+                                ...station // Pass full config, type, name, etc.
                             }}
                         >
                             {!['counter', 'table', 'serving'].includes(station.type) && (

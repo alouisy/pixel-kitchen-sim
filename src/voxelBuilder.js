@@ -1,8 +1,8 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
-import { GRID_UNIT } from './constants.js';
+import { GRID_UNIT, INGREDIENT_RENDER_ORDER } from './constants.js';
 
-const VOXEL_RESOLUTION = 16; 
+const VOXEL_RESOLUTION = 16;  
 const VOXEL_SIZE = GRID_UNIT / VOXEL_RESOLUTION; 
 
 export const PALETTE = {
@@ -343,10 +343,11 @@ function getIngredientColor(type) {
 
 // --- ITEMS (Physical objects in hand/world) ---
 
-export function createItemMesh(type) {
+export function createItemMesh(type, contents = [], mealName = null) {
     const vb = new VoxelBuilder();
     
     if (type === 'plate') {
+        // Build the physical plate
         vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.PLATE_WHITE);
         vb.addBox(2, 1, 2, 13, 2, 3, PALETTE.PLATE_WHITE); 
         vb.addBox(2, 1, 12, 13, 2, 13, PALETTE.PLATE_WHITE);
@@ -368,16 +369,129 @@ export function createItemMesh(type) {
         if (type.includes('sauce')) {
              vb.addBox(4, 0, 4, 11, 5, 11, PALETTE.METAL_LIGHT); // Can
              vb.addBox(4, 2, 4, 11, 4, 11, PALETTE.SAUCE_RED); // Label
+        } else if (type.includes('chopped')) {
+            // Chopped tomato: Draw two flat tomato slices/quarters lying down
+            // Slice 1: center at (5.5, 0.5, 5.5)
+            for (let x = 2; x <= 9; x++) {
+                for (let z = 2; z <= 9; z++) {
+                    const dx = x - 5.5;
+                    const dz = z - 5.5;
+                    if (dx*dx + dz*dz <= 12.25) {
+                        const isRim = (dx*dx + dz*dz >= 6.25);
+                        vb.add(x, 0, z, isRim ? PALETTE.TOMATO : 0xe53935);
+                        if (!isRim && (x+z)%2 === 0) {
+                            vb.add(x, 1, z, 0xffd54f); // seeds
+                        } else {
+                            vb.add(x, 1, z, PALETTE.TOMATO);
+                        }
+                    }
+                }
+            }
+            // Slice 2: center at (10.5, 0.5, 10.5)
+            for (let x = 7; x <= 14; x++) {
+                for (let z = 7; z <= 14; z++) {
+                    const dx = x - 10.5;
+                    const dz = z - 10.5;
+                    if (dx*dx + dz*dz <= 12.25) {
+                        const isRim = (dx*dx + dz*dz >= 6.25);
+                        vb.add(x, 0, z, isRim ? PALETTE.TOMATO : 0xe53935);
+                        if (!isRim && (x+z)%2 === 1) {
+                            vb.add(x, 1, z, 0xffd54f); // seeds
+                        } else {
+                            vb.add(x, 1, z, PALETTE.TOMATO);
+                        }
+                    }
+                }
+            }
         } else {
-            vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.TOMATO);
-            if (!type.includes('chopped')) vb.addBox(6, 4, 6, 9, 5, 9, PALETTE.LETTUCE); // Stem
+            // Rounded tomato
+            const rx = 4.5, ry = 3.5, rz = 4.5;
+            const cx = 7.5, cy = 3.5, cz = 7.5;
+            for (let x = 3; x <= 12; x++) {
+                for (let y = 0; y <= 7; y++) {
+                    for (let z = 3; z <= 12; z++) {
+                        const dx = (x - cx) / rx;
+                        const dy = (y - cy) / ry;
+                        const dz = (z - cz) / rz;
+                        if (dx*dx + dy*dy + dz*dz <= 1.0) {
+                            vb.add(x, y, z, PALETTE.TOMATO);
+                        }
+                    }
+                }
+            }
+            // Leaf/Stem star on top
+            vb.add(7, 8, 7, 0x2e7d32); // Stem center high
+            vb.add(7, 7, 7, 0x2e7d32); // Stem center
+            // Star leaves
+            vb.add(6, 7, 7, PALETTE.LETTUCE);
+            vb.add(8, 7, 7, PALETTE.LETTUCE);
+            vb.add(7, 7, 6, PALETTE.LETTUCE);
+            vb.add(7, 7, 8, PALETTE.LETTUCE);
+            vb.add(5, 7, 5, PALETTE.LETTUCE);
+            vb.add(9, 7, 9, PALETTE.LETTUCE);
+            vb.add(5, 7, 9, PALETTE.LETTUCE);
+            vb.add(9, 7, 5, PALETTE.LETTUCE);
         }
     }
     else if (type.includes('lettuce')) {
-        vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.LETTUCE);
+        if (type.includes('chopped')) {
+            // Chopped lettuce: scattered small green strips/leafy bits
+            vb.addBox(3, 0, 3, 6, 0, 4, PALETTE.LETTUCE);
+            vb.addBox(5, 1, 3, 7, 1, 5, 0x66bb6a);
+            vb.addBox(8, 0, 4, 11, 0, 5, PALETTE.LETTUCE);
+            vb.addBox(9, 1, 5, 10, 1, 8, 0x66bb6a);
+            vb.addBox(4, 0, 8, 5, 0, 12, PALETTE.LETTUCE);
+            vb.addBox(5, 1, 10, 8, 1, 11, 0x66bb6a);
+            vb.addBox(9, 0, 9, 12, 0, 10, 0x2e7d32);
+            vb.addBox(10, 1, 8, 12, 1, 12, PALETTE.LETTUCE);
+        } else {
+            // Lettuce head: bulbous sphere with leafy folds
+            const cx = 7.5, cy = 4.5, cz = 7.5;
+            const r = 4.5;
+            for (let x = 3; x <= 12; x++) {
+                for (let y = 0; y <= 8; y++) {
+                    for (let z = 3; z <= 12; z++) {
+                        const dx = x - cx;
+                        const dy = y - cy;
+                        const dz = z - cz;
+                        if (dx*dx + dy*dy + dz*dz <= r*r) {
+                            let color = PALETTE.LETTUCE;
+                            if ((x + y + z) % 3 === 0) {
+                                color = 0x66bb6a; // Lighter green leaf highlight
+                            } else if ((x - y + z) % 4 === 0) {
+                                color = 0x2e7d32; // Darker green leaf shadow
+                            }
+                            vb.add(x, y, z, color);
+                        }
+                    }
+                }
+            }
+        }
     }
     else if (type.includes('potato')) {
-        vb.addBox(5, 0, 4, 10, 3, 11, PALETTE.POTATO);
+        // Draw an organic rounded potato
+        const rx = 4.5, ry = 3.5, rz = 5.5;
+        const cx = 7.5, cy = 3.5, cz = 7.5;
+        for (let x = 3; x <= 12; x++) {
+            for (let y = 0; y <= 7; y++) {
+                for (let z = 2; z <= 13; z++) {
+                    const dx = (x - cx) / rx;
+                    const dy = (y - cy) / ry;
+                    const dz = (z - cz) / rz;
+                    if (dx*dx + dy*dy + dz*dz <= 1.0) {
+                        let color = PALETTE.POTATO;
+                        // Add some eyes (dark spots)
+                        if ((x === 4 && y === 4 && z === 5) || 
+                            (x === 11 && y === 2 && z === 8) || 
+                            (x === 7 && y === 6 && z === 11) ||
+                            (x === 8 && y === 1 && z === 3)) {
+                            color = 0x8d6e63; // Slightly darker potato eye
+                        }
+                        vb.add(x, y, z, color);
+                    }
+                }
+            }
+        }
     }
     else if (type === 'raw_fries') {
         vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_RAW); vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_RAW); vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_RAW);
@@ -386,15 +500,99 @@ export function createItemMesh(type) {
         vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_COOKED); vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_COOKED); vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_COOKED);
     }
     else if (type.includes('patty')) {
-        const c = type.includes('cooked') ? PALETTE.MEAT_COOKED : PALETTE.MEAT_RAW;
-        vb.addBox(3, 0, 3, 12, 2, 12, c);
+        const isCooked = type.includes('cooked');
+        const c = isCooked ? PALETTE.MEAT_COOKED : PALETTE.MEAT_RAW;
+        const cx = 7.5, cz = 7.5, r = 4.8;
+        for (let x = 2; x <= 13; x++) {
+            for (let z = 2; z <= 13; z++) {
+                const dx = x - cx;
+                const dz = z - cz;
+                if (dx*dx + dz*dz <= r*r) {
+                    for (let y = 0; y <= 1; y++) {
+                        let voxelColor = c;
+                        if (isCooked) {
+                            // Cooked: Add dark grill marks on the top surface (y === 1)
+                            if (y === 1 && (x + z) % 4 === 0) {
+                                voxelColor = 0x271a15; // Dark charcoal grill lines
+                            }
+                        } else {
+                            // Raw: Add some fat marbling (white streaks)
+                            if ((x - z) === 2 || (x + z) === 10) {
+                                voxelColor = 0xffebee; // Pinkish-white fat marbling
+                            }
+                        }
+                        vb.add(x, y, z, voxelColor);
+                    }
+                }
+            }
+        }
     }
-    else if (type === 'bun' || type.includes('bread')) {
-        const c = type.includes('toasted') ? PALETTE.WOOD_DARK : PALETTE.BUN;
-        vb.addBox(3, 0, 3, 12, 2, 12, c);
+    else if (type === 'bun' || type.includes('bread') || type === 'bun_bottom' || type === 'bun_top') {
+        const isToasted = type.includes('toasted');
+        const c = isToasted ? PALETTE.WOOD_DARK : PALETTE.BUN;
+        const drawBottom = type !== 'bun_top';
+        const drawTop = type !== 'bun_bottom';
+        
+        const cx = 7.5, cz = 7.5;
+        
+        // Bottom Bun (y=0 to y=1)
+        if (drawBottom) {
+            for (let y = 0; y <= 1; y++) {
+                let r = y === 0 ? 4.2 : 4.8;
+                for (let x = 2; x <= 13; x++) {
+                    for (let z = 2; z <= 13; z++) {
+                        const dx = x - cx, dz = z - cz;
+                        if (dx*dx + dz*dz <= r*r) {
+                            vb.add(x, y, z, c);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Top Bun (y=2 to y=4)
+        if (drawTop) {
+            // Offset y if we are only drawing the top half so it rests on the ground if spawned alone
+            const yOffset = drawBottom ? 0 : -2; 
+            for (let y = 2; y <= 4; y++) {
+                let r = 4.8;
+                if (y === 3) r = 4.2;
+                if (y === 4) r = 3.2;
+                
+                for (let x = 2; x <= 13; x++) {
+                    for (let z = 2; z <= 13; z++) {
+                        const dx = x - cx, dz = z - cz;
+                        if (dx*dx + dz*dz <= r*r) {
+                            let voxelColor = c;
+                            if (!isToasted && y === 4 && (x + z) % 3 === 0 && (x * z) % 2 === 0) {
+                                voxelColor = 0xfffdd0;
+                            }
+                            vb.add(x, y + yOffset, z, voxelColor);
+                        }
+                    }
+                }
+            }
+        }
     }
     else if (type.includes('cheese') || type.includes('mozzarella')) {
-        vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.CHEESE);
+        const isMozzarella = type.includes('mozzarella');
+        const color = isMozzarella ? PALETTE.MOZZARELLA : PALETTE.CHEESE;
+        if (isMozzarella) {
+            // Rounded slice of mozzarella
+            const cx = 7.5, cz = 7.5, r = 4.5;
+            for (let x = 3; x <= 12; x++) {
+                for (let z = 3; z <= 12; z++) {
+                    const dx = x - cx;
+                    const dz = z - cz;
+                    if (dx*dx + dz*dz <= r*r) {
+                        vb.add(x, 0, z, color);
+                    }
+                }
+            }
+        } else {
+            // Cheddar cheese slice
+            vb.addBox(3, 0, 3, 12, 0, 12, color);
+        }
     }
     else if (type.includes('chicken')) {
         const c = type.includes('cooked') ? PALETTE.CHICKEN_COOKED : (type.includes('coated') ? PALETTE.WOOD_BOARD : PALETTE.CHICKEN_RAW);

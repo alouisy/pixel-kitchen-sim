@@ -2,17 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useGameStore } from '../../store/useGameStore';
 import { useTranslation } from '../../utils/i18n';
 import type { LevelSchema } from '../../types/GameTypes';
-import { LevelLoader } from '../../utils/LevelLoader';
-import type { RoadmapLevel } from '../../utils/LevelLoader';
+import { saveManager } from '../../utils/SaveManager';
 
 export const LevelManager: React.FC = () => {
     const { gameState, setGameState, setLevel } = useGameStore();
     const { t } = useTranslation();
-    const [levels, setLevels] = useState<RoadmapLevel[]>([]);
+    const [customLevels, setCustomLevels] = useState<LevelSchema[]>([]);
 
     useEffect(() => {
         if (gameState === 'EDITOR_HUB') {
-            LevelLoader.fetchRoadmap().then(setLevels);
+            setCustomLevels(saveManager.getCustomLevels());
         }
     }, [gameState]);
 
@@ -21,23 +20,29 @@ export const LevelManager: React.FC = () => {
     const handleNewLevel = () => {
         const newLevel: LevelSchema = {
             levelId: Date.now(),
-            name: "New Level",
+            name: "New Custom Level",
             duration: 300,
             starThresholds: [100, 200, 300],
-            availableMeals: [],
+            availableMeals: ['Hamburger'],
             maxActiveOrders: 3,
-            newOrderDelay: 10,
+            newOrderDelay: 15,
             layout: []
         };
+        // Save immediately so it exists
+        saveManager.saveCustomLevel(newLevel);
         setLevel(newLevel);
         setGameState('EDITOR');
     };
 
-    const handleEditLevel = async (levelInfo: RoadmapLevel) => {
-        const levelData = await LevelLoader.fetchLevel(levelInfo.filename);
-        if (levelData) {
-            setLevel(levelData);
-            setGameState('EDITOR');
+    const handleEditLevel = (level: LevelSchema) => {
+        setLevel(level);
+        setGameState('EDITOR');
+    };
+
+    const handleDeleteLevel = (id: number) => {
+        if (confirm(t('deleteConfirm') || 'Delete this level?')) {
+            saveManager.deleteCustomLevel(id);
+            setCustomLevels(saveManager.getCustomLevels());
         }
     };
 
@@ -54,15 +59,26 @@ export const LevelManager: React.FC = () => {
                     display: 'flex', flexDirection: 'column', gap: '10px',
                     maxHeight: '400px', overflowY: 'auto', background: 'rgba(0,0,0,0.3)', padding: '10px'
                 }}>
-                    {levels.map(level => (
+                    {customLevels.length === 0 && (
+                        <div style={{ padding: '20px', textAlign: 'center', color: '#aaa' }}>
+                            No custom levels found. Create one!
+                        </div>
+                    )}
+                    {customLevels.map(level => (
                         <div key={level.levelId} style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             background: '#444', padding: '10px', border: '1px solid #666'
                         }}>
-                            <span>{level.name} (ID: {level.levelId})</span>
+                            <span>{level.name}</span>
                             <div style={{ display: 'flex', gap: '5px' }}>
                                 <button className="menu-button small" onClick={() => handleEditLevel(level)}>{t('edit')}</button>
-                                <button className="menu-button small delete" style={{ background: '#822' }}>{t('delete')}</button>
+                                <button
+                                    className="menu-button small delete"
+                                    style={{ background: '#822' }}
+                                    onClick={() => handleDeleteLevel(level.levelId)}
+                                >
+                                    {t('delete')}
+                                </button>
                             </div>
                         </div>
                     ))}

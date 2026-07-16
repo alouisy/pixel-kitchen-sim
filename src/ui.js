@@ -1,5 +1,5 @@
 // src/ui.js
-import { getRecipeDetails, getRecipeIngredients, RECIPES } from './gameData.js'; 
+import { getRecipeDetails, getRecipeIngredients, RECIPES } from './gameData.js';
 import { getTrans } from './i18nData.js';
 
 function formatTime(seconds) {
@@ -17,7 +17,7 @@ export class UIManager {
         this.levelSelectScreen = document.getElementById('level-select-screen');
         this.levelEndScreen = document.getElementById('level-end-screen');
         this.gameHud = document.getElementById('game-hud');
-        this.levelInstructionsScreen = document.getElementById('level-instructions-screen'); 
+        this.levelInstructionsScreen = document.getElementById('level-instructions-screen');
 
         this.orderListElement = document.getElementById('order-list');
         this.levelTimerDisplay = document.getElementById('level-timer-display');
@@ -38,7 +38,7 @@ export class UIManager {
         this.instructionsTitle = document.getElementById('instructions-title');
         this.instructionsContent = document.getElementById('instructions-content');
         this.startLevelInstructionsButton = document.getElementById('start-level-instructions-button');
-        this.instructionsHint = this.levelInstructionsScreen.querySelector('.menu-hint'); 
+        this.instructionsHint = this.levelInstructionsScreen.querySelector('.menu-hint');
 
         this.activeScreen = null;
         this.messageTimeout = null;
@@ -46,9 +46,9 @@ export class UIManager {
 
         // Initial UI Dictionary
         this.uiText = {
-            en: { title: "Pixel Kitchen Sim", play: "Play", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked", levelInstructions: "Level Instructions", startLevel: "Start Level", recipe: "Recipe", close: "Close", hintToggleInstructions: "Toggle: [I] / [△/Y]" },
-            fr: { title: "Pixel Cuisine Sim", play: "Jouer", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher Étiquettes:", version: "Version:", selectLevel: "Choisir Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous Niveaux Finis!", playAgain: "Rejouer?", loading: "Chargement...", levelTime: "Temps Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé", levelInstructions: "Instructions du Niveau", startLevel: "Commencer Niveau", recipe: "Recette", close: "Fermer", hintToggleInstructions: "Basculer: [I] / [△/Y]" },
-            es: { title: "Pixel Cocina Sim", play: "Jugar", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menú Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", version: "Versión:", selectLevel: "Elegir Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos Niveles Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", levelTime: "Tiempo Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado", levelInstructions: "Instrucciones del Nivel", startLevel: "Empezar Nivel", recipe: "Receta", close: "Cerrar", hintToggleInstructions: "Alternar: [I] / [△/Y]" }
+            en: { select: "Select: Enter/[X]/[A]", title: "Pixel Kitchen Sim", play: "Play", levelEditor: "Level Editor", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked", levelInstructions: "Level Instructions", startLevel: "Start Level", recipe: "Recipe", close: "Close", hintToggleInstructions: "Toggle: [I] / [△/Y]", editorHubTitle: "Level Manager", createLevel: "➕ New Level", downloadRoadmap: "💾 Download Roadmap", backToMenu: "Back to Menu", credits: "A Game By Azzxl Studio", hintMenu: "Navigate: Arrows/Stick | Select: Enter/[X]/[A]", hintSettings: "Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]" },
+            fr: { select: "Confirmer: Entrée/[X]/[A]", title: "Pixel Cuisine Sim", play: "Jouer", levelEditor: "Éditeur de Niveau", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher Étiquettes:", version: "Version:", selectLevel: "Choisir Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous Niveaux Finis!", playAgain: "Rejouer?", loading: "Chargement...", levelTime: "Temps Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé", levelInstructions: "Instructions du Niveau", startLevel: "Commencer Niveau", recipe: "Recette", close: "Fermer", hintToggleInstructions: "Basculer: [I] / [△/Y]", editorHubTitle: "Gestionnaire", createLevel: "➕ Nouveau", downloadRoadmap: "💾 Télécharger Carte", backToMenu: "Retour Menu", credits: "Un Jeu Par Azzxl Studio", hintMenu: "Naviguer: Flèches/Stick | Confirmer: Entrée/[X]/[A]", hintSettings: "Naviguer: Flèches/Stick | Confirmer: Entrée/[X]/[A] | Retour: Échap/[O]/[B]" },
+            es: { select: "Entrar: Enter/[X]/[A]", title: "Pixel Cocina Sim", play: "Jugar", levelEditor: "Editor de Niveles", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menú Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", version: "Versión:", selectLevel: "Elegir Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos Niveles Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", levelTime: "Tiempo Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado", levelInstructions: "Instrucciones del Nivel", startLevel: "Empezar Nivel", recipe: "Receta", close: "Cerrar", hintToggleInstructions: "Alternar: [I] / [△/Y]", editorHubTitle: "Gestor de Niveles", createLevel: "➕ Nuevo Nivel", downloadRoadmap: "💾 Descargar Mapa", backToMenu: "Volver al Menú", credits: "Un Juego De Azzxl Studio", hintMenu: "Navegar: Flechas/Stick | Entrar: Enter/[X]/[A]", hintSettings: "Navegar: Flechas/Stick | Entrar: Enter/[X]/[A] | Volver: Esc/[O]/[B]" }
         };
 
         // Initialize Recipe Book container
@@ -78,7 +78,7 @@ export class UIManager {
                 const entry = document.createElement('div');
                 entry.className = 'recipe-entry';
                 const h4 = document.createElement('h4');
-                h4.textContent = getTrans(mealName, lang); 
+                h4.textContent = getTrans(mealName, lang);
                 const p = document.createElement('p');
                 p.textContent = data.instructions[lang].join(" → ");
                 entry.appendChild(h4); entry.appendChild(p);
@@ -134,14 +134,14 @@ export class UIManager {
         if (!levelData || !this.instructionsTitle || !this.instructionsContent) return;
         const lang = this.currentLanguage;
         this.instructionsTitle.textContent = `${this.uiText[lang].level || "Level"} ${levelData.levelId}: ${levelData.name}`;
-        this.instructionsContent.innerHTML = ''; 
+        this.instructionsContent.innerHTML = '';
         levelData.availableMeals.forEach(mealName => {
             const details = getRecipeDetails(mealName);
             if (details && details.instructions && details.instructions[lang]) {
                 const recipeDiv = document.createElement('div');
                 recipeDiv.className = 'recipe-instruction';
                 const title = document.createElement('h3');
-                title.textContent = getTrans(mealName, lang); 
+                title.textContent = getTrans(mealName, lang);
                 recipeDiv.appendChild(title);
                 const stepList = document.createElement('ul');
                 details.instructions[lang].forEach(step => {
@@ -154,12 +154,12 @@ export class UIManager {
             }
         });
         if (isMidGame) {
-            this.startLevelInstructionsButton.style.display = 'none'; 
+            this.startLevelInstructionsButton.style.display = 'none';
             this.instructionsHint.textContent = this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]";
         } else {
-            this.startLevelInstructionsButton.style.display = 'block'; 
+            this.startLevelInstructionsButton.style.display = 'block';
             this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
-            this.instructionsHint.textContent = this.uiText[lang].select || "Select: Enter/[X]/[A]"; 
+            this.instructionsHint.textContent = this.uiText[lang].select || "Select: Enter/[X]/[A]";
         }
         this._setActiveScreen(this.levelInstructionsScreen);
         this.hideGameUI();
@@ -167,7 +167,7 @@ export class UIManager {
 
     updateLevelTimer(seconds) { this.levelTimerDisplay.textContent = formatTime(seconds); }
     updateScore(score) { this.scoreDisplay.textContent = score; }
-    
+
     updateHolding(heldItemName) {
         // Translate the holding text
         const text = heldItemName ? getTrans(heldItemName, this.currentLanguage) : (this.uiText[this.currentLanguage].nothing || "Nothing");
@@ -175,11 +175,11 @@ export class UIManager {
     }
 
     updateGamepadStatus(isConnected) { this.gamepadStatusElement.textContent = isConnected ? '🎮' : ''; }
-    
+
     showTemporaryMessage(messageKey, duration = 2000) {
-        let messageText = getTrans(messageKey, this.currentLanguage); 
+        let messageText = getTrans(messageKey, this.currentLanguage);
         if (messageText === messageKey && this.uiText[this.currentLanguage][messageKey]) {
-             messageText = this.uiText[this.currentLanguage][messageKey];
+            messageText = this.uiText[this.currentLanguage][messageKey];
         }
         this.tempMessageElement.textContent = messageText;
         this.tempMessageElement.classList.add('visible');
@@ -193,7 +193,7 @@ export class UIManager {
     // Updated Order Card Logic for Overcooked-style UI
     addOrderCard(orderId, mealName, timeLimit) {
         const card = document.createElement('div');
-        card.className = 'order-card'; 
+        card.className = 'order-card';
         card.id = orderId;
         card.dataset.maxTime = timeLimit; // Store max time for calculation
 
@@ -214,7 +214,7 @@ export class UIManager {
         // 3. Ingredient List
         const ingredientsContainer = document.createElement('div');
         ingredientsContainer.className = 'order-ingredients';
-        
+
         const ingredients = getRecipeIngredients(mealName) || [];
         ingredients.forEach(ing => {
             const ingEl = document.createElement('div');
@@ -234,11 +234,11 @@ export class UIManager {
         if (card) {
             const maxTime = parseFloat(card.dataset.maxTime) || seconds;
             const percentage = Math.max(0, Math.min(100, (seconds / maxTime) * 100));
-            
+
             const bar = card.querySelector('.order-timer-bar');
             if (bar) {
                 bar.style.width = `${percentage}%`;
-                
+
                 // Color states
                 if (percentage > 50) {
                     bar.style.backgroundColor = '#4CAF50'; // Green
@@ -256,11 +256,11 @@ export class UIManager {
 
     removeOrderCard(orderId) {
         const card = document.getElementById(orderId);
-        if (card) { 
+        if (card) {
             // Slide up animation
-            card.style.transform = 'translateY(-120%)'; 
+            card.style.transform = 'translateY(-120%)';
             card.style.opacity = '0';
-            setTimeout(() => card.remove(), 400); 
+            setTimeout(() => card.remove(), 400);
         }
     }
 
@@ -293,10 +293,22 @@ export class UIManager {
     setLanguage(lang) {
         if (!this.uiText[lang]) { lang = 'en'; }
         this.currentLanguage = lang;
-        
+
         this.mainMenu.querySelector('h1').textContent = this.uiText[lang].title;
         document.getElementById('play-button').textContent = this.uiText[lang].play;
+        const editorBtn = document.getElementById('editor-button'); if (editorBtn) editorBtn.textContent = this.uiText[lang].levelEditor;
         document.getElementById('settings-button').textContent = this.uiText[lang].settings;
+        const creditsEl = document.getElementById('credits-text'); if (creditsEl) creditsEl.textContent = this.uiText[lang].credits;
+
+        const editorHubTitle = document.getElementById('editor-hub-title'); if (editorHubTitle) editorHubTitle.textContent = this.uiText[lang].editorHubTitle;
+        const createLevelBtn = document.getElementById('create-level-btn'); if (createLevelBtn) createLevelBtn.textContent = this.uiText[lang].createLevel;
+        const dlRoadmapBtn = document.getElementById('download-roadmap-btn'); if (dlRoadmapBtn) dlRoadmapBtn.textContent = this.uiText[lang].downloadRoadmap;
+        const editorHubBackBtn = document.getElementById('editor-hub-back-btn'); if (editorHubBackBtn) editorHubBackBtn.textContent = this.uiText[lang].backToMenu;
+
+        const mainMenuHint = document.getElementById('main-menu-hint'); if (mainMenuHint) mainMenuHint.textContent = this.uiText[lang].hintMenu;
+        const settingsHint = document.getElementById('settings-hint'); if (settingsHint) settingsHint.textContent = this.uiText[lang].hintSettings;
+        const levelSelectHint = document.getElementById('level-select-hint'); if (levelSelectHint) levelSelectHint.textContent = this.uiText[lang].hintSettings;
+        const levelEndHint = document.getElementById('level-end-hint'); if (levelEndHint) levelEndHint.textContent = this.uiText[lang].hintMenu;
         this.settingsScreen.querySelector('h1').textContent = this.uiText[lang].settings;
         if (this.languageLabel) this.languageLabel.textContent = this.uiText[lang].language + ":";
         this.settingsScreen.querySelector('label[for="toggle-labels-setting"]').textContent = this.uiText[lang].showLabels;
@@ -314,12 +326,12 @@ export class UIManager {
         document.querySelector('#game-timer-container').firstChild.textContent = this.uiText[lang].levelTime + ": ";
         // document.querySelector('#bottom-hud').firstChild.textContent = this.uiText[lang].holding + ": "; // Removed hardcoded prefix
         this.loadingScreen.querySelector('h2').textContent = this.uiText[lang].loading;
-        
-        if(this.instructionsTitle) this.instructionsTitle.textContent = this.uiText[lang].levelInstructions || "Level Instructions";
-        if(this.startLevelInstructionsButton) this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
-        if(this.instructionsHint) {
-             const startButtonVisible = this.startLevelInstructionsButton && this.startLevelInstructionsButton.style.display !== 'none';
-             this.instructionsHint.textContent = startButtonVisible ? (this.uiText[lang].select || "Select: Enter/[X]/[A]") : (this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]");
+
+        if (this.instructionsTitle) this.instructionsTitle.textContent = this.uiText[lang].levelInstructions || "Level Instructions";
+        if (this.startLevelInstructionsButton) this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
+        if (this.instructionsHint) {
+            const startButtonVisible = this.startLevelInstructionsButton && this.startLevelInstructionsButton.style.display !== 'none';
+            this.instructionsHint.textContent = startButtonVisible ? (this.uiText[lang].select || "Select: Enter/[X]/[A]") : (this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]");
         }
 
         this.languageButtons.forEach(btn => btn.classList.toggle('active-lang', btn.dataset.lang === lang));
@@ -327,15 +339,15 @@ export class UIManager {
         this.updateRecipeBook(lang);
 
         if (this.activeScreen === this.levelSelectScreen && this.saveManager && typeof levelDatabase !== 'undefined') {
-             this.populateLevelSelect(levelDatabase, this.saveManager);
+            this.populateLevelSelect(levelDatabase, this.saveManager);
         }
         if (this.activeScreen === this.levelInstructionsScreen && typeof currentLevelData !== 'undefined' && currentLevelData) {
-             this.showLevelInstructions(currentLevelData, true); 
+            this.showLevelInstructions(currentLevelData, true);
         }
-        
+
         // Update holding display immediately to reflect language change
         const holdingEl = document.getElementById('holding-display');
-        if(holdingEl) this.updateHolding(holdingEl.dataset.rawItem);
+        if (holdingEl) this.updateHolding(holdingEl.dataset.rawItem);
     }
 
     getLabelToggleState() { return this.toggleLabelsCheckbox.checked; }

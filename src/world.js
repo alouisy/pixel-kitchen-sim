@@ -303,7 +303,7 @@ export function clearKitchen(scene) {
 
 export function buildKitchen(scene, levelLayout, preloadedModels) {
     clearKitchen(scene);
-    const newStations = {};
+    const newStations = [];
     const newStationInteractables = [];
     const occupancyMap = new Map();
     levelLayout.forEach(def => {
@@ -422,7 +422,7 @@ export function buildKitchen(scene, levelLayout, preloadedModels) {
             scene.add(object3D);
             currentKitchenObjects.push(object3D);
             if (def.type !== 'decoration' && def.type !== STATION_TYPES.WALL) {
-                newStations[def.name] = object3D;
+                newStations.push(object3D);
                 newStationInteractables.push(object3D);
             }
         }

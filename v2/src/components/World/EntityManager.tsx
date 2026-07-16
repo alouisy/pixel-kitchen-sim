@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { useGameStore } from '../../store/useGameStore';
 import { VoxelFactory } from '../../utils/VoxelFactory';
 import type { Entity } from '../../types/GameTypes';
-import * as THREE from 'three';
 
 export const EntityManager: React.FC = () => {
     const entities = useGameStore(state => state.entities);
@@ -68,16 +67,16 @@ const EntityMesh: React.FC<{ entity: Entity }> = ({ entity }) => {
     // Let's update the filter.
 
     return (
-        <group position={[entity.position.x, entity.position.y, entity.position.z]} rotation={[entity.rotation.x, entity.rotation.y, entity.rotation.z]}>
+        <group
+            position={[entity.position.x, entity.position.y, entity.position.z]}
+            rotation={[entity.rotation.x, entity.rotation.y, entity.rotation.z]}
+            userData={{ entityId: entity.id, type: 'entity' }}
+        >
             <mesh geometry={geometry} castShadow receiveShadow>
                 <meshStandardMaterial vertexColors roughness={0.8} metalness={0.1} />
             </mesh>
             {/* Render Contents if any */}
             {entity.contents && <EntityContents contentIds={entity.contents} />}
-
-            {/* UserData for Raycasting */}
-            <primitive object={new THREE.Group()} userData={{ entityId: entity.id, type: 'entity' }} />
-            {/* Actually attach userData to the mesh or group */}
         </group>
     );
 };

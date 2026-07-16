@@ -1,0 +1,8261 @@
+<user_instructions>
+Do you see any patterns or opportunities where we could simplify the current codebase without removing or altering any existing game features? I'm looking for a world-class, senior-level code refactor aimed at clarity, maintainability, and performance improvements wherever possible.
+
+For this refactor, feel free to use any web technology or framework you think is appropriate; we are not limited to plain JavaScript. The only requirement is that all game functionality, as well as the entire level editor feature set, must be fully preserved.
+</user_instructions>
+
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: levels, levels/game_roadmap.json, levels/level_1.json, levels/level_2.json, models, src, index.html, levels.json, style.css
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+levels/
+  game_roadmap.json
+  level_1.json
+  level_2.json
+src/
+  audioManager.js
+  constants.js
+  controls.js
+  editor.js
+  gameData.js
+  grid.js
+  i18nData.js
+  interaction.js
+  items.js
+  LevelManager.js
+  main.js
+  menuManager.js
+  player.js
+  saveLoad.js
+  saveManager.js
+  setup.js
+  ui.js
+  voxelBuilder.js
+  world.js
+index.html
+levels.json
+style.css
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+
+<file path="levels/level_1.json">
+{
+    "levelId": 1,
+    "name": "Fry Cook Training",
+    "duration": 180,
+    "starThresholds": [
+        300,
+        500,
+        700
+    ],
+    "availableMeals": [
+        "French Fries"
+    ],
+    "maxActiveOrders": 2,
+    "newOrderDelay": 15,
+    "layout": [
+        {
+            "name": "Wall_Back",
+            "type": "wall",
+            "position": { "x": 0, "z": -4 },
+            "size": { "width": 8.5, "depth": 0.5 }
+        },
+        {
+            "name": "Wall_Front_L",
+            "type": "wall",
+            "position": { "x": -2.5, "z": 4 },
+            "size": { "width": 3.5, "depth": 0.5 }
+        },
+        {
+            "name": "Wall_Front_R",
+            "type": "wall",
+            "position": { "x": 2.5, "z": 4 },
+            "size": { "width": 3.5, "depth": 0.5 }
+        },
+        {
+            "name": "Wall_Left",
+            "type": "wall",
+            "position": { "x": -4, "z": 0 },
+            "size": { "width": 0.5, "depth": 7.5 }
+        },
+        {
+            "name": "Wall_Right",
+            "type": "wall",
+            "position": { "x": 4, "z": 0 },
+            "size": { "width": 0.5, "depth": 7.5 }
+        },
+        {
+            "name": "C_Serve_1",
+            "type": "serving",
+            "position": { "x": -0.5, "z": 4 },
+            "rotation": -3.14
+        },
+        {
+            "name": "C_Serve_2",
+            "type": "serving",
+            "position": { "x": 0, "z": 4 },
+            "rotation": -3.14
+        },
+        {
+            "name": "C_Serve_3",
+            "type": "serving",
+            "position": { "x": 0.5, "z": 4 },
+            "rotation": -3.14
+        },
+        {
+            "name": "C_Back_1",
+            "type": "counter",
+            "position": { "x": -3, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_2",
+            "type": "counter",
+            "position": { "x": -2.5, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_3",
+            "type": "counter",
+            "position": { "x": -1, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_4",
+            "type": "counter",
+            "position": { "x": 1, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_5",
+            "type": "counter",
+            "position": { "x": 2.5, "z": -3.5 }
+        },
+        {
+            "name": "C_Back_6",
+            "type": "counter",
+            "position": { "x": 3, "z": -3.5 }
+        },
+        {
+            "name": "C_Side_L1",
+            "type": "counter",
+            "position": { "x": -3.5, "z": -3 },
+            "rotation": -4.71
+        },
+        {
+            "name": "C_Side_L2",
+            "type": "counter",
+            "position": { "x": -3.5, "z": -2.5 },
+            "rotation": -4.71
+        },
+        {
+            "name": "C_Side_R1",
+            "type": "counter",
+            "position": { "x": 3.5, "z": -3 },
+            "rotation": -1.57
+        },
+        {
+            "name": "C_Side_R2",
+            "type": "counter",
+            "position": { "x": 3.5, "z": -2.5 },
+            "rotation": -1.57
+        },
+        {
+            "name": "CuttingBoard1",
+            "type": "processor",
+            "position": { "x": -2.5, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["potato"],
+                "result": { "potato": "raw_fries" }
+            }
+        },
+        {
+            "name": "Fryer1",
+            "type": "processor",
+            "position": { "x": -1, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["raw_fries"],
+                "result": { "raw_fries": "cooked_fries" },
+                "processingTime": 3000
+            }
+        },
+        {
+            "name": "Trash",
+            "type": "trash",
+            "position": { "x": 3.5, "z": -2 },
+            "rotation": -1.57,
+            "size": { "width": 0.5, "depth": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base1",
+            "type": "table",
+            "position": { "x": -1.5, "z": -0.5 }
+        },
+        {
+            "name": "T_Assem_Base2",
+            "type": "table",
+            "position": { "x": -1, "z": -0.5 }
+        },
+        {
+            "name": "T_Assem_Base3",
+            "type": "table",
+            "position": { "x": -0.5, "z": -0.5 }
+        },
+        {
+            "name": "Counter (Corner)",
+            "type": "counter",
+            "position": { "x": -3.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Corner)",
+            "type": "counter",
+            "position": { "x": 3.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": -2, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": -1.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": -0.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 0, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 0.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 1.5, "z": -3.5 }
+        },
+        {
+            "name": "Counter (Wood)",
+            "type": "counter",
+            "position": { "x": 2, "z": -3.5 }
+        },
+        {
+            "name": "T_Assem_Base7",
+            "type": "table",
+            "position": { "x": 0.5, "z": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base8",
+            "type": "table",
+            "position": { "x": 1, "z": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base9",
+            "type": "table",
+            "position": { "x": 1.5, "z": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base10",
+            "type": "table",
+            "position": { "x": 0.5, "z": 1 }
+        },
+        {
+            "name": "T_Assem_Base11",
+            "type": "table",
+            "position": { "x": 1, "z": 1 }
+        },
+        {
+            "name": "T_Assem_Base12",
+            "type": "table",
+            "position": { "x": 1.5, "z": 1 }
+        },
+        {
+            "name": "CuttingBoard2",
+            "type": "processor",
+            "position": { "x": -3.5, "z": -2.5 },
+            "rotation": -11,
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["potato"],
+                "result": { "potato": "raw_fries" }
+            }
+        },
+        {
+            "name": "Fryer2",
+            "type": "processor",
+            "position": { "x": -0.5, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": {
+                "processes": ["raw_fries"],
+                "result": { "raw_fries": "cooked_fries" },
+                "processingTime": 3000
+            }
+        },
+        {
+            "name": "TrashBin2",
+            "type": "trash",
+            "position": { "x": -3.5, "z": -2 },
+            "rotation": -4.71,
+            "size": { "width": 0.5, "depth": 0.5 }
+        },
+        {
+            "name": "T_Assem_Base4",
+            "type": "table",
+            "position": { "x": -1.5, "z": -1 }
+        },
+        {
+            "name": "T_Assem_Base5",
+            "type": "table",
+            "position": { "x": -1, "z": -1 }
+        },
+        {
+            "name": "T_Assem_Base6",
+            "type": "table",
+            "position": { "x": -0.5, "z": -1 }
+        },
+        {
+            "name": "PotatoBin_1",
+            "type": "ingredient_source",
+            "position": { "x": -3.5, "z": -3 },
+            "rotation": -4.71,
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "ingredient": "potato" }
+        },
+        {
+            "name": "PotatoBin_2",
+            "type": "ingredient_source",
+            "position": { "x": -3, "z": -3.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "ingredient": "potato" }
+        },
+        {
+            "name": "PlateStack",
+            "type": "item_source",
+            "position": { "x": 3.5, "z": -3 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": -1.5, "z": -1 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": -1, "z": -1 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": -0.5, "z": -1 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": 0.5, "z": 0.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": 1, "z": 0.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        },
+        {
+            "name": "Plate (Single)",
+            "type": "preplaced_item",
+            "position": { "x": 1.5, "z": 0.5 },
+            "size": { "width": 0.5, "depth": 0.5 },
+            "config": { "item": "plate" }
+        }
+    ]
+}
+</file>
+
+<file path="levels/level_2.json">
+{
+  "levelId": 2,
+  "name": "Burger & Fries",
+  "duration": 180,
+  "starThresholds": [
+    100,
+    200,
+    300
+  ],
+  "availableMeals": [
+    "French Fries",
+    "Salad",
+    "Hamburger",
+    "Cheeseburger"
+  ],
+  "maxActiveOrders": 2,
+  "newOrderDelay": 15,
+  "layout": [
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": -2.5,
+        "z": 4
+      },
+      "size": {
+        "width": 3.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Wall (Long)",
+      "type": "wall",
+      "position": {
+        "x": -4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 7.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Wall (Long)",
+      "type": "wall",
+      "position": {
+        "x": 4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 7.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": -4,
+        "z": -4
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": 4,
+        "z": -4
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Corner Wall",
+      "type": "wall",
+      "position": {
+        "x": 2.5,
+        "z": 4
+      },
+      "size": {
+        "width": 3.5,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Wall (Long)",
+      "type": "wall",
+      "position": {
+        "x": 0,
+        "z": -4
+      },
+      "size": {
+        "width": 8,
+        "depth": 0.5
+      },
+      "color": "#EFEBE9"
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": 0.5,
+        "z": 4
+      },
+      "rotation": -3.14
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": 0,
+        "z": 4
+      },
+      "rotation": -3.14
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": -0.5,
+        "z": 4
+      },
+      "rotation": -3.14
+    },
+    {
+      "name": "Counter (Corner)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Corner)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -2.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -2,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -1,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 0,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 1,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 2,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 2.5,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3,
+        "z": -3.5
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -4,
+        "z": -3
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -4.5,
+        "z": -3
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -4,
+        "z": -3
+      },
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1.5
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      },
+      "rotation": -4.71,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3
+      },
+      "rotation": -7.85,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2.5
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1.5
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      },
+      "rotation": -1.57,
+      "color": "#8B4513"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -2,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -1.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -2,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -1.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -0.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -0.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 1.5,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 2,
+        "z": -0.5
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 1.5,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 2,
+        "z": -1
+      },
+      "color": "#CCCCCC"
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": 0.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": 0,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": -0.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": 1.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate (Single)",
+      "type": "preplaced_item",
+      "position": {
+        "x": -1.5,
+        "z": -1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": -1
+      },
+      "rotation": -4.71,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": 3.5,
+        "z": -1
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#DEB887",
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Deep Fryer",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": -2
+      },
+      "rotation": -4.71,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#555",
+      "config": {
+        "processes": [
+          "raw_fries",
+          "onion_rings_coated",
+          "coated_chicken_strips"
+        ],
+        "result": {
+          "raw_fries": "cooked_fries",
+          "onion_rings_coated": "cooked_onion_rings",
+          "coated_chicken_strips": "cooked_chicken_tenders"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "Stove Top",
+      "type": "processor",
+      "position": {
+        "x": -3,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#333",
+      "config": {
+        "processes": [
+          "patty",
+          "raw_bacon",
+          "pancake_batter",
+          "omelette_mix",
+          "grilled_cheese_raw"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "raw_bacon": "cooked_bacon",
+          "pancake_batter": "cooked_pancakes",
+          "omelette_mix": "cooked_omelette",
+          "grilled_cheese_raw": "grilled_cheese_cooked"
+        },
+        "processingTime": 4000
+      }
+    },
+    {
+      "name": "Stove Top",
+      "type": "processor",
+      "position": {
+        "x": 3,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#333",
+      "config": {
+        "processes": [
+          "patty",
+          "raw_bacon",
+          "pancake_batter",
+          "omelette_mix",
+          "grilled_cheese_raw"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "raw_bacon": "cooked_bacon",
+          "pancake_batter": "cooked_pancakes",
+          "omelette_mix": "cooked_omelette",
+          "grilled_cheese_raw": "grilled_cheese_cooked"
+        },
+        "processingTime": 4000
+      }
+    },
+    {
+      "name": "Deep Fryer",
+      "type": "processor",
+      "position": {
+        "x": 3.5,
+        "z": -2
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#555",
+      "config": {
+        "processes": [
+          "raw_fries",
+          "onion_rings_coated",
+          "coated_chicken_strips"
+        ],
+        "result": {
+          "raw_fries": "cooked_fries",
+          "onion_rings_coated": "cooked_onion_rings",
+          "coated_chicken_strips": "cooked_chicken_tenders"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "Potato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#CD853F",
+      "config": {
+        "ingredient": "potato"
+      }
+    },
+    {
+      "name": "Potato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#CD853F",
+      "config": {
+        "ingredient": "potato"
+      }
+    },
+    {
+      "name": "Bun Rack",
+      "type": "ingredient_source",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#F4A460",
+      "config": {
+        "ingredient": "bun"
+      }
+    },
+    {
+      "name": "Tomato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#FF6347",
+      "config": {
+        "ingredient": "tomato"
+      }
+    },
+    {
+      "name": "Lettuce Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -1,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#90EE90",
+      "config": {
+        "ingredient": "lettuce"
+      }
+    },
+    {
+      "name": "Plate Stack",
+      "type": "item_source",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Plate Stack",
+      "type": "item_source",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Cheese Fridge",
+      "type": "ingredient_source",
+      "position": {
+        "x": 1,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#FFD700",
+      "config": {
+        "ingredient": "cheese_slice"
+      }
+    },
+    {
+      "name": "Patty Box",
+      "type": "ingredient_source",
+      "position": {
+        "x": 0,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "color": "#A52A2A",
+      "config": {
+        "ingredient": "patty"
+      }
+    }
+  ]
+}
+</file>
+
+<file path="src/audioManager.js">
+// src/audioManager.js
+
+export class AudioManager {
+    constructor() {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = 0.3; // Master Volume
+        this.masterGain.connect(this.ctx.destination);
+        this.enabled = true;
+    }
+
+    resume() {
+        if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+
+    play(soundName) {
+        if (!this.enabled) return;
+        this.resume();
+
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        switch (soundName) {
+            case 'pop': // Pickup / Select
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, t);
+                osc.frequency.exponentialRampToValueAtTime(1200, t + 0.1);
+                gain.gain.setValueAtTime(1, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                osc.start(t);
+                osc.stop(t + 0.1);
+                break;
+
+            case 'place': // Drop / Place
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, t);
+                osc.frequency.linearRampToValueAtTime(100, t + 0.1);
+                gain.gain.setValueAtTime(0.8, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.1);
+                osc.start(t);
+                osc.stop(t + 0.1);
+                break;
+
+            case 'chop': // Cutting
+                // Noise burst
+                const bufferSize = this.ctx.sampleRate * 0.1; // 0.1 sec
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                const noiseGain = this.ctx.createGain();
+                noiseGain.gain.setValueAtTime(0.5, t);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                noise.connect(noiseGain);
+                noiseGain.connect(this.masterGain);
+                noise.start(t);
+                break;
+
+            case 'fry': // Sizzle start
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, t);
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.linearRampToValueAtTime(0, t + 0.5);
+                osc.start(t);
+                osc.stop(t + 0.5);
+                break;
+
+            case 'ding': // Success / Order Complete
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, t); // C5
+                osc.frequency.setValueAtTime(1046.50, t + 0.1); // C6
+                gain.gain.setValueAtTime(0.5, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 1);
+                osc.start(t);
+                osc.stop(t + 1);
+                break;
+
+            case 'error': // Bad action / Buzz
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(100, t + 0.3);
+                gain.gain.setValueAtTime(0.5, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t);
+                osc.stop(t + 0.3);
+                break;
+            
+            case 'music_start': // Simple jingle
+                this.playNote(659.25, t, 0.1); // E5
+                this.playNote(659.25, t+0.15, 0.1);
+                this.playNote(1046.5, t+0.3, 0.4); // C6
+                break;
+        }
+    }
+
+    playNote(freq, time, duration) {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, time);
+        gain.gain.setValueAtTime(0.1, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+        osc.start(time);
+        osc.stop(time + duration);
+    }
+}
+</file>
+
+<file path="levels/game_roadmap.json">
+[
+  {
+    "levelId": 1,
+    "name": "Fry Cook Training",
+    "filename": "level_1.json"
+  },
+  {
+    "levelId": 2,
+    "name": "Burger & Fries",
+    "filename": "level_2.json"
+  }
+]
+</file>
+
+<file path="src/grid.js">
+// src/grid.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { GRID_UNIT } from './constants.js';
+
+export class GridSystem {
+    constructor(widthUnits, depthUnits, worldCenterX, worldCenterZ, parentMesh) {
+        this.parentMesh = parentMesh;
+        // Dimensions in Slots (integer)
+        this.cols = Math.round(widthUnits / GRID_UNIT);
+        this.rows = Math.round(depthUnits / GRID_UNIT);
+        
+        // Top-Left corner in World Space
+        this.originX = worldCenterX - (widthUnits / 2);
+        this.originZ = worldCenterZ - (depthUnits / 2);
+
+        // Occupancy Map
+        this.occupied = Array(this.cols).fill().map(() => Array(this.rows).fill(null));
+    }
+
+    worldToGrid(point) {
+        const localX = point.x - this.originX;
+        const localZ = point.z - this.originZ;
+        const col = Math.floor(localX / GRID_UNIT);
+        const row = Math.floor(localZ / GRID_UNIT);
+        return { col, row };
+    }
+
+    gridToWorld(col, row) {
+        const x = this.originX + (col * GRID_UNIT) + (GRID_UNIT / 2);
+        const z = this.originZ + (row * GRID_UNIT) + (GRID_UNIT / 2);
+        return new THREE.Vector3(x, 0, z);
+    }
+
+    isAreaFree(startCol, startRow, widthSlots, depthSlots, ignoreItem = null) {
+        if (startCol < 0 || startRow < 0 || startCol + widthSlots > this.cols || startRow + depthSlots > this.rows) {
+            return false; 
+        }
+        for (let i = 0; i < widthSlots; i++) {
+            for (let j = 0; j < depthSlots; j++) {
+                const item = this.occupied[startCol + i][startRow + j];
+                if (item !== null && item !== ignoreItem) return false;
+            }
+        }
+        return true;
+    }
+
+    occupy(startCol, startRow, widthSlots, depthSlots, item) {
+        for (let i = 0; i < widthSlots; i++) {
+            for (let j = 0; j < depthSlots; j++) {
+                this.occupied[startCol + i][startRow + j] = item;
+            }
+        }
+        item.userData.gridInfo = { grid: this, col: startCol, row: startRow, w: widthSlots, d: depthSlots };
+    }
+
+    vacate(item) {
+        if (!item.userData.gridInfo || item.userData.gridInfo.grid !== this) return;
+        const { col, row, w, d } = item.userData.gridInfo;
+        for (let i = 0; i < w; i++) {
+            for (let j = 0; j < d; j++) {
+                if (this.occupied[col + i][row + j] === item) {
+                    this.occupied[col + i][row + j] = null;
+                }
+            }
+        }
+        delete item.userData.gridInfo;
+    }
+}
+</file>
+
+<file path="src/i18nData.js">
+// src/i18nData.js
+
+export const DATA_TRANSLATIONS = {
+    en: {
+        // Ingredients & Items
+        "potato": "Potato",
+        "raw_fries": "Raw Fries",
+        "cooked_fries": "Cooked Fries",
+        "plate": "Plate",
+        "French Fries": "French Fries",
+        "Salad": "Salad",
+        "Hamburger": "Hamburger",
+        "Cheeseburger": "Cheeseburger",
+        "bun": "Bun",
+        "patty": "Patty",
+        "cooked_patty": "Cooked Patty",
+        "cheese_slice": "Cheese",
+        "lettuce": "Lettuce",
+        "chopped_lettuce": "Chopped Lettuce",
+        "tomato": "Tomato",
+        "chopped_tomato": "Chopped Tomato",
+        
+        // Stations
+        "PotatoBin": "Potato Bin",
+        "CuttingBoard": "Cutting Board",
+        "Fryer": "Fryer",
+        "PlateStack": "Plates",
+        "SERVE": "SERVE",
+        "Trash": "Trash",
+        
+        // UI Messages
+        "Placed": "Placed",
+        "Slot Occupied": "Slot Occupied",
+        "Order Served!": "Order Served!",
+        "Wrong / No Order!": "Wrong Order!",
+        "Not a Meal!": "Not a Meal!",
+        "Ingredient Added": "Ingredient Added",
+        "Already Added!": "Already Added!",
+        "Hands Full!": "Hands Full!",
+        "Station Busy": "Station Busy",
+        "Cannot Process": "Cannot Process",
+        "Station Empty": "Station Empty",
+        "Slot Empty": "Slot Empty",
+        "Nothing to Use": "Nothing to Use",
+        "Pick up Container": "Pick up Container",
+        "Cannot Add This!": "Cannot Add This!",
+        "Mixed!": "Mixed!",
+        "Blender Not Ready!": "Blender Not Ready!",
+        "Smoothie Ready!": "Smoothie Ready!"
+    },
+    fr: {
+        "potato": "Patate",
+        "raw_fries": "Frites Crues",
+        "cooked_fries": "Frites Cuites",
+        "plate": "Assiette",
+        "French Fries": "Frites",
+        "Salad": "Salade",
+        "Hamburger": "Hamburger",
+        "Cheeseburger": "Cheeseburger",
+        "bun": "Pain",
+        "patty": "Steak",
+        "cooked_patty": "Steak Cuit",
+        "cheese_slice": "Fromage",
+        "lettuce": "Laitue",
+        "chopped_lettuce": "Laitue Hachée",
+        "tomato": "Tomate",
+        "chopped_tomato": "Tomate Hachée",
+
+        "PotatoBin": "Bac Patates",
+        "CuttingBoard": "Planche",
+        "Fryer": "Friteuse",
+        "PlateStack": "Assiettes",
+        "SERVE": "SERVIR",
+        "Trash": "Poubelle",
+
+        "Placed": "Placé",
+        "Slot Occupied": "Occupé",
+        "Order Served!": "Servi !",
+        "Wrong / No Order!": "Erreur Commande !",
+        "Not a Meal!": "Pas un Plat !",
+        "Ingredient Added": "Ingrédient Ajouté",
+        "Already Added!": "Déjà Ajouté !",
+        "Hands Full!": "Mains Pleines !",
+        "Station Busy": "Station Occupée",
+        "Cannot Process": "Impossible",
+        "Station Empty": "Station Vide",
+        "Slot Empty": "Vide",
+        "Nothing to Use": "Rien à utiliser",
+        "Pick up Container": "Prendre le Contenant",
+        "Cannot Add This!": "Impossible d'ajouter",
+        "Mixed!": "Mélangé !",
+        "Blender Not Ready!": "Blender Pas Prêt !",
+        "Smoothie Ready!": "Smoothie Prêt !"
+    },
+    es: {
+        "potato": "Patata",
+        "raw_fries": "Patatas Crudas",
+        "cooked_fries": "Patatas Fritas",
+        "plate": "Plato",
+        "French Fries": "Patatas Fritas",
+        "Salad": "Ensalada",
+        "Hamburger": "Hamburguesa",
+        "Cheeseburger": "Hamburguesa con Queso",
+        "bun": "Pan",
+        "patty": "Carne",
+        "cooked_patty": "Carne Cocida",
+        "cheese_slice": "Queso",
+        "lettuce": "Lechuga",
+        "chopped_lettuce": "Lechuga Picada",
+        "tomato": "Tomate",
+        "chopped_tomato": "Tomate Picado",
+
+        "PotatoBin": "Patatas",
+        "CuttingBoard": "Tabla",
+        "Fryer": "Freidora",
+        "PlateStack": "Platos",
+        "SERVE": "SERVIR",
+        "Trash": "Basura",
+
+        "Placed": "Colocado",
+        "Slot Occupied": "Ocupado",
+        "Order Served!": "¡Servido!",
+        "Wrong / No Order!": "¡Error Pedido!",
+        "Not a Meal!": "¡No es Comida!",
+        "Ingredient Added": "Ingrediente Añadido",
+        "Already Added!": "¡Ya Añadido!",
+        "Hands Full!": "¡Manos Llenas!",
+        "Station Busy": "Ocupado",
+        "Cannot Process": "Imposible",
+        "Station Empty": "Vacío",
+        "Slot Empty": "Vacío",
+        "Nothing to Use": "Nada que usar",
+        "Pick up Container": "Coger Recipiente",
+        "Cannot Add This!": "¡No se puede añadir!",
+        "Mixed!": "¡Mezclado!",
+        "Blender Not Ready!": "¡Licuadora no lista!",
+        "Smoothie Ready!": "¡Batido listo!"
+    }
+};
+
+export function getTrans(key, lang = 'en') {
+    // 1. Try direct key match
+    if (DATA_TRANSLATIONS[lang] && DATA_TRANSLATIONS[lang][key]) {
+        return DATA_TRANSLATIONS[lang][key];
+    }
+    // 2. Fallback to English
+    if (DATA_TRANSLATIONS['en'][key]) {
+        return DATA_TRANSLATIONS['en'][key];
+    }
+    // 3. Return key as is (debug)
+    return key;
+}
+</file>
+
+<file path="src/saveManager.js">
+// src/saveManager.js
+
+const SAVE_KEY = 'pixelKitchenSaveData'; 
+
+export class SaveManager {
+    constructor() {
+        this.saveData = this.loadProgress();
+        console.log("SaveManager Initialized. Loaded data:", this.saveData);
+    }
+
+    loadProgress() {
+        try {
+            const savedString = localStorage.getItem(SAVE_KEY);
+            if (savedString) {
+                const data = JSON.parse(savedString);
+                // Ensure structure exists
+                if (!data.levels) data.levels = {};
+                if (!data.settings) data.settings = { language: 'en', showLabels: true };
+                return data;
+            } else {
+                return this.createDefaultSaveData();
+            }
+        } catch (error) {
+            console.error("Error loading save data:", error);
+            return this.createDefaultSaveData();
+        }
+    }
+
+    saveProgress() {
+        try {
+            const dataString = JSON.stringify(this.saveData);
+            localStorage.setItem(SAVE_KEY, dataString);
+        } catch (error) {
+            console.error("Error saving progress:", error);
+        }
+    }
+
+    createDefaultSaveData() {
+        return {
+            levels: {}, 
+            settings: { language: 'en', showLabels: true }
+        };
+    }
+
+    getLevelProgress(levelIndex) {
+        return this.saveData.levels[levelIndex] || { completed: false, highScore: 0, stars: 0 };
+    }
+
+    updateLevelCompletion(levelIndex, score, stars) {
+        const currentProgress = this.getLevelProgress(levelIndex);
+        if (!currentProgress.completed || score > currentProgress.highScore) {
+            this.saveData.levels[levelIndex] = {
+                completed: true,
+                highScore: score,
+                stars: stars
+            };
+            this.saveProgress();
+        }
+    }
+
+    isLevelUnlocked(levelIndex) {
+        if (levelIndex === 0) return true; 
+        const prevLevelProgress = this.getLevelProgress(levelIndex - 1);
+        return prevLevelProgress.completed; 
+    }
+
+    // --- Settings API ---
+    getSetting(key) {
+        // Return default if key missing
+        if (this.saveData.settings && this.saveData.settings[key] !== undefined) {
+            return this.saveData.settings[key];
+        }
+        // Defaults
+        if (key === 'language') return 'en';
+        if (key === 'showLabels') return true;
+        return null;
+    }
+
+    saveSetting(key, value) {
+        if (!this.saveData.settings) this.saveData.settings = {};
+        this.saveData.settings[key] = value;
+        this.saveProgress();
+    }
+}
+</file>
+
+<file path="src/setup.js">
+// src/setup.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { PLAYER_HEIGHT } from './constants.js';
+
+export function setupScene() {
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x202025); // Darker background to make lights pop
+    scene.fog = new THREE.Fog(0x202025, 5, 20);
+    return scene;
+}
+
+export function setupCamera() {
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, PLAYER_HEIGHT, 3); 
+    return camera;
+}
+
+export function setupRenderer() {
+    const renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById('gameCanvas'),
+        antialias: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    
+    // Shadow Map settings
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
+    
+    // Tone Mapping for better colors
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+
+    return renderer;
+}
+
+export function setupLighting(scene) {
+    // 1. Ambient Light (Soft fill)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
+    scene.add(ambientLight);
+
+    // 2. Directional Light (Sun/Main Source)
+    const dirLight = new THREE.DirectionalLight(0xffeeb1, 1.2); // Warm light
+    dirLight.position.set(5, 10, 5);
+    dirLight.castShadow = true;
+    
+    // Optimize Shadow Map
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 0.5;
+    dirLight.shadow.camera.far = 50;
+    const d = 10;
+    dirLight.shadow.camera.left = -d;
+    dirLight.shadow.camera.right = d;
+    dirLight.shadow.camera.top = d;
+    dirLight.shadow.camera.bottom = -d;
+    dirLight.shadow.bias = -0.0005; // Fix shadow acne on voxels
+    
+    scene.add(dirLight);
+
+    // 3. Rim Light (Cool blue from back for contrast)
+    const rimLight = new THREE.DirectionalLight(0x4455ff, 0.3);
+    rimLight.position.set(-5, 5, -5);
+    scene.add(rimLight);
+}
+
+export function setupResizeHandler(camera, renderer) {
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+}
+</file>
+
+<file path="src/menuManager.js">
+// src/menuManager.js
+
+const GAMEPAD_DEADZONE_NAV = 0.5;
+const GAMEPAD_NAV_DELAY = 150;
+const GAMEPAD_CONFIRM_BUTTON = 0; // Cross (X) / A
+const GAMEPAD_BACK_BUTTON = 1;    // Circle / B
+
+export class MenuManager {
+    constructor(uiManager) {
+        this.uiManager = uiManager;
+        this.activeMenuElement = null;
+        this.focusableElements = [];
+        this.selectedIndex = -1;
+        this.gamepadNavTimer = 0;
+        this.prevGamepadButtons = []; // Store previous frame's buttons
+        this._addEventListeners(); // Add listeners during construction
+    }
+
+    _addEventListeners() {
+        document.addEventListener('mouseover', (event) => {
+            if (!this.activeMenuElement) return;
+            const target = event.target.closest('.menu-button, .menu-link, .menu-toggle');
+            if (target && this.focusableElements.includes(target)) {
+                const index = this.focusableElements.indexOf(target);
+                if (index !== this.selectedIndex) {
+                    this.setSelectedIndex(index);
+                }
+            }
+        });
+
+        // Clicks are handled by main.js calling handleMenuAction
+    }
+
+    activateMenu(menuElement) {
+        if (!menuElement) {
+            this.deactivateMenu();
+            return;
+        }
+        this.activeMenuElement = menuElement;
+        this.refreshFocusableElements();
+
+        let defaultIndex = 0;
+        // Prioritize specific buttons like "Resume" or "Start" if they exist and are visible
+        const priorityActions = ['start-level-confirm', 'resume', 'next-level', 'restart-level'];
+        let priorityButtonFound = false;
+        for (const action of priorityActions) {
+            const button = menuElement.querySelector(`[data-action="${action}"]`);
+            if (button && button.offsetParent !== null && !button.disabled) { // Check visibility and enabled
+                const buttonIndex = this.focusableElements.indexOf(button);
+                if (buttonIndex > -1) {
+                    defaultIndex = buttonIndex;
+                    priorityButtonFound = true;
+                    break;
+                }
+            }
+        }
+
+        // Fallback to first non-link element if no priority button found
+        if (!priorityButtonFound) {
+            const firstButtonIndex = this.focusableElements.findIndex(el => el.tagName === 'BUTTON' || el.tagName === 'INPUT');
+            if (firstButtonIndex > -1) defaultIndex = firstButtonIndex;
+        }
+
+        this.setSelectedIndex(defaultIndex);
+        this.prevGamepadButtons = []; // Reset button history when menu activates
+        this.gamepadNavTimer = GAMEPAD_NAV_DELAY; // Add initial delay
+    }
+
+    deactivateMenu() {
+        this.setSelectedIndex(-1); // Deselect current item visually
+        this.activeMenuElement = null;
+        this.focusableElements = [];
+        this.selectedIndex = -1;
+    }
+
+    refreshFocusableElements() {
+        if (!this.activeMenuElement) {
+            this.focusableElements = [];
+            return;
+        }
+        this.focusableElements = Array.from(
+            this.activeMenuElement.querySelectorAll('.menu-button, .menu-link, .menu-toggle')
+        ).filter(el => el.offsetParent !== null && !el.disabled); // Check visibility and disabled state
+
+        // console.log("Focusable elements:", this.focusableElements.map(el => el.id || el.dataset.action));
+    }
+
+    setSelectedIndex(index) {
+        if (!this.activeMenuElement || !this.focusableElements.length) {
+            index = -1;
+        }
+
+        // Clamp index
+        index = Math.max(-1, Math.min(index, this.focusableElements.length - 1));
+
+
+        if (this.selectedIndex >= 0 && this.selectedIndex < this.focusableElements.length) {
+            this.focusableElements[this.selectedIndex].classList.remove('selected');
+        }
+
+        this.selectedIndex = index;
+
+        if (this.selectedIndex >= 0 && this.selectedIndex < this.focusableElements.length) {
+            this.focusableElements[this.selectedIndex].classList.add('selected');
+            // Scroll into view if needed (especially for level select)
+            this.focusableElements[this.selectedIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+    }
+
+    // Returns object { action: string, element: HTMLElement } if confirmed, or null
+    handleGamepadNav(gamepad, delta) {
+        if (!this.activeMenuElement || !this.focusableElements.length) return null;
+
+        // Update button states for edge detection (pressed this frame, not last)
+        const currentButtons = gamepad.buttons.map(b => b.pressed);
+        const buttonJustPressed = (index) => currentButtons[index] && !this.prevGamepadButtons[index];
+
+        this.gamepadNavTimer -= delta * 1000;
+
+        let navX = gamepad.axes[0] ?? 0;
+        let navY = gamepad.axes[1] ?? 0;
+        // Use buttonJustPressed for dpad to avoid continuous scrolling
+        let dpadUp = buttonJustPressed(12);
+        let dpadDown = buttonJustPressed(13);
+        let dpadLeft = buttonJustPressed(14);
+        let dpadRight = buttonJustPressed(15);
+
+        let moveVertical = 0;
+        let moveHorizontal = 0;
+        let stickMovedV = false;
+        let stickMovedH = false;
+
+        // Check stick movement only if timer allows
+        if (this.gamepadNavTimer <= 0) {
+            if (navY > GAMEPAD_DEADZONE_NAV) { moveVertical = 1; stickMovedV = true; }
+            else if (navY < -GAMEPAD_DEADZONE_NAV) { moveVertical = -1; stickMovedV = true; }
+
+            if (navX > GAMEPAD_DEADZONE_NAV) { moveHorizontal = 1; stickMovedH = true; }
+            else if (navX < -GAMEPAD_DEADZONE_NAV) { moveHorizontal = -1; stickMovedH = true; }
+        }
+
+        // Prioritize D-pad over stick if both pressed
+        if (dpadDown) moveVertical = 1;
+        else if (dpadUp) moveVertical = -1;
+
+        if (dpadRight) moveHorizontal = 1;
+        else if (dpadLeft) moveHorizontal = -1;
+
+
+        // --- Navigation Logic ---
+        if (moveVertical !== 0 || moveHorizontal !== 0) {
+            const currentElement = this.focusableElements[this.selectedIndex];
+            let moved = false;
+
+            // Try horizontal first within specific groups (like language buttons)
+            if (moveHorizontal !== 0) {
+                const parentGroup = currentElement?.closest('.button-group, .level-grid'); // Add level-grid
+                if (parentGroup) {
+                    const groupElements = this.focusableElements.filter(el => parentGroup.contains(el));
+                    const currentIndexInGroup = groupElements.indexOf(currentElement);
+                    let newIndexInGroup = currentIndexInGroup + moveHorizontal;
+
+                    // Simple horizontal wrapping within the group
+                    if (newIndexInGroup >= groupElements.length) newIndexInGroup = 0;
+                    if (newIndexInGroup < 0) newIndexInGroup = groupElements.length - 1;
+
+                    if (newIndexInGroup >= 0 && newIndexInGroup < groupElements.length) {
+                        const newElement = groupElements[newIndexInGroup];
+                        const newOverallIndex = this.focusableElements.indexOf(newElement);
+                        if (newOverallIndex > -1) {
+                            this.setSelectedIndex(newOverallIndex);
+                            moved = true;
+                        }
+                    }
+                }
+            }
+
+            // If horizontal didn't move (or wasn't applicable), try vertical
+            if (!moved && moveVertical !== 0) {
+                // Simple vertical navigation: find next/prev element in the flat list
+                let newIndex = this.selectedIndex + moveVertical;
+                // Basic wrapping
+                if (newIndex >= this.focusableElements.length) newIndex = 0;
+                if (newIndex < 0) newIndex = this.focusableElements.length - 1;
+                this.setSelectedIndex(newIndex);
+                moved = true;
+            }
+
+            // Reset timer if movement occurred via stick or dpad press
+            if (moved && (stickMovedV || stickMovedH || dpadUp || dpadDown || dpadLeft || dpadRight)) {
+                this.gamepadNavTimer = GAMEPAD_NAV_DELAY;
+            }
+        }
+
+
+        // --- Confirmation ---
+        if (buttonJustPressed(GAMEPAD_CONFIRM_BUTTON)) {
+            if (this.selectedIndex >= 0 && this.selectedIndex < this.focusableElements.length) {
+                const selectedElement = this.focusableElements[this.selectedIndex];
+                console.log(`Gamepad confirming action: ${selectedElement.dataset.action} on element:`, selectedElement);
+
+                // --- Special Handling for Checkbox ---
+                if (selectedElement.matches('.menu-toggle')) {
+                    selectedElement.checked = !selectedElement.checked; // Toggle the state
+                    // Manually trigger the change event so listeners (like in main.js) fire
+                    selectedElement.dispatchEvent(new Event('change', { bubbles: true }));
+                    // Return the action so main.js knows something happened, even if handled here
+                    this.prevGamepadButtons = currentButtons; // Update history *before* returning
+                    return { action: selectedElement.dataset.action, element: selectedElement };
+                }
+                // --- End Special Handling ---
+
+                this.prevGamepadButtons = currentButtons; // Update history *before* returning
+                // Return action and the specific element confirmed
+                return { action: selectedElement.dataset.action, element: selectedElement };
+            }
+        }
+
+        // --- Back Action ---
+        // Only allow back if not on main menu
+        if (buttonJustPressed(GAMEPAD_BACK_BUTTON) && this.activeMenuElement !== this.uiManager.mainMenu) {
+            // Find the appropriate back button for the current menu
+            const backButton = this.focusableElements.find(el =>
+                el.dataset.action?.startsWith('back') || // Generic back
+                (this.activeMenuElement === this.uiManager.settingsScreen && el.dataset.action === 'resume' && el.style.display !== 'none') // Resume acts as back if paused
+            );
+            if (backButton) {
+                console.log(`Gamepad back action: ${backButton.dataset.action}`);
+                this.prevGamepadButtons = currentButtons; // Update history *before* returning
+                return { action: backButton.dataset.action, element: backButton };
+            } else {
+                console.log("Gamepad back pressed, but no suitable back/resume button found on current menu.");
+            }
+        }
+
+        // Update button history for the next frame
+        this.prevGamepadButtons = currentButtons;
+        return null; // No action confirmed this frame
+    }
+
+    getSelectedElement() {
+        if (this.selectedIndex >= 0 && this.selectedIndex < this.focusableElements.length) {
+            return this.focusableElements[this.selectedIndex];
+        }
+        return null;
+    }
+}
+</file>
+
+<file path="src/controls.js">
+// src/controls.js
+import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
+import {
+    GAMEPAD_DEADZONE, GAMEPAD_INTERACT_BUTTON, GAMEPAD_PAUSE_BUTTON,
+    GAMEPAD_LOOK_SENSITIVITY_X, GAMEPAD_LOOK_SENSITIVITY_Y,
+    GAMEPAD_INSTRUCTIONS_BUTTON, KEYBOARD_INSTRUCTIONS_KEY,
+} from './constants.js';
+
+export class PlayerControls {
+    constructor(camera, domElement) {
+        this._pointerLockControls = new PointerLockControls(camera, domElement);
+        this._domElement = domElement;
+
+        // Keyboard states
+        this.kbMovingForward = false;
+        this.kbMovingBackward = false;
+        this.kbMovingLeft = false;
+        this.kbMovingRight = false;
+
+        // Gamepad movement states
+        this.gpMovingForward = false;
+        this.gpMovingBackward = false;
+        this.gpMovingLeft = false;
+        this.gpMovingRight = false;
+
+        this.gamepadConnected = false;
+        this.prevGamepadButtons = [];
+
+        this.interactRequested = false;
+        this.pauseToggleRequested = false;
+        this.instructionToggleRequested = false;
+
+        this.crosshair = document.getElementById('crosshair'); // Keep crosshair reference
+
+        this._addEventListeners();
+    }
+
+    _addEventListeners() {
+        this._pointerLockControls.addEventListener('lock', () => {
+            if (this.crosshair) this.crosshair.style.display = 'block'; // Show crosshair on lock
+        });
+
+        this._pointerLockControls.addEventListener('unlock', () => {
+            if (this.crosshair) this.crosshair.style.display = 'none'; // Hide crosshair on unlock
+            // Reset movement keys on unlock
+            this.kbMovingForward = this.kbMovingBackward = this.kbMovingLeft = this.kbMovingRight = false;
+            this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
+        });
+
+        document.addEventListener('keydown', (event) => this._onKeyDown(event));
+        document.addEventListener('keyup', (event) => this._onKeyUp(event));
+        document.addEventListener('click', () => this._onClick());
+
+        window.addEventListener('gamepadconnected', (event) => {
+            console.log('Gamepad connected:', event.gamepad.id);
+            this.gamepadConnected = true;
+        });
+
+        window.addEventListener('gamepaddisconnected', (event) => {
+            console.log('Gamepad disconnected:', event.gamepad.id);
+            this.gamepadConnected = false;
+            this.prevGamepadButtons = [];
+            this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
+        });
+    }
+
+    handleGamepadInput(gamepad, delta) {
+        const wasConnected = this.gamepadConnected;
+        this.gamepadConnected = !!gamepad;
+
+        if (!gamepad) {
+            if (wasConnected) {
+                this.prevGamepadButtons = [];
+                this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
+            }
+            return;
+        }
+
+        // --- Movement (Left Stick) ---
+        const leftStickX = gamepad.axes[0] ?? 0;
+        const leftStickY = gamepad.axes[1] ?? 0;
+        const moveZ = Math.abs(leftStickY) > GAMEPAD_DEADZONE ? -leftStickY : 0;
+        const moveX = Math.abs(leftStickX) > GAMEPAD_DEADZONE ? leftStickX : 0;
+        this.gpMovingForward = moveZ > 0;
+        this.gpMovingBackward = moveZ < 0;
+        this.gpMovingLeft = moveX < 0;
+        this.gpMovingRight = moveX > 0;
+
+        // --- Button Presses (Edge Detection) ---
+        const currentButtons = gamepad.buttons.map(b => b.pressed);
+        const buttonJustPressed = (index) => currentButtons[index] && !(this.prevGamepadButtons[index] ?? false);
+
+        // --- Request Flags ---
+        // Interaction (Cross/A) - only if pointer locked
+        if (this._pointerLockControls.isLocked && buttonJustPressed(GAMEPAD_INTERACT_BUTTON)) {
+            this.interactRequested = true;
+        }
+        // Pause (Options/Menu)
+        if (buttonJustPressed(GAMEPAD_PAUSE_BUTTON)) {
+            this.pauseToggleRequested = true;
+        }
+        // Instructions (Triangle/Y)
+        if (buttonJustPressed(GAMEPAD_INSTRUCTIONS_BUTTON)) {
+            this.instructionToggleRequested = true;
+        }
+        // Editor Toggle (No standard gamepad button assigned yet)
+
+        // Store current button states for next frame's edge detection
+        this.prevGamepadButtons = currentButtons;
+
+        // --- Right Stick Look (Synthetic Mouse Events) ---
+        if (this._pointerLockControls.isLocked) {
+            const rightStickX = gamepad.axes[2] ?? 0;
+            const rightStickY = gamepad.axes[3] ?? 0;
+            let movementX = 0;
+            let movementY = 0;
+
+            if (Math.abs(rightStickX) > GAMEPAD_DEADZONE) {
+                movementX = rightStickX * GAMEPAD_LOOK_SENSITIVITY_X * delta;
+            }
+            if (Math.abs(rightStickY) > GAMEPAD_DEADZONE) {
+                movementY = rightStickY * GAMEPAD_LOOK_SENSITIVITY_Y * delta;
+            }
+
+            if (movementX !== 0 || movementY !== 0) {
+                const event = new MouseEvent('mousemove', {
+                    movementX: movementX,
+                    movementY: movementY,
+                    bubbles: true,
+                    cancelable: true
+                });
+                this._domElement.dispatchEvent(event);
+            }
+        }
+    }
+
+    _onKeyDown(event) {
+        // Handle non-movement keys first, regardless of lock state
+        if (event.code === 'KeyP') { // Pause
+            this.pauseToggleRequested = true;
+            return;
+        }
+        if (event.code === KEYBOARD_INSTRUCTIONS_KEY) { // Instructions
+            this.instructionToggleRequested = true;
+            return;
+        }
+
+        // Only process movement if pointer is locked
+        if (!this._pointerLockControls.isLocked) return;
+        switch (event.code) {
+            case 'KeyW': case 'ArrowUp': this.kbMovingForward = true; break;
+            case 'KeyA': case 'ArrowLeft': this.kbMovingLeft = true; break;
+            case 'KeyS': case 'ArrowDown': this.kbMovingBackward = true; break;
+            case 'KeyD': case 'ArrowRight': this.kbMovingRight = true; break;
+        }
+    }
+
+    _onKeyUp(event) {
+        // Always reset keys on keyup, regardless of lock state
+        switch (event.code) {
+            case 'KeyW': case 'ArrowUp': this.kbMovingForward = false; break;
+            case 'KeyA': case 'ArrowLeft': this.kbMovingLeft = false; break;
+            case 'KeyS': case 'ArrowDown': this.kbMovingBackward = false; break;
+            case 'KeyD': case 'ArrowRight': this.kbMovingRight = false; break;
+        }
+    }
+
+    _onClick() {
+        // Request interaction only if pointer is locked (GAME_RUNNING state)
+        // Editor clicks are handled differently in main.js
+        if (this._pointerLockControls.isLocked) {
+            this.interactRequested = true;
+        }
+    }
+
+    getMovementInput() {
+        const direction = { x: 0, z: 0 };
+        const forward = this.kbMovingForward || this.gpMovingForward;
+        const backward = this.kbMovingBackward || this.gpMovingBackward;
+        const left = this.kbMovingLeft || this.gpMovingLeft;
+        const right = this.kbMovingRight || this.gpMovingRight;
+
+        if (forward) direction.z -= 1;
+        if (backward) direction.z += 1;
+        if (left) direction.x -= 1;
+        if (right) direction.x += 1;
+
+        // Reset gamepad flags each frame after reading (movement only)
+        this.gpMovingForward = this.gpMovingBackward = this.gpMovingLeft = this.gpMovingRight = false;
+
+        return direction;
+    }
+
+    consumeInteractionRequest() {
+        if (this.interactRequested) {
+            this.interactRequested = false;
+            return true;
+        }
+        return false;
+    }
+
+    consumePauseToggleRequest() {
+        if (this.pauseToggleRequested) {
+            this.pauseToggleRequested = false;
+            return true;
+        }
+        return false;
+    }
+
+    consumeInstructionToggleRequest() {
+        if (this.instructionToggleRequested) {
+            this.instructionToggleRequested = false;
+            return true;
+        }
+        return false;
+    }
+
+    get isLocked() {
+        return this._pointerLockControls.isLocked;
+    }
+
+    get object() {
+        return this._pointerLockControls.getObject();
+    }
+
+    // Explicit lock/unlock methods called by main.js state changes
+    lock() {
+        this._pointerLockControls.lock();
+    }
+
+    unlock() {
+        this._pointerLockControls.unlock();
+    }
+
+    moveForward(distance) {
+        this._pointerLockControls.moveForward(distance);
+    }
+
+    moveRight(distance) {
+        this._pointerLockControls.moveRight(distance);
+    }
+}
+</file>
+
+<file path="src/voxelBuilder.js">
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+import { GRID_UNIT } from './constants.js';
+
+const VOXEL_RESOLUTION = 16; 
+const VOXEL_SIZE = GRID_UNIT / VOXEL_RESOLUTION; 
+
+export const PALETTE = {
+    WOOD_DARK: 0x5d4037,
+    WOOD_LIGHT: 0x8d6e63,
+    WOOD_BOARD: 0xeecfa1,
+    METAL_DARK: 0x424242,
+    METAL_LIGHT: 0xbdbdbd,
+    METAL_SHINY: 0xe0e0e0,
+    BLACK: 0x1a1a1a,
+    COUNTER_TOP: 0xf5f5f5, 
+    TRASH_GREEN: 0x2e7d32,
+    TRASH_LID: 0x1b5e20,
+    PLASTIC_RED: 0xc62828,
+    PLASTIC_BLUE: 0x1565c0,
+    OIL_GOLD: 0xffd700,
+    WATER_BLUE: 0x29b6f6,
+    FIRE_ORANGE: 0xff5722,
+    TOMATO: 0xd32f2f,
+    LETTUCE: 0x43a047,
+    CHEESE: 0xfbc02d,
+    BUN: 0xf4a460,
+    MEAT_RAW: 0xe57373,
+    MEAT_COOKED: 0x5d4037,
+    POTATO: 0xd7ccc8,
+    FRIES_RAW: 0xffecb3,
+    FRIES_COOKED: 0xffeb3b,
+    PLATE_WHITE: 0xffffff,
+    ONION: 0xeceff1,
+    MUSHROOM: 0xa1887f,
+    WALL_WHITE: 0xEFEBE9,
+    // New Colors
+    CHICKEN_RAW: 0xFFB6C1,
+    CHICKEN_COOKED: 0xCD853F,
+    BACON_RAW: 0xFA8072,
+    BACON_COOKED: 0x8B0000,
+    EGG_WHITE: 0xFFFFFF,
+    EGG_YOLK: 0xFFD700,
+    PANCAKE: 0xF4A460,
+    PIZZA_CRUST: 0xDEB887,
+    SAUCE_RED: 0xB22222,
+    MOZZARELLA: 0xFFFFF0,
+    BANANA: 0xFFE135,
+    STRAWBERRY: 0xFC5A8D,
+    GLASS_BLUE: 0xAADDFF
+};
+
+export class VoxelBuilder {
+    constructor() {
+        this.geometries = [];
+        this.baseGeometry = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE);
+    }
+
+    add(x, y, z, color) {
+        const matrix = new THREE.Matrix4();
+        const offset = (VOXEL_SIZE / 2);
+        const tx = (x * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
+        const ty = (y * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
+        const tz = (z * VOXEL_SIZE) - (GRID_UNIT / 2) + offset;
+        matrix.makeTranslation(tx, ty, tz);
+
+        const geometry = this.baseGeometry.clone();
+        geometry.applyMatrix4(matrix);
+
+        const colors = [];
+        const c = new THREE.Color(color);
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            colors.push(c.r, c.g, c.b);
+        }
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        this.geometries.push(geometry);
+        return this;
+    }
+
+    addBox(x1, y1, z1, x2, y2, z2, color) {
+        for(let x = x1; x <= x2; x++) {
+            for(let y = y1; y <= y2; y++) {
+                for(let z = z1; z <= z2; z++) {
+                    this.add(x, y, z, color);
+                }
+            }
+        }
+        return this;
+    }
+
+    buildMesh() {
+        if (this.geometries.length === 0) return new THREE.Mesh();
+        const mergedGeometry = BufferGeometryUtils.mergeGeometries(this.geometries, false);
+        const material = new THREE.MeshStandardMaterial({
+            vertexColors: true,
+            roughness: 0.8,
+            metalness: 0.1,
+            flatShading: true
+        });
+        const mesh = new THREE.Mesh(mergedGeometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        this.geometries.forEach(g => g.dispose());
+        this.geometries = [];
+        return mesh;
+    }
+}
+
+// --- APPLIANCES ---
+
+export function createTrashBinMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(3, 0, 3, 12, 10, 12, PALETTE.TRASH_GREEN);
+    vb.addBox(2, 10, 2, 13, 11, 13, PALETTE.TRASH_LID);
+    vb.addBox(6, 0, 13, 9, 1, 15, PALETTE.METAL_LIGHT);
+    vb.addBox(4, 9, 4, 11, 10, 11, PALETTE.BLACK);
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2; 
+    return mesh;
+}
+
+export function createFryerMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 8, 14, PALETTE.METAL_SHINY);
+    vb.addBox(2, 5, 2, 13, 7, 13, PALETTE.OIL_GOLD);
+    vb.addBox(1, 8, 1, 14, 12, 3, PALETTE.METAL_DARK);
+    vb.addBox(4, 9, 4, 4, 14, 4, PALETTE.BLACK); // Basket handle L
+    vb.addBox(11, 9, 4, 11, 14, 4, PALETTE.BLACK); // Basket handle R
+    vb.addBox(4, 5, 4, 11, 8, 11, PALETTE.METAL_DARK); // Basket mesh area
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createCuttingBoardMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.WOOD_BOARD);
+    vb.addBox(10, 1, 3, 10, 1, 10, PALETTE.METAL_SHINY); // Knife blade
+    vb.addBox(10, 1, 11, 10, 1, 13, PALETTE.BLACK); // Knife handle
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createStoveMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 2, 14, PALETTE.METAL_DARK);
+    vb.addBox(2, 2, 2, 13, 2, 13, PALETTE.BLACK);
+    vb.addBox(4, 2, 4, 5, 2, 5, PALETTE.FIRE_ORANGE);
+    vb.addBox(10, 2, 10, 11, 2, 11, PALETTE.FIRE_ORANGE);
+    vb.addBox(3, 1, 14, 4, 1, 15, PALETTE.PLASTIC_RED); // Knob
+    vb.addBox(11, 1, 14, 12, 1, 15, PALETTE.PLASTIC_RED); // Knob
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createSinkMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 4, 14, PALETTE.METAL_SHINY);
+    vb.addBox(2, 2, 2, 13, 3, 13, PALETTE.WATER_BLUE);
+    vb.addBox(7, 4, 1, 8, 10, 2, PALETTE.METAL_LIGHT); 
+    vb.addBox(7, 10, 2, 8, 11, 8, PALETTE.METAL_LIGHT); 
+    vb.addBox(7, 8, 8, 8, 9, 8, PALETTE.METAL_LIGHT); 
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createToasterMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(3, 0, 3, 12, 6, 12, PALETTE.METAL_SHINY);
+    vb.addBox(4, 6, 5, 11, 6, 6, PALETTE.BLACK); // Slot 1
+    vb.addBox(4, 6, 9, 11, 6, 10, PALETTE.BLACK); // Slot 2
+    vb.addBox(13, 2, 7, 14, 4, 8, PALETTE.BLACK); // Lever
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createMixerMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(4, 0, 4, 11, 1, 11, PALETTE.METAL_LIGHT); // Base
+    vb.addBox(4, 1, 4, 6, 10, 6, PALETTE.METAL_LIGHT); // Neck
+    vb.addBox(4, 10, 4, 11, 12, 6, PALETTE.METAL_LIGHT); // Top arm
+    vb.addBox(9, 2, 6, 11, 6, 11, PALETTE.METAL_SHINY); // Bowl
+    vb.addBox(9, 6, 8, 9, 10, 9, PALETTE.METAL_DARK); // Beater
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createBlenderMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.METAL_DARK); // Base
+    vb.addBox(6, 4, 6, 9, 11, 9, PALETTE.GLASS_BLUE); // Jug
+    vb.addBox(6, 11, 6, 9, 12, 9, PALETTE.BLACK); // Lid
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createDoughPressMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.METAL_LIGHT); // Base
+    vb.addBox(7, 1, 2, 8, 8, 3, PALETTE.METAL_DARK); // Hinge pillar
+    vb.addBox(3, 8, 3, 12, 9, 12, PALETTE.METAL_LIGHT); // Top Plate
+    vb.addBox(7, 9, 7, 8, 12, 8, PALETTE.BLACK); // Handle vert
+    vb.addBox(5, 12, 7, 10, 13, 8, PALETTE.BLACK); // Handle horiz
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createPizzaOvenMesh() {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 1, 14, PALETTE.METAL_DARK); // Floor
+    // Arch
+    vb.addBox(1, 1, 1, 3, 10, 14, PALETTE.WOOD_DARK); // L wall
+    vb.addBox(12, 1, 1, 14, 10, 14, PALETTE.WOOD_DARK); // R wall
+    vb.addBox(1, 1, 1, 14, 10, 3, PALETTE.WOOD_DARK); // Back wall
+    vb.addBox(1, 10, 1, 14, 12, 14, PALETTE.WOOD_DARK); // Roof
+    vb.addBox(6, 2, 6, 9, 4, 9, PALETTE.FIRE_ORANGE); // Fire inside
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createTableMesh(neighbors) {
+    const vb = new VoxelBuilder();
+    // Top
+    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.METAL_SHINY);
+    vb.addBox(1, 5, 1, 14, 5, 14, PALETTE.METAL_DARK); // Underside brace
+    
+    // Smart Legs Logic: Add leg only if no neighbor in that direction
+    // Corners need legs if either adjacent side is open? 
+    // Standard logic: 4 corners. 
+    // NW Leg (x=1, z=1) - Remove if N or W has neighbor?
+    // Actually, tables usually fuse. If there is a table to the West, we don't need the West legs? 
+    // Or rather, shared legs?
+    // Let's simply: Only place a leg if NO neighbor is present on the two adjacent sides.
+    
+    const addLeg = (x, z) => vb.addBox(x, 0, z, x+1, 14, z+1, PALETTE.METAL_LIGHT);
+    
+    // NW Corner (1,1)
+    if(!neighbors.w && !neighbors.n) addLeg(1, 1);
+    
+    // NE Corner (13,1)
+    if(!neighbors.e && !neighbors.n) addLeg(13, 1);
+    
+    // SW Corner (1,13)
+    if(!neighbors.w && !neighbors.s) addLeg(1, 13);
+    
+    // SE Corner (13,13)
+    if(!neighbors.e && !neighbors.s) addLeg(13, 13);
+
+    const mesh = vb.buildMesh();
+    mesh.scale.set(1, GRID_UNIT*1.8 / GRID_UNIT, 1); // Adjust height scalar (1.8 units ~ 0.9 world height)
+    // Wait, normal voxel scale is 1.
+    // GRID_UNIT is 0.5. 
+    // Voxel Size = 0.5/16.
+    // Mesh is 16 voxels high = 0.5 height.
+    // We want 0.9 height. Scale Y by 1.8.
+    mesh.scale.set(1, 1.8, 1);
+    
+    mesh.position.y = (GRID_UNIT * 1.8) / 2;
+    return mesh;
+}
+
+// --- SOURCES ---
+
+export function createIngredientBinMesh(ingredientType) {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 6, 14, PALETTE.WOOD_LIGHT);
+    vb.addBox(2, 1, 2, 13, 6, 13, PALETTE.BLACK); // Interior void illusion
+    
+    // Content fill
+    const c = getIngredientColor(ingredientType);
+    if (c) {
+        vb.addBox(3, 2, 3, 6, 5, 6, c);
+        vb.addBox(7, 3, 4, 10, 5, 8, c);
+        vb.addBox(4, 4, 8, 8, 6, 11, c);
+    }
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createPlateStackMesh() {
+    const vb = new VoxelBuilder();
+    for(let y=0; y<8; y+=2) {
+        vb.addBox(3, y, 3, 12, y+1, 12, PALETTE.PLATE_WHITE);
+    }
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createCupStackMesh() {
+    const vb = new VoxelBuilder();
+    // Stack of cups
+    for(let i=0; i<3; i++) {
+        let y = i * 3;
+        vb.addBox(5, y, 5, 10, y+2, 10, PALETTE.WATER_BLUE);
+    }
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+export function createBowlStackMesh() {
+    const vb = new VoxelBuilder();
+    for(let i=0; i<4; i++) {
+        let y = i * 2;
+        vb.addBox(4, y, 4, 11, y+1, 11, PALETTE.WOOD_BOARD); // Beige bowls
+    }
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
+    return mesh;
+}
+
+// --- HELPERS ---
+
+function getIngredientColor(type) {
+    if(type.includes('tomato')) return type.includes('sauce') ? PALETTE.SAUCE_RED : PALETTE.TOMATO;
+    if(type.includes('lettuce')) return PALETTE.LETTUCE;
+    if(type.includes('cheese') || type.includes('mozzarella')) return PALETTE.CHEESE;
+    if(type.includes('bun') || type.includes('bread')) return PALETTE.BUN;
+    if(type.includes('patty')) return PALETTE.MEAT_RAW;
+    if(type.includes('cooked_patty')) return PALETTE.MEAT_COOKED;
+    if(type.includes('potato')) return PALETTE.POTATO;
+    if(type.includes('fries')) return PALETTE.FRIES_RAW;
+    if(type.includes('onion')) return PALETTE.ONION;
+    if(type.includes('chicken')) return PALETTE.CHICKEN_RAW;
+    if(type.includes('bacon')) return PALETTE.BACON_RAW;
+    if(type.includes('banana')) return PALETTE.BANANA;
+    if(type.includes('strawberry')) return PALETTE.STRAWBERRY;
+    if(type.includes('egg')) return PALETTE.EGG_WHITE;
+    if(type.includes('pizza')) return PALETTE.PIZZA_CRUST;
+    if(type.includes('coating')) return PALETTE.WOOD_BOARD;
+    return null;
+}
+
+// --- ITEMS (Physical objects in hand/world) ---
+
+export function createItemMesh(type) {
+    const vb = new VoxelBuilder();
+    
+    if (type === 'plate') {
+        vb.addBox(2, 0, 2, 13, 1, 13, PALETTE.PLATE_WHITE);
+        vb.addBox(2, 1, 2, 13, 2, 3, PALETTE.PLATE_WHITE); 
+        vb.addBox(2, 1, 12, 13, 2, 13, PALETTE.PLATE_WHITE);
+        vb.addBox(2, 1, 3, 3, 2, 12, PALETTE.PLATE_WHITE);
+        vb.addBox(12, 1, 3, 13, 2, 12, PALETTE.PLATE_WHITE);
+    } 
+    else if (type === 'bowl') {
+        vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.WOOD_BOARD);
+        vb.addBox(3, 1, 3, 12, 4, 4, PALETTE.WOOD_BOARD);
+        vb.addBox(3, 1, 11, 12, 4, 12, PALETTE.WOOD_BOARD);
+        vb.addBox(3, 1, 4, 4, 4, 11, PALETTE.WOOD_BOARD);
+        vb.addBox(11, 1, 4, 12, 4, 11, PALETTE.WOOD_BOARD);
+    }
+    else if (type === 'cup') {
+        vb.addBox(5, 0, 5, 10, 6, 10, PALETTE.GLASS_BLUE);
+    }
+    // --- Food Items ---
+    else if (type.includes('tomato')) {
+        if (type.includes('sauce')) {
+             vb.addBox(4, 0, 4, 11, 5, 11, PALETTE.METAL_LIGHT); // Can
+             vb.addBox(4, 2, 4, 11, 4, 11, PALETTE.SAUCE_RED); // Label
+        } else {
+            vb.addBox(5, 0, 5, 10, 4, 10, PALETTE.TOMATO);
+            if (!type.includes('chopped')) vb.addBox(6, 4, 6, 9, 5, 9, PALETTE.LETTUCE); // Stem
+        }
+    }
+    else if (type.includes('lettuce')) {
+        vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.LETTUCE);
+    }
+    else if (type.includes('potato')) {
+        vb.addBox(5, 0, 4, 10, 3, 11, PALETTE.POTATO);
+    }
+    else if (type === 'raw_fries') {
+        vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_RAW); vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_RAW); vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_RAW);
+    }
+    else if (type === 'cooked_fries') {
+        vb.addBox(6, 0, 4, 7, 4, 5, PALETTE.FRIES_COOKED); vb.addBox(8, 0, 6, 9, 4, 7, PALETTE.FRIES_COOKED); vb.addBox(5, 0, 7, 6, 4, 8, PALETTE.FRIES_COOKED);
+    }
+    else if (type.includes('patty')) {
+        const c = type.includes('cooked') ? PALETTE.MEAT_COOKED : PALETTE.MEAT_RAW;
+        vb.addBox(3, 0, 3, 12, 2, 12, c);
+    }
+    else if (type === 'bun' || type.includes('bread')) {
+        const c = type.includes('toasted') ? PALETTE.WOOD_DARK : PALETTE.BUN;
+        vb.addBox(3, 0, 3, 12, 2, 12, c);
+    }
+    else if (type.includes('cheese') || type.includes('mozzarella')) {
+        vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.CHEESE);
+    }
+    else if (type.includes('chicken')) {
+        const c = type.includes('cooked') ? PALETTE.CHICKEN_COOKED : (type.includes('coated') ? PALETTE.WOOD_BOARD : PALETTE.CHICKEN_RAW);
+        vb.addBox(4, 0, 4, 11, 3, 9, c);
+    }
+    else if (type.includes('bacon')) {
+        const c = type.includes('cooked') ? PALETTE.BACON_COOKED : PALETTE.BACON_RAW;
+        vb.addBox(2, 0, 6, 13, 1, 9, c);
+    }
+    else if (type.includes('onion')) {
+        vb.addBox(5, 0, 5, 10, 5, 10, PALETTE.ONION);
+    }
+    else if (type.includes('banana')) {
+        vb.addBox(3, 0, 7, 12, 3, 9, PALETTE.BANANA); // Curved shape approximation
+    }
+    else if (type.includes('strawberry')) {
+        vb.addBox(6, 0, 6, 9, 3, 9, PALETTE.STRAWBERRY);
+    }
+    else if (type.includes('pizza_dough') || type.includes('pizza_base')) {
+        vb.addBox(3, 0, 3, 12, 2, 12, PALETTE.PIZZA_CRUST);
+    }
+    else if (type.includes('pizza_margherita')) {
+        const c = type.includes('cooked') ? PALETTE.PIZZA_CRUST : PALETTE.PIZZA_CRUST;
+        vb.addBox(3, 0, 3, 12, 2, 12, c);
+        vb.addBox(4, 2, 4, 11, 3, 11, PALETTE.SAUCE_RED);
+        vb.addBox(5, 3, 5, 10, 4, 10, PALETTE.MOZZARELLA);
+    }
+    else if (type.includes('egg')) {
+        vb.addBox(6, 0, 6, 9, 4, 9, PALETTE.EGG_WHITE);
+    }
+    else if (type.includes('pancake')) {
+        if (type.includes('mix') || type.includes('batter')) vb.addBox(5, 0, 5, 10, 6, 10, PALETTE.WOOD_BOARD); // Box
+        else vb.addBox(3, 0, 3, 12, 2, 12, PALETTE.PANCAKE); // Cooked
+    }
+    else if (type.includes('omelette')) {
+        vb.addBox(3, 0, 6, 12, 3, 10, PALETTE.EGG_YOLK); // Folded
+    }
+    else if (type.includes('milk') || type.includes('yogurt')) {
+        vb.addBox(5, 0, 5, 10, 8, 10, PALETTE.WHITE);
+    }
+    else {
+        vb.addBox(4, 0, 4, 11, 7, 11, PALETTE.PLASTIC_BLUE); // Generic
+    }
+
+    const mesh = vb.buildMesh();
+    
+    // *** KEY FIX: NORMALIZE ORIGIN ***
+    // VoxelBuilder 0,0,0 is center of grid unit.
+    // This shift makes (0,0,0) the BOTTOM of the mesh.
+    mesh.geometry.translate(0, GRID_UNIT/2, 0); 
+    
+    return mesh;
+}
+</file>
+
+<file path="src/player.js">
+// src/player.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { PLAYER_HEIGHT, PLAYER_SPEED, KITCHEN_BOUNDS, ITEM_TYPES } from './constants.js'; // Added ITEM_TYPES
+
+export class Player {
+    constructor(controls) {
+        this.controls = controls;
+        this.cameraObject = controls.object;
+        this.velocity = new THREE.Vector3();
+        this.holdingItem = null;
+        this.scene = null;
+
+        this.holdPositionHelper = new THREE.Object3D();
+        this.holdPositionHelper.position.set(0, -0.3, -0.8); // Adjusted hold position slightly
+        this.cameraObject.add(this.holdPositionHelper);
+    }
+
+    update(delta, movementInput) {
+        if (!this.controls.isLocked) return;
+
+        const speed = PLAYER_SPEED * delta;
+        this.velocity.set(movementInput.x, 0, movementInput.z);
+
+        if (this.velocity.lengthSq() > 0) {
+            this.velocity.normalize().multiplyScalar(speed);
+        } else {
+            this.velocity.set(0, 0, 0);
+        }
+
+        this.controls.moveRight(this.velocity.x);
+        this.controls.moveForward(-this.velocity.z); // Use negative Z for forward relative to camera
+
+        // Apply bounds - consider making bounds dynamic based on level layout later
+        this.cameraObject.position.x = Math.max(KITCHEN_BOUNDS.xMin, Math.min(KITCHEN_BOUNDS.xMax, this.cameraObject.position.x));
+        this.cameraObject.position.z = Math.max(KITCHEN_BOUNDS.zMin, Math.min(KITCHEN_BOUNDS.zMax, this.cameraObject.position.z));
+        this.cameraObject.position.y = PLAYER_HEIGHT;
+
+        this._updateHeldItemPosition();
+    }
+
+    _updateHeldItemPosition() {
+        if (this.holdingItem) {
+            const targetPosition = new THREE.Vector3();
+            this.holdPositionHelper.getWorldPosition(targetPosition);
+            // Use lerp for smoother movement towards the target position
+            this.holdingItem.position.lerp(targetPosition, 0.4); // Increased lerp factor for responsiveness
+
+            const targetRotation = new THREE.Quaternion();
+            // Get camera's world rotation directly
+            this.cameraObject.getWorldQuaternion(targetRotation);
+            // Slerp for smoother rotation towards the target rotation
+            this.holdingItem.quaternion.slerp(targetRotation, 0.3); // Increased slerp factor
+        }
+    }
+
+
+    pickup(item) {
+        if (this.holdingItem || !this.scene || !item) return false;
+
+        this.holdingItem = item;
+        // InteractionManager handles removing from its interactables list
+        // Ensure item is added to the scene if not already (might be redundant if IM adds it)
+        if (!item.parent) {
+            this.scene.add(item);
+        }
+
+        // Disable raycasting while held
+        if (typeof item.raycast === 'function') {
+            item.userData.originalRaycast = item.raycast;
+        }
+        item.raycast = () => { };
+        return true;
+    }
+
+    place() {
+        if (!this.holdingItem) return null;
+        const item = this.holdingItem;
+        // Restore raycasting
+        if (item.userData.originalRaycast) {
+            item.raycast = item.userData.originalRaycast;
+            delete item.userData.originalRaycast;
+        } else {
+            // If no original raycast was stored, ensure it defaults back to THREE's default
+            delete item.raycast;
+        }
+        this.holdingItem = null;
+        // Return item for InteractionManager to handle placement/adding back to list
+        return item;
+    }
+
+    // Force drop - just clear internal state and remove from scene
+    forceDropItem() {
+        if (!this.holdingItem) return;
+        console.log(`Player force dropping: ${this.holdingItem.name}`);
+        const item = this.holdingItem;
+        this.holdingItem = null; // Clear internal reference
+
+        // Remove from scene graph - InteractionManager handles the list
+        if (item.parent) {
+            item.parent.remove(item);
+        }
+        // Optional: Dispose geometry/material if needed (handled by IM clearDynamicItems now)
+    }
+
+    getHeldItem() { return this.holdingItem; }
+
+    // New method to get the display name for the held item
+    getHeldItemName() {
+        if (!this.holdingItem) return null;
+
+        // If it's a container (plate/bowl/cup) and has a mealName, return that
+        if (this.holdingItem.userData?.type === ITEM_TYPES.ITEM && this.holdingItem.userData?.mealName) {
+            return this.holdingItem.userData.mealName;
+        }
+
+        // Otherwise, return the item's base name
+        return this.holdingItem.name;
+    }
+
+    getPosition() { return this.cameraObject.position; }
+    setScene(scene) { this.scene = scene; }
+}
+</file>
+
+<file path="src/gameData.js">
+// src/gameData.js
+// import { INGREDIENT_STATES, STATION_TYPES, COUNTER_HEIGHT } from './constants.js'; // Keep imports if needed
+
+// --- RECIPES ---
+// Includes default timeLimit, baseScore, penalty, and NEW instructions per recipe
+// Ingredient names MUST match the 'finalName' generated in items.js
+export const RECIPES = {
+    // --- Existing ---
+    'French Fries': {
+        ingredients: ['cooked_fries'].sort(),
+        timeLimit: 75, baseScore: 60, penalty: 30,
+        instructions: {
+            en: [
+                "Get Potato (Bin)",
+                "Use Cutting Board -> Raw Fries",
+                "Use Fryer -> Cooked Fries",
+                "Get Plate (Stack)",
+                "Combine Plate + Cooked Fries (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Patate (Bac)",
+                "Utiliser Planche -> Frites Crues",
+                "Utiliser Friteuse -> Frites Cuites",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Frites Cuites (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Patata (Contenedor)",
+                "Usar Tabla -> Patatas Crudas",
+                "Usar Freidora -> Patatas Cocidas",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Patatas Cocidas (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'Salad': {
+        ingredients: ['chopped_lettuce', 'chopped_tomato'].sort(),
+        timeLimit: 90, baseScore: 75, penalty: 40,
+        instructions: {
+            en: [
+                "Get Lettuce (Bin)",
+                "Use Cutting Board -> Chopped Lettuce",
+                "Get Tomato (Bin)",
+                "Use Cutting Board -> Chopped Tomato",
+                "Get Plate (Stack)",
+                "Combine Plate + Chopped Lettuce + Chopped Tomato (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Laitue (Bac)",
+                "Utiliser Planche -> Laitue Hachée",
+                "Prendre Tomate (Bac)",
+                "Utiliser Planche -> Tomate Hachée",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Laitue Hachée + Tomate Hachée (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Lechuga (Contenedor)",
+                "Usar Tabla -> Lechuga Picada",
+                "Coger Tomate (Contenedor)",
+                "Usar Tabla -> Tomate Picado",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Lechuga Picada + Tomate Picado (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'Hamburger': {
+        ingredients: ['bun', 'cooked_patty'].sort(),
+        timeLimit: 100, baseScore: 100, penalty: 50,
+        instructions: {
+            en: [
+                "Get Patty (Bin)",
+                "Use Grill -> Cooked Patty",
+                "Get Bun (Rack)",
+                "Get Plate (Stack)",
+                "Combine Plate + Bun + Cooked Patty (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Steak Haché (Bac)",
+                "Utiliser Grill -> Steak Cuit",
+                "Prendre Pain (Étagère)",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Pain + Steak Cuit (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Hamburguesa (Contenedor)",
+                "Usar Parrilla -> Hamburguesa Cocida",
+                "Coger Pan (Estante)",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Pan + Hamburguesa Cocida (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'Cheeseburger': {
+        ingredients: ['bun', 'cheese_slice', 'cooked_patty'].sort(),
+        timeLimit: 110, baseScore: 120, penalty: 60,
+        instructions: {
+            en: [
+                "Get Patty (Bin)",
+                "Use Grill -> Cooked Patty",
+                "Get Bun (Rack)",
+                "Get Cheese Slice (Fridge)",
+                "Get Plate (Stack)",
+                "Combine Plate + Bun + Cooked Patty + Cheese Slice (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Steak Haché (Bac)",
+                "Utiliser Grill -> Steak Cuit",
+                "Prendre Pain (Étagère)",
+                "Prendre Tranche Fromage (Frigo)",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Pain + Steak Cuit + Fromage (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Hamburguesa (Contenedor)",
+                "Usar Parrilla -> Hamburguesa Cocida",
+                "Coger Pan (Estante)",
+                "Coger Loncha Queso (Nevera)",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Pan + Hamburguesa Cocida + Queso (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    // --- New Recipes ---
+    'Onion Rings': {
+        ingredients: ['cooked_onion_rings'].sort(),
+        timeLimit: 80, baseScore: 70, penalty: 35,
+        instructions: { // Assuming Onion -> Cut -> Coat -> Fry
+            en: [
+                "Get Onion (Bin)",
+                "Use Cutting Board -> Raw Onion Rings",
+                "Get Coating Mix (Source)",
+                "Use Coating Station w/ Rings -> Coated Onion Rings", // Needs station
+                "Use Fryer -> Cooked Onion Rings",
+                "Get Plate (Stack)",
+                "Combine Plate + Cooked Onion Rings (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Oignon (Bac)",
+                "Utiliser Planche -> Rondelles Oignon Crues",
+                "Prendre Panure (Source)",
+                "Utiliser Station Panure avec Rondelles -> Rondelles Panées", // Needs station
+                "Utiliser Friteuse -> Rondelles Cuites",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Rondelles Cuites (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Cebolla (Contenedor)",
+                "Usar Tabla -> Aros Cebolla Crudos",
+                "Coger Mezcla Rebozar (Fuente)",
+                "Usar Estación Rebozado con Aros -> Aros Rebozados", // Needs station
+                "Usar Freidora -> Aros Cocidos",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Aros Cocidos (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'Chicken Tenders': {
+        ingredients: ['cooked_chicken_tenders'].sort(),
+        timeLimit: 95, baseScore: 90, penalty: 45,
+        instructions: { // Assuming Chicken -> Cut -> Coat -> Fry
+            en: [
+                "Get Raw Chicken (Source)",
+                "Use Cutting Board -> Raw Chicken Strips",
+                "Get Coating Mix (Source)",
+                "Use Coating Station w/ Strips -> Coated Chicken Strips", // Needs station
+                "Use Fryer -> Cooked Chicken Tenders",
+                "Get Plate (Stack)",
+                "Combine Plate + Cooked Chicken Tenders (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Poulet Cru (Source)",
+                "Utiliser Planche -> Lanières Poulet Crues",
+                "Prendre Panure (Source)",
+                "Utiliser Station Panure avec Lanières -> Lanières Panées", // Needs station
+                "Utiliser Friteuse -> Lanières Cuites",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Lanières Cuites (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Pollo Crudo (Fuente)",
+                "Usar Tabla -> Tiras Pollo Crudas",
+                "Coger Mezcla Rebozar (Fuente)",
+                "Usar Estación Rebozado con Tiras -> Tiras Rebozadas", // Needs station
+                "Usar Freidora -> Tiras Cocidas",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Tiras Cocidas (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'BLT Sandwich': {
+        ingredients: ['cooked_bacon', 'chopped_lettuce', 'chopped_tomato', 'toasted_bread'].sort(),
+        timeLimit: 120, baseScore: 110, penalty: 55,
+        instructions: {
+            en: [
+                "Get Bread Slice (Source)",
+                "Use Toaster -> Toasted Bread",
+                "Get Raw Bacon (Source)",
+                "Use Griddle -> Cooked Bacon",
+                "Get Lettuce (Bin)",
+                "Use Cutting Board -> Chopped Lettuce",
+                "Get Tomato (Bin)",
+                "Use Cutting Board -> Chopped Tomato",
+                "Get Plate (Stack)",
+                "Combine Plate + Toasted Bread + Cooked Bacon + Lettuce + Tomato (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Tranche Pain (Source)",
+                "Utiliser Grille-pain -> Pain Grillé",
+                "Prendre Bacon Cru (Source)",
+                "Utiliser Plaque -> Bacon Cuit",
+                "Prendre Laitue (Bac)",
+                "Utiliser Planche -> Laitue Hachée",
+                "Prendre Tomate (Bac)",
+                "Utiliser Planche -> Tomate Hachée",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Pain Grillé + Bacon Cuit + Laitue + Tomate (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Rebanada Pan (Fuente)",
+                "Usar Tostadora -> Pan Tostado",
+                "Coger Bacon Crudo (Fuente)",
+                "Usar Plancha -> Bacon Cocido",
+                "Coger Lechuga (Contenedor)",
+                "Usar Tabla -> Lechuga Picada",
+                "Coger Tomate (Contenedor)",
+                "Usar Tabla -> Tomate Picado",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Pan Tostado + Bacon Cocido + Lechuga + Tomate (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'Grilled Cheese Sandwich': {
+        ingredients: ['grilled_cheese_cooked'].sort(),
+        timeLimit: 85, baseScore: 80, penalty: 40,
+        instructions: { // Assuming Bread + Cheese -> Assemble -> Griddle
+            en: [
+                "Get Bread Slice (Source)",
+                "Get Cheese Slice (Fridge)",
+                "Combine Bread + Cheese (Assembly) -> Grilled Cheese Raw", // Implicit assembly step
+                "Use Griddle -> Grilled Cheese Cooked",
+                "Get Plate (Stack)",
+                "Combine Plate + Grilled Cheese Cooked (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Tranche Pain (Source)",
+                "Prendre Tranche Fromage (Frigo)",
+                "Combiner Pain + Fromage (Assemblage) -> Sandwich Cru", // Implicit assembly step
+                "Utiliser Plaque -> Sandwich Grillé Cuit",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Sandwich Grillé Cuit (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Rebanada Pan (Fuente)",
+                "Coger Loncha Queso (Nevera)",
+                "Combinar Pan + Queso (Ensamblaje) -> Sándwich Crudo", // Implicit assembly step
+                "Usar Plancha -> Sándwich Queso Cocido",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Sándwich Queso Cocido (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'Pancakes': {
+        ingredients: ['cooked_pancakes', 'syrup'].sort(),
+        timeLimit: 120, baseScore: 90, penalty: 45,
+        instructions: {
+            en: [
+                "Get Pancake Mix (Source)",
+                "Use Mixer -> Pancake Batter",
+                "Use Griddle -> Cooked Pancakes",
+                "Get Syrup (Source)",
+                "Get Plate (Stack)",
+                "Combine Plate + Cooked Pancakes + Syrup (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Mix Pancake (Source)",
+                "Utiliser Mixeur -> Pâte à Pancake",
+                "Utiliser Plaque -> Pancakes Cuits",
+                "Prendre Sirop (Source)",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Pancakes Cuits + Sirop (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Mezcla Tortitas (Fuente)",
+                "Usar Batidora -> Masa Tortitas",
+                "Usar Plancha -> Tortitas Cocidas",
+                "Coger Sirope (Fuente)",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Tortitas Cocidas + Sirope (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'Omelette': {
+        ingredients: ['cooked_omelette'].sort(),
+        timeLimit: 90, baseScore: 80, penalty: 40,
+        instructions: {
+            en: [
+                "Get Egg (Source)",
+                "Use Mixer -> Omelette Mix",
+                "Use Griddle -> Cooked Omelette",
+                "Get Plate (Stack)",
+                "Combine Plate + Cooked Omelette (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Oeuf (Source)",
+                "Utiliser Mixeur -> Mélange Omelette",
+                "Utiliser Plaque -> Omelette Cuite",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Omelette Cuite (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Huevo (Fuente)",
+                "Usar Batidora -> Mezcla Tortilla",
+                "Usar Plancha -> Tortilla Cocida",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Tortilla Cocida (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'Fruit & Yogurt Bowl': {
+        ingredients: ['granola', 'sliced_banana', 'sliced_strawberry', 'yogurt'].sort(),
+        timeLimit: 70, baseScore: 70, penalty: 30,
+        instructions: {
+            en: [
+                "Get Banana (Bin)",
+                "Use Cutting Board -> Sliced Banana",
+                "Get Strawberry (Bin)",
+                "Use Cutting Board -> Sliced Strawberry",
+                "Get Yogurt (Source)",
+                "Get Granola (Source)",
+                "Get Bowl (Source)", // Needs Bowl source
+                "Combine Bowl + Yogurt + Banana + Strawberry + Granola (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Banane (Bac)",
+                "Utiliser Planche -> Banane Tranchée",
+                "Prendre Fraise (Bac)",
+                "Utiliser Planche -> Fraise Tranchée",
+                "Prendre Yaourt (Source)",
+                "Prendre Granola (Source)",
+                "Prendre Bol (Source)", // Needs Bowl source
+                "Combiner Bol + Yaourt + Banane + Fraise + Granola (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Plátano (Contenedor)",
+                "Usar Tabla -> Plátano Rebanado",
+                "Coger Fresa (Contenedor)",
+                "Usar Tabla -> Fresa Rebanada",
+                "Coger Yogur (Fuente)",
+                "Coger Granola (Fuente)",
+                "Coger Bol (Fuente)", // Needs Bowl source
+                "Combinar Bol + Yogur + Plátano + Fresa + Granola (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'Smoothie': {
+        ingredients: ['smoothie_ready'].sort(),
+        timeLimit: 60, baseScore: 65, penalty: 25,
+        instructions: { // Using new Blender logic
+            en: [
+                "Get Banana (Bin)",
+                "Use Cutting Board -> Sliced Banana",
+                "Use Blender w/ Sliced Banana",
+                "Get Strawberry (Bin)",
+                "Use Cutting Board -> Sliced Strawberry",
+                "Use Blender w/ Sliced Strawberry",
+                "Get Milk/Yogurt (Source)", // Depends on level
+                "Use Blender w/ Milk/Yogurt",
+                "Get Cup (Source)",
+                "Use Blender w/ Cup -> Smoothie Ready",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Banane (Bac)",
+                "Utiliser Planche -> Banane Tranchée",
+                "Utiliser Blender avec Banane",
+                "Prendre Fraise (Bac)",
+                "Utiliser Planche -> Fraise Tranchée",
+                "Utiliser Blender avec Fraise",
+                "Prendre Lait/Yaourt (Source)", // Depends on level
+                "Utiliser Blender avec Lait/Yaourt",
+                "Prendre Gobelet (Source)",
+                "Utiliser Blender avec Gobelet -> Smoothie Prêt",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Plátano (Contenedor)",
+                "Usar Tabla -> Plátano Rebanado",
+                "Usar Licuadora con Plátano",
+                "Coger Fresa (Contenedor)",
+                "Usar Tabla -> Fresa Rebanada",
+                "Usar Licuadora con Fresa",
+                "Coger Leche/Yogur (Fuente)", // Depends on level
+                "Usar Licuadora con Leche/Yogur",
+                "Coger Vaso (Fuente)",
+                "Usar Licuadora con Vaso -> Batido Listo",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+    'Pizza Margherita': {
+        ingredients: ['cooked_pizza_margherita'].sort(),
+        timeLimit: 150, baseScore: 150, penalty: 70,
+        instructions: { // Dough -> Press -> Sauce -> Cheese -> Assemble -> Oven
+            en: [
+                "Get Pizza Dough (Source)",
+                "Use Dough Press -> Pizza Base",
+                "Get Tomato Sauce (Source)",
+                "Get Shredded Mozzarella (Source)",
+                "Combine Base + Sauce + Cheese (Assembly Pizza) -> Pizza Margherita Raw",
+                "Use Oven -> Cooked Pizza Margherita",
+                "Get Plate (Stack)", // Or maybe serve directly? Let's use plate for now.
+                "Combine Plate + Cooked Pizza (Assembly)",
+                "Serve (Counter)"
+            ],
+            fr: [
+                "Prendre Pâte à Pizza (Source)",
+                "Utiliser Presse -> Base Pizza",
+                "Prendre Sauce Tomate (Source)",
+                "Prendre Mozzarella Râpée (Source)",
+                "Combiner Base + Sauce + Fromage (Assemblage Pizza) -> Pizza Margherita Crue",
+                "Utiliser Four -> Pizza Margherita Cuite",
+                "Prendre Assiette (Pile)",
+                "Combiner Assiette + Pizza Cuite (Assemblage)",
+                "Servir (Comptoir)"
+            ],
+            es: [
+                "Coger Masa Pizza (Fuente)",
+                "Usar Prensa Masa -> Base Pizza",
+                "Coger Salsa Tomate (Fuente)",
+                "Coger Mozzarella Rallada (Fuente)",
+                "Combinar Base + Salsa + Queso (Ensamblaje Pizza) -> Pizza Margherita Cruda",
+                "Usar Horno -> Pizza Margherita Cocida",
+                "Coger Plato (Pila)",
+                "Combinar Plato + Pizza Cocida (Ensamblaje)",
+                "Servir (Mostrador)"
+            ]
+        }
+    },
+};
+
+
+// Helper function to get recipe *ingredients* by name
+export function getRecipeIngredients(mealName) {
+    return RECIPES[mealName]?.ingredients;
+}
+// Helper function to get recipe *details* (time, score, penalty, instructions)
+export function getRecipeDetails(mealName) {
+    const recipe = RECIPES[mealName];
+    if (!recipe) return null;
+    return {
+        timeLimit: recipe.timeLimit,
+        baseScore: recipe.baseScore,
+        penalty: recipe.penalty,
+        instructions: recipe.instructions // Include instructions
+    };
+}
+</file>
+
+<file path="src/ui.js">
+// src/ui.js
+import { getRecipeDetails, getRecipeIngredients, RECIPES } from './gameData.js'; 
+import { getTrans } from './i18nData.js';
+
+function formatTime(seconds) {
+    const mins = Math.floor(Math.max(0, seconds) / 60);
+    const secs = Math.floor(Math.max(0, seconds) % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+export class UIManager {
+    constructor(saveManager) {
+        this.saveManager = saveManager;
+        this.loadingScreen = document.getElementById('loading-screen');
+        this.mainMenu = document.getElementById('main-menu');
+        this.settingsScreen = document.getElementById('settings-screen');
+        this.levelSelectScreen = document.getElementById('level-select-screen');
+        this.levelEndScreen = document.getElementById('level-end-screen');
+        this.gameHud = document.getElementById('game-hud');
+        this.levelInstructionsScreen = document.getElementById('level-instructions-screen'); 
+
+        this.orderListElement = document.getElementById('order-list');
+        this.levelTimerDisplay = document.getElementById('level-timer-display');
+        this.holdingDisplay = document.getElementById('holding-display');
+        this.scoreDisplay = document.getElementById('score-display');
+        this.gamepadStatusElement = document.getElementById('gamepad-status');
+        this.crosshair = document.getElementById('crosshair');
+        this.tempMessageElement = document.getElementById('temp-message');
+
+        this.finalScoreElement = document.getElementById('final-score');
+        this.finalStarsElement = document.getElementById('final-stars');
+        this.languageButtons = this.settingsScreen.querySelectorAll('.lang-button');
+        this.toggleLabelsCheckbox = document.getElementById('toggle-labels-setting');
+        this.resumeButtonSettings = document.getElementById('resume-button-settings');
+        this.languageLabel = document.getElementById('language-label');
+        this.levelListContainer = document.getElementById('level-list');
+
+        this.instructionsTitle = document.getElementById('instructions-title');
+        this.instructionsContent = document.getElementById('instructions-content');
+        this.startLevelInstructionsButton = document.getElementById('start-level-instructions-button');
+        this.instructionsHint = this.levelInstructionsScreen.querySelector('.menu-hint'); 
+
+        this.activeScreen = null;
+        this.messageTimeout = null;
+        this.currentLanguage = 'en';
+
+        // Initial UI Dictionary
+        this.uiText = {
+            en: { title: "Pixel Kitchen Sim", play: "Play", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked", levelInstructions: "Level Instructions", startLevel: "Start Level", recipe: "Recipe", close: "Close", hintToggleInstructions: "Toggle: [I] / [△/Y]" },
+            fr: { title: "Pixel Cuisine Sim", play: "Jouer", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher Étiquettes:", version: "Version:", selectLevel: "Choisir Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous Niveaux Finis!", playAgain: "Rejouer?", loading: "Chargement...", levelTime: "Temps Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé", levelInstructions: "Instructions du Niveau", startLevel: "Commencer Niveau", recipe: "Recette", close: "Fermer", hintToggleInstructions: "Basculer: [I] / [△/Y]" },
+            es: { title: "Pixel Cocina Sim", play: "Jugar", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menú Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", version: "Versión:", selectLevel: "Elegir Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos Niveles Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", levelTime: "Tiempo Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado", levelInstructions: "Instrucciones del Nivel", startLevel: "Empezar Nivel", recipe: "Receta", close: "Cerrar", hintToggleInstructions: "Alternar: [I] / [△/Y]" }
+        };
+
+        // Initialize Recipe Book container
+        this.createRecipeBook();
+
+        // Set Language from Save or Default
+        const savedLang = this.saveManager.getSetting('language') || 'en';
+        this.setLanguage(savedLang);
+    }
+
+    createRecipeBook() {
+        const container = document.createElement('div');
+        container.id = 'recipe-book-container';
+        this.settingsScreen.querySelector('.menu-container').insertBefore(container, document.getElementById('back-to-main-button'));
+        this.recipeBookContainer = container;
+    }
+
+    updateRecipeBook(lang) {
+        if (!this.recipeBookContainer || !this.uiText || !this.uiText[lang]) return;
+        this.recipeBookContainer.innerHTML = '';
+        const title = document.createElement('h3');
+        title.textContent = (this.uiText[lang].recipe || "Recipes") + " Book";
+        title.style.color = '#FFD700';
+        this.recipeBookContainer.appendChild(title);
+        for (const [mealName, data] of Object.entries(RECIPES)) {
+            if (data.instructions && data.instructions[lang]) {
+                const entry = document.createElement('div');
+                entry.className = 'recipe-entry';
+                const h4 = document.createElement('h4');
+                h4.textContent = getTrans(mealName, lang); 
+                const p = document.createElement('p');
+                p.textContent = data.instructions[lang].join(" → ");
+                entry.appendChild(h4); entry.appendChild(p);
+                this.recipeBookContainer.appendChild(entry);
+            }
+        }
+    }
+
+    _setActiveScreen(screenElement) { if (this.activeScreen && this.activeScreen !== screenElement) this.activeScreen.classList.remove('active'); if (screenElement) screenElement.classList.add('active'); this.activeScreen = screenElement; }
+    showLoading() { this._setActiveScreen(this.loadingScreen); }
+    hideLoading() { if (this.activeScreen === this.loadingScreen) this.loadingScreen.classList.remove('active'); }
+    showMainMenu() { this._setActiveScreen(this.mainMenu); this.hideGameUI(); }
+    showSettings(isPauseMenu = false) {
+        this._setActiveScreen(this.settingsScreen);
+        this.resumeButtonSettings.style.display = isPauseMenu ? 'block' : 'none';
+        this.hideGameUI();
+    }
+    showLevelSelect() { this._setActiveScreen(this.levelSelectScreen); this.hideGameUI(); }
+    showLevelEnd(score, stars, levelIndex, canContinue) {
+        this.finalScoreElement.textContent = score;
+        this.finalStarsElement.textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+        this.levelEndScreen.dataset.levelIndex = levelIndex;
+        const nextButton = document.getElementById('next-level-button');
+        const isNextLevelUnlocked = this.saveManager.isLevelUnlocked(levelIndex + 1);
+        if (nextButton) nextButton.style.display = (canContinue && isNextLevelUnlocked) ? 'block' : 'none';
+        const restartButton = document.getElementById('restart-level-button');
+        if (restartButton) restartButton.textContent = this.uiText[this.currentLanguage].restartLevel || "Restart Level";
+        this._setActiveScreen(this.levelEndScreen);
+        this.hideGameUI();
+    }
+    showGameEnd() {
+        this.finalScoreElement.textContent = "-";
+        this.finalStarsElement.textContent = this.uiText[this.currentLanguage].allLevelsDone || "All Levels Done!";
+        this.levelEndScreen.dataset.levelIndex = -1;
+        const nextButton = document.getElementById('next-level-button');
+        if (nextButton) nextButton.style.display = 'none';
+        const restartButton = document.getElementById('restart-level-button');
+        if (restartButton) restartButton.textContent = this.uiText[this.currentLanguage].playAgain || "Play Again?";
+        this._setActiveScreen(this.levelEndScreen);
+        this.hideGameUI();
+    }
+    showGameUI() {
+        if (this.activeScreen && this.activeScreen !== this.gameHud) { this.activeScreen.classList.remove('active'); this.activeScreen = null; }
+        this.gameHud.style.display = 'block';
+        this.crosshair.style.display = 'block';
+    }
+    hideGameUI() {
+        this.gameHud.style.display = 'none';
+        this.crosshair.style.display = 'none';
+    }
+
+    showLevelInstructions(levelData, isMidGame = false) {
+        if (!levelData || !this.instructionsTitle || !this.instructionsContent) return;
+        const lang = this.currentLanguage;
+        this.instructionsTitle.textContent = `${this.uiText[lang].level || "Level"} ${levelData.levelId}: ${levelData.name}`;
+        this.instructionsContent.innerHTML = ''; 
+        levelData.availableMeals.forEach(mealName => {
+            const details = getRecipeDetails(mealName);
+            if (details && details.instructions && details.instructions[lang]) {
+                const recipeDiv = document.createElement('div');
+                recipeDiv.className = 'recipe-instruction';
+                const title = document.createElement('h3');
+                title.textContent = getTrans(mealName, lang); 
+                recipeDiv.appendChild(title);
+                const stepList = document.createElement('ul');
+                details.instructions[lang].forEach(step => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = step;
+                    stepList.appendChild(listItem);
+                });
+                recipeDiv.appendChild(stepList);
+                this.instructionsContent.appendChild(recipeDiv);
+            }
+        });
+        if (isMidGame) {
+            this.startLevelInstructionsButton.style.display = 'none'; 
+            this.instructionsHint.textContent = this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]";
+        } else {
+            this.startLevelInstructionsButton.style.display = 'block'; 
+            this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
+            this.instructionsHint.textContent = this.uiText[lang].select || "Select: Enter/[X]/[A]"; 
+        }
+        this._setActiveScreen(this.levelInstructionsScreen);
+        this.hideGameUI();
+    }
+
+    updateLevelTimer(seconds) { this.levelTimerDisplay.textContent = formatTime(seconds); }
+    updateScore(score) { this.scoreDisplay.textContent = score; }
+    
+    updateHolding(heldItemName) {
+        // Translate the holding text
+        const text = heldItemName ? getTrans(heldItemName, this.currentLanguage) : (this.uiText[this.currentLanguage].nothing || "Nothing");
+        this.holdingDisplay.textContent = text;
+    }
+
+    updateGamepadStatus(isConnected) { this.gamepadStatusElement.textContent = isConnected ? '🎮' : ''; }
+    
+    showTemporaryMessage(messageKey, duration = 2000) {
+        let messageText = getTrans(messageKey, this.currentLanguage); 
+        if (messageText === messageKey && this.uiText[this.currentLanguage][messageKey]) {
+             messageText = this.uiText[this.currentLanguage][messageKey];
+        }
+        this.tempMessageElement.textContent = messageText;
+        this.tempMessageElement.classList.add('visible');
+        if (this.messageTimeout) clearTimeout(this.messageTimeout);
+        this.messageTimeout = setTimeout(() => {
+            this.tempMessageElement.classList.remove('visible');
+            this.messageTimeout = null;
+        }, duration);
+    }
+
+    // Updated Order Card Logic for Overcooked-style UI
+    addOrderCard(orderId, mealName, timeLimit) {
+        const card = document.createElement('div');
+        card.className = 'order-card'; 
+        card.id = orderId;
+        card.dataset.maxTime = timeLimit; // Store max time for calculation
+
+        // 1. Timer Bar (Top)
+        const timerContainer = document.createElement('div');
+        timerContainer.className = 'order-timer-container';
+        const timerBar = document.createElement('div');
+        timerBar.className = 'order-timer-bar';
+        timerContainer.appendChild(timerBar);
+        card.appendChild(timerContainer);
+
+        // 2. Header (Meal Name)
+        const header = document.createElement('div');
+        header.className = 'order-header';
+        header.textContent = getTrans(mealName, this.currentLanguage);
+        card.appendChild(header);
+
+        // 3. Ingredient List
+        const ingredientsContainer = document.createElement('div');
+        ingredientsContainer.className = 'order-ingredients';
+        
+        const ingredients = getRecipeIngredients(mealName) || [];
+        ingredients.forEach(ing => {
+            const ingEl = document.createElement('div');
+            ingEl.className = 'ingredient-item';
+            // Use shorter translation or mapping if available, for now standard translation
+            ingEl.textContent = getTrans(ing, this.currentLanguage);
+            ingredientsContainer.appendChild(ingEl);
+        });
+        card.appendChild(ingredientsContainer);
+
+        this.orderListElement.appendChild(card);
+        return card;
+    }
+
+    updateOrderCardTimer(orderId, seconds) {
+        const card = document.getElementById(orderId);
+        if (card) {
+            const maxTime = parseFloat(card.dataset.maxTime) || seconds;
+            const percentage = Math.max(0, Math.min(100, (seconds / maxTime) * 100));
+            
+            const bar = card.querySelector('.order-timer-bar');
+            if (bar) {
+                bar.style.width = `${percentage}%`;
+                
+                // Color states
+                if (percentage > 50) {
+                    bar.style.backgroundColor = '#4CAF50'; // Green
+                    card.classList.remove('critical');
+                } else if (percentage > 25) {
+                    bar.style.backgroundColor = '#FFC107'; // Yellow
+                    card.classList.remove('critical');
+                } else {
+                    bar.style.backgroundColor = '#D32F2F'; // Red
+                    card.classList.add('critical'); // Adds shake animation
+                }
+            }
+        }
+    }
+
+    removeOrderCard(orderId) {
+        const card = document.getElementById(orderId);
+        if (card) { 
+            // Slide up animation
+            card.style.transform = 'translateY(-120%)'; 
+            card.style.opacity = '0';
+            setTimeout(() => card.remove(), 400); 
+        }
+    }
+
+    clearOrderList() { this.orderListElement.innerHTML = ''; }
+
+    populateLevelSelect(levelDataArray, saveManager) {
+        this.levelListContainer.innerHTML = '';
+        if (!levelDataArray || !saveManager) return;
+        levelDataArray.forEach((level, index) => {
+            const button = document.createElement('button');
+            button.className = 'menu-button level-button';
+            button.dataset.action = 'start-level';
+            button.dataset.levelIndex = index;
+            const levelProgress = saveManager.getLevelProgress(index);
+            const isUnlocked = saveManager.isLevelUnlocked(index);
+            let buttonHTML = `<span class="level-name">${this.uiText[this.currentLanguage].level || "Level"} ${level.levelId}: ${level.name}</span>`;
+            if (isUnlocked) {
+                if (levelProgress.completed) {
+                    buttonHTML += `<span class="level-stars">${'★'.repeat(levelProgress.stars)}${'☆'.repeat(3 - levelProgress.stars)}</span><span class="level-score">${this.uiText[this.currentLanguage].highScore || "High Score"}: ${levelProgress.highScore}</span>`;
+                } else { buttonHTML += `<span class="level-status"></span>`; }
+            } else {
+                buttonHTML += `<span class="level-locked">${this.uiText[this.currentLanguage].levelLocked || "Locked"}</span>`;
+                button.disabled = true; button.classList.add('locked');
+            }
+            button.innerHTML = buttonHTML;
+            this.levelListContainer.appendChild(button);
+        });
+    }
+
+    setLanguage(lang) {
+        if (!this.uiText[lang]) { lang = 'en'; }
+        this.currentLanguage = lang;
+        
+        this.mainMenu.querySelector('h1').textContent = this.uiText[lang].title;
+        document.getElementById('play-button').textContent = this.uiText[lang].play;
+        document.getElementById('settings-button').textContent = this.uiText[lang].settings;
+        this.settingsScreen.querySelector('h1').textContent = this.uiText[lang].settings;
+        if (this.languageLabel) this.languageLabel.textContent = this.uiText[lang].language + ":";
+        this.settingsScreen.querySelector('label[for="toggle-labels-setting"]').textContent = this.uiText[lang].showLabels;
+        document.getElementById('back-to-main-button').textContent = this.uiText[lang].back;
+        document.getElementById('resume-button-settings').textContent = this.uiText[lang].resume;
+        document.getElementById('game-version').textContent = `${this.uiText[lang].version} 1.0 Beta`;
+        this.levelSelectScreen.querySelector('h1').textContent = this.uiText[lang].selectLevel;
+        document.getElementById('back-to-main-from-level-select').textContent = this.uiText[lang].back;
+        this.levelEndScreen.querySelector('h1').textContent = this.uiText[lang].levelComplete;
+        this.levelEndScreen.querySelector('#final-score').parentNode.firstChild.textContent = this.uiText[lang].score + ": ";
+        this.levelEndScreen.querySelector('#final-stars').parentNode.firstChild.textContent = this.uiText[lang].stars + ": ";
+        document.getElementById('next-level-button').textContent = this.uiText[lang].nextLevel;
+        document.getElementById('restart-level-button').textContent = this.uiText[lang].restartLevel;
+        document.getElementById('level-end-main-menu-button').textContent = this.uiText[lang].mainMenu;
+        document.querySelector('#game-timer-container').firstChild.textContent = this.uiText[lang].levelTime + ": ";
+        // document.querySelector('#bottom-hud').firstChild.textContent = this.uiText[lang].holding + ": "; // Removed hardcoded prefix
+        this.loadingScreen.querySelector('h2').textContent = this.uiText[lang].loading;
+        
+        if(this.instructionsTitle) this.instructionsTitle.textContent = this.uiText[lang].levelInstructions || "Level Instructions";
+        if(this.startLevelInstructionsButton) this.startLevelInstructionsButton.textContent = this.uiText[lang].startLevel || "Start Level";
+        if(this.instructionsHint) {
+             const startButtonVisible = this.startLevelInstructionsButton && this.startLevelInstructionsButton.style.display !== 'none';
+             this.instructionsHint.textContent = startButtonVisible ? (this.uiText[lang].select || "Select: Enter/[X]/[A]") : (this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]");
+        }
+
+        this.languageButtons.forEach(btn => btn.classList.toggle('active-lang', btn.dataset.lang === lang));
+
+        this.updateRecipeBook(lang);
+
+        if (this.activeScreen === this.levelSelectScreen && this.saveManager && typeof levelDatabase !== 'undefined') {
+             this.populateLevelSelect(levelDatabase, this.saveManager);
+        }
+        if (this.activeScreen === this.levelInstructionsScreen && typeof currentLevelData !== 'undefined' && currentLevelData) {
+             this.showLevelInstructions(currentLevelData, true); 
+        }
+        
+        // Update holding display immediately to reflect language change
+        const holdingEl = document.getElementById('holding-display');
+        if(holdingEl) this.updateHolding(holdingEl.dataset.rawItem);
+    }
+
+    getLabelToggleState() { return this.toggleLabelsCheckbox.checked; }
+    setLabelToggleState(isChecked) { this.toggleLabelsCheckbox.checked = isChecked; }
+}
+</file>
+
+<file path="index.html">
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Kitchen Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+                "gsap": "https://unpkg.com/gsap@3.12.4/index.js"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Loading Indicator -->
+    <div id="loading-screen" class="overlay active">
+        <h2>Loading Assets...</h2>
+    </div>
+
+    <!-- Main Menu -->
+    <div id="main-menu" class="overlay menu-screen">
+        <h1>Pixel Kitchen Sim</h1>
+        <div class="menu-container">
+            <button id="play-button" class="menu-button" data-action="play">Play</button>
+            <button id="editor-button" class="menu-button" data-action="editor-hub">Level Editor</button>
+            <button id="settings-button" class="menu-button" data-action="settings">Settings</button>
+            <div id="credits">
+                <p>A Game By [Your Name/Studio]</p>
+                <p>
+                    <a href="#" class="menu-link" data-action="link">X (Twitter)</a> |
+                    <a href="#" class="menu-link" data-action="link">Instagram</a> |
+                    <a href="#" class="menu-link" data-action="link">GitHub</a>
+                </p>
+            </div>
+        </div>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+    </div>
+
+    <!-- Editor Hub (New) -->
+    <div id="editor-hub-screen" class="overlay menu-screen">
+        <h1>Level Manager</h1>
+        <div class="editor-toolbar">
+            <button class="menu-button small" data-action="create-level">➕ New Level</button>
+            <button class="menu-button small" data-action="save-roadmap">💾 Download Roadmap</button>
+        </div>
+        <div id="editor-level-list" class="menu-container level-list-editor">
+            <!-- List items injected by JS -->
+        </div>
+        <button class="menu-button" data-action="back-to-main">Back to Menu</button>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="settings-screen" class="overlay menu-screen">
+        <h1>Settings</h1>
+        <div class="menu-container">
+            <div class="setting-group">
+                <label id="language-label">Language:</label>
+                <div id="language-options" class="button-group">
+                    <button class="menu-button lang-button" data-lang="en" data-action="set-language">English</button>
+                    <button class="menu-button lang-button" data-lang="fr" data-action="set-language">Français</button>
+                    <button class="menu-button lang-button" data-lang="es" data-action="set-language">Español</button>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label for="toggle-labels-setting">Show Station Labels:</label>
+                <input type="checkbox" id="toggle-labels-setting" class="menu-toggle" data-action="toggle-labels"
+                    checked>
+            </div>
+            <p id="game-version">Version: 1.0 Beta</p>
+            <button id="back-to-main-button" class="menu-button" data-action="back-to-main">Back</button>
+            <button id="resume-button-settings" class="menu-button" data-action="resume" style="display: none;">Resume Game</button>
+        </div>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
+    </div>
+
+    <!-- Level Select Screen -->
+    <div id="level-select-screen" class="overlay menu-screen">
+        <h1>Select Level</h1>
+        <div id="level-list" class="menu-container level-grid"></div>
+        <button id="back-to-main-from-level-select" class="menu-button" data-action="back-to-main">Back</button>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
+    </div>
+
+    <!-- In-Game HUD -->
+    <div id="game-hud" style="display: none;">
+        <div id="order-list"></div>
+        <div id="game-timer-container">
+            Level Time: <span id="level-timer-display">0:00</span>
+        </div>
+        <div id="bottom-hud">
+            Holding: <span id="holding-display">Nothing</span> |
+            Score: <span id="score-display">0</span> |
+            <span id="gamepad-status"></span>
+        </div>
+        <div id="crosshair"></div>
+        <div id="temp-message"></div>
+    </div>
+
+    <!-- EDITOR UI CONTAINER -->
+    <div id="editor-ui" style="display: none;">
+        <!-- Top Helper Bar -->
+        <div class="editor-top-bar">
+            <div class="editor-title">🏗️ LEVEL EDITOR: <span id="editor-current-level-name">Untitled</span></div>
+            <div class="editor-controls-hint">
+                <span><b>Left Click:</b> Place</span> |
+                <span><b>Right Drag:</b> Pan</span> |
+                <span><b>T:</b> Save JSON</span>
+            </div>
+            <div class="editor-top-actions">
+                <button id="editor-meta-btn" class="editor-action-btn small">⚙️ Level Settings</button>
+                <button id="editor-export-btn" class="editor-action-btn small">💾 Save JSON</button>
+                <button id="editor-exit-btn" class="editor-action-btn small delete">Exit</button>
+            </div>
+        </div>
+
+        <!-- Level Metadata Modal (Hidden by default) -->
+        <div id="editor-meta-modal" class="editor-panel center-panel" style="display: none;">
+            <h3>Level Settings</h3>
+            <div class="meta-row"><label>Name:</label> <input type="text" id="meta-name"></div>
+            <div class="meta-row"><label>Duration (s):</label> <input type="number" id="meta-duration"></div>
+            <div class="meta-row"><label>Delay (s):</label> <input type="number" id="meta-delay"></div>
+            <div class="meta-row"><label>Max Orders:</label> <input type="number" id="meta-max-orders"></div>
+            <div class="meta-row"><label>1 Star:</label> <input type="number" id="meta-star1"></div>
+            <div class="meta-row"><label>2 Stars:</label> <input type="number" id="meta-star2"></div>
+            <div class="meta-row"><label>3 Stars:</label> <input type="number" id="meta-star3"></div>
+            <div class="meta-row">
+                <label>Meals:</label>
+                <select id="meta-meals" multiple size="4">
+                    <!-- Populated by JS -->
+                </select>
+            </div>
+            <p style="font-size:0.6em; color:#aaa;">Hold Ctrl to select multiple meals.</p>
+            <button id="meta-close-btn" class="editor-action-btn">Close</button>
+        </div>
+
+        <!-- Bottom Library (Visual Picker) -->
+        <div id="editor-library" class="editor-panel bottom-panel">
+            <div class="library-tabs">
+                <button class="tab-btn active" data-category="all">All</button>
+                <button class="tab-btn" data-category="Architecture">Walls/Floors</button>
+                <button class="tab-btn" data-category="Furniture">Furniture</button>
+                <button class="tab-btn" data-category="Stations">Stations</button>
+                <button class="tab-btn" data-category="Sources">Sources</button>
+            </div>
+            <div id="library-content" class="library-grid">
+                <!-- Items injected by JS -->
+            </div>
+        </div>
+
+        <!-- Right Inspector (Context Actions) -->
+        <div id="editor-inspector" class="editor-panel right-panel" style="display: none;">
+            <h3>Selected Object</h3>
+            <div id="inspector-name" class="inspector-field">None</div>
+            <div class="inspector-actions">
+                <button id="btn-rotate" class="editor-action-btn" title="Rotate (R)">🔄 Rotate</button>
+                <button id="btn-clone" class="editor-action-btn" title="Clone (C)">📋 Duplicate</button>
+                <button id="btn-delete" class="editor-action-btn delete" title="Delete (Del)">🗑️ Delete</button>
+            </div>
+            
+            <div class="inspector-config-section">
+                <label for="inspector-config">Config (JSON):</label>
+                <textarea id="inspector-config" rows="5" spellcheck="false"></textarea>
+                <button id="btn-save-config" class="editor-action-btn">💾 Save Config</button>
+            </div>
+
+            <div class="inspector-coords">
+                X: <span id="val-x">0</span> Z: <span id="val-z">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level End Screen -->
+    <div id="level-end-screen" class="overlay menu-screen">
+        <h1>Level Complete!</h1>
+        <div class="menu-container">
+            <p>Score: <span id="final-score">0</span></p>
+            <p>Stars: <span id="final-stars">☆☆☆</span></p>
+            <button id="next-level-button" class="menu-button" data-action="next-level">Next Level</button>
+            <button id="restart-level-button" class="menu-button" data-action="restart-level">Restart Level</button>
+            <button id="level-end-main-menu-button" class="menu-button" data-action="back-to-main">Main Menu</button>
+        </div>
+        <p class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+    </div>
+
+    <!-- Level Instructions Screen -->
+    <div id="level-instructions-screen" class="overlay menu-screen">
+        <h1 id="instructions-title">Level Instructions</h1>
+        <div id="instructions-container" class="menu-container instructions-box">
+            <div id="instructions-content"></div>
+            <button id="start-level-instructions-button" class="menu-button" data-action="start-level-confirm">Start Level</button>
+        </div>
+         <p class="menu-hint">Select: Enter/[X]/[A]</p>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>
+</file>
+
+<file path="levels.json">
+[
+    {
+        "levelId": 1,
+        "name": "Fry Cook Training",
+        "duration": 180,
+        "starThresholds": [
+            300,
+            500,
+            700
+        ],
+        "availableMeals": [
+            "French Fries"
+        ],
+        "maxActiveOrders": 2,
+        "newOrderDelay": 15,
+        "layout": [
+            {
+                "name": "Wall_Back",
+                "type": "wall",
+                "position": {
+                    "x": 0,
+                    "z": -4
+                },
+                "size": {
+                    "width": 8.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "Wall_Front_L",
+                "type": "wall",
+                "position": {
+                    "x": -2.5,
+                    "z": 4
+                },
+                "size": {
+                    "width": 3.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "Wall_Front_R",
+                "type": "wall",
+                "position": {
+                    "x": 2.5,
+                    "z": 4
+                },
+                "size": {
+                    "width": 3.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "Wall_Left",
+                "type": "wall",
+                "position": {
+                    "x": -4,
+                    "z": 0
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 7.5
+                }
+            },
+            {
+                "name": "Wall_Right",
+                "type": "wall",
+                "position": {
+                    "x": 4,
+                    "z": 0
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 7.5
+                }
+            },
+            {
+                "name": "C_Serve_1",
+                "type": "serving",
+                "position": {
+                    "x": -0.5,
+                    "z": 4
+                },
+                "rotation": -3.14
+            },
+            {
+                "name": "C_Serve_2",
+                "type": "serving",
+                "position": {
+                    "x": 0,
+                    "z": 4
+                },
+                "rotation": -3.14
+            },
+            {
+                "name": "C_Serve_3",
+                "type": "serving",
+                "position": {
+                    "x": 0.5,
+                    "z": 4
+                },
+                "rotation": -3.14
+            },
+            {
+                "name": "C_Back_1",
+                "type": "counter",
+                "position": {
+                    "x": -3,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_2",
+                "type": "counter",
+                "position": {
+                    "x": -2.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_3",
+                "type": "counter",
+                "position": {
+                    "x": -1,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_4",
+                "type": "counter",
+                "position": {
+                    "x": 1,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_5",
+                "type": "counter",
+                "position": {
+                    "x": 2.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Back_6",
+                "type": "counter",
+                "position": {
+                    "x": 3,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "C_Side_L1",
+                "type": "counter",
+                "position": {
+                    "x": -3.5,
+                    "z": -3
+                },
+                "rotation": -4.71
+            },
+            {
+                "name": "C_Side_L2",
+                "type": "counter",
+                "position": {
+                    "x": -3.5,
+                    "z": -2.5
+                },
+                "rotation": -4.71
+            },
+            {
+                "name": "C_Side_R1",
+                "type": "counter",
+                "position": {
+                    "x": 3.5,
+                    "z": -3
+                },
+                "rotation": -1.57
+            },
+            {
+                "name": "C_Side_R2",
+                "type": "counter",
+                "position": {
+                    "x": 3.5,
+                    "z": -2.5
+                },
+                "rotation": -1.57
+            },
+            {
+                "name": "CuttingBoard1",
+                "type": "processor",
+                "position": {
+                    "x": -2.5,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "processes": [
+                        "potato"
+                    ],
+                    "result": {
+                        "potato": "raw_fries"
+                    }
+                }
+            },
+            {
+                "name": "Fryer1",
+                "type": "processor",
+                "position": {
+                    "x": -1,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "processes": [
+                        "raw_fries"
+                    ],
+                    "result": {
+                        "raw_fries": "cooked_fries"
+                    },
+                    "processingTime": 3000
+                }
+            },
+            {
+                "name": "Trash",
+                "type": "trash",
+                "position": {
+                    "x": 3.5,
+                    "z": -2
+                },
+                "rotation": -1.57,
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base1",
+                "type": "table",
+                "position": {
+                    "x": -1.5,
+                    "z": -0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base2",
+                "type": "table",
+                "position": {
+                    "x": -1,
+                    "z": -0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base3",
+                "type": "table",
+                "position": {
+                    "x": -0.5,
+                    "z": -0.5
+                }
+            },
+            {
+                "name": "Counter (Corner)",
+                "type": "counter",
+                "position": {
+                    "x": -3.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Corner)",
+                "type": "counter",
+                "position": {
+                    "x": 3.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": -2,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": -1.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": -0.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 0,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 0.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 1.5,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "Counter (Wood)",
+                "type": "counter",
+                "position": {
+                    "x": 2,
+                    "z": -3.5
+                }
+            },
+            {
+                "name": "T_Assem_Base7",
+                "type": "table",
+                "position": {
+                    "x": 0.5,
+                    "z": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base8",
+                "type": "table",
+                "position": {
+                    "x": 1,
+                    "z": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base9",
+                "type": "table",
+                "position": {
+                    "x": 1.5,
+                    "z": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base10",
+                "type": "table",
+                "position": {
+                    "x": 0.5,
+                    "z": 1
+                }
+            },
+            {
+                "name": "T_Assem_Base11",
+                "type": "table",
+                "position": {
+                    "x": 1,
+                    "z": 1
+                }
+            },
+            {
+                "name": "T_Assem_Base12",
+                "type": "table",
+                "position": {
+                    "x": 1.5,
+                    "z": 1
+                }
+            },
+            {
+                "name": "CuttingBoard2",
+                "type": "processor",
+                "position": {
+                    "x": -3.5,
+                    "z": -2.5
+                },
+                "rotation": -11,
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "processes": [
+                        "potato"
+                    ],
+                    "result": {
+                        "potato": "raw_fries"
+                    }
+                }
+            },
+            {
+                "name": "Fryer2",
+                "type": "processor",
+                "position": {
+                    "x": -0.5,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "processes": [
+                        "raw_fries"
+                    ],
+                    "result": {
+                        "raw_fries": "cooked_fries"
+                    },
+                    "processingTime": 3000
+                }
+            },
+            {
+                "name": "TrashBin2",
+                "type": "trash",
+                "position": {
+                    "x": -3.5,
+                    "z": -2
+                },
+                "rotation": -4.71,
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                }
+            },
+            {
+                "name": "T_Assem_Base4",
+                "type": "table",
+                "position": {
+                    "x": -1.5,
+                    "z": -1
+                }
+            },
+            {
+                "name": "T_Assem_Base5",
+                "type": "table",
+                "position": {
+                    "x": -1,
+                    "z": -1
+                }
+            },
+            {
+                "name": "T_Assem_Base6",
+                "type": "table",
+                "position": {
+                    "x": -0.5,
+                    "z": -1
+                }
+            },
+            {
+                "name": "PotatoBin_1",
+                "type": "ingredient_source",
+                "position": {
+                    "x": -3.5,
+                    "z": -3
+                },
+                "rotation": -4.71,
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "ingredient": "potato"
+                }
+            },
+            {
+                "name": "PotatoBin_2",
+                "type": "ingredient_source",
+                "position": {
+                    "x": -3,
+                    "z": -3.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "ingredient": "potato"
+                }
+            },
+            {
+                "name": "PlateStack",
+                "type": "item_source",
+                "position": {
+                    "x": 3.5,
+                    "z": -3
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": -1.5,
+                    "z": -1
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": -1,
+                    "z": -1
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": -0.5,
+                    "z": -1
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": 0.5,
+                    "z": 0.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": 1,
+                    "z": 0.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            },
+            {
+                "name": "Plate (Single)",
+                "type": "preplaced_item",
+                "position": {
+                    "x": 1.5,
+                    "z": 0.5
+                },
+                "size": {
+                    "width": 0.5,
+                    "depth": 0.5
+                },
+                "config": {
+                    "item": "plate"
+                }
+            }
+        ]
+    }
+]
+</file>
+
+<file path="src/editor.js">
+// src/editor.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT } from './constants.js';
+import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh, resizeWall, refreshSmartObjects } from './world.js';
+import { RECIPES } from './gameData.js';
+
+export class LevelEditor {
+    constructor(camera, renderer, scene, interactionManager, onExit) {
+        this.camera = camera;
+        this.renderer = renderer;
+        this.scene = scene;
+        this.interactionManager = interactionManager;
+        this.onExit = onExit;
+        this.enabled = false;
+        this.raycaster = new THREE.Raycaster();
+        
+        // Loaded Level Metadata
+        this.currentLevelData = {};
+
+        // State
+        this.selectedObject = null;
+        this.ghostObject = null; // Object currently being placed
+        this.isDragging = false;
+        this.placementMode = false; // If true, we are trying to place a new item
+        
+        // Resize/Extend State
+        this.activeHandle = null;
+        this.startDragPos = new THREE.Vector3();
+        this.originalSize = { width: 0, depth: 0 };
+        this.originalPos = new THREE.Vector3();
+        this.extendingGhosts = []; // For counters/tables
+
+        // Ground Plane for Raycasting (Y=0)
+        this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+        // Grid Helper (Visible only in Editor)
+        // 8x8 size, 0.5 unit cells = 16 divisions
+        this.gridHelper = new THREE.GridHelper(8, 16, 0xFFD700, 0x444444);
+        this.gridHelper.position.y = 0.01; // Slight offset to avoid z-fighting if floor was visible
+        this.gridHelper.visible = false;
+        this.scene.add(this.gridHelper);
+
+        // Controls
+        this.orbit = new OrbitControls(camera, renderer.domElement);
+        this.orbit.enabled = false;
+        this.orbit.enableDamping = true;
+        this.orbit.dampingFactor = 0.1;
+
+        // Visual Helpers
+        this.selectionBox = new THREE.BoxHelper(new THREE.Mesh(), 0xffff00);
+        this.selectionBox.visible = false;
+        this.scene.add(this.selectionBox);
+
+        // Resize Handles
+        this.handlesGroup = new THREE.Group();
+        this.scene.add(this.handlesGroup);
+        this.handles = {};
+        ['n', 's', 'e', 'w'].forEach(dir => {
+            const g = new THREE.SphereGeometry(0.25, 16, 16);
+            const m = new THREE.MeshBasicMaterial({ color: 0x00FFFF, depthTest: false, transparent: true, opacity: 0.8 });
+            const mesh = new THREE.Mesh(g, m);
+            mesh.userData = { isHandle: true, direction: dir };
+            mesh.renderOrder = 999;
+            mesh.visible = false;
+            this.handlesGroup.add(mesh);
+            this.handles[dir] = mesh;
+        });
+
+
+        // Init UI
+        this.ui = document.getElementById('editor-ui');
+        this.libraryContent = document.getElementById('library-content');
+        this.inspector = document.getElementById('editor-inspector');
+        this.inspectorName = document.getElementById('inspector-name');
+        this.inspectorX = document.getElementById('val-x');
+        this.inspectorZ = document.getElementById('val-z');
+
+        // Meta Modal
+        this.metaModal = document.getElementById('editor-meta-modal');
+
+        this._initUI();
+        this._bindEvents();
+    }
+
+    _initUI() {
+        // Populate Library
+        this._renderLibrary('all');
+
+        // Populate Meals for Meta
+        const mealsSelect = document.getElementById('meta-meals');
+        Object.keys(RECIPES).forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r;
+            opt.textContent = r;
+            mealsSelect.appendChild(opt);
+        });
+
+        // Bind Tab Switching
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                tabs.forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                this._renderLibrary(e.target.dataset.category);
+            });
+        });
+
+        // Bind Inspector Actions
+        document.getElementById('btn-rotate').addEventListener('click', () => this.rotateSelected());
+        document.getElementById('btn-clone').addEventListener('click', () => this.cloneSelected());
+        document.getElementById('btn-delete').addEventListener('click', () => this.deleteSelected());
+        document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLayout());
+        document.getElementById('editor-exit-btn').addEventListener('click', () => {
+            if (this.onExit) this.onExit();
+        });
+
+        // Meta Button
+        document.getElementById('editor-meta-btn').addEventListener('click', () => {
+            this.openMetaModal();
+        });
+        document.getElementById('meta-close-btn').addEventListener('click', () => {
+            this.saveMetaFromModal();
+            this.metaModal.style.display = 'none';
+        });
+
+        // Bind Config Editor
+        this.inspectorConfig = document.getElementById('inspector-config');
+        document.getElementById('btn-save-config').addEventListener('click', () => this.saveConfig());
+    }
+
+    _renderLibrary(category) {
+        this.libraryContent.innerHTML = '';
+        const items = category === 'all' 
+            ? CATALOG_ITEMS 
+            : CATALOG_ITEMS.filter(i => i.category === category);
+
+        items.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'library-item';
+            
+            // Simple icon selection based on type
+            let icon = '📦';
+            if(item.type.includes('wall')) icon = '🧱';
+            else if(item.type.includes('counter')) icon = '🟫';
+            else if(item.type.includes('processor')) icon = '🍳';
+            else if(item.type.includes('source')) icon = '🧺';
+            else if(item.isServing) icon = '🛎️';
+            else if(item.category === 'Items') icon = '🍽️';
+
+            el.innerHTML = `
+                <div class="library-item-icon">${icon}</div>
+                <div class="library-item-name">${item.name}</div>
+            `;
+            
+            el.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent canvas click
+                this.startPlacement(item);
+            });
+            
+            this.libraryContent.appendChild(el);
+        });
+    }
+
+    _bindEvents() {
+        // Mouse Events
+        this.renderer.domElement.addEventListener('pointerdown', (e) => this.onPointerDown(e));
+        this.renderer.domElement.addEventListener('pointermove', (e) => this.onPointerMove(e));
+        this.renderer.domElement.addEventListener('pointerup', (e) => this.onPointerUp(e));
+        
+        // Keyboard Shortcuts
+        window.addEventListener('keydown', (e) => {
+            if (!this.enabled) return;
+            // Do not trigger shortcuts if user is typing in textarea or inputs
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+
+            switch(e.key.toLowerCase()) {
+                case 'escape': 
+                    this.cancelPlacement(); 
+                    this.deselect(); 
+                    break;
+                case 'delete': 
+                case 'backspace':
+                    this.deleteSelected(); 
+                    break;
+                case 'r': 
+                    this.rotateSelected(); 
+                    break;
+                case 'c': 
+                    this.cloneSelected(); 
+                    break;
+                case 't':
+                    this.exportLayout();
+                    break;
+            }
+        });
+    }
+
+    // Called when opening editor for a specific level
+    loadLevel(levelData) {
+        // We store the metadata locally. The 3D objects are already added by main.js using buildKitchen
+        // We just need to sync our internal state.
+        this.currentLevelData = JSON.parse(JSON.stringify(levelData)); // Deep copy
+        document.getElementById('editor-current-level-name').textContent = levelData.name || "Untitled";
+    }
+
+    enable() {
+        this.enabled = true;
+        this.orbit.enabled = true;
+        this.ui.style.display = 'block';
+        
+        // Show Schematic Grid
+        this.gridHelper.visible = true;
+        
+        // Hide textured floor for clean CAD look
+        const gameFloor = getFloorMesh();
+        if(gameFloor) gameFloor.visible = false;
+
+        // Set optimal editor view
+        this.camera.position.set(0, 12, 8);
+        this.camera.lookAt(0, 0, 0);
+        this.orbit.target.set(0,0,0);
+    }
+
+    disable() {
+        this.enabled = false;
+        this.orbit.enabled = false;
+        this.ui.style.display = 'none';
+        this.cancelPlacement();
+        this.deselect();
+
+        // Revert Visuals
+        this.gridHelper.visible = false;
+        const gameFloor = getFloorMesh();
+        if(gameFloor) gameFloor.visible = true;
+    }
+
+    update(delta) {
+        if (!this.enabled) return;
+        this.orbit.update();
+        
+        if (this.selectedObject) {
+            this.selectionBox.update();
+            this._updateInspectorData();
+            this._updateHandles();
+        }
+    }
+
+    // --- Meta Modal ---
+
+    openMetaModal() {
+        this.metaModal.style.display = 'flex';
+        const d = this.currentLevelData;
+        document.getElementById('meta-name').value = d.name || "";
+        document.getElementById('meta-duration').value = d.duration || 180;
+        document.getElementById('meta-delay').value = d.newOrderDelay || 15;
+        document.getElementById('meta-max-orders').value = d.maxActiveOrders || 2;
+        document.getElementById('meta-star1').value = d.starThresholds ? d.starThresholds[0] : 100;
+        document.getElementById('meta-star2').value = d.starThresholds ? d.starThresholds[1] : 200;
+        document.getElementById('meta-star3').value = d.starThresholds ? d.starThresholds[2] : 300;
+        
+        const mealsSelect = document.getElementById('meta-meals');
+        Array.from(mealsSelect.options).forEach(opt => {
+            opt.selected = d.availableMeals ? d.availableMeals.includes(opt.value) : false;
+        });
+    }
+
+    saveMetaFromModal() {
+        const d = this.currentLevelData;
+        d.name = document.getElementById('meta-name').value;
+        d.duration = parseInt(document.getElementById('meta-duration').value);
+        d.newOrderDelay = parseInt(document.getElementById('meta-delay').value);
+        d.maxActiveOrders = parseInt(document.getElementById('meta-max-orders').value);
+        d.starThresholds = [
+            parseInt(document.getElementById('meta-star1').value),
+            parseInt(document.getElementById('meta-star2').value),
+            parseInt(document.getElementById('meta-star3').value),
+        ];
+        
+        const mealsSelect = document.getElementById('meta-meals');
+        d.availableMeals = Array.from(mealsSelect.selectedOptions).map(opt => opt.value);
+
+        document.getElementById('editor-current-level-name').textContent = d.name;
+    }
+
+    // --- Core Logic ---
+
+    startPlacement(template) {
+        this.cancelPlacement(); // Clear existing ghost
+        this.deselect(); // Clear selection
+        
+        this.placementMode = true;
+        this.ghostObject = this._createObjectFromTemplate(template);
+        
+        // Make ghost transparent
+        this.ghostObject.traverse(c => {
+            if (c.isMesh) {
+                c.material = c.material.clone();
+                c.material.transparent = true;
+                c.material.opacity = 0.6;
+                c.material.emissive = new THREE.Color(0x00FF00);
+                c.material.emissiveIntensity = 0.2;
+            }
+        });
+
+        this.scene.add(this.ghostObject);
+    }
+
+    cancelPlacement() {
+        if (this.ghostObject) {
+            this.scene.remove(this.ghostObject);
+            this.ghostObject = null;
+        }
+        this.placementMode = false;
+    }
+
+    confirmPlacement() {
+        if (this.ghostObject) {
+            // Create a real solid instance
+            const template = this.ghostObject.userData.template;
+            const realObject = this._createObjectFromTemplate(template);
+            
+            realObject.position.copy(this.ghostObject.position);
+            realObject.rotation.copy(this.ghostObject.rotation);
+            
+            this.scene.add(realObject);
+            
+            // Auto-fuse visuals
+            refreshSmartObjects(this.scene);
+        }
+    }
+
+    _createObjectFromTemplate(t) {
+        // Map template to world.js creation functions
+        let obj;
+        const fakeColor = t.color || '#FFFFFF';
+        const dummyPos = { x: 0, z: 0 }; // Position set later
+
+        if (t.type === STATION_TYPES.COUNTER || t.type === STATION_TYPES.SERVING) {
+            obj = createCounterPrefab(t.name, fakeColor, t.isServing);
+        } else if (t.type === STATION_TYPES.TABLE) {
+            // Neighbors default to false, will fuse later
+            obj = createTablePrefab(t.name, fakeColor, {n:false, s:false, e:false, w:false});
+        } else {
+            // Generic Station / Wall / Source / Preplaced Item
+            const def = {
+                name: t.name,
+                type: t.type,
+                size: t.size,
+                color: fakeColor,
+                config: t.config,
+                position: dummyPos
+            };
+            obj = createStationPrefab(def);
+        }
+
+        // Store template data for serialization later
+        obj.userData.template = t; 
+        // Y position will be handled by onPointerMove snapping
+        obj.position.y = 0;
+
+        return obj;
+    }
+
+    select(object) {
+        if (this.selectedObject === object) return;
+        this.selectedObject = object;
+        this.selectionBox.setFromObject(object);
+        this.selectionBox.visible = true;
+        
+        // Update UI
+        this.inspector.style.display = 'flex';
+        this.inspectorName.textContent = object.name;
+
+        // Populate Config
+        // Use existing userData.config if set, otherwise fallback to template config
+        const config = object.userData.config || object.userData.template?.config || {};
+        this.inspectorConfig.value = JSON.stringify(config, null, 2);
+        
+        this._updateHandles();
+    }
+
+    deselect() {
+        this.selectedObject = null;
+        this.selectionBox.visible = false;
+        this.inspector.style.display = 'none';
+        this.handlesGroup.visible = false;
+    }
+
+    // --- Manipulation ---
+
+    saveConfig() {
+        if (!this.selectedObject) return;
+        try {
+            const newConfig = JSON.parse(this.inspectorConfig.value);
+            this.selectedObject.userData.config = newConfig;
+            
+            // Visual feedback
+            const btn = document.getElementById('btn-save-config');
+            const originalText = btn.innerText;
+            btn.innerText = "✅ Saved!";
+            setTimeout(() => btn.innerText = originalText, 1000);
+            
+        } catch (e) {
+            alert("Invalid JSON syntax! Check your brackets and quotes.");
+        }
+    }
+
+    rotateSelected() {
+        const target = this.placementMode ? this.ghostObject : this.selectedObject;
+        if (target) {
+            target.rotation.y -= Math.PI / 2;
+            target.updateMatrixWorld();
+            if (this.selectionBox.visible) this.selectionBox.update();
+            // If rotating placed object, refresh visuals
+            if (!this.placementMode) refreshSmartObjects(this.scene);
+        }
+    }
+
+    deleteSelected() {
+        if (this.selectedObject) {
+            this.scene.remove(this.selectedObject);
+            this.deselect();
+            refreshSmartObjects(this.scene);
+        }
+    }
+
+    cloneSelected() {
+        if (this.selectedObject) {
+            const template = this.selectedObject.userData.template || {
+                name: this.selectedObject.name,
+                type: this.selectedObject.userData.stationType || this.selectedObject.userData.type,
+            };
+            
+            if (this.selectedObject.userData.template) {
+                this.startPlacement(this.selectedObject.userData.template);
+            } else {
+                const clone = this.selectedObject.clone();
+                clone.position.x += GRID_UNIT;
+                this.scene.add(clone);
+                this.select(clone);
+                refreshSmartObjects(this.scene);
+            }
+        }
+    }
+
+    _updateInspectorData() {
+        if (this.selectedObject) {
+            this.inspectorX.textContent = this.selectedObject.position.x.toFixed(1);
+            this.inspectorZ.textContent = this.selectedObject.position.z.toFixed(1);
+        }
+    }
+    
+    // --- Handle Management ---
+
+    _updateHandles() {
+        const obj = this.selectedObject;
+        if (!obj) {
+            this.handlesGroup.visible = false;
+            return;
+        }
+        
+        const type = obj.userData.stationType || obj.userData.type;
+        const resizable = type === STATION_TYPES.WALL;
+        const extendable = type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING;
+        
+        if (!resizable && !extendable) {
+            this.handlesGroup.visible = false;
+            return;
+        }
+        
+        this.handlesGroup.visible = true;
+        
+        // Calculate bounds
+        const box = new THREE.Box3().setFromObject(obj);
+        const center = obj.position;
+        // Use simple box dimensions based on userData for walls to be precise, or bounding box for others
+        let w, d;
+        if (resizable && obj.userData.size) {
+            w = obj.userData.size.width;
+            d = obj.userData.size.depth;
+        } else {
+            w = box.max.x - box.min.x;
+            d = box.max.z - box.min.z;
+        }
+        
+        const y = center.y;
+        const offset = 0.3;
+
+        this.handles.n.position.set(center.x, y, center.z - d/2 - offset);
+        this.handles.s.position.set(center.x, y, center.z + d/2 + offset);
+        this.handles.e.position.set(center.x + w/2 + offset, y, center.z);
+        this.handles.w.position.set(center.x - w/2 - offset, y, center.z);
+        
+        Object.values(this.handles).forEach(h => h.visible = true);
+    }
+
+    // --- Input Handling ---
+
+    onPointerDown(e) {
+        if (!this.enabled || e.button !== 0) return;
+        
+        // Ignore clicks on UI panels
+        if (e.target.closest('.editor-panel') || e.target.closest('.editor-top-bar')) return;
+
+        const mouse = { 
+            x: (e.clientX / window.innerWidth) * 2 - 1, 
+            y: -(e.clientY / window.innerHeight) * 2 + 1 
+        };
+        this.raycaster.setFromCamera(mouse, this.camera);
+
+        // Check Handle Click first
+        if (this.handlesGroup.visible) {
+            const handleIntersects = this.raycaster.intersectObjects(this.handlesGroup.children);
+            if (handleIntersects.length > 0) {
+                this.activeHandle = handleIntersects[0].object;
+                this.isDragging = true;
+                this.orbit.enabled = false;
+                
+                // Setup drag state
+                const planeIntersect = new THREE.Vector3();
+                this.raycaster.ray.intersectPlane(this.groundPlane, planeIntersect);
+                this.startDragPos.copy(planeIntersect);
+                this.originalPos.copy(this.selectedObject.position);
+                
+                if (this.selectedObject.userData.stationType === STATION_TYPES.WALL) {
+                    this.originalSize = { ...this.selectedObject.userData.size };
+                }
+                
+                return; // Consumed
+            }
+        }
+
+        if (this.placementMode) {
+            this.confirmPlacement();
+        } else {
+            // Raycast for selection
+            const candidates = [];
+            this.scene.traverse(c => {
+                // Find root objects
+                if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.stationType)) {
+                    candidates.push(c);
+                }
+            });
+
+            const hits = this.raycaster.intersectObjects(candidates, true);
+            
+            if (hits.length > 0) {
+                // Walk up to the root group
+                let root = hits[0].object;
+                while(root.parent && root.parent !== this.scene) { root = root.parent; }
+                
+                if (this.selectedObject !== root) {
+                    this.select(root);
+                }
+                this.isDragging = true;
+                this.orbit.enabled = false; 
+            } else {
+                this.deselect();
+            }
+        }
+    }
+
+    onPointerMove(e) {
+        if (!this.enabled) return;
+
+        const mouse = { 
+            x: (e.clientX / window.innerWidth) * 2 - 1, 
+            y: -(e.clientY / window.innerHeight) * 2 + 1 
+        };
+        this.raycaster.setFromCamera(mouse, this.camera);
+        
+        // --- RESIZE / EXTEND LOGIC ---
+        if (this.isDragging && this.activeHandle && this.selectedObject) {
+            const intersect = new THREE.Vector3();
+            if (this.raycaster.ray.intersectPlane(this.groundPlane, intersect)) {
+                const delta = intersect.clone().sub(this.startDragPos);
+                const type = this.selectedObject.userData.stationType;
+                
+                // Direction multipliers based on handle
+                const dir = this.activeHandle.userData.direction;
+                // n: z-, s: z+, e: x+, w: x-
+                
+                if (type === STATION_TYPES.WALL) {
+                    // Resize Logic
+                    let dw = 0; 
+                    let dd = 0;
+                    let dx = 0;
+                    let dz = 0;
+                    
+                    // Calculate dimension changes locally aligned
+                    if (dir === 'e') dw = delta.x;
+                    if (dir === 'w') dw = -delta.x;
+                    if (dir === 's') dd = delta.z;
+                    if (dir === 'n') dd = -delta.z;
+                    
+                    // Snap to grid unit
+                    let newW = Math.max(GRID_UNIT, Math.round((this.originalSize.width + dw) * 2) / 2);
+                    let newD = Math.max(GRID_UNIT, Math.round((this.originalSize.depth + dd) * 2) / 2);
+                    
+                    // Shift center to compensate anchor
+                    if (dir === 'e') dx = (newW - this.originalSize.width) / 2;
+                    if (dir === 'w') dx = -(newW - this.originalSize.width) / 2;
+                    if (dir === 's') dz = (newD - this.originalSize.depth) / 2;
+                    if (dir === 'n') dz = -(newD - this.originalSize.depth) / 2;
+
+                    // Update Wall
+                    resizeWall(this.selectedObject, newW, newD);
+                    this.selectedObject.position.set(
+                        this.originalPos.x + dx,
+                        this.originalPos.y,
+                        this.originalPos.z + dz
+                    );
+                    this.selectionBox.setFromObject(this.selectedObject);
+                } 
+                else if (type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING) {
+                    // Tiling Logic
+                    // Calculate how many units moved along axis
+                    let axisDelta = 0;
+                    let axisVector = new THREE.Vector3();
+                    
+                    if (dir === 'e') { axisDelta = delta.x; axisVector.set(1,0,0); }
+                    if (dir === 'w') { axisDelta = -delta.x; axisVector.set(-1,0,0); }
+                    if (dir === 's') { axisDelta = delta.z; axisVector.set(0,0,1); }
+                    if (dir === 'n') { axisDelta = -delta.z; axisVector.set(0,0,-1); }
+                    
+                    const count = Math.floor((axisDelta + (GRID_UNIT/2)) / GRID_UNIT);
+                    
+                    // Cleanup old ghosts
+                    this.extendingGhosts.forEach(g => this.scene.remove(g));
+                    this.extendingGhosts = [];
+                    
+                    if (count > 0) {
+                        // Create ghosts
+                        const t = this.selectedObject.userData.template;
+                        for(let i=1; i<=count; i++) {
+                            const ghost = this._createObjectFromTemplate(t);
+                            ghost.position.copy(this.originalPos).add(axisVector.clone().multiplyScalar(i * GRID_UNIT));
+                            
+                            // Make ghost transparent
+                             ghost.traverse(c => {
+                                if (c.isMesh) {
+                                    c.material = c.material.clone();
+                                    c.material.transparent = true;
+                                    c.material.opacity = 0.5;
+                                    c.material.color.setHex(0x00FF00);
+                                }
+                            });
+                            
+                            this.scene.add(ghost);
+                            this.extendingGhosts.push(ghost);
+                        }
+                    }
+                }
+                
+                // Update handle positions to follow the expansion
+                this._updateHandles(); 
+            }
+            return;
+        }
+
+        // --- STACKING LOGIC (Existing) ---
+        // 1. Find potential support objects (Counters, Tables)
+        const supports = [];
+        this.scene.traverse(c => {
+            // Must be visible, and not the object currently being dragged/placed
+            if (c.visible && c !== this.ghostObject && c !== this.selectedObject) {
+                if (c.userData && (c.userData.stationType === STATION_TYPES.COUNTER || c.userData.stationType === STATION_TYPES.TABLE || c.userData.stationType === STATION_TYPES.SERVING)) {
+                    supports.push(c);
+                }
+            }
+        });
+
+        // 2. Check intersections with supports
+        const hits = this.raycaster.intersectObjects(supports, true);
+        
+        let targetY = 0;
+        let targetX = 0;
+        let targetZ = 0;
+        let foundSupport = false;
+
+        if (hits.length > 0) {
+            // Hit a counter/table -> Stack on top
+            foundSupport = true;
+            const hit = hits[0];
+            const p = hit.point;
+            targetX = p.x;
+            targetZ = p.z;
+            targetY = MODULE_HEIGHT; // Place on top of counter (0.9)
+        } else {
+            // Hit nothing valid -> Check Ground Plane (Y=0)
+            const target = new THREE.Vector3();
+            if (this.raycaster.ray.intersectPlane(this.groundPlane, target)) {
+                foundSupport = true;
+                targetX = target.x;
+                targetZ = target.z;
+                targetY = 0;
+            }
+        }
+
+        if (foundSupport) {
+            // Snap X/Z to grid
+            const finalX = Math.round(targetX * 2) / 2; 
+            const finalZ = Math.round(targetZ * 2) / 2;
+
+            if (this.placementMode && this.ghostObject) {
+                this.ghostObject.position.set(finalX, targetY, finalZ);
+            } else if (this.isDragging && this.selectedObject) {
+                this.selectedObject.position.set(finalX, targetY, finalZ);
+            }
+        }
+    }
+
+    onPointerUp() {
+        if (this.enabled) {
+            if (this.activeHandle) {
+                // Finish Extend/Resize
+                if (this.extendingGhosts.length > 0) {
+                    // Solidify ghosts
+                    this.extendingGhosts.forEach(g => {
+                         const t = g.userData.template;
+                         const real = this._createObjectFromTemplate(t);
+                         real.position.copy(g.position);
+                         real.rotation.copy(g.rotation);
+                         this.scene.add(real);
+                         this.scene.remove(g);
+                    });
+                    this.extendingGhosts = [];
+                    refreshSmartObjects(this.scene); // Fuse visuals
+                }
+                
+                this.activeHandle = null;
+                this._updateHandles();
+            }
+            
+            this.isDragging = false;
+            this.orbit.enabled = true;
+        }
+    }
+
+    // --- Export ---
+
+    exportLayout() {
+        const layout = [];
+        this.scene.traverse(c => {
+            if (c.parent === this.scene && c.userData && (c.userData.type === 'station' || c.userData.type === 'counter')) {
+                const entry = {
+                    name: c.name,
+                    type: c.userData.stationType || c.userData.type,
+                    position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
+                };
+                
+                // Include rotation if not zero
+                if (c.rotation.y !== 0) {
+                    entry.rotation = parseFloat(c.rotation.y.toFixed(2));
+                }
+
+                if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
+                if (c.userData.template?.color) entry.color = c.userData.template.color;
+                if (c.userData.isServing) entry.isServing = true;
+                
+                // Config: Prioritize userData.config (preserved from loaded levels)
+                // Fallback to template config if available (editor-created items)
+                if (c.userData.config) {
+                    entry.config = c.userData.config;
+                } else if (c.userData.template?.config) {
+                    entry.config = c.userData.template.config;
+                }
+
+                layout.push(entry);
+            }
+        });
+        
+        // Update current level data with new layout
+        this.currentLevelData.layout = layout;
+        
+        const jsonStr = JSON.stringify(this.currentLevelData, null, 2);
+        const fileName = `level_${this.currentLevelData.levelId || 'custom'}.json`;
+
+        // Trigger Download
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", fileName);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        
+        alert(`Level Exported! Replace the file in 'levels/${fileName}' to persist changes.`);
+    }
+}
+</file>
+
+<file path="src/items.js">
+// src/items.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { ITEM_TYPES, INGREDIENT_STATES } from './constants.js';
+import { RECIPES } from './gameData.js';
+import { createItemMesh } from './voxelBuilder.js';
+
+export function checkPlateCompletion(plate) {
+    if (!plate || plate.userData.type !== ITEM_TYPES.ITEM || !['plate', 'bowl', 'cup'].includes(plate.userData.itemType)) return false;
+    const contents = Array.isArray(plate.userData.contents) ? plate.userData.contents.slice().sort() : [];
+
+    for (const mealName in RECIPES) {
+        const recipeData = RECIPES[mealName];
+        if (!recipeData || !recipeData.ingredients) continue;
+        const recipeIngredients = recipeData.ingredients;
+        let lengthsMatch = contents.length === recipeIngredients.length;
+        let elementsMatch = lengthsMatch && contents.every((value, index) => value === recipeIngredients[index]);
+
+        if (lengthsMatch && elementsMatch) {
+            plate.userData.mealName = mealName;
+            return true;
+        }
+    }
+    plate.userData.mealName = null;
+    return false;
+}
+
+export function createItem(scene, type, preloadedModels, state = INGREDIENT_STATES.RAW, position = null) {
+    // Use Voxel Generator instead of Primitives
+    const mesh = createItemMesh(type);
+
+    const defaultPos = new THREE.Vector3(0, 0.2, 0);
+    let userData = {};
+    let finalName = type;
+
+    // Determine type based on string analysis or direct match
+    // This logic is critical for interaction compatibility
+    
+    if (['plate', 'bowl', 'cup'].includes(type)) {
+         userData = { type: ITEM_TYPES.ITEM, itemType: type, contents: [], mealName: null };
+    }
+    else if (type.includes('smoothie_ready') || type.includes('cooked') || type.includes('chopped') || type.includes('sliced') || type.includes('toasted') || type.includes('coated') || type.includes('mixed') || type.includes('batter') || type.includes('base')) {
+        userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: type, state: INGREDIENT_STATES.COOKED }; // Generalized state
+    }
+    else {
+        userData = { type: ITEM_TYPES.INGREDIENT, ingredientType: type, state: INGREDIENT_STATES.RAW };
+    }
+
+    mesh.castShadow = true; 
+    mesh.receiveShadow = true;
+    mesh.position.copy(position || defaultPos);
+    mesh.name = finalName; 
+    mesh.userData = userData;
+    
+    scene.add(mesh);
+    return mesh;
+}
+</file>
+
+<file path="src/LevelManager.js">
+// src/LevelManager.js
+import { getRecipeDetails } from './gameData.js'; // Keep recipe helper
+
+export class LevelManager {
+    constructor(uiManager, saveManager, levelDatabaseRef) { // Accept levelDatabase reference
+        this.uiManager = uiManager;
+        this.saveManager = saveManager;
+        this.levels = levelDatabaseRef; // Store reference to the fetched data
+
+        this.currentLevelIndex = -1;
+        this.currentLevelData = null; // This will hold the specific level object from the database
+
+        // Level parameters (will be set in loadLevel)
+        this.availableMeals = [];
+        this.maxActiveOrders = 1;
+        this.newOrderDelay = 15;
+        this.newOrderTimer = 0;
+
+        // Active state
+        this.activeOrders = new Map(); // Map: orderId -> orderData { id, mealName, timer, baseScore, penalty }
+        this.nextOrderId = 0; // Simple counter for unique IDs per level load
+
+        this.levelTimer = 0;
+        this.currentScore = 0;
+        this.isLevelRunning = false;
+
+        this.onLevelEnd = null;
+        this.onGameEnd = null;
+    }
+
+    // Accepts the specific levelData object for the level being loaded
+    loadLevel(levelIndex, levelData) {
+        if (!levelData) {
+            console.error(`No level data provided for index ${levelIndex}`);
+            this.isLevelRunning = false;
+            if (this.onGameEnd) this.onGameEnd();
+            return false;
+        }
+
+        // Reset internal state
+        this.currentLevelIndex = levelIndex;
+        this.currentLevelData = levelData; // Store the specific level object
+        this.currentScore = 0;
+        this.levelTimer = this.currentLevelData.duration;
+        this.isLevelRunning = true;
+        this.activeOrders.clear();
+        this.nextOrderId = 0;
+
+        // Load parameters from the passed levelData
+        this.availableMeals = this.currentLevelData.availableMeals || [];
+        this.maxActiveOrders = this.currentLevelData.maxActiveOrders || 1;
+        this.newOrderDelay = this.currentLevelData.newOrderDelay || 15;
+        this.newOrderTimer = 0; // Reset delay timer
+
+        console.log(`Loading Level ${this.currentLevelData.levelId}: ${this.currentLevelData.name}`);
+        
+        this.uiManager.updateScore(this.currentScore);
+        this.uiManager.updateLevelTimer(this.levelTimer);
+        this.uiManager.clearOrderList();
+
+        // Attempt to generate initial orders up to the max allowed
+        for (let i = 0; i < this.maxActiveOrders; i++) {
+            this.generateNewOrder();
+        }
+        // Start the cooldown timer after initial generation
+        this.newOrderTimer = this.newOrderDelay;
+
+        return true; // Indicate success
+    }
+
+    generateNewOrder() {
+        if (this.activeOrders.size >= this.maxActiveOrders || this.availableMeals.length === 0) {
+            return; // Don't generate if max reached or no meals possible
+        }
+
+        const randomIndex = Math.floor(Math.random() * this.availableMeals.length);
+        const mealName = this.availableMeals[randomIndex];
+        const recipeDetails = getRecipeDetails(mealName);
+
+        if (!recipeDetails) {
+            console.error(`Could not find recipe details for "${mealName}"`);
+            return; // Skip if recipe details are missing
+        }
+
+        const orderId = `order-${this.currentLevelIndex}-${this.nextOrderId++}`;
+        const newOrder = {
+            id: orderId, mealName: mealName, timer: recipeDetails.timeLimit,
+            baseScore: recipeDetails.baseScore, penalty: recipeDetails.penalty
+        };
+
+        this.activeOrders.set(orderId, newOrder);
+        // Pass timeLimit as maxTime for progress bar calculation
+        this.uiManager.addOrderCard(orderId, mealName, newOrder.timer);
+        console.log(`Generated new order: ${mealName} (ID: ${orderId})`);
+
+        // Reset the cooldown timer for the *next* potential order
+        this.newOrderTimer = this.newOrderDelay;
+    }
+
+
+    update(delta) {
+        if (!this.isLevelRunning) return;
+
+        // 1. Update Level Timer & Check End Condition
+        this.levelTimer -= delta;
+        this.uiManager.updateLevelTimer(this.levelTimer);
+        if (this.levelTimer <= 0) { this.endLevel(); return; }
+
+        // 2. Update Active Order Timers & Check Failures
+        const failedOrderIds = [];
+        this.activeOrders.forEach((order, orderId) => {
+            order.timer -= delta;
+            this.uiManager.updateOrderCardTimer(orderId, order.timer);
+            if (order.timer <= 0) failedOrderIds.push(orderId);
+        });
+        failedOrderIds.forEach(orderId => this.failOrder(orderId)); // Process failures
+
+        // 3. Check if New Order Should Be Generated
+        this.newOrderTimer -= delta;
+        if (this.activeOrders.size < this.maxActiveOrders && this.newOrderTimer <= 0) {
+            this.generateNewOrder();
+        }
+    }
+
+    completeOrder(servedMealName) {
+        let completedOrderId = null, completedOrderData = null;
+        for (const [orderId, orderData] of this.activeOrders.entries()) {
+            if (orderData.mealName === servedMealName) {
+                completedOrderId = orderId; completedOrderData = orderData; break;
+            }
+        }
+
+        if (!completedOrderId) { // No matching active order found
+            console.warn(`Attempted to complete invalid order: ${servedMealName}.`);
+            if (this.activeOrders.size > 0) { // Penalize only if other orders were active
+                let penalty = 25; this.currentScore -= penalty;
+                this.currentScore = Math.max(0, this.currentScore);
+                this.uiManager.updateScore(this.currentScore);
+                this.uiManager.showTemporaryMessage('Wrong / No Order!');
+            } else { this.uiManager.showTemporaryMessage('Wrong / No Order!'); }
+            return false;
+        }
+
+        // Success
+        let scoreGained = completedOrderData.baseScore;
+        let timeBonus = Math.min(20, Math.floor(Math.max(0, completedOrderData.timer) / 2));
+        scoreGained += timeBonus;
+        this.currentScore += scoreGained;
+        this.uiManager.updateScore(this.currentScore);
+        this.uiManager.showTemporaryMessage(`+${scoreGained} Points!`, 1500);
+
+        this.activeOrders.delete(completedOrderId); // Remove from map
+        this.uiManager.removeOrderCard(completedOrderId); // Remove from UI
+
+        return true;
+    }
+
+    failOrder(orderId) {
+        const orderData = this.activeOrders.get(orderId);
+        if (!orderData) return; // Already removed
+
+        console.log(`Order ${orderData.mealName} (ID: ${orderId}) FAILED (Timeout).`);
+        this.uiManager.showTemporaryMessage(`Order Failed! -${orderData.penalty}`, 2000);
+        this.currentScore -= orderData.penalty;
+        this.currentScore = Math.max(0, this.currentScore);
+        this.uiManager.updateScore(this.currentScore);
+
+        this.activeOrders.delete(orderId); // Remove from map
+        this.uiManager.removeOrderCard(orderId); // Remove from UI
+    }
+
+    endLevel() {
+        if (!this.isLevelRunning) return;
+        console.log(`Level ${this.currentLevelData.levelId} ended. Final Score: ${this.currentScore}`);
+        this.isLevelRunning = false;
+
+        this.activeOrders.clear(); // Clear remaining orders
+        this.uiManager.clearOrderList();
+        this.uiManager.updateLevelTimer(0);
+
+        let stars = 0;
+        const thresholds = this.currentLevelData.starThresholds.sort((a, b) => a - b);
+        if (this.currentScore >= thresholds[0]) stars = 1;
+        if (thresholds.length > 1 && this.currentScore >= thresholds[1]) stars = 2;
+        if (thresholds.length > 2 && this.currentScore >= thresholds[2]) stars = 3;
+
+        if (this.saveManager) {
+            this.saveManager.updateLevelCompletion(this.currentLevelIndex, this.currentScore, stars);
+        } else { console.warn("SaveManager not available to save progress."); }
+
+        if (this.onLevelEnd) this.onLevelEnd(this.currentScore, stars, this.currentLevelIndex);
+        else console.error("onLevelEnd callback not set in LevelManager");
+    }
+
+    isRunning() { return this.isLevelRunning; }
+}
+</file>
+
+<file path="style.css">
+/* Reset and Base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overflow: hidden;
+    font-family: 'Press Start 2P', monospace;
+    background-color: #222;
+    color: #FFF;
+    user-select: none;
+    -webkit-user-select: none;
+    image-rendering: pixelated;
+    font-smooth: never;
+    -webkit-font-smoothing: none;
+}
+
+canvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* Overlays (Menus, Loading) */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(20, 20, 30, 0.95);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    padding: 20px;
+    text-align: center;
+}
+
+.overlay.active {
+    display: flex;
+}
+
+/* Menu Screens General Styling */
+.menu-screen h1 {
+    font-size: 2.5em;
+    margin-bottom: 30px;
+    color: #FFD700;
+    text-shadow: 2px 2px #000;
+}
+
+.menu-container {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 25px;
+    border: 4px solid #888;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 300px;
+    max-width: 500px;
+}
+
+.menu-button {
+    font-family: inherit;
+    font-size: 1.2em;
+    color: #FFF;
+    background-color: #555;
+    border: 3px solid #333;
+    padding: 10px 15px;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.1s ease, background-color 0.1s ease;
+    outline: none;
+}
+
+.menu-button:hover {
+    background-color: #777;
+    transform: scale(1.02);
+}
+
+.menu-button.selected {
+    background-color: #FF8C00;
+    border-color: #FFF;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.menu-button:active {
+    background-color: #444;
+    transform: scale(0.98);
+}
+
+.menu-button.small {
+    font-size: 0.8em;
+    padding: 5px 10px;
+}
+
+.menu-hint {
+    margin-top: 20px;
+    font-size: 0.8em;
+    color: #BBB;
+}
+
+#credits {
+    margin-top: 20px;
+    font-size: 0.8em;
+    color: #CCC;
+}
+
+
+.menu-link {
+    color: #87CEEB;
+    text-decoration: none;
+    padding: 2px 0;
+}
+
+.menu-link.selected {
+    background-color: #FF8C00;
+    color: #FFF;
+    outline: 2px solid white;
+}
+
+/* Settings Screen */
+.setting-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 15px;
+}
+
+.button-group {
+    display: flex;
+    gap: 5px;
+}
+
+.lang-button {
+    font-size: 0.9em;
+    padding: 5px 8px;
+}
+
+.lang-button.active-lang {
+    background-color: #4CAF50;
+    border-color: #FFF;
+}
+
+/* Toggle Switch */
+.menu-toggle {
+    appearance: none;
+    width: 40px;
+    height: 20px;
+    background-color: #555;
+    border: 2px solid #333;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    vertical-align: middle;
+}
+
+.menu-toggle::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background-color: #FFF;
+    top: 1px;
+    left: 1px;
+    transition: transform 0.2s ease;
+}
+
+.menu-toggle:checked {
+    background-color: #4CAF50;
+}
+
+.menu-toggle:checked::after {
+    transform: translateX(20px);
+}
+
+.menu-toggle.selected {
+    box-shadow: 0 0 8px white;
+}
+
+/* Level Select Screen */
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid #666;
+}
+
+.level-button {
+    font-size: 0.9em;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    text-align: center;
+}
+
+.level-button.locked {
+    background-color: #444;
+    border-color: #222;
+    cursor: default;
+    opacity: 0.6;
+}
+
+.level-button .level-stars {
+    color: #FFD700;
+    font-size: 1.2em;
+    margin-bottom: 3px;
+}
+
+.level-button .level-locked {
+    color: #F00;
+    font-weight: bold;
+}
+
+/* =========================================
+   EDITOR HUB
+   ========================================= */
+
+.editor-toolbar {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 10px;
+}
+
+.level-list-editor {
+    width: 100%;
+    max-width: 700px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.editor-level-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #333;
+    border: 2px solid #555;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+.editor-level-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.level-id-badge {
+    font-size: 0.6em;
+    color: #888;
+}
+
+.editor-level-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.icon-btn {
+    background: #444;
+    border: 1px solid #666;
+    color: #fff;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 0.8em;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover { background: #666; }
+.icon-btn.delete:hover { background: #A33; }
+
+/* =========================================
+   IN-GAME HUD & ORDERS (OVERCOOKED STYLE)
+   ========================================= */
+
+#game-hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    color: #FFF;
+    font-size: 1.1em;
+    text-shadow: 1px 1px 2px #000;
+}
+
+#order-list {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    display: flex;
+    flex-direction: row; /* Horizontal layout */
+    gap: 12px;
+    max-width: 80vw; /* Allow wrapping if too many */
+    flex-wrap: wrap;
+}
+
+/* The Order Ticket */
+.order-card {
+    background-color: #F0F0F0;
+    color: #222;
+    border: 3px solid #888;
+    border-radius: 6px;
+    width: 130px;
+    height: auto;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+    animation: ticketSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    position: relative;
+    text-shadow: none; /* Clean text for ticket */
+}
+
+@keyframes ticketSlideIn {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Header Section (Name) */
+.order-header {
+    background-color: #DDD;
+    padding: 6px 4px;
+    border-bottom: 2px solid #BBB;
+    text-align: center;
+    font-size: 0.65em;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Progress Bar Container */
+.order-timer-container {
+    width: 100%;
+    height: 12px;
+    background-color: #333;
+    border-bottom: 2px solid #888;
+}
+
+/* Actual Bar */
+.order-timer-bar {
+    height: 100%;
+    width: 100%;
+    background-color: #4CAF50; /* Green start */
+    transition: width 0.2s linear, background-color 0.5s;
+}
+
+/* Ingredient List Section */
+.order-ingredients {
+    flex-grow: 1;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    background-color: #FFF;
+}
+
+.ingredient-item {
+    font-size: 0.6em;
+    background: #EEE;
+    border: 1px solid #CCC;
+    padding: 4px 6px;
+    border-radius: 4px;
+    width: 90%;
+    text-align: center;
+    color: #444;
+}
+
+/* Animations for urgency */
+@keyframes pulseRed {
+    0% { background-color: #ff3333; }
+    50% { background-color: #ff0000; }
+    100% { background-color: #ff3333; }
+}
+
+@keyframes shakeCard {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    25% { transform: translate(-1px, -2px) rotate(-1deg); }
+    50% { transform: translate(-2px, 0px) rotate(1deg); }
+    75% { transform: translate(2px, 1px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+.order-card.critical {
+    border-color: #D32F2F;
+    animation: shakeCard 0.5s infinite;
+}
+
+.order-card.critical .order-timer-bar {
+    background-color: #D32F2F;
+    animation: pulseRed 0.5s infinite;
+}
+
+/* =========================================
+   OTHER HUD ELEMENTS
+   ========================================= */
+
+#game-timer-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid #888;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+#bottom-hud {
+    position: absolute;
+    bottom: 15px;
+    right: 15px; /* Moved to right for cleaner look */
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid #888;
+    padding: 10px 15px;
+    border-radius: 4px;
+    text-align: right;
+}
+
+#holding-display {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+#crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border: 1px solid black;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 6;
+}
+
+#temp-message {
+    position: absolute;
+    top: 30%; /* Moved up slightly */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 25px;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #FFD700;
+    border: 2px solid #FFF;
+    border-radius: 8px;
+    z-index: 7;
+    font-size: 1.4em;
+    text-align: center;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+    box-shadow: 0 0 15px rgba(0,0,0,0.7);
+}
+
+#temp-message.visible {
+    display: block;
+    opacity: 1;
+}
+
+/* Recipe Book & Instructions */
+#recipe-book-container {
+    margin-top: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.3);
+    border: 2px solid #555;
+    padding: 10px;
+}
+
+.recipe-entry {
+    border-bottom: 1px solid #444;
+    padding: 8px 0;
+    text-align: left;
+}
+
+.instructions-box {
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
+    background-color: rgba(30, 35, 45, 0.95);
+    border: 3px solid #678;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+#instructions-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.recipe-instruction {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid #556;
+    padding: 15px;
+    min-width: 280px;
+    flex: 1;
+    border-radius: 4px;
+}
+
+.recipe-instruction h3 {
+    color: #87CEEB;
+    border-bottom: 1px solid #556;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.recipe-instruction ul {
+    list-style: none;
+    /* Remove default bullets */
+    padding-left: 0;
+}
+
+.recipe-instruction li {
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    padding-left: 1.5em;
+    /* Indent steps */
+    position: relative;
+}
+
+.recipe-instruction li::before {
+    content: '»';
+    /* Use a different bullet */
+    color: #87CEEB;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+#start-level-instructions-button {
+    margin: auto;
+    margin-top: 15px;
+    /* Space above button */
+    font-size: 1.3em;
+    padding: 12px 20px;
+    background-color: #4CAF50;
+    /* Green start button */
+    border-color: #FFF;
+}
+
+#start-level-instructions-button.selected {
+    background-color: #66BB6A;
+    /* Lighter green highlight */
+    box-shadow: 0 0 12px rgba(102, 255, 102, 0.7);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #222; }
+::-webkit-scrollbar-thumb { background: #555; border: 2px solid #222; }
+::-webkit-scrollbar-thumb:hover { background: #777; }
+
+/* =========================================
+   EDITOR UI
+   ========================================= */
+#editor-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    pointer-events: none; /* Allow clicks to pass through empty areas */
+    font-family: 'Courier New', monospace;
+}
+
+.editor-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #555;
+    pointer-events: auto;
+}
+
+.editor-title {
+    color: orange;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.editor-controls-hint {
+    color: #ccc;
+    font-size: 0.8em;
+}
+
+.editor-controls-hint span {
+    margin: 0 10px;
+}
+
+.editor-panel {
+    background: rgba(30, 30, 30, 0.95);
+    border: 2px solid #666;
+    pointer-events: auto;
+}
+
+.center-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 300px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    z-index: 30;
+}
+
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.meta-row label {
+    font-size: 0.8em;
+    color: #ddd;
+    margin-right: 10px;
+}
+
+.meta-row input, .meta-row select {
+    background: #111;
+    border: 1px solid #555;
+    color: white;
+    padding: 5px;
+    font-family: inherit;
+    width: 150px;
+}
+
+
+.bottom-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+}
+
+.library-tabs {
+    display: flex;
+    background: #222;
+    border-bottom: 1px solid #555;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.2s, background 0.2s;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    background: #444;
+}
+
+.tab-btn.active {
+    color: #FFD700;
+    border-bottom: 2px solid #FFD700;
+    background: #333;
+}
+
+.library-grid {
+    flex-grow: 1;
+    overflow-x: auto;
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    align-items: center;
+}
+
+.library-item {
+    min-width: 90px;
+    height: 90px;
+    background: #444;
+    border: 2px solid #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+    text-align: center;
+    padding: 5px;
+}
+
+.library-item:hover {
+    transform: scale(1.05);
+    border-color: #FFF;
+    background: #555;
+}
+
+.library-item-icon {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.library-item-name {
+    font-size: 0.6em;
+    line-height: 1.2;
+}
+
+.right-panel {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    width: 240px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.right-panel h3 {
+    color: #87CEEB;
+    font-size: 0.9em;
+    border-bottom: 1px solid #555;
+    padding-bottom: 5px;
+}
+
+.inspector-field {
+    background: #222;
+    padding: 5px;
+    font-size: 0.8em;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.inspector-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.inspector-config-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+    border-top: 1px solid #555;
+    padding-top: 10px;
+}
+
+.inspector-config-section label {
+    font-size: 0.7em;
+    color: #ccc;
+}
+
+#inspector-config {
+    background: #111;
+    color: #0f0;
+    border: 1px solid #444;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7em;
+    resize: vertical;
+    padding: 5px;
+}
+
+.editor-action-btn {
+    background: #444;
+    color: white;
+    border: 1px solid #666;
+    padding: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8em;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.editor-action-btn:hover {
+    background: #666;
+}
+
+.editor-action-btn.small {
+    padding: 5px 10px;
+}
+
+.editor-action-btn.delete {
+    background: #622;
+    border-color: #844;
+}
+
+.editor-action-btn.delete:hover {
+    background: #922;
+}
+
+.inspector-coords {
+    font-size: 0.7em;
+    color: #aaa;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* New Editor Handle Cursor */
+body.resizing-n-s { cursor: ns-resize; }
+body.resizing-e-w { cursor: ew-resize; }
+</file>
+
+<file path="src/constants.js">
+// src/constants.js
+export const PLAYER_HEIGHT = 1.8;
+export const PLAYER_SPEED = 5.0;
+export const INTERACTION_DISTANCE = 3.0;
+// Bounds match the new 8x8 floor (Radius 4)
+export const KITCHEN_BOUNDS = { xMin: -3.5, xMax: 3.5, zMin: -3.5, zMax: 3.5 }; 
+
+// --- GRID & DIMENSIONS ---
+export const GRID_UNIT = 0.5; 
+export const MODULE_HEIGHT = 0.9; 
+export const LABEL_Y_OFFSET = 0.3;
+
+export const STATION_TYPES = {
+    INGREDIENT_SOURCE: 'ingredient_source',
+    ITEM_SOURCE: 'item_source',
+    PROCESSOR: 'processor',
+    SERVING: 'serving',
+    COUNTER: 'counter', // Solid block
+    TABLE: 'table',     // With smart legs
+    FLOOR: 'floor',
+    TRASH: 'trash',
+    WALL: 'wall',
+    PREPLACED_ITEM: 'preplaced_item' // New type for individual items
+};
+
+export const ITEM_TYPES = {
+    INGREDIENT: 'ingredient',
+    ITEM: 'item', 
+};
+
+export const INGREDIENT_STATES = {
+    RAW: 'raw',
+    CHOPPED: 'chopped',
+    COOKED: 'cooked',
+    MIXED: 'mixed',
+    BATTER: 'batter',
+    SLICED: 'sliced',
+    TOASTED: 'toasted',
+    COATED: 'coated',
+    READY: 'ready',
+};
+
+// --- INPUT ---
+export const GAMEPAD_DEADZONE = 0.15;
+export const GAMEPAD_INTERACT_BUTTON = 0; // Cross/A
+export const GAMEPAD_BACK_BUTTON = 1;     // Circle/B
+export const GAMEPAD_INSTRUCTIONS_BUTTON = 3; // Triangle/Y
+export const GAMEPAD_PAUSE_BUTTON = 9;    // Options/Start
+export const GAMEPAD_LOOK_SENSITIVITY_X = 300.0;
+export const GAMEPAD_LOOK_SENSITIVITY_Y = 300.0;
+
+export const KEYBOARD_INSTRUCTIONS_KEY = 'KeyI';
+
+// --- EDITOR CATALOG ---
+export const CATALOG_ITEMS = [
+    // --- ARCHITECTURE ---
+    { name: "Wall (Short)", type: STATION_TYPES.WALL, category: "Architecture", size: { width: 1.0, depth: 0.5 }, color: "#EFEBE9" },
+    { name: "Wall (Long)", type: STATION_TYPES.WALL, category: "Architecture", size: { width: 2.0, depth: 0.5 }, color: "#EFEBE9" },
+    { name: "Corner Wall", type: STATION_TYPES.WALL, category: "Architecture", size: { width: 0.5, depth: 0.5 }, color: "#EFEBE9" },
+    
+    // --- FURNITURE ---
+    { name: "Counter (Wood)", type: STATION_TYPES.COUNTER, category: "Furniture", color: "#8B4513" },
+    { name: "Counter (Corner)", type: STATION_TYPES.COUNTER, category: "Furniture", color: "#8B4513" },
+    { name: "Serving Pass", type: STATION_TYPES.SERVING, category: "Furniture", isServing: true },
+    { name: "Table", type: STATION_TYPES.TABLE, category: "Furniture", color: "#CCCCCC" },
+    { name: "Trash Bin", type: STATION_TYPES.TRASH, category: "Furniture", size: { width: 0.5, depth: 0.5 } },
+
+    // --- ITEMS (Single Placeable) ---
+    { name: "Plate (Single)", type: STATION_TYPES.PREPLACED_ITEM, category: "Items", size: { width: 0.5, depth: 0.5 }, config: { item: "plate" } },
+    { name: "Bowl (Single)", type: STATION_TYPES.PREPLACED_ITEM, category: "Items", size: { width: 0.5, depth: 0.5 }, config: { item: "bowl" } },
+    { name: "Cup (Single)", type: STATION_TYPES.PREPLACED_ITEM, category: "Items", size: { width: 0.5, depth: 0.5 }, config: { item: "cup" } },
+
+    // --- PROCESSORS (APPLIANCES) ---
+    { name: "Cutting Board", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#DEB887", config: { processes: ["potato", "tomato", "lettuce", "onion", "banana", "strawberry", "raw_chicken"], result: { "potato": "raw_fries", "tomato": "chopped_tomato", "lettuce": "chopped_lettuce", "onion": "onion_rings_raw", "banana": "sliced_banana", "strawberry": "sliced_strawberry", "raw_chicken": "raw_chicken_strips" } } },
+    { name: "Stove Top", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#333", config: { processes: ["patty", "raw_bacon", "pancake_batter", "omelette_mix", "grilled_cheese_raw"], result: { "patty": "cooked_patty", "raw_bacon": "cooked_bacon", "pancake_batter": "cooked_pancakes", "omelette_mix": "cooked_omelette", "grilled_cheese_raw": "grilled_cheese_cooked" }, processingTime: 4000 } },
+    { name: "Deep Fryer", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#555", config: { processes: ["raw_fries", "onion_rings_coated", "coated_chicken_strips"], result: { "raw_fries": "cooked_fries", "onion_rings_coated": "cooked_onion_rings", "coated_chicken_strips": "cooked_chicken_tenders" }, processingTime: 3000 } },
+    { name: "Toaster", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#D3D3D3", config: { processes: ["bread_slice"], result: { "bread_slice": "toasted_bread" }, processingTime: 3000 } },
+    { name: "Stand Mixer", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#FFF", config: { processes: ["egg", "pancake_mix"], result: { "egg": "omelette_mix", "pancake_mix": "pancake_batter" }, processingTime: 2000 } },
+    { name: "Blender", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#708090", config: { requiredIngredients: ["sliced_banana", "sliced_strawberry", "milk"], outputItem: "smoothie_ready", acceptsIngredients: ["sliced_banana", "sliced_strawberry", "milk", "yogurt"], acceptsContainer: "cup" } },
+    { name: "Dough Press", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#B0C4DE", config: { processes: ["pizza_dough"], result: { "pizza_dough": "pizza_base" } } },
+    { name: "Pizza Oven", type: STATION_TYPES.PROCESSOR, category: "Stations", size: { width: 0.5, depth: 0.5 }, color: "#8B0000", config: { processes: ["pizza_margherita_raw"], result: { "pizza_margherita_raw": "cooked_pizza_margherita" }, processingTime: 6000 } },
+    
+    // --- SOURCES (INGREDIENTS) ---
+    { name: "Plate Stack", type: STATION_TYPES.ITEM_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, config: { item: "plate" } },
+    { name: "Bowl Stack", type: STATION_TYPES.ITEM_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, config: { item: "bowl" } },
+    { name: "Cup Stack", type: STATION_TYPES.ITEM_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, config: { item: "cup" } },
+    
+    { name: "Potato Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#CD853F", config: { ingredient: "potato" } },
+    { name: "Tomato Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FF6347", config: { ingredient: "tomato" } },
+    { name: "Lettuce Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#90EE90", config: { ingredient: "lettuce" } },
+    { name: "Onion Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F0F8FF", config: { ingredient: "onion" } },
+    { name: "Banana Crate", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFE135", config: { ingredient: "banana" } },
+    { name: "Strawberry Box", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FC5A8D", config: { ingredient: "strawberry" } },
+    
+    { name: "Bun Rack", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F4A460", config: { ingredient: "bun" } },
+    { name: "Bread Rack", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#DEB887", config: { ingredient: "bread_slice" } },
+    { name: "Patty Box", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#A52A2A", config: { ingredient: "patty" } },
+    { name: "Chicken Box", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFB6C1", config: { ingredient: "raw_chicken" } },
+    { name: "Bacon Pack", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#CD5C5C", config: { ingredient: "raw_bacon" } },
+    { name: "Cheese Fridge", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFD700", config: { ingredient: "cheese_slice" } },
+    { name: "Mozzarella Bin", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFFFF0", config: { ingredient: "shredded_mozzarella" } },
+    { name: "Pizza Dough", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F5DEB3", config: { ingredient: "pizza_dough" } },
+    
+    { name: "Egg Carton", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFF8DC", config: { ingredient: "egg" } },
+    { name: "Milk Carton", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#FFFFFF", config: { ingredient: "milk" } },
+    { name: "Yogurt Pot", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F0FFFF", config: { ingredient: "yogurt" } },
+    { name: "Pancake Mix", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F5DEB3", config: { ingredient: "pancake_mix" } },
+    
+    { name: "Tomato Sauce", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#8B0000", config: { ingredient: "tomato_sauce" } },
+    { name: "Syrup Bottle", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#8B4513", config: { ingredient: "syrup" } },
+    { name: "Granola Jar", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#D2691E", config: { ingredient: "granola" } },
+    { name: "Coating Mix", type: STATION_TYPES.INGREDIENT_SOURCE, category: "Sources", size: { width: 0.5, depth: 0.5 }, color: "#F5F5DC", config: { ingredient: "coating_mix" } },
+];
+</file>
+
+<file path="src/main.js">
+// src/main.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { setupScene, setupCamera, setupRenderer, setupLighting, setupResizeHandler } from './setup.js';
+import { PlayerControls } from './controls.js';
+import { Player } from './player.js';
+import { buildKitchen, clearKitchen, toggleLabels, setWorldLanguage } from './world.js';
+import { InteractionManager } from './interaction.js';
+import { LevelManager } from './LevelManager.js';
+import { UIManager } from './ui.js';
+import { MenuManager } from './menuManager.js';
+import { SaveManager } from './saveManager.js';
+import { LevelEditor } from './editor.js';
+import { AudioManager } from './audioManager.js'; 
+
+const GameState = { 
+    LOADING: 'LOADING', 
+    MAIN_MENU: 'MAIN_MENU', 
+    SETTINGS: 'SETTINGS', 
+    LEVEL_SELECT: 'LEVEL_SELECT', 
+    LEVEL_INSTRUCTIONS: 'LEVEL_INSTRUCTIONS', 
+    GAME_RUNNING: 'GAME_RUNNING', 
+    PAUSED: 'PAUSED', 
+    VIEWING_INSTRUCTIONS: 'VIEWING_INSTRUCTIONS', 
+    LEVEL_END: 'LEVEL_END',
+    EDITOR: 'EDITOR',
+    EDITOR_HUB: 'EDITOR_HUB'
+};
+
+let currentGameState = GameState.LOADING;
+let preloadedModels = {};
+let activeGamepad = null;
+const clock = new THREE.Clock();
+
+let scene, camera, renderer, playerControls, player, interactionManager, levelManager, uiManager, menuManager, saveManager, levelEditor, audioManager;
+let levelDatabase = []; 
+let levelDataCache = {}; // Cache level contents: filename/id -> json data
+let pendingLevelIndex = -1;
+let pendingLevelData = null;
+let currentLevelData = null; 
+let inputCooldownTimer = 0;
+const INPUT_COOLDOWN_DURATION = 0.2;
+
+const loadingManager = new THREE.LoadingManager();
+const gltfLoader = new GLTFLoader(loadingManager);
+const assetsToLoad = { 
+    tomato: 'models/tomato.glb',
+    potato: 'models/potato.glb',
+    chopped_tomato: 'models/chopped_tomato.glb',
+    lettuce: 'models/lettuce.glb',
+    banana: 'models/banana.glb',
+    strawberry: 'models/strawberry.glb',
+    milk: 'models/milk.glb',
+    yogurt: 'models/yogurt.glb',
+    cup: 'models/cup.glb',
+    egg: 'models/egg.glb',
+    pancake_mix: 'models/pancake_mix.glb',
+    syrup: 'models/syrup.glb',
+    bowl: 'models/bowl.glb',
+    granola: 'models/granola.glb',
+};
+
+async function preloadAssets() {
+    if (!saveManager) saveManager = new SaveManager();
+    if (!uiManager) uiManager = new UIManager(saveManager);
+    if (!audioManager) audioManager = new AudioManager();
+
+    uiManager.showLoading();
+    currentGameState = GameState.LOADING;
+    const promises = [];
+    console.log("Starting asset preloading...");
+
+    for (const key in assetsToLoad) {
+        promises.push(
+            gltfLoader.loadAsync(assetsToLoad[key]).then(gltf => {
+                console.log(`Loaded ${key}`);
+                const model = gltf.scene;
+                model.visible = false; 
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
+                preloadedModels[key] = model; 
+            }).catch(error => {
+                console.error(`Failed to load ${key}:`, error);
+            })
+        );
+    }
+    loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => { };
+    loadingManager.onError = (url) => console.error('There was an error loading ' + url);
+    await Promise.all(promises);
+    console.log("Asset preloading complete.");
+}
+
+async function loadLevelData() {
+    try {
+        // Load roadmap instead of a giant monolithic file
+        const response = await fetch('levels/game_roadmap.json'); 
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        levelDatabase = await response.json();
+        if (!Array.isArray(levelDatabase) || levelDatabase.length === 0) throw new Error("Loaded level roadmap is not a valid non-empty array.");
+    } catch (error) {
+        console.error("Failed to load level data:", error);
+        levelDatabase = [];
+        if (uiManager && uiManager.loadingScreen) {
+            uiManager.loadingScreen.innerHTML = `<h2>Error loading game roadmap!</h2><p>${error.message}</p>`;
+        }
+    }
+}
+
+function initializeGameComponents() {
+    console.log("Initializing game components...");
+    scene = setupScene();
+    camera = setupCamera();
+    renderer = setupRenderer();
+    setupLighting(scene);
+    setupResizeHandler(camera, renderer);
+
+    playerControls = new PlayerControls(camera, renderer.domElement);
+    scene.add(playerControls.object);
+
+    player = new Player(playerControls);
+    player.setScene(scene);
+
+    if (!saveManager) saveManager = new SaveManager();
+    if (!uiManager) uiManager = new UIManager(saveManager);
+    if (!audioManager) audioManager = new AudioManager();
+
+    menuManager = new MenuManager(uiManager);
+    levelManager = new LevelManager(uiManager, saveManager, levelDatabase);
+    levelManager.audioManager = audioManager;
+
+    interactionManager = new InteractionManager(camera, scene, player, {}, [], levelManager, uiManager, preloadedModels, null);
+    interactionManager.audioManager = audioManager;
+
+    // Pass an exit callback to the editor to return to the editor hub
+    levelEditor = new LevelEditor(camera, renderer, scene, interactionManager, () => {
+        changeGameState(GameState.EDITOR_HUB);
+    });
+
+    // --- APPLY SAVED SETTINGS ---
+    const savedLang = saveManager.getSetting('language') || 'en';
+    uiManager.setLanguage(savedLang);
+    setWorldLanguage(savedLang); // Set for World builder
+
+    const savedLabels = saveManager.getSetting('showLabels'); // Could be true, false, or undefined
+    // If undefined, default to true (handled by getSetting in previous file, but safe here)
+    const showLabels = savedLabels !== false;
+    toggleLabels(showLabels);
+    uiManager.setLabelToggleState(showLabels);
+
+    addEventListeners();
+    console.log("Kitchen Simulator Initialized.");
+}
+
+function addEventListeners() {
+    document.body.addEventListener('mousedown', (event) => {
+        audioManager.resume(); 
+        // Allow handling interaction if we are in a menu OR editor hub
+        if ((isMenuState(currentGameState) || currentGameState === GameState.EDITOR_HUB) && inputCooldownTimer <= 0) {
+            handleMenuAction(event);
+        }
+    });
+    window.addEventListener('keydown', (e) => {
+        audioManager.resume();
+        // Removed F1 toggle, using Editor Exit button now
+    });
+
+    // --- FIX: Label Toggle Listener ---
+    const labelToggle = document.getElementById('toggle-labels-setting');
+    if (labelToggle) {
+        // Clone to clear old listeners if any
+        const newToggle = labelToggle.cloneNode(true);
+        labelToggle.parentNode.replaceChild(newToggle, labelToggle);
+        
+        newToggle.addEventListener('change', (event) => {
+            const isChecked = event.target.checked;
+            toggleLabels(isChecked);
+            saveManager.saveSetting('showLabels', isChecked); // Persist to localStorage
+            
+            // Sync with MenuManager focus
+            if (menuManager?.activeMenuElement === uiManager.settingsScreen) {
+                menuManager.setSelectedIndex(menuManager.focusableElements.indexOf(event.target));
+            }
+        });
+        // Update ref in UI Manager
+        uiManager.toggleLabelsCheckbox = newToggle;
+    } else { console.error("Label toggle checkbox not found!"); }
+
+    window.addEventListener('gamepadconnected', (event) => { console.log('Gamepad connected:', event.gamepad.id); });
+    window.addEventListener('gamepaddisconnected', (event) => { console.log('Gamepad disconnected:', event.gamepad.id); activeGamepad = null; });
+}
+
+function changeGameState(newState) {
+    const previousState = currentGameState;
+    if (isMenuState(previousState) && !isMenuState(newState) && newState !== GameState.EDITOR_HUB) menuManager.deactivateMenu();
+    
+    if ((previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS) && newState !== GameState.PAUSED && newState !== GameState.VIEWING_INSTRUCTIONS && newState !== GameState.EDITOR) {
+        if (playerControls) playerControls.unlock();
+    }
+
+    if (newState === GameState.EDITOR) {
+        if (playerControls) playerControls.unlock();
+        uiManager.hideGameUI();
+        levelEditor.enable();
+    } else if (previousState === GameState.EDITOR) {
+        levelEditor.disable();
+        if (newState === GameState.GAME_RUNNING && player) {
+            const pos = player.getPosition();
+            camera.position.copy(pos);
+            camera.rotation.set(0,0,0);
+        }
+    }
+
+    currentGameState = newState;
+    const editorHubScreen = document.getElementById('editor-hub-screen');
+    if (editorHubScreen) editorHubScreen.classList.remove('active');
+
+    switch (newState) {
+        case GameState.MAIN_MENU: uiManager.showMainMenu(); menuManager.activateMenu(uiManager.mainMenu); break;
+        case GameState.EDITOR_HUB: 
+            uiManager.hideGameUI();
+            renderEditorHub();
+            editorHubScreen.classList.add('active');
+            menuManager.activateMenu(editorHubScreen);
+            break;
+        case GameState.SETTINGS:
+            const isPause = previousState === GameState.PAUSED || previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS;
+            uiManager.showSettings(isPause); menuManager.activateMenu(uiManager.settingsScreen);
+            break;
+        case GameState.LEVEL_SELECT: uiManager.populateLevelSelect(levelDatabase, saveManager); uiManager.showLevelSelect(); menuManager.activateMenu(uiManager.levelSelectScreen); break;
+        case GameState.LEVEL_INSTRUCTIONS: menuManager.activateMenu(uiManager.levelInstructionsScreen); break;
+        case GameState.VIEWING_INSTRUCTIONS: 
+            if (currentLevelData) uiManager.showLevelInstructions(currentLevelData, true); 
+            else changeGameState(GameState.GAME_RUNNING); 
+            break;
+        case GameState.GAME_RUNNING:
+            if (uiManager.settingsScreen.classList.contains('active')) uiManager.settingsScreen.classList.remove('active');
+            if (uiManager.levelInstructionsScreen.classList.contains('active')) uiManager.levelInstructionsScreen.classList.remove('active');
+            uiManager.showGameUI();
+            if (playerControls) playerControls.lock();
+            break;
+        case GameState.PAUSED: uiManager.showSettings(true); menuManager.activateMenu(uiManager.settingsScreen); break;
+        case GameState.LEVEL_END: currentLevelData = null; menuManager.activateMenu(uiManager.levelEndScreen); break;
+        case GameState.LOADING: uiManager.showLoading(); menuManager.deactivateMenu(); break;
+    }
+}
+
+function isMenuState(state) { return [GameState.MAIN_MENU, GameState.SETTINGS, GameState.LEVEL_SELECT, GameState.LEVEL_INSTRUCTIONS, GameState.PAUSED, GameState.LEVEL_END].includes(state); }
+
+function handleMenuAction(eventOrAction) {
+    let action = null, element = null;
+    if (inputCooldownTimer > 0) return;
+    if (eventOrAction instanceof Event) {
+        const target = eventOrAction.target.closest('[data-action]');
+        if (!target) return;
+        action = target.dataset.action;
+        element = target;
+        if (element.tagName === 'A' && action !== 'link') eventOrAction.preventDefault();
+        if (action === 'toggle-labels') return;
+    } else if (eventOrAction?.action) {
+        action = eventOrAction.action;
+        element = eventOrAction.element;
+        if (action === 'toggle-labels') { inputCooldownTimer = INPUT_COOLDOWN_DURATION; return; }
+    } else { return; }
+    if (!action || !element) return;
+
+    let actionTaken = true;
+    // Only play pop sound for menu clicks, not generic editor clicks if already in editor
+    if (currentGameState !== GameState.EDITOR) audioManager.play('pop'); 
+
+    // --- Editor Hub Actions ---
+    if (currentGameState === GameState.EDITOR_HUB) {
+        const idx = parseInt(element.dataset.index, 10);
+        switch (action) {
+            case 'back-to-main': changeGameState(GameState.MAIN_MENU); break;
+            case 'create-level': createNewLevel(); break;
+            case 'save-roadmap': downloadRoadmap(); break;
+            case 'edit-level': if (!isNaN(idx)) prepareEditLevel(idx); break;
+            case 'move-up': if (!isNaN(idx)) reorderLevel(idx, -1); break;
+            case 'move-down': if (!isNaN(idx)) reorderLevel(idx, 1); break;
+            case 'duplicate': if (!isNaN(idx)) duplicateLevel(idx); break;
+            case 'delete-level': if (!isNaN(idx)) deleteLevel(idx); break;
+            default: actionTaken = false;
+        }
+        if (actionTaken) {
+            inputCooldownTimer = INPUT_COOLDOWN_DURATION;
+            return;
+        }
+    }
+
+    switch (action) {
+        case 'play': changeGameState(GameState.LEVEL_SELECT); break;
+        case 'editor-hub': changeGameState(GameState.EDITOR_HUB); break; 
+        case 'settings': changeGameState(GameState.SETTINGS); break;
+        case 'back-to-main': changeGameState(GameState.MAIN_MENU); break;
+        case 'start-level':
+            const levelIndex = parseInt(element.dataset.levelIndex, 10);
+            if (!isNaN(levelIndex) && saveManager.isLevelUnlocked(levelIndex)) {
+                prepareStartLevel(levelIndex);
+            } else { 
+                if (!isNaN(levelIndex)) uiManager.showTemporaryMessage("Level Locked!", 1500); 
+                actionTaken = false; 
+            }
+            break;
+        case 'start-level-confirm':
+            if (currentGameState === GameState.LEVEL_INSTRUCTIONS) { confirmStartLevel(); audioManager.play('music_start'); } else actionTaken = false;
+            break;
+        case 'set-language':
+            const lang = element.dataset.lang;
+            uiManager.setLanguage(lang);
+            setWorldLanguage(lang); // Set for future levels
+            saveManager.saveSetting('language', lang); // Persist
+            break;
+        case 'resume': resumeGame(); break;
+        case 'next-level':
+            const currentLevelIdx = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
+            const nextLevelIndex = currentLevelIdx + 1;
+            if (!isNaN(currentLevelIdx) && nextLevelIndex < levelDatabase.length && saveManager.isLevelUnlocked(nextLevelIndex)) prepareStartLevel(nextLevelIndex);
+            else actionTaken = false;
+            break;
+        case 'restart-level':
+            const levelToRestart = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
+            if (!isNaN(levelToRestart) && levelToRestart >= 0) prepareStartLevel(levelToRestart);
+            else prepareStartLevel(0);
+            break;
+        case 'link': window.open(element.href, '_blank'); break;
+        default: actionTaken = false;
+    }
+    if (actionTaken) inputCooldownTimer = INPUT_COOLDOWN_DURATION;
+}
+
+// --- Editor Hub Logic ---
+
+function renderEditorHub() {
+    const container = document.getElementById('editor-level-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    levelDatabase.forEach((level, index) => {
+        const row = document.createElement('div');
+        row.className = 'editor-level-row';
+        row.innerHTML = `
+            <div class="editor-level-actions">
+                <button class="icon-btn" data-action="move-up" data-index="${index}" title="Move Up">▲</button>
+                <button class="icon-btn" data-action="move-down" data-index="${index}" title="Move Down">▼</button>
+            </div>
+            <div class="editor-level-info">
+                <span class="level-name-display">${level.name}</span>
+                <span class="level-id-badge">ID: ${level.levelId} | File: ${level.filename || 'unsaved'}</span>
+            </div>
+            <div class="editor-level-actions">
+                <button class="icon-btn" data-action="edit-level" data-index="${index}" title="Edit">✏️</button>
+                <button class="icon-btn" data-action="duplicate" data-index="${index}" title="Duplicate">📋</button>
+                <button class="icon-btn delete" data-action="delete-level" data-index="${index}" title="Delete">🗑️</button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+function createNewLevel() {
+    const newId = levelDatabase.length > 0 ? Math.max(...levelDatabase.map(l => l.levelId)) + 1 : 1;
+    const filename = `level_${newId}.json`;
+    const newEntry = {
+        levelId: newId,
+        name: `New Level ${newId}`,
+        filename: filename
+    };
+    
+    // Create default content in cache
+    levelDataCache[filename] = {
+        levelId: newId,
+        name: `New Level ${newId}`,
+        duration: 180,
+        starThresholds: [100, 200, 300],
+        availableMeals: [],
+        maxActiveOrders: 2,
+        newOrderDelay: 15,
+        layout: []
+    };
+
+    levelDatabase.push(newEntry);
+    renderEditorHub();
+}
+
+function reorderLevel(index, direction) {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= levelDatabase.length) return;
+    
+    // Swap
+    const temp = levelDatabase[index];
+    levelDatabase[index] = levelDatabase[newIndex];
+    levelDatabase[newIndex] = temp;
+    
+    renderEditorHub();
+}
+
+function deleteLevel(index) {
+    if (!confirm("Delete this level reference? (Files cannot be deleted by web browser)")) return;
+    levelDatabase.splice(index, 1);
+    renderEditorHub();
+}
+
+// Fetch logic helper
+async function getLevelData(entry) {
+    // Check cache first
+    if (levelDataCache[entry.filename]) {
+        return JSON.parse(JSON.stringify(levelDataCache[entry.filename])); // Deep copy
+    }
+    
+    // Fetch from server
+    try {
+        const res = await fetch(`levels/${entry.filename}`);
+        if (!res.ok) throw new Error("File not found");
+        const data = await res.json();
+        levelDataCache[entry.filename] = data; // Cache it
+        return data;
+    } catch (e) {
+        console.warn(`Could not load ${entry.filename}, creating empty template.`);
+        const tmpl = { levelId: entry.levelId, name: entry.name, layout: [] };
+        levelDataCache[entry.filename] = tmpl;
+        return tmpl;
+    }
+}
+
+async function duplicateLevel(index) {
+    const sourceEntry = levelDatabase[index];
+    const sourceData = await getLevelData(sourceEntry);
+    
+    const newId = Math.max(...levelDatabase.map(l => l.levelId)) + 1;
+    const newFilename = `level_${newId}.json`;
+    
+    // Clone data
+    const newData = JSON.parse(JSON.stringify(sourceData));
+    newData.levelId = newId;
+    newData.name = `${sourceData.name} (Copy)`;
+    
+    // Update Roadmap
+    const newEntry = {
+        levelId: newId,
+        name: newData.name,
+        filename: newFilename
+    };
+    levelDatabase.push(newEntry);
+    
+    // Update Cache
+    levelDataCache[newFilename] = newData;
+    
+    renderEditorHub();
+}
+
+async function prepareEditLevel(index) {
+    const entry = levelDatabase[index];
+    uiManager.showLoading();
+    try {
+        const data = await getLevelData(entry);
+        
+        resetWorldState();
+        clearKitchen(scene);
+        
+        // Use builder to show current state
+        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, data.layout || [], preloadedModels);
+        interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
+        
+        // Initialize Editor with this data
+        levelEditor.loadLevel(data);
+        
+        uiManager.hideLoading();
+        changeGameState(GameState.EDITOR);
+    } catch (e) {
+        console.error(e);
+        uiManager.hideLoading();
+        alert("Failed to load level for editing");
+    }
+}
+
+function downloadRoadmap() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(levelDatabase, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "game_roadmap.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    alert("Roadmap downloaded. Overwrite levels/game_roadmap.json in your project.");
+}
+
+// --- Game Load Logic ---
+
+// Converted to async to handle fetching individual level files
+async function prepareStartLevel(levelIndex) {
+    if (!levelManager || !interactionManager || !scene || !uiManager) { changeGameState(GameState.MAIN_MENU); return; }
+    if (levelIndex < 0 || levelIndex >= levelDatabase.length) { changeGameState(GameState.LEVEL_SELECT); return; }
+    
+    uiManager.showLoading();
+    
+    try {
+        const levelEntry = levelDatabase[levelIndex];
+        // Fetch specific level data
+        const levelData = await getLevelData(levelEntry);
+
+        resetWorldState();
+        clearKitchen(scene);
+        
+        // Pass preloadedModels to buildKitchen so preplaced items can be instantiated
+        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout, preloadedModels);
+        interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
+        
+        pendingLevelIndex = levelIndex;
+        pendingLevelData = levelData;
+        currentLevelData = null; 
+        
+        uiManager.hideLoading();
+        uiManager.showLevelInstructions(levelData, false);
+        changeGameState(GameState.LEVEL_INSTRUCTIONS);
+    } catch (e) {
+        console.error(e);
+        uiManager.hideLoading();
+        uiManager.showTemporaryMessage("Error loading level", 2000);
+        changeGameState(GameState.LEVEL_SELECT);
+    }
+}
+
+function confirmStartLevel() {
+    if (pendingLevelIndex < 0 || !pendingLevelData || !levelManager) { changeGameState(GameState.LEVEL_SELECT); return; }
+    currentLevelData = pendingLevelData;
+    const loaded = levelManager.loadLevel(pendingLevelIndex, pendingLevelData);
+    pendingLevelIndex = -1;
+    pendingLevelData = null;
+    if (loaded && levelManager.isRunning()) changeGameState(GameState.GAME_RUNNING);
+    else { currentLevelData = null; changeGameState(GameState.LEVEL_SELECT); }
+}
+
+function resetWorldState() {
+    if (player) player.forceDropItem();
+    if (interactionManager) {
+        if (interactionManager.currentlyHighlighted) {
+            interactionManager.revertHighlight(interactionManager.currentlyHighlighted);
+            interactionManager.currentlyHighlighted = null;
+        }
+        interactionManager.clearDynamicItems();
+    }
+    if (uiManager) { uiManager.clearOrderList(); uiManager.updateHolding(null); }
+    pendingLevelIndex = -1;
+    pendingLevelData = null;
+}
+
+function pauseGame() { if (currentGameState === GameState.GAME_RUNNING) changeGameState(GameState.PAUSED); }
+function resumeGame() {
+    if (currentGameState === GameState.PAUSED || currentGameState === GameState.SETTINGS || currentGameState === GameState.VIEWING_INSTRUCTIONS) {
+         if (levelManager?.isRunning()) changeGameState(GameState.GAME_RUNNING);
+         else changeGameState(GameState.MAIN_MENU);
+    }
+}
+function handleLevelEnd(score, stars, levelIndex) {
+    currentLevelData = null; 
+    if (saveManager) saveManager.updateLevelCompletion(levelIndex, score, stars);
+    const hasNextLevel = (levelIndex + 1) < levelDatabase.length;
+    uiManager.showLevelEnd(score, stars, levelIndex, hasNextLevel);
+    changeGameState(GameState.LEVEL_END);
+}
+function handleGameEnd() {
+    currentLevelData = null; 
+    uiManager.showGameEnd();
+    changeGameState(GameState.LEVEL_END);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    if (!renderer || !uiManager || !menuManager || !playerControls || !player || !interactionManager) return;
+    const delta = clock.getDelta();
+    if (inputCooldownTimer > 0) inputCooldownTimer -= delta;
+    const gamepads = navigator.getGamepads();
+    activeGamepad = null;
+    for (const gp of gamepads) { if (gp?.connected) { activeGamepad = gp; break; } }
+    if (uiManager) uiManager.updateGamepadStatus(!!activeGamepad);
+    let pausePressed = false;
+    let instructionPressed = false;
+    if (activeGamepad) {
+        playerControls.handleGamepadInput(activeGamepad, delta); 
+        pausePressed = playerControls.consumePauseToggleRequest();
+        instructionPressed = playerControls.consumeInstructionToggleRequest();
+    } else {
+        playerControls.handleGamepadInput(null, delta); 
+        pausePressed = playerControls.consumePauseToggleRequest(); 
+        instructionPressed = playerControls.consumeInstructionToggleRequest(); 
+    }
+    
+    // Handle gamepad in editor hub
+    if (currentGameState === GameState.EDITOR_HUB && activeGamepad && inputCooldownTimer <= 0) {
+        const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); 
+        if (menuAction) handleMenuAction(menuAction);
+    }
+
+    if (currentGameState === GameState.GAME_RUNNING) {
+        if (pausePressed) { pauseGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
+        if (instructionPressed) { changeGameState(GameState.VIEWING_INSTRUCTIONS); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
+        if (levelManager && interactionManager && player) {
+            levelManager.update(delta); 
+            if (playerControls.isLocked) {
+                player.update(delta, playerControls.getMovementInput()); 
+                interactionManager.updateAimHighlight();
+                if (inputCooldownTimer <= 0 && playerControls.consumeInteractionRequest()) interactionManager.handleInteractionRequest();
+                if (uiManager) uiManager.updateHolding(player.getHeldItemName());
+            } else {
+                 if (uiManager) uiManager.updateHolding(null);
+                 if (interactionManager.currentlyHighlighted) { interactionManager.revertHighlight(interactionManager.currentlyHighlighted); interactionManager.currentlyHighlighted = null; }
+            }
+        }
+    }
+    else if (currentGameState === GameState.PAUSED) {
+        if (pausePressed) { resumeGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; }
+        if (inputCooldownTimer <= 0 && isMenuState(currentGameState) && activeGamepad) { const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); if (menuAction) handleMenuAction(menuAction); }
+    }
+    else if (currentGameState === GameState.VIEWING_INSTRUCTIONS) { if (instructionPressed || pausePressed) { resumeGame(); inputCooldownTimer = INPUT_COOLDOWN_DURATION; renderer.render(scene, camera); return; } }
+    else if (currentGameState === GameState.EDITOR) { levelEditor.update(delta); renderer.render(scene, camera); return; }
+    else if (isMenuState(currentGameState)) { if (inputCooldownTimer <= 0 && activeGamepad) { const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); if (menuAction) handleMenuAction(menuAction); } }
+    
+    if (currentGameState !== GameState.EDITOR) renderer.render(scene, camera);
+}
+
+async function runGame() {
+    try {
+        saveManager = new SaveManager();
+        uiManager = new UIManager(saveManager);
+        await preloadAssets();
+        await loadLevelData();
+        initializeGameComponents();
+        levelManager.onLevelEnd = handleLevelEnd;
+        levelManager.onGameEnd = handleGameEnd;
+        changeGameState(GameState.MAIN_MENU);
+        animate();
+    } catch (error) {
+        console.error(error);
+    }
+}
+runGame();
+</file>
+
+<file path="src/interaction.js">
+// src/interaction.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { gsap } from 'gsap';
+import { INTERACTION_DISTANCE, STATION_TYPES, ITEM_TYPES, GRID_UNIT } from './constants.js';
+import { createItem, checkPlateCompletion } from './items.js';
+
+export class InteractionManager {
+    constructor(camera, scene, player, stations, stationInteractables, levelManager, uiManager, preloadedModels, floorMesh) {
+        this.camera = camera;
+        this.scene = scene;
+        this.player = player;
+        this.stations = stations; 
+        this.interactables = stationInteractables ? [...stationInteractables] : []; 
+        this.levelManager = levelManager;
+        this.uiManager = uiManager;
+        this.preloadedModels = preloadedModels;
+        this.floorMesh = floorMesh;
+        this.raycaster = new THREE.Raycaster();
+        
+        this.currentlyHighlightedObject = null;
+        this.audioManager = null;
+
+        // Slot Highlight
+        const highlightGeo = new THREE.PlaneGeometry(GRID_UNIT * 0.9, GRID_UNIT * 0.9);
+        const highlightMat = new THREE.MeshBasicMaterial({ color: 0x00FF00, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+        this.slotHighlight = new THREE.Mesh(highlightGeo, highlightMat);
+        this.slotHighlight.rotation.x = -Math.PI / 2;
+        this.slotHighlight.visible = false;
+        this.scene.add(this.slotHighlight);
+    }
+
+    updateWorldData(newStations, newStationInteractables, newFloorMesh) {
+        this.stations = newStations || {};
+        this.interactables = newStationInteractables ? [...newStationInteractables] : [];
+        this.floorMesh = newFloorMesh;
+    }
+
+    clearDynamicItems() {
+        if (!this.interactables) return;
+        for (let i = this.interactables.length - 1; i >= 0; i--) {
+            const item = this.interactables[i];
+            if (item.userData && (item.userData.type === ITEM_TYPES.ITEM || item.userData.type === ITEM_TYPES.INGREDIENT)) {
+                if (item.userData.gridInfo) item.userData.gridInfo.grid.vacate(item);
+                if (item.parent) item.parent.remove(item); 
+                item.traverse(child => {
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) {
+                        if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                        else child.material.dispose();
+                    }
+                });
+                this.interactables.splice(i, 1); 
+            }
+        }
+        this.slotHighlight.visible = false;
+    }
+
+    _addDynamicInteractable(item) {
+        if (item && !this.interactables.includes(item)) {
+            if (item.userData?.type === ITEM_TYPES.ITEM || item.userData?.type === ITEM_TYPES.INGREDIENT) {
+                this.interactables.push(item);
+            }
+        }
+    }
+
+    _removeDynamicInteractable(item) {
+        if (!item) return;
+        if (item.userData.gridInfo) item.userData.gridInfo.grid.vacate(item);
+        const index = this.interactables.indexOf(item);
+        if (index > -1) this.interactables.splice(index, 1);
+        if (item.parent) item.parent.remove(item);
+    }
+
+    _animateMealCompletion(plate) {
+        if (!plate || !plate.parent) return;
+        const originalScale = plate.scale.clone();
+        const targetScale = originalScale.clone().multiplyScalar(1.15);
+        gsap.timeline()
+            .to(plate.scale, { x: targetScale.x, y: targetScale.y, z: targetScale.z, duration: 0.15, ease: "power1.out" })
+            .to(plate.scale, { x: originalScale.x, y: originalScale.y, z: originalScale.z, duration: 0.25, ease: "elastic.out(1, 0.5)" });
+    }
+
+    // --- Main Logic ---
+
+    handleInteractionRequest() {
+        const heldItem = this.player.getHeldItem();
+        const targetInfo = this._findTarget();
+        
+        if (!targetInfo) return;
+        let targetObject = targetInfo.object;
+        const targetPoint = targetInfo.point;
+
+        // Redirect from Grid Slot to Item inside
+        if (targetObject.userData.grid) {
+            const grid = targetObject.userData.grid;
+            const { col, row } = grid.worldToGrid(targetPoint);
+            const itemInSlot = grid.occupied[col]?.[row];
+            if (itemInSlot && itemInSlot !== heldItem) {
+                targetObject = itemInSlot;
+            }
+        }
+        // Redirect from Station to Item (e.g. pick up fries from cutting board)
+        if (targetObject.userData.type === 'station' && targetObject.userData.occupiedBy) {
+             // If holding nothing, or if holding something that can't be processed, default to the item on station
+             // This makes clicking the "cutting board with fries" pick up the fries.
+             if (!heldItem || !targetObject.userData.processes?.includes(heldItem.name)) {
+                 targetObject = targetObject.userData.occupiedBy;
+             }
+        }
+
+        if (heldItem) {
+            if (this._isDirectAdditionCheck(heldItem, targetObject)) {
+                this._handleDirectAddition(heldItem, targetObject);
+                return;
+            }
+
+            const type = targetObject.userData.type;
+            const stType = targetObject.userData.stationType;
+
+            if (type === 'station' || type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.FLOOR) {
+                if (stType === STATION_TYPES.PROCESSOR) {
+                    this._placeOrProcessItem(heldItem, targetObject, targetPoint);
+                    return;
+                }
+                if (targetObject.userData.grid) {
+                    this._attemptGridPlacement(heldItem, targetObject, targetPoint);
+                    return;
+                }
+            }
+        } else {
+            if (targetObject.userData.type === ITEM_TYPES.ITEM || targetObject.userData.type === ITEM_TYPES.INGREDIENT) {
+                this._pickupItem(targetObject);
+            }
+            else if (targetObject.userData.type === 'station') {
+                this._useStation(targetObject, targetPoint);
+            }
+        }
+    }
+
+    _findTarget() {
+        this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
+        const objectsToCheck = [...this.interactables];
+        if (this.floorMesh) objectsToCheck.push(this.floorMesh);
+        const intersects = this.raycaster.intersectObjects(objectsToCheck, true); 
+        
+        for (const intersect of intersects) {
+            if (intersect.distance > INTERACTION_DISTANCE) continue;
+            let obj = intersect.object;
+            while (obj.parent && obj !== this.scene) {
+                if (this.interactables.includes(obj) || obj === this.floorMesh) break;
+                obj = obj.parent;
+            }
+            if (obj === this.player.getHeldItem()) continue;
+            return { object: obj, point: intersect.point };
+        }
+        return null;
+    }
+
+    _attemptGridPlacement(item, surface, hitPoint) {
+        const grid = surface.userData.grid;
+        if (!grid) return;
+        const { col, row } = grid.worldToGrid(hitPoint);
+        const existingItem = grid.occupied[col]?.[row];
+
+        if (surface.userData.stationType === STATION_TYPES.SERVING) {
+            if (this._tryServeItem(item)) return;
+        }
+
+        if (existingItem) {
+            const heldIsIng = item.userData.type === ITEM_TYPES.INGREDIENT;
+            const targetIsContainer = existingItem.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(existingItem.userData.itemType);
+            if (heldIsIng && targetIsContainer) {
+                this._handleDirectAddition(existingItem, item); 
+                return;
+            } else {
+                this.uiManager.showTemporaryMessage("Slot Occupied", 1000);
+                if(this.audioManager) this.audioManager.play('error');
+                return;
+            }
+        }
+
+        if (grid.isAreaFree(col, row, 1, 1)) {
+            const placedItem = this.player.place();
+            if (!placedItem) return;
+            grid.occupy(col, row, 1, 1, placedItem);
+            
+            const worldPos = grid.gridToWorld(col, row);
+            let yBase = 0;
+            if (surface.userData.stationType === STATION_TYPES.COUNTER || surface.userData.stationType === STATION_TYPES.TABLE || surface.userData.stationType === STATION_TYPES.SERVING) {
+                yBase = 0.9;
+            }
+            
+            // *** FIX FLOATING PLATE ON COUNTER ***
+            // Voxel items have their origin (0,0,0) at the bottom.
+            // So we simply place them at yBase. 
+            // We remove BB calculation here to avoid issues with invisible children or bounds.
+            placedItem.position.set(worldPos.x, yBase + 0.005, worldPos.z);
+
+            placedItem.rotation.set(0, 0, 0);
+            this._addDynamicInteractable(placedItem);
+            this.scene.add(placedItem);
+            if (placedItem.userData.originalRaycast) { placedItem.raycast = placedItem.userData.originalRaycast; delete placedItem.userData.originalRaycast; } else { delete placedItem.raycast; }
+            if(this.audioManager) this.audioManager.play('place');
+        }
+    }
+
+    _tryServeItem(item) {
+        const itemData = item.userData;
+        if (itemData.type === ITEM_TYPES.ITEM && ['plate', 'bowl', 'cup'].includes(itemData.itemType) && itemData.mealName) {
+            const success = this.levelManager.completeOrder(itemData.mealName);
+            if (success) {
+                const servedItem = this.player.place(); 
+                this._removeDynamicInteractable(servedItem); 
+                this.scene.remove(servedItem); 
+                servedItem.traverse((c) => { if(c.geometry) c.geometry.dispose(); });
+                this.uiManager.showTemporaryMessage("Order Served!", 1500);
+                if(this.audioManager) this.audioManager.play('ding');
+                return true;
+            }
+        }
+        return false;
+    }
+
+    _isDirectAdditionCheck(heldItem, targetObject) {
+        if (heldItem.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(heldItem.userData.itemType)) {
+             if (targetObject.userData.type === ITEM_TYPES.INGREDIENT) return true;
+             if (targetObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) return true;
+        }
+        if (heldItem.userData.type === ITEM_TYPES.INGREDIENT) {
+             if (targetObject.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(targetObject.userData.itemType)) {
+                 return true;
+             }
+        }
+        return false;
+    }
+
+    _handleDirectAddition(itemA, itemB) {
+        let container, ingredientObject;
+        if (itemA.userData.type === ITEM_TYPES.ITEM) { container = itemA; ingredientObject = itemB; } 
+        else { container = itemB; ingredientObject = itemA; }
+
+        const containerData = container.userData;
+        let ingredientName = ingredientObject.name;
+        if (ingredientObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) {
+            ingredientName = ingredientObject.userData.ingredient;
+        }
+
+        if (!['plate', 'bowl', 'cup'].includes(containerData.itemType)) return;
+        if (!Array.isArray(containerData.contents)) containerData.contents = [];
+        if (containerData.contents.includes(ingredientName)) {
+            this.uiManager.showTemporaryMessage("Already Added!", 1000);
+            return;
+        }
+
+        containerData.contents.push(ingredientName);
+        const ingredientMeshClone = createItem(this.scene, ingredientName, this.preloadedModels);
+        if (!ingredientMeshClone) return;
+        
+        this.scene.remove(ingredientMeshClone);
+        this._removeDynamicInteractable(ingredientMeshClone);
+
+        const contentCount = container.children.length;
+        const offsetY = 0.05 + (contentCount * 0.1); 
+        ingredientMeshClone.position.set(0, offsetY, 0);
+        ingredientMeshClone.rotation.set(0, Math.random() * Math.PI * 2, 0);
+        container.add(ingredientMeshClone);
+        
+        if (typeof ingredientMeshClone.raycast === 'function') ingredientMeshClone.userData.originalRaycast = ingredientMeshClone.raycast;
+        ingredientMeshClone.raycast = () => {};
+
+        if (ingredientObject === this.player.getHeldItem()) {
+            this.player.place(); 
+            this._removeDynamicInteractable(ingredientObject);
+            this.scene.remove(ingredientObject);
+            ingredientObject.traverse(c => { if(c.geometry) c.geometry.dispose(); });
+        } 
+        else if (ingredientObject.userData.type === ITEM_TYPES.INGREDIENT) {
+            this._removeDynamicInteractable(ingredientObject);
+            this.scene.remove(ingredientObject);
+            ingredientObject.traverse(c => { if(c.geometry) c.geometry.dispose(); });
+            if (ingredientObject.userData.gridInfo) ingredientObject.userData.gridInfo.grid.vacate(ingredientObject);
+            for (const name in this.stations) {
+                const station = this.stations[name];
+                if (station.userData?.occupiedBy === ingredientObject) {
+                    station.userData.occupiedBy = null; break;
+                }
+            }
+        }
+
+        if (checkPlateCompletion(container)) {
+            this.uiManager.showTemporaryMessage(`${containerData.mealName} Ready!`, 1500);
+            this._animateMealCompletion(container);
+            if(this.audioManager) this.audioManager.play('ding');
+        } else {
+            this.uiManager.showTemporaryMessage("Ingredient Added", 1000);
+            if(this.audioManager) this.audioManager.play('place');
+        }
+    }
+
+    _pickupItem(item) {
+        for (const name in this.stations) {
+            const station = this.stations[name];
+            if (station.userData?.stationType === STATION_TYPES.PROCESSOR && station.userData.occupiedBy === item) {
+                if (item.userData.processTimeoutId) { clearTimeout(item.userData.processTimeoutId); delete item.userData.processTimeoutId; }
+                station.userData.occupiedBy = null; break;
+            }
+        }
+        if (item.userData.gridInfo) item.userData.gridInfo.grid.vacate(item);
+        this._removeDynamicInteractable(item);
+        if (this.player.pickup(item)) {
+             if(this.audioManager) this.audioManager.play('pop');
+        } else {
+            this.uiManager.showTemporaryMessage("Hands Full!", 1000);
+            this._addDynamicInteractable(item);
+        }
+    }
+
+    // *** FIX: HELPER TO GET ACCURATE HEIGHT (IGNORING LABELS) ***
+    _getVisualTopY(object) {
+        const box = new THREE.Box3();
+        // Traverse and expand box ONLY for Meshes, excluding children that look like UI (Sprites)
+        object.traverse((child) => {
+            if (child.isMesh && child.visible) {
+                // Optional: Check if it's a helper or overlay
+                // For now, assume all Meshes are physical parts of the station
+                child.updateWorldMatrix(true, false);
+                if (child.geometry) {
+                    child.geometry.computeBoundingBox();
+                    const childBox = child.geometry.boundingBox.clone();
+                    childBox.applyMatrix4(child.matrixWorld);
+                    box.union(childBox);
+                }
+            }
+        });
+        if (box.isEmpty()) return object.position.y; // Fallback
+        return box.max.y;
+    }
+
+    _placeOrProcessItem(item, station, targetPoint) {
+         if ((station.name === 'robotMixer' || station.name === 'blender')) return; 
+        const stationData = station.userData;
+        if (stationData.occupiedBy) { this.uiManager.showTemporaryMessage("Station Busy", 1000); if(this.audioManager) this.audioManager.play('error'); return; }
+        
+        const itemToPlace = this.player.place();
+        if (!itemToPlace) return;
+
+        if (stationData.processes?.includes(item.name)) {
+            // Calculate visual top ignoring labels
+            const topY = this._getVisualTopY(station);
+            itemToPlace.position.set(station.position.x, topY + 0.005, station.position.z);
+            this.scene.add(itemToPlace);
+
+            stationData.occupiedBy = itemToPlace;
+            this._addDynamicInteractable(itemToPlace);
+            
+            if (stationData.processingTime) {
+                if(this.audioManager) this.audioManager.play('fry'); 
+                itemToPlace.userData.processTimeoutId = setTimeout(() => {
+                    if (station.userData.occupiedBy === itemToPlace) this._finishProcessing(itemToPlace, station);
+                    delete itemToPlace.userData.processTimeoutId;
+                }, stationData.processingTime);
+            } else {
+                if(this.audioManager) this.audioManager.play('chop'); 
+                this._finishProcessing(itemToPlace, station);
+            }
+        } else {
+            this.uiManager.showTemporaryMessage("Cannot Process", 1000);
+            if(this.audioManager) this.audioManager.play('error');
+            this.player.pickup(itemToPlace);
+        }
+    }
+
+    _finishProcessing(item, station) {
+         const resultType = station.userData.result?.[item.name];
+         const newItem = createItem(this.scene, resultType, this.preloadedModels);
+         if (!newItem) return;
+
+         this._removeDynamicInteractable(item);
+         item.traverse(c => { if(c.geometry) c.geometry.dispose(); });
+         this.scene.remove(item);
+         
+         station.userData.occupiedBy = newItem;
+         this._placeItemOnStationVisual(newItem, station);
+         this._addDynamicInteractable(newItem);
+         
+         if(this.audioManager) this.audioManager.play('ding');
+    }
+
+    _useStation(station, point) {
+        if (station.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE || station.userData.stationType === STATION_TYPES.ITEM_SOURCE) {
+             const type = station.userData.ingredient || station.userData.item;
+             const newItem = createItem(this.scene, type, this.preloadedModels);
+             if(this.player.pickup(newItem)) { 
+                 if(this.audioManager) this.audioManager.play('pop');
+             }
+        }
+    }
+
+    _placeItemOnStationVisual(item, station) {
+        // *** FIX: FLOATING ITEM ON STATION ***
+        const topY = this._getVisualTopY(station);
+        item.position.set(station.position.x, topY + 0.005, station.position.z);
+        item.rotation.set(0, 0, 0);
+        this.scene.add(item);
+    }
+
+    updateAimHighlight() {
+        if (!this.player.controls.isLocked) { this.slotHighlight.visible = false; return; }
+        const info = this._findTarget();
+        const obj = info ? info.object : null;
+        const point = info ? info.point : null;
+
+        if (this.currentlyHighlightedObject && this.currentlyHighlightedObject !== obj) {
+            this.revertObjectHighlight(this.currentlyHighlightedObject);
+            this.currentlyHighlightedObject = null;
+        }
+
+        this.slotHighlight.visible = false;
+
+        if (obj) {
+            if (obj.userData.grid) {
+                const grid = obj.userData.grid;
+                const { col, row } = grid.worldToGrid(point);
+                const itemInside = grid.occupied[col]?.[row];
+                if (itemInside) {
+                    this.applyObjectHighlight(itemInside);
+                    this.currentlyHighlightedObject = itemInside;
+                } 
+                else if (grid.isAreaFree(col, row, 1, 1)) {
+                    const worldPos = grid.gridToWorld(col, row);
+                    let y = obj.position.y;
+                    if (obj.userData.type === STATION_TYPES.FLOOR) y = 0.01;
+                    else y = 0.9 + 0.01; 
+                    this.slotHighlight.position.set(worldPos.x, y, worldPos.z);
+                    this.slotHighlight.visible = true;
+                }
+            }
+            else if (obj.userData.type === ITEM_TYPES.ITEM || obj.userData.type === ITEM_TYPES.INGREDIENT || obj.userData.type === 'station') {
+                if (obj.userData.occupiedBy) {
+                     this.applyObjectHighlight(obj.userData.occupiedBy);
+                     this.currentlyHighlightedObject = obj.userData.occupiedBy;
+                } else if (obj.userData.stationType !== STATION_TYPES.COUNTER && obj.userData.stationType !== STATION_TYPES.TABLE) {
+                    this.applyObjectHighlight(obj);
+                    this.currentlyHighlightedObject = obj;
+                }
+            }
+        }
+    }
+    applyObjectHighlight(obj) {
+        if (!obj.userData.originalScale) obj.userData.originalScale = obj.scale.clone();
+        gsap.to(obj.scale, { x: obj.userData.originalScale.x * 1.1, y: obj.userData.originalScale.y * 1.1, z: obj.userData.originalScale.z * 1.1, duration: 0.15 });
+    }
+    revertObjectHighlight(obj) {
+        if (!obj || !obj.userData.originalScale) return;
+        gsap.to(obj.scale, { x: obj.userData.originalScale.x, y: obj.userData.originalScale.y, z: obj.userData.originalScale.z, duration: 0.1 });
+    }
+}
+</file>
+
+<file path="src/world.js">
+// src/world.js
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { LABEL_Y_OFFSET, STATION_TYPES, GRID_UNIT, MODULE_HEIGHT } from './constants.js';
+import { GridSystem } from './grid.js';
+import { 
+    VoxelBuilder, PALETTE, 
+    createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, createStoveMesh, createSinkMesh, 
+    createIngredientBinMesh, createPlateStackMesh, createCupStackMesh, createBowlStackMesh,
+    createToasterMesh, createMixerMesh, createBlenderMesh, createDoughPressMesh, createPizzaOvenMesh,
+    createItemMesh, createTableMesh
+} from './voxelBuilder.js';
+import { getTrans } from './i18nData.js';
+import { createItem } from './items.js';
+
+let currentKitchenObjects = [];
+let currentLabels = [];
+let currentFloor = null;
+let currentLang = 'en'; 
+let currentLabelVisibility = true;
+
+export function setWorldLanguage(lang) {
+    currentLang = lang;
+}
+
+export function refreshSmartObjects(scene) {
+    // Updates the mesh of smart objects (Tables) based on their neighbors
+    scene.traverse(c => {
+        if (c.userData && (c.userData.stationType === STATION_TYPES.TABLE)) {
+            updateSmartObjectMesh(c, scene);
+        }
+    });
+}
+
+function updateSmartObjectMesh(object, scene) {
+    const type = object.userData.stationType;
+    const x = object.position.x;
+    const z = object.position.z;
+    const w = GRID_UNIT; 
+    
+    // Check neighbors in the scene
+    const checkNeighbor = (dx, dz) => {
+        const targetX = x + dx;
+        const targetZ = z + dz;
+        let found = false;
+        
+        // Iterate scene children manually to be robust in editor
+        for(let i=0; i<scene.children.length; i++) {
+            const c = scene.children[i];
+            if (c !== object && c.userData && c.userData.stationType === type) {
+                if (Math.abs(c.position.x - targetX) < 0.1 && Math.abs(c.position.z - targetZ) < 0.1) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        return found;
+    };
+
+    const neighbors = {
+        n: checkNeighbor(0, -w),
+        s: checkNeighbor(0, w),
+        e: checkNeighbor(w, 0),
+        w: checkNeighbor(-w, 0)
+    };
+
+    // Remove old visual child
+    const oldVisual = object.children.find(c => c.type === 'Mesh' || c.type === 'Group');
+    if (oldVisual) {
+        object.remove(oldVisual);
+        if(oldVisual.geometry) oldVisual.geometry.dispose();
+        if(oldVisual.material) {
+            if(Array.isArray(oldVisual.material)) oldVisual.material.forEach(m=>m.dispose());
+            else oldVisual.material.dispose();
+        }
+    }
+
+    // Create new visual
+    if (type === STATION_TYPES.TABLE) {
+        const visual = createTableMesh(neighbors);
+        object.add(visual);
+    }
+}
+
+export function resizeWall(wallObject, width, depth) {
+    if (wallObject.userData.stationType !== STATION_TYPES.WALL) return;
+
+    const h = 2.5; // Wall height
+    const oldMesh = wallObject.children.find(c => c.isMesh);
+    
+    if (oldMesh) {
+        // Reuse geometry if possible, but easier to recreate box
+        oldMesh.geometry.dispose();
+        oldMesh.geometry = new THREE.BoxGeometry(width, h, depth);
+        // Re-center geometry vertically so origin is bottom
+        oldMesh.position.y = h/2;
+    }
+
+    // Update userData
+    wallObject.userData.size = { width, depth };
+    
+    // Ensure object name reflects resize if it helps debugging, or keep generic
+}
+
+function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
+    const translatedText = getTrans(text, currentLang);
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = "Bold 40px 'Courier New'";
+    const metrics = context.measureText(translatedText);
+    canvas.width = metrics.width + 20;
+    canvas.height = 50;
+    context.font = "Bold 40px 'Courier New'";
+    context.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillStyle = '#FFD700';
+    context.fillText(translatedText, canvas.width / 2, canvas.height / 2);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.minFilter = THREE.NearestFilter;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false }));
+    sprite.scale.set(canvas.width * 0.005, canvas.height * 0.005, 1);
+    sprite.position.copy(position);
+    sprite.position.y += yOffset;
+    sprite.renderOrder = 999;
+    
+    sprite.visible = currentLabelVisibility;
+
+    scene.add(sprite);
+    currentLabels.push(sprite);
+    return sprite;
+}
+
+export function toggleLabels(visible) {
+    currentLabelVisibility = visible;
+    currentLabels.forEach(s => s.visible = visible);
+}
+
+export function getFloorMesh() {
+    return currentFloor;
+}
+
+function createCounterMesh(isServing, isCorner) {
+    const vb = new VoxelBuilder();
+    vb.addBox(1, 0, 1, 14, 1, 14, PALETTE.BLACK);
+    vb.addBox(0, 2, 0, 15, 14, 15, isServing ? PALETTE.WOOD_LIGHT : PALETTE.WOOD_DARK);
+    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.COUNTER_TOP);
+    
+    // Only add front details if it's NOT a serving counter AND NOT a corner
+    if (!isServing && !isCorner) {
+        vb.addBox(1, 11, 15, 14, 13, 15, PALETTE.WOOD_BOARD); 
+        vb.addBox(6, 12, 16, 9, 12, 16, PALETTE.METAL_LIGHT);
+        vb.addBox(1, 3, 15, 14, 9, 15, PALETTE.WOOD_BOARD);
+        vb.addBox(12, 6, 16, 12, 8, 16, PALETTE.METAL_LIGHT);
+    } else if (isServing) {
+        vb.addBox(1, 3, 15, 14, 13, 15, PALETTE.PLASTIC_RED);
+    }
+    const mesh = vb.buildMesh();
+    mesh.scale.set(1, MODULE_HEIGHT / GRID_UNIT, 1);
+    mesh.position.y = MODULE_HEIGHT / 2;
+    return mesh;
+}
+
+// Exported for Editor use
+export function createCounterPrefab(name, color, isServing) {
+    const group = new THREE.Group();
+    group.name = name;
+    // Detect corner from name
+    const isCorner = name && name.toLowerCase().includes('corner');
+    const visual = createCounterMesh(isServing, isCorner);
+    group.add(visual);
+    group.userData = { type: isServing ? 'station' : 'counter', stationType: isServing ? STATION_TYPES.SERVING : STATION_TYPES.COUNTER, name: name, isBase: true };
+    group.userData.grid = new GridSystem(GRID_UNIT, GRID_UNIT, 0, 0, group);
+    return group;
+}
+
+// Exported for Editor use
+export function createTablePrefab(name, color, neighbors) {
+    const group = new THREE.Group();
+    group.name = name;
+    const visual = createTableMesh(neighbors);
+    group.add(visual);
+    group.userData = { type: 'counter', stationType: STATION_TYPES.TABLE, name: name, isBase: true };
+    group.userData.grid = new GridSystem(GRID_UNIT, GRID_UNIT, 0, 0, group);
+    return group;
+}
+
+// Exported for Editor use
+export function createStationPrefab(def) {
+    const { name, type, size, color, config } = def;
+    const group = new THREE.Group();
+    group.name = name;
+    const w = Math.round((size?.width ?? 0.5) / GRID_UNIT) * GRID_UNIT;
+    const d = Math.round((size?.depth ?? 0.5) / GRID_UNIT) * GRID_UNIT;
+    const h = 0.3; 
+    let mesh = null;
+    const n = name.toLowerCase();
+
+    if (type === STATION_TYPES.WALL) {
+        const wallH = 2.5;
+        const geo = new THREE.BoxGeometry(w, wallH, d);
+        const mat = new THREE.MeshStandardMaterial({ color: color || PALETTE.WALL_WHITE });
+        mesh = new THREE.Mesh(geo, mat);
+        mesh.position.y = wallH / 2;
+        mesh.castShadow = true; 
+        mesh.receiveShadow = true;
+    } 
+    else if (type === STATION_TYPES.TRASH) {
+        mesh = createTrashBinMesh();
+    } 
+    else if (type === STATION_TYPES.INGREDIENT_SOURCE) {
+        mesh = createIngredientBinMesh(config?.ingredient || 'generic');
+    } 
+    else if (type === STATION_TYPES.ITEM_SOURCE) {
+        if (config?.item === 'plate') mesh = createPlateStackMesh();
+        else if (config?.item === 'cup') mesh = createCupStackMesh();
+        else if (config?.item === 'bowl') mesh = createBowlStackMesh();
+        else mesh = createPlateStackMesh(); // Fallback
+    } 
+    else if (type === STATION_TYPES.PREPLACED_ITEM) {
+        // For the editor/ghost, we just want a visual representation.
+        // We use createItemMesh directly.
+        mesh = createItemMesh(config?.item || 'plate');
+        // Shift Y to bottom to match station origin expectations
+        mesh.position.y = 0; 
+    }
+    else if (n.includes('fryer')) {
+        mesh = createFryerMesh();
+    } 
+    else if (n.includes('cutting') || n.includes('board')) {
+        mesh = createCuttingBoardMesh();
+    } 
+    else if (n.includes('stove') || n.includes('grill') || n.includes('hob')) {
+        mesh = createStoveMesh();
+    } 
+    else if (n.includes('sink')) {
+        mesh = createSinkMesh();
+    } 
+    else if (n.includes('toaster')) {
+        mesh = createToasterMesh();
+    }
+    else if (n.includes('mixer')) {
+        mesh = createMixerMesh();
+    }
+    else if (n.includes('blender')) {
+        mesh = createBlenderMesh();
+    }
+    else if (n.includes('press')) {
+        mesh = createDoughPressMesh();
+    }
+    else if (n.includes('oven') || n.includes('pizza')) {
+        mesh = createPizzaOvenMesh();
+    }
+    else {
+        // Generic fallback
+        const geo = new THREE.BoxGeometry(w - 0.05, h, d - 0.05);
+        const mat = new THREE.MeshStandardMaterial({ color: color || 0x555555 });
+        mesh = new THREE.Mesh(geo, mat);
+        mesh.position.y = h/2;
+        mesh.castShadow = true; mesh.receiveShadow = true;
+    }
+
+    if (mesh) group.add(mesh);
+    
+    // Store config separately in userData so it's accessible for export
+    group.userData = { ...config, type: 'station', stationType: type, name: name, size: { width: w, height: h, depth: d } };
+    if (config) group.userData.config = config;
+
+    if (type === STATION_TYPES.PROCESSOR) {
+        group.userData.occupiedBy = null;
+        if (config?.requiredIngredients) group.userData.internalContents = [];
+    }
+    return group;
+}
+
+export function clearKitchen(scene) {
+    currentKitchenObjects.forEach(obj => {
+        scene.remove(obj);
+        obj.traverse(c => {
+            if (c.geometry) c.geometry.dispose();
+            if (c.material) {
+                if (Array.isArray(c.material)) c.material.forEach(m => m.dispose());
+                else c.material.dispose();
+            }
+        });
+    });
+    currentLabels.forEach(l => {
+        scene.remove(l);
+        l.material.map.dispose();
+        l.material.dispose();
+    });
+    currentKitchenObjects = [];
+    currentLabels = [];
+    if (currentFloor) {
+        scene.remove(currentFloor);
+        currentFloor.geometry.dispose();
+        currentFloor.material.map.dispose();
+        currentFloor.material.dispose();
+        currentFloor = null;
+    }
+}
+
+export function buildKitchen(scene, levelLayout, preloadedModels) {
+    clearKitchen(scene);
+    const newStations = {};
+    const newStationInteractables = [];
+    const occupancyMap = new Map();
+    levelLayout.forEach(def => {
+        if (def.type === STATION_TYPES.TABLE || def.type === STATION_TYPES.COUNTER || def.type === STATION_TYPES.SERVING) {
+            const kx = Math.round(def.position.x * 100) / 100;
+            const kz = Math.round(def.position.z * 100) / 100;
+            occupancyMap.set(`${kx},${kz}`, def.type);
+        }
+    });
+    
+    // Reduced floor size 8x8 (matches bounds -3.5 to 3.5 visual padding)
+    const floorSize = 8; 
+    const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize);
+    
+    // Improved "Kitchen Tile" texture
+    const canvas = document.createElement('canvas'); 
+    canvas.width = 128; 
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    
+    // Dark slate background
+    ctx.fillStyle = '#37474F'; 
+    ctx.fillRect(0, 0, 128, 128);
+    
+    // Lighter grey tiles (checkerboard pattern)
+    ctx.fillStyle = '#546E7A'; 
+    ctx.fillRect(0, 0, 64, 64);
+    ctx.fillRect(64, 64, 64, 64);
+    
+    // Border/Grout line effect included by gap logic or simply drawing rectangles slightly smaller?
+    // Let's draw a thin border
+    ctx.strokeStyle = '#263238';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(0,0,128,128);
+    ctx.beginPath();
+    ctx.moveTo(64,0); ctx.lineTo(64,128);
+    ctx.moveTo(0,64); ctx.lineTo(128,64);
+    ctx.stroke();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+    // Repeat per unit (size)
+    tex.repeat.set(floorSize/2, floorSize/2); 
+    tex.magFilter = THREE.NearestFilter; 
+    tex.minFilter = THREE.NearestFilter;
+    
+    const floorMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5, metalness: 0.1 });
+    currentFloor = new THREE.Mesh(floorGeo, floorMat);
+    currentFloor.rotation.x = -Math.PI / 2; 
+    currentFloor.receiveShadow = true;
+    currentFloor.name = "Floor";
+    currentFloor.userData = { type: STATION_TYPES.FLOOR, grid: new GridSystem(floorSize, floorSize, 0, 0, currentFloor) };
+    scene.add(currentFloor);
+
+    levelLayout.forEach(def => {
+        let object3D = null;
+        const x = def.position.x; 
+        const z = def.position.z;
+
+        if (def.type === STATION_TYPES.COUNTER || def.type === STATION_TYPES.SERVING) {
+            object3D = createCounterPrefab(def.name, def.color, def.type === STATION_TYPES.SERVING);
+            object3D.position.set(x, 0, z);
+            object3D.userData.grid.originX = x - (GRID_UNIT/2);
+            object3D.userData.grid.originZ = z - (GRID_UNIT/2);
+            if (def.type === STATION_TYPES.SERVING) object3D.attach(createLabel(scene, "SERVE", object3D.position, 1.5));
+
+        } else if (def.type === STATION_TYPES.TABLE) {
+            const neighbors = {
+                n: occupancyMap.get(`${x},${z-GRID_UNIT}`) === STATION_TYPES.TABLE,
+                s: occupancyMap.get(`${x},${z+GRID_UNIT}`) === STATION_TYPES.TABLE,
+                e: occupancyMap.get(`${x+GRID_UNIT},${z}`) === STATION_TYPES.TABLE,
+                w: occupancyMap.get(`${x-GRID_UNIT},${z}`) === STATION_TYPES.TABLE
+            };
+            object3D = createTablePrefab(def.name, def.color, neighbors);
+            object3D.position.set(x, 0, z);
+            object3D.userData.grid.originX = x - (GRID_UNIT/2);
+            object3D.userData.grid.originZ = z - (GRID_UNIT/2);
+
+        } else if (def.type === STATION_TYPES.PREPLACED_ITEM) {
+            // Special Case: Create a dynamic item instead of a station
+            // This item will be pickup-able immediately
+            const item = createItem(scene, def.config.item, preloadedModels);
+            
+            // Adjust position to sit on top of counters (which are at y=0.9)
+            // Or use floor level if no counter under it? Assuming placement on counters for now.
+            // The level layout usually puts items where counters are.
+            // Voxel items have origin at bottom.
+            item.position.set(x, MODULE_HEIGHT + 0.01, z);
+            
+            if (def.rotation) item.rotation.y = def.rotation;
+            
+            currentKitchenObjects.push(item);
+            newStationInteractables.push(item);
+            // Do NOT add to newStations, as it's not a fixed machine
+            object3D = null; 
+
+        } else if (Object.values(STATION_TYPES).includes(def.type)) {
+            object3D = createStationPrefab(def);
+            if (def.type === STATION_TYPES.TRASH || def.type === STATION_TYPES.WALL) {
+                object3D.position.set(x, 0, z);
+            } else {
+                object3D.position.set(x, MODULE_HEIGHT, z);
+            }
+            
+            if (def.type !== STATION_TYPES.WALL) {
+                object3D.add(createLabel(scene, def.name, new THREE.Vector3(0,0.5,0), 0));
+            }
+        }
+
+        if (object3D) {
+            // Apply rotation if present in layout definition
+            if (def.rotation) {
+                object3D.rotation.y = def.rotation;
+            }
+            
+            scene.add(object3D);
+            currentKitchenObjects.push(object3D);
+            if (def.type !== 'decoration' && def.type !== STATION_TYPES.WALL) {
+                newStations[def.name] = object3D;
+                newStationInteractables.push(object3D);
+            }
+        }
+    });
+
+    return { stations: newStations, stationInteractables: newStationInteractables, floorMesh: currentFloor };
+}
+</file>
+
+</files>
+
+<user_instructions>
+Do you see any patterns or opportunities where we could simplify the current codebase without removing or altering any existing game features? I'm looking for a world-class, senior-level code refactor aimed at clarity, maintainability, and performance improvements wherever possible.
+
+For this refactor, feel free to use any web technology or framework you think is appropriate; we are not limited to plain JavaScript. The only requirement is that all game functionality, as well as the entire level editor feature set, must be fully preserved.
+</user_instructions>

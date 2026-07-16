@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGameStore } from '../../store/useGameStore';
 import type { LevelObject } from '../../types/GameTypes';
 import { CATALOG_ITEMS, CATALOG_CATEGORIES } from '../../config/editorCatalog';
+import { saveManager } from '../../utils/SaveManager';
 import './EditorUI.css';
 
 export const EditorUI: React.FC = () => {
@@ -128,8 +129,16 @@ export const EditorUI: React.FC = () => {
                     <button className="editor-action-btn small" onClick={() => setShowMetaModal(true)}>
                         ⚙️ Settings
                     </button>
+                    <button className="editor-action-btn small" onClick={() => {
+                        if (currentLevel) {
+                            saveManager.saveCustomLevel(currentLevel);
+                            alert('Level saved to browser storage!');
+                        }
+                    }}>
+                        💾 Save
+                    </button>
                     <button className="editor-action-btn small" onClick={handleExportLevel}>
-                        💾 Save JSON
+                        📤 Export JSON
                     </button>
                     <button className="editor-action-btn small delete" onClick={handleExitEditor}>
                         Exit

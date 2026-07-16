@@ -8,17 +8,21 @@ export type ItemType =
     | 'potato' | 'raw_fries' | 'cooked_fries'
     | 'patty' | 'cooked_patty'
     | 'bun' | 'toasted_bun'
-    | 'cheese'
-    | 'chicken' | 'coated_chicken' | 'cooked_chicken'
+    | 'cheese' | 'cheese_slice' | 'grilled_cheese_cooked'
+    | 'chicken' | 'coated_chicken' | 'cooked_chicken' | 'cooked_chicken_tenders'
     | 'bacon' | 'cooked_bacon'
-    | 'onion' | 'chopped_onion'
+    | 'onion' | 'chopped_onion' | 'onion_rings' | 'cooked_onion_rings'
     | 'banana' | 'sliced_banana'
     | 'strawberry' | 'sliced_strawberry'
-    | 'pizza_dough' | 'pizza_base' | 'pizza_margherita' | 'cooked_pizza'
+    | 'pizza_dough' | 'pizza_base' | 'pizza_margherita' | 'cooked_pizza_margherita'
     | 'egg' | 'fried_egg'
-    | 'pancake_mix' | 'pancake'
-    | 'omelette'
-    | 'milk' | 'yogurt';
+    | 'pancake_mix' | 'pancake' | 'cooked_pancakes'
+    | 'omelette' | 'cooked_omelette'
+    | 'milk' | 'yogurt'
+    | 'bread' | 'toasted_bread'
+    | 'syrup'
+    | 'granola'
+    | 'smoothie_ready';
 
 export type StationType = 'wall' | 'counter' | 'processor' | 'ingredient_source' | 'item_source' | 'serving' | 'trash' | 'table' | 'preplaced_item';
 

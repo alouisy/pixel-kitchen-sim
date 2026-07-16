@@ -2,6 +2,7 @@ import { useGameStore } from '../store/useGameStore';
 import { RECIPES } from './RecipeSystem';
 import { v4 as uuidv4 } from 'uuid';
 import type { Order } from '../types/GameTypes';
+import { AudioSystem } from './AudioSystem';
 
 export const OrderSystem = {
     update: () => {
@@ -44,14 +45,26 @@ export const OrderSystem = {
 
     },
 
+    // ...
+
     // Called every second by GameLoop
     tick: () => {
         const state = useGameStore.getState();
-        const { currentLevel, orders, addOrder, tickOrders } = state;
+        const { currentLevel, orders, addOrder, tickOrders, addScore, setTempMessage } = state;
 
         if (!currentLevel || state.gameState !== 'PLAYING') return;
 
         // 1. Update Timers & Remove Expired
+        // Check for expirations first
+        const expired = orders.filter(o => o.duration <= 1);
+        if (expired.length > 0) {
+            expired.forEach(_ => {
+                addScore(-10);
+                setTempMessage(`Order Expired! -10`);
+                AudioSystem.play('error');
+            });
+        }
+
         tickOrders();
 
         // 2. Generate New Orders
