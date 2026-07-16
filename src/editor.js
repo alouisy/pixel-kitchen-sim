@@ -1039,6 +1039,11 @@ export class LevelEditor {
         if (isBaseGhost && y > 0.1) {
             return true;
         }
+        
+        // Top items MUST be placed on top of a support (y > 0.1)
+        if (isTopGhost && y < 0.1) {
+            return true;
+        }
 
         let occupied = false;
         this.scene.traverse(c => {

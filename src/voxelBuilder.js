@@ -53,267 +53,465 @@ export const PALETTE = {
 const ICONS = {
     patty: {
         art: [
-            "          ",
-            "  RRRRRR  ",
-            " RRRRRRRR ",
-            " RRRRRRRR ",
-            " RRRRRRRR ",
-            "  RRRRRR  ",
-            "          "
+            "                ",
+            "                ",
+            "     DDDDDD     ",
+            "   DDMMMMMMDD   ",
+            "  DMMMDDMMMMMD  ",
+            "  DMMDDMMDDMMD  ",
+            " DMMMDDMMMDDMMD ",
+            " DMMDDMMMDDMMMD ",
+            " DMMMDDMMMDDMMD ",
+            " DMMMDDMMDDMMMD ",
+            "  DMMMMDDMMMMD  ",
+            "  DMMMMMMMMMMD  ",
+            "   DDMMMMMMDD   ",
+            "     DDDDDD     ",
+            "                ",
+            "                "
         ],
-        colors: { R: 0xe57373 } // PALETTE.MEAT_RAW
+        colors: { M: 0xe57373, D: 0xb71c1c } 
     },
     raw_chicken: {
         art: [
-            "          ",
-            "    CC    ",
-            "   CCCC   ",
-            "   CCCC   ",
-            "    CC    ",
-            "    WW    ",
-            "   W  W   "
+            "                ",
+            "                ",
+            "            DD  ",
+            "          DDDD  ",
+            "         DDD D  ",
+            "     DDDDDDD    ",
+            "   DDDDDDDDD    ",
+            "  DDDDDDDDDD    ",
+            "  DDDDDDDDD     ",
+            "   DDDDDDDD     ",
+            "     WWWDD      ",
+            "    WW W        ",
+            "   WW           ",
+            "  W             ",
+            "                ",
+            "                "
         ],
-        colors: { C: 0xFFB6C1, W: 0xffffff } // CHICKEN_RAW
+        colors: { D: 0xFFB6C1, W: 0xffffff } 
     },
     raw_bacon: {
         art: [
-            "  RRRRR   ",
-            " RWWWWR   ",
-            " RWRRWR   ",
-            "  RWRRWR  ",
-            "  RWWWWR  ",
-            "   RRRRR  ",
-            "          "
+            "                ",
+            "     MMMMMMMMM  ",
+            "    MWWWWMMMM   ",
+            "   MMMMWWWWMM   ",
+            "   MMWMMMWMWM   ",
+            "   MWWWWMMMMM   ",
+            "   MMWWWWMMM    ",
+            "   MMMWMMMWWM   ",
+            "   MMMWWWWMMM   ",
+            "   MMWWWWMMMM   ",
+            "   MMMWMMMWWM   ",
+            "    MMMMMMMM    ",
+            "                ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { R: 0xFA8072, W: 0xffffff } // BACON_RAW
+        colors: { M: 0xFA8072, W: 0xffffff } 
     },
     cheese_slice: {
         art: [
-            "          ",
-            "  YYYYYY  ",
-            "  Y Y YY  ",
-            "  YYYY Y  ",
-            "  Y  YYY  ",
-            "  YYYYYY  ",
-            "          "
+            "                ",
+            "                ",
+            "   YYYYYYYYYY   ",
+            "   YYYYYYYYYY   ",
+            "   YYYYDDYYYY   ",
+            "   YYDDYYYYYY   ",
+            "   YYYYYYYYYY   ",
+            "   YYYYYYYYDD   ",
+            "   YYYYDDYYYY   ",
+            "   YYDDYYYYYY   ",
+            "   YYYYYYYYYY   ",
+            "   YYYYYYYYYY   ",
+            "   YYYYYYYYYY   ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { Y: 0xfbc02d } // CHEESE
+        colors: { Y: 0xfbc02d, D: 0xf9a825 } 
     },
     shredded_mozzarella: {
         art: [
-            "          ",
-            " WW   WW  ",
-            " W W W W  ",
-            " WW  W W  ",
-            " W    W   ",
-            "          ",
-            "          "
+            "                ",
+            "                ",
+            "                ",
+            "       WW       ",
+            "      W  WW     ",
+            "     W WW  W    ",
+            "   WW W  WW W   ",
+            "  W  WW WW  WW  ",
+            " WW WW   WW W   ",
+            " W WW  WW  W    ",
+            "  WW WW WW W    ",
+            "   WWWWWWWW     ",
+            "                ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { W: 0xFFFFF0 } // MOZZARELLA
+        colors: { W: 0xFFFFF0 } 
     },
     pizza_dough: {
         art: [
-            "          ",
-            "          ",
-            "  DDDDDD  ",
-            " DDDDDDDD ",
-            " DDDDDDDD ",
-            "  DDDDDD  ",
-            "          "
+            "                ",
+            "                ",
+            "     DDDDDD     ",
+            "   DDDDDDDDDD   ",
+            "  DDDDDDDDDDDD  ",
+            "  DDDDDDDDDDDD  ",
+            " DDDDDDDDDDDDDD ",
+            " DDDDDDDDDDDDDD ",
+            " DDDDDDDDDDDDDD ",
+            " DDDDDDDDDDDDDD ",
+            "  DDDDDDDDDDDD  ",
+            "  DDDDDDDDDDDD  ",
+            "   DDDDDDDDDD   ",
+            "     DDDDDD     ",
+            "                ",
+            "                "
         ],
-        colors: { D: 0xDEB887 } // PIZZA_CRUST
+        colors: { D: 0xDEB887 } 
     },
     egg: {
         art: [
-            "          ",
-            "   WWWW   ",
-            "  WWWWWW  ",
-            " WWWWWWWW ",
-            " WWWWWWWW ",
-            "  WWWWWW  ",
-            "   WWWW   "
+            "                ",
+            "                ",
+            "                ",
+            "     WWWWWW     ",
+            "   WWWWWWWWWW   ",
+            "  WWWWWWWWWWWW  ",
+            "  WWWWYYYYWWWW  ",
+            " WWWWYYYYYYWWWW ",
+            " WWWWYYYYYYWWWW ",
+            " WWWWYYYYYYWWWW ",
+            "  WWWWYYYYWWWW  ",
+            "  WWWWWWWWWWWW  ",
+            "   WWWWWWWWWW   ",
+            "     WWWWWW     ",
+            "                ",
+            "                "
         ],
-        colors: { W: 0xFFFFFF } // EGG_WHITE
+        colors: { W: 0xFFFFFF, Y: 0xFFD700 } 
     },
     milk: {
         art: [
-            "   WWWW   ",
-            "   WBBW   ",
-            "  WWBWBW  ",
-            "  WBBBBW  ",
-            "  WWWWWW  ",
-            "  WWWWWW  ",
-            "          "
+            "                ",
+            "     WWWWWW     ",
+            "    WWWWWWWW    ",
+            "    WBBBBBBW    ",
+            "   WWWWWWWWWW   ",
+            "   WBBBBBBBBW   ",
+            "   WBBBBBBBBW   ",
+            "   WWWWWWWWWW   ",
+            "   WBBBBBBBBW   ",
+            "   WBBBBBBBBW   ",
+            "   WWWWWWWWWW   ",
+            "   WWWWWWWWWW   ",
+            "                ",
+            "                ",
+            "                ",
+            "                "
         ],
         colors: { W: 0xffffff, B: 0x29b6f6 }
     },
     yogurt: {
         art: [
-            "          ",
-            "  WWWWWW  ",
-            "  W    W  ",
-            "   WWWW   ",
-            "   WBBW   ",
-            "   WWWW   ",
-            "          "
+            "                ",
+            "                ",
+            "                ",
+            "    WWWWWWWW    ",
+            "    W      W    ",
+            "   WWWWWWWWWW   ",
+            "   WBBBBBBBBW   ",
+            "   WBBBBBBBBW   ",
+            "   WWWWWWWWWW   ",
+            "    WWWWWWWW    ",
+            "    WWWWWWWW    ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                "
         ],
         colors: { W: 0xffffff, B: 0x29b6f6 }
     },
     pancake_mix: {
         art: [
-            "          ",
-            "  BBBBBB  ",
-            "  B Y  B  ",
-            "  B YY B  ",
-            "  B Y  B  ",
-            "  BBBBBB  ",
-            "          "
+            "                ",
+            "   BBBBBBBBBB   ",
+            "   B        B   ",
+            "   B Y    Y B   ",
+            "   B Y    Y B   ",
+            "   B YYYYYY B   ",
+            "   B Y    Y B   ",
+            "   B Y    Y B   ",
+            "   B        B   ",
+            "   BBBBBBBBBB   ",
+            "   B YYYYYY B   ",
+            "   BBBBBBBBBB   ",
+            "                ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { B: 0x8B4513, Y: 0xF4A460 } // PANCAKE
+        colors: { B: 0x8B4513, Y: 0xF4A460 } 
     },
     tomato_sauce: {
         art: [
-            "          ",
-            "   MMMM   ",
-            "   MRRM   ",
-            "   MRRM   ",
-            "   MMMM   ",
-            "          ",
-            "          "
+            "                ",
+            "                ",
+            "    MMMMMMMM    ",
+            "   MMMMMMMMMM   ",
+            "   MRRRRRRRRM   ",
+            "   MRRRRRRRRM   ",
+            "   MRRRRRRRRM   ",
+            "   MRRRRRRRRM   ",
+            "   MRRRRRRRRM   ",
+            "   MRRRRRRRRM   ",
+            "   MMMMMMMMMM   ",
+            "    MMMMMMMM    ",
+            "                ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { M: 0xbdbdbd, R: 0xB22222 } // METAL_LIGHT, SAUCE_RED
+        colors: { M: 0xbdbdbd, R: 0xB22222 } 
     },
     syrup: {
         art: [
-            "          ",
-            "    BB    ",
-            "   SSSS   ",
-            "   S  S   ",
-            "   SSSS   ",
-            "   SSSS   ",
-            "          "
+            "                ",
+            "      BBBB      ",
+            "      BBBB      ",
+            "      SSSS      ",
+            "      SSSS      ",
+            "     SSSSSS     ",
+            "     S    S     ",
+            "    SSSSSSSS    ",
+            "    SSSSSSSS    ",
+            "    SSSSSSSS    ",
+            "    SSSSSSSS    ",
+            "    SSSSSSSS    ",
+            "     SSSSSS     ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { S: 0x8B4513, B: 0x1a1a1a } // BLACK
+        colors: { S: 0x8B4513, B: 0x1a1a1a } 
     },
     granola: {
         art: [
-            "          ",
-            "  OOOOOO  ",
-            "  O    O  ",
-            "  OG G O  ",
-            "  O GG O  ",
-            "  OOOOOO  ",
-            "          "
+            "                ",
+            "                ",
+            "      BBBB      ",
+            "     B    B     ",
+            "    B      B    ",
+            "    B O  O B    ",
+            "   B  O OO  B   ",
+            "   B O OO O B   ",
+            "   B OOO OO B   ",
+            "   B OOOOOO B   ",
+            "    BBBBBBBB    ",
+            "     BBBBBB     ",
+            "                ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { O: 0xD2691E, G: 0xeecfa1 } // WOOD_BOARD
+        colors: { O: 0xD2691E, B: 0x8d6e63 } 
     },
     coating_mix: {
         art: [
-            "          ",
-            "  BBBBBB  ",
-            "  B    B  ",
-            "  B CC B  ",
-            "  B    B  ",
-            "  BBBBBB  ",
-            "          "
+            "                ",
+            "   BBBBBBBBBB   ",
+            "   B        B   ",
+            "   B  CCCC  B   ",
+            "   B  CCCC  B   ",
+            "   B  CCCC  B   ",
+            "   B  CCCC  B   ",
+            "   B  CCCC  B   ",
+            "   B  CCCC  B   ",
+            "   B        B   ",
+            "   BBBBBBBBBB   ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                "
         ],
         colors: { B: 0x8d6e63, C: 0xF5DEB3 }
     },
     potato: {
         art: [
-            "          ",
-            "          ",
-            "   PPPP   ",
-            "  PPPPPP  ",
-            "  PPPPPP  ",
-            "   PPPP   ",
-            "          "
+            "                ",
+            "                ",
+            "                ",
+            "     PPPPPP     ",
+            "    PPPPPPPP    ",
+            "   PPPPPPPPPP   ",
+            "   PPPPPPPPPP   ",
+            "  PPPPPPPPPPPP  ",
+            "  PPPPPPPPPPPP  ",
+            "  PPPPPPPPPPPP  ",
+            "   PPPPPPPPPP   ",
+            "   PPPPPPPPPP   ",
+            "    PPPPPPPP    ",
+            "     PPPPPP     ",
+            "                ",
+            "                "
         ],
-        colors: { P: 0xd7ccc8 } // POTATO
+        colors: { P: 0xd7ccc8 } 
     },
     tomato: {
         art: [
-            "          ",
-            "    GG    ",
-            "   RRRR   ",
-            "  RRRRRR  ",
-            "  RRRRRR  ",
-            "   RRRR   ",
-            "          "
+            "                ",
+            "                ",
+            "      GGGG      ",
+            "     RRRRRR     ",
+            "   RRRRRRRRRR   ",
+            "  RRRRRRRRRRRR  ",
+            " RRRRRRRRRRRRRR ",
+            " RRRRRRRRRRRRRR ",
+            " RRRRRRRRRRRRRR ",
+            " RRRRRRRRRRRRRR ",
+            "  RRRRRRRRRRRR  ",
+            "   RRRRRRRRRR   ",
+            "     RRRRRR     ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { R: 0xd32f2f, G: 0x43a047 } // TOMATO, LETTUCE
+        colors: { R: 0xd32f2f, G: 0x43a047 } 
     },
     lettuce: {
         art: [
-            "          ",
-            "   GGGG   ",
-            "  GGGGGG  ",
-            " GGLGGLGG ",
-            " GGGGGGGG ",
-            "  GGGGGG  ",
-            "   GGGG   "
+            "                ",
+            "                ",
+            "     GGGGGG     ",
+            "    GGGGGGGG    ",
+            "   GGLGGLGGLGG  ",
+            "  GGGLGGGLGGGLG ",
+            "  GGGGGGGGGGGGG ",
+            " GGGGGGGGGGGGGG ",
+            " GGGGGGGGGGGGGG ",
+            " GGGGGGGGGGGGGG ",
+            "  GGLGGGGLGGGG  ",
+            "   GGGGGGGGGG   ",
+            "    GGGGGGGG    ",
+            "     GGGGGG     ",
+            "                ",
+            "                "
         ],
         colors: { G: 0x43a047, L: 0x66bb6a }
     },
     onion: {
         art: [
-            "          ",
-            "    YY    ",
-            "   OOOO   ",
-            "  OOOOOO  ",
-            "  OOOOOO  ",
-            "   OOOO   ",
-            "    OO    "
+            "                ",
+            "                ",
+            "       YY       ",
+            "       YY       ",
+            "      OOOO      ",
+            "     OOOOOO     ",
+            "    OOOOOOOO    ",
+            "    OOOOOOOO    ",
+            "   OOOOOOOOOO   ",
+            "   OOOOOOOOOO   ",
+            "   OOOOOOOOOO   ",
+            "    OOOOOOOO    ",
+            "     OOOOOO     ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { O: 0xeceff1, Y: 0x81c784 } // ONION
+        colors: { O: 0xeceff1, Y: 0x81c784 } 
     },
     banana: {
         art: [
-            "          ",
-            "      Y   ",
-            "     YY   ",
-            "    YY    ",
-            "   YY     ",
-            "  YY      ",
-            "  Y       "
+            "                ",
+            "          YY    ",
+            "         YYY    ",
+            "        YYY     ",
+            "       YYY      ",
+            "      YYY       ",
+            "     YYY        ",
+            "    YYY         ",
+            "    YYY         ",
+            "   YYY          ",
+            "   YY           ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { Y: 0xFFE135 } // BANANA
+        colors: { Y: 0xFFE135 } 
     },
     strawberry: {
         art: [
-            "          ",
-            "   GGGG   ",
-            "  RRRRRR  ",
-            "  RYRRYR  ",
-            "   RRRR   ",
-            "    RR    ",
-            "          "
+            "                ",
+            "                ",
+            "      GGGG      ",
+            "     RRRRRR     ",
+            "    RYRRYRRR    ",
+            "    RRRRYRRY    ",
+            "   RYRRRYRRRY   ",
+            "   RRRYRRRYRR   ",
+            "    RRRRRRRR    ",
+            "    RYRRYRRR    ",
+            "     RRRRRR     ",
+            "      RRRR      ",
+            "                ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { R: 0xFC5A8D, G: 0x43a047, Y: 0xffd54f } // STRAWBERRY
+        colors: { R: 0xFC5A8D, G: 0x43a047, Y: 0xffd54f } 
     },
     bun: {
         art: [
-            "          ",
-            "          ",
-            "   BBBB   ",
-            "  BBBBBB  ",
-            " BBBBBBBB ",
-            " BBBBBBBB ",
-            "  BBBBBB  "
+            "                ",
+            "                ",
+            "      BBBB      ",
+            "    BBBBBBBB    ",
+            "   BBBSBBBSBBB  ",
+            "  BBBBBBBBBBBBB ",
+            "  BSBBBSBBBSBBB ",
+            " BBBBBBBBBBBBBBB",
+            " BBSBBBSBBBSBBBB",
+            " BBBBBBBBBBBBBBB",
+            " BBBBBBBBBBBBBBB",
+            "  BBBBBBBBBBBBB ",
+            "   BBBBBBBBBBB  ",
+            "                ",
+            "                ",
+            "                "
         ],
-        colors: { B: 0xf4a460 } // BUN
+        colors: { B: 0xf4a460, S: 0xfffdd0 } 
     },
     bread_slice: {
         art: [
-            "          ",
-            "  BB  BB  ",
-            " BBBBBBBB ",
-            " BBBBBBBB ",
-            " BBBBBBBB ",
-            "  BBBBBB  ",
-            "  BBBBBB  "
+            "                ",
+            "   CC      CC   ",
+            "  CCCC    CCCC  ",
+            " CCCCCCCCCCCCCC ",
+            " CWWWWWWWWWWWWC ",
+            " CWWWWWWWWWWWWC ",
+            " CWWWWWWWWWWWWC ",
+            " CWWWWWWWWWWWWC ",
+            " CWWWWWWWWWWWWC ",
+            " CWWWWWWWWWWWWC ",
+            " CWWWWWWWWWWWWC ",
+            " CWWWWWWWWWWWWC ",
+            " CWWWWWWWWWWWWC ",
+            "  CCCCCCCCCCCC  ",
+            "                ",
+            "                "
         ],
-        colors: { B: 0xf4a460 } // BUN
+        colors: { C: 0xa0522d, W: 0xFFF8DC } 
     }
 };
 
@@ -538,144 +736,42 @@ export function createTableMesh(neighbors) {
 
 export function createIngredientBinMesh(ingredientType) {
     const vb = new VoxelBuilder();
-    let h = 8; // Default height for signboard
     
-    if (ingredientType === 'patty' || ingredientType.includes('chicken') || ingredientType.includes('bacon')) {
-        // Cooler Box (Meat/Poultry/Pork)
-        const isRed = ingredientType === 'patty' || ingredientType.includes('bacon');
-        const coolerColor = isRed ? 0xc62828 : 0x1565c0; // Red or Blue cooler
-        vb.addBox(1, 0, 1, 14, 8, 14, coolerColor);
-        vb.addBox(2, 1, 2, 13, 8, 13, PALETTE.BLACK); // Interior
-        vb.addBox(1, 8, 1, 14, 8, 14, 0xffffff); // White rim
-        vb.addBox(2, 2, 2, 13, 5, 13, 0xe0f7fa); // Ice
-        
-        // Items on top of ice
-        if (ingredientType === 'patty') {
-            for(let x=4; x<=10; x+=5) {
-                for(let z=4; z<=10; z+=5) {
-                    vb.addBox(x, 6, z, x+3, 6, z+3, PALETTE.MEAT_RAW);
+    const iconData = ICONS[ingredientType] || ICONS['potato'];
+    const art = iconData ? iconData.art : null;
+    const colors = iconData ? iconData.colors : null;
+    
+    // Fill the full 16x16 area
+    for (let x = 0; x <= 15; x++) {
+        for (let z = 0; z <= 15; z++) {
+            let color = PALETTE.WOOD_BOARD; // Default beige background
+            
+            // Add a dark brown border to delimit plates side-by-side
+            if (x === 0 || x === 15 || z === 0 || z === 15) {
+                color = PALETTE.WOOD_DARK;
+            } 
+            // Draw the ingredient icon, scaled down to 12x12 (25% smaller) to leave room
+            else if (art) {
+                if (x >= 2 && x <= 13 && z >= 2 && z <= 13) {
+                    const c = Math.floor((x - 2) * (16 / 12));
+                    const r = Math.floor((z - 2) * (16 / 12));
+                    
+                    if (r < art.length && c < art[r].length) {
+                        const char = art[r][c];
+                        if (char !== ' ' && colors[char]) {
+                            color = colors[char];
+                        }
+                    }
                 }
             }
-        } else if (ingredientType.includes('chicken')) {
-            vb.addBox(4, 6, 4, 7, 7, 10, PALETTE.CHICKEN_RAW);
-            vb.addBox(9, 6, 5, 12, 7, 11, PALETTE.CHICKEN_RAW);
-        } else if (ingredientType.includes('bacon')) {
-            vb.addBox(3, 6, 4, 12, 6, 6, PALETTE.BACON_RAW);
-            vb.addBox(3, 6, 8, 12, 6, 10, PALETTE.BACON_RAW);
+            vb.add(x, 0, z, color);
         }
-        h = 8;
-    } 
-    else if (ingredientType.includes('cheese') || ingredientType.includes('milk') || ingredientType.includes('yogurt') || ingredientType.includes('egg') || ingredientType.includes('mozzarella')) {
-        // Chilled Display / Fridge Basket
-        vb.addBox(2, 0, 2, 13, 1, 13, 0xffffff); // White base
-        vb.addBox(2, 1, 2, 3, 7, 13, 0x90caf9); // Glass side L
-        vb.addBox(12, 1, 2, 13, 7, 13, 0x90caf9); // Glass side R
-        vb.addBox(2, 1, 2, 13, 7, 3, 0x90caf9); // Glass side Back
-        vb.addBox(2, 1, 12, 13, 4, 13, 0x90caf9); // Glass side Front (low)
-        
-        if (ingredientType.includes('cheese') || ingredientType.includes('mozzarella')) {
-            vb.addBox(4, 1, 4, 11, 4, 11, PALETTE.CHEESE);
-        } else if (ingredientType.includes('milk')) {
-            vb.addBox(4, 1, 4, 6, 6, 6, 0xffffff);
-            vb.addBox(9, 1, 8, 11, 6, 10, 0xffffff);
-        } else if (ingredientType.includes('yogurt')) {
-            vb.addBox(4, 1, 4, 6, 3, 6, 0xffffff);
-            vb.addBox(8, 1, 5, 10, 3, 7, 0xffffff);
-        } else if (ingredientType.includes('egg')) {
-            vb.addBox(4, 1, 4, 11, 2, 10, 0xffeb3b); // Egg carton
-        }
-        h = 7;
     }
-    else if (ingredientType.includes('bun') || ingredientType.includes('bread') || ingredientType.includes('dough')) {
-        // Bakery Basket
-        vb.addBox(1, 0, 1, 14, 4, 14, PALETTE.WOOD_DARK);
-        vb.addBox(2, 1, 2, 13, 4, 13, PALETTE.WOOD_BOARD);
-        
-        if (ingredientType.includes('bun')) {
-            vb.addBox(3, 1, 3, 6, 3, 6, PALETTE.BUN);
-            vb.addBox(8, 1, 4, 11, 3, 7, PALETTE.BUN);
-            vb.addBox(5, 1, 8, 8, 3, 11, PALETTE.BUN);
-        } else if (ingredientType.includes('bread')) {
-            vb.addBox(3, 1, 3, 12, 4, 6, PALETTE.BUN);
-            vb.addBox(3, 1, 8, 12, 4, 11, PALETTE.BUN);
-        } else if (ingredientType.includes('dough')) {
-            vb.addBox(5, 1, 5, 10, 4, 10, PALETTE.PIZZA_CRUST);
-        }
-        h = 4;
-    }
-    else if (ingredientType.includes('sauce') || ingredientType.includes('syrup') || ingredientType.includes('granola') || ingredientType.includes('coating') || ingredientType.includes('pancake')) {
-        // Shelf / Cardboard Box
-        vb.addBox(2, 0, 2, 13, 5, 13, 0x8d6e63); // Box
-        vb.addBox(3, 1, 3, 12, 5, 12, PALETTE.BLACK); 
-        
-        if (ingredientType.includes('sauce')) {
-            vb.addBox(4, 1, 4, 7, 6, 7, PALETTE.METAL_LIGHT); vb.addBox(4, 3, 4, 7, 5, 7, PALETTE.SAUCE_RED);
-            vb.addBox(8, 1, 8, 11, 6, 11, PALETTE.METAL_LIGHT); vb.addBox(8, 3, 8, 11, 5, 11, PALETTE.SAUCE_RED);
-        } else if (ingredientType.includes('syrup')) {
-            vb.addBox(5, 1, 5, 9, 7, 9, 0x8B4513);
-        } else if (ingredientType.includes('granola')) {
-            vb.addBox(4, 1, 4, 8, 6, 8, 0xD2691E);
-        } else if (ingredientType.includes('coating') || ingredientType.includes('pancake')) {
-            vb.addBox(4, 1, 4, 10, 6, 8, 0xF5DEB3);
-        }
-        h = 5;
-    }
-    else {
-        // Generic Wooden Crate for Vegetables & Fruits (potato, tomato, lettuce, onion, banana, strawberry)
-        vb.addBox(1, 0, 1, 14, 6, 14, PALETTE.WOOD_LIGHT);
-        vb.addBox(2, 1, 2, 13, 6, 13, PALETTE.BLACK);
-        
-        // Add corner pillars
-        vb.addBox(1, 0, 1, 2, 7, 2, PALETTE.WOOD_DARK);
-        vb.addBox(13, 0, 1, 14, 7, 2, PALETTE.WOOD_DARK);
-        vb.addBox(1, 0, 13, 2, 7, 14, PALETTE.WOOD_DARK);
-        vb.addBox(13, 0, 13, 14, 7, 14, PALETTE.WOOD_DARK);
-        
-        const c = getIngredientColor(ingredientType);
-        if (c) {
-            // Fill with random bumps of the ingredient color
-            vb.addBox(3, 1, 3, 6, 4, 6, c);
-            vb.addBox(8, 1, 3, 11, 3, 6, c);
-            vb.addBox(3, 1, 8, 6, 5, 11, c);
-            vb.addBox(8, 1, 8, 12, 4, 12, c);
-            vb.addBox(6, 1, 6, 9, 6, 9, c);
-        }
-        h = 7;
-    }
-    
-    // Add distinctive Signboard
-    addSignboard(vb, ingredientType, h);
     
     const mesh = vb.buildMesh();
     mesh.position.y = GRID_UNIT/2;
+    
     return mesh;
-}
-
-function addSignboard(vb, type, h) {
-    // Poles
-    vb.addBox(3, h, 1, 4, h + 5, 2, PALETTE.WOOD_DARK);
-    vb.addBox(11, h, 1, 12, h + 5, 2, PALETTE.WOOD_DARK);
-    // Sign board
-    vb.addBox(2, h + 4, 1, 13, h + 12, 2, PALETTE.WOOD_BOARD);
-    
-    const iconData = ICONS[type] || ICONS['potato']; // Fallback
-    if (!iconData) return;
-    
-    const iconZ = 3;
-    const art = iconData.art;
-    const colors = iconData.colors;
-    
-    for (let r = 0; r < art.length; r++) {
-        const row = art[r];
-        for (let c = 0; c < row.length; c++) {
-            const char = row[c];
-            if (char !== ' ' && colors[char]) {
-                const px = c;
-                const py = (art.length - 1) - r; 
-                vb.add(3 + px, h + 5 + py, iconZ, colors[char]);
-            }
-        }
-    }
 }
 
 export function createPlateStackMesh() {
