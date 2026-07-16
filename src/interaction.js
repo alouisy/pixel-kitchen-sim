@@ -2,7 +2,7 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { gsap } from 'gsap';
 import { INTERACTION_DISTANCE, STATION_TYPES, ITEM_TYPES, GRID_UNIT, INGREDIENT_RENDER_ORDER } from './constants.js';
-import { createItem, checkPlateCompletion } from './items.js';
+import { createItem, checkPlateCompletion, updatePlateVisuals } from './items.js';
 
 export class InteractionManager {
     constructor(camera, scene, player, stations, stationInteractables, levelManager, uiManager, preloadedModels, floorMesh) {
@@ -186,8 +186,8 @@ export class InteractionManager {
             
             const worldPos = grid.gridToWorld(col, row);
             let yBase = 0;
-            if (surface.userData.stationType === STATION_TYPES.COUNTER || surface.userData.stationType === STATION_TYPES.TABLE || surface.userData.stationType === STATION_TYPES.SERVING) {
-                yBase = 0.9;
+            if (surface.userData.type !== STATION_TYPES.FLOOR) {
+                yBase = this._getVisualTopY(surface);
             }
             
             // *** FIX FLOATING PLATE ON COUNTER ***
@@ -254,7 +254,9 @@ export class InteractionManager {
 
         containerData.contents.push(ingredientName);
         
-        this._updatePlateVisuals(container);
+        const isMealComplete = checkPlateCompletion(container);
+
+        updatePlateVisuals(this.scene, container, this.preloadedModels);
 
         if (ingredientObject === this.player.getHeldItem()) {
             this.player.place(); 
@@ -274,7 +276,7 @@ export class InteractionManager {
             }
         }
 
-        if (checkPlateCompletion(container)) {
+        if (isMealComplete) {
             this.uiManager.showTemporaryMessage(`${containerData.mealName} Ready!`, 1500);
             this._animateMealCompletion(container);
             if(this.audioManager) this.audioManager.play('ding');
@@ -284,70 +286,6 @@ export class InteractionManager {
         }
     }
 
-    _updatePlateVisuals(plate) {
-        if (!plate || !plate.parent) return;
-
-        // Clear existing ingredient meshes
-        for (let i = plate.children.length - 1; i >= 0; i--) {
-            const child = plate.children[i];
-            if (child.userData && child.userData.type === ITEM_TYPES.INGREDIENT) {
-                plate.remove(child);
-                child.traverse(c => { if (c.geometry) c.geometry.dispose(); });
-            }
-        }
-
-        const contents = plate.userData.contents || [];
-        if (contents.length === 0) return;
-
-        let itemsToDraw = [...contents];
-        const bunIndex = itemsToDraw.indexOf('bun');
-        
-        // If a meal is complete, we could just render a solid meal, but for now
-        // splitting the bun and ordering the items correctly provides a perfect meal visual!
-        if (bunIndex !== -1 && contents.length > 1) {
-            // Only split the bun if there's more than just a bun on the plate
-            itemsToDraw.splice(bunIndex, 1, 'bun_bottom', 'bun_top');
-        }
-
-        // Sort itemsToDraw based on INGREDIENT_RENDER_ORDER
-        itemsToDraw.sort((a, b) => {
-            let indexA = INGREDIENT_RENDER_ORDER.indexOf(a);
-            let indexB = INGREDIENT_RENDER_ORDER.indexOf(b);
-            if (indexA === -1) indexA = 999;
-            if (indexB === -1) indexB = 999;
-            return indexA - indexB;
-        });
-
-        let offsetY = 0.05; 
-        for (const itemName of itemsToDraw) {
-            const mesh = createItem(this.scene, itemName, this.preloadedModels);
-            if (!mesh) continue;
-            
-            this.scene.remove(mesh); // It's going to be a child of the plate
-            
-            if (typeof mesh.raycast === 'function') mesh.userData.originalRaycast = mesh.raycast;
-            mesh.raycast = () => {}; // Disable raycast for plate children
-
-            mesh.position.set(0, offsetY, 0);
-            
-            // Random rotation for natural look, except for buns
-            if (!itemName.includes('bun')) {
-                 mesh.rotation.set(0, Math.random() * Math.PI * 2, 0);
-            }
-
-            plate.add(mesh);
-            
-            // Increment height based on item
-            let thickness = 0.1;
-            if (itemName === 'bun_bottom') thickness = 0.15;
-            if (itemName === 'bun_top') thickness = 0.2;
-            if (itemName.includes('patty')) thickness = 0.15;
-            if (itemName.includes('cheese') || itemName.includes('lettuce') || itemName.includes('bacon') || itemName.includes('tomato')) thickness = 0.05;
-            if (itemName.includes('bread')) thickness = 0.08;
-
-            offsetY += thickness;
-        }
-    }
 
     _pickupItem(item) {
         for (const station of this.stations) {
@@ -479,9 +417,9 @@ export class InteractionManager {
                 } 
                 else if (grid.isAreaFree(col, row, 1, 1)) {
                     const worldPos = grid.gridToWorld(col, row);
-                    let y = obj.position.y;
+                    let y = 0;
                     if (obj.userData.type === STATION_TYPES.FLOOR) y = 0.01;
-                    else y = 0.9 + 0.01; 
+                    else y = this._getVisualTopY(obj) + 0.01; 
                     this.slotHighlight.position.set(worldPos.x, y, worldPos.z);
                     this.slotHighlight.visible = true;
                 }

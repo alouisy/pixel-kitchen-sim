@@ -1,7 +1,7 @@
 // src/editor.js
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT } from './constants.js';
+import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT, ITEM_TYPES } from './constants.js';
 import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh, resizeWall, refreshSmartObjects } from './world.js';
 import { RECIPES } from './gameData.js';
 
@@ -79,6 +79,9 @@ export class LevelEditor {
         // Meta Modal
         this.metaModal = document.getElementById('editor-meta-modal');
 
+        this.thumbnailCache = new Map();
+        this.rightClickStart = { x: 0, y: 0 };
+
         this._initUI();
         this._bindEvents();
     }
@@ -139,17 +142,10 @@ export class LevelEditor {
             const el = document.createElement('div');
             el.className = 'library-item';
             
-            // Simple icon selection based on type
-            let icon = '📦';
-            if(item.type.includes('wall')) icon = '🧱';
-            else if(item.type.includes('counter')) icon = '🟫';
-            else if(item.type.includes('processor')) icon = '🍳';
-            else if(item.type.includes('source')) icon = '🧺';
-            else if(item.isServing) icon = '🛎️';
-            else if(item.category === 'Items') icon = '🍽️';
+            const imgSrc = this.generateThumbnail(item);
 
             el.innerHTML = `
-                <div class="library-item-icon">${icon}</div>
+                <img class="library-item-icon-3d" src="${imgSrc}" alt="${item.name}">
                 <div class="library-item-name">${item.name}</div>
             `;
             
@@ -167,6 +163,11 @@ export class LevelEditor {
         this.renderer.domElement.addEventListener('pointerdown', (e) => this.onPointerDown(e));
         this.renderer.domElement.addEventListener('pointermove', (e) => this.onPointerMove(e));
         this.renderer.domElement.addEventListener('pointerup', (e) => this.onPointerUp(e));
+        
+        // Prevent default context menu in editor mode
+        this.renderer.domElement.addEventListener('contextmenu', (e) => {
+            if (this.enabled) e.preventDefault();
+        });
         
         // Keyboard Shortcuts
         window.addEventListener('keydown', (e) => {
@@ -285,6 +286,23 @@ export class LevelEditor {
 
     // --- Core Logic ---
 
+    _getVisualTopY(object) {
+        const box = new THREE.Box3();
+        object.traverse((child) => {
+            if (child.isMesh && child.visible) {
+                child.updateWorldMatrix(true, false);
+                if (child.geometry) {
+                    child.geometry.computeBoundingBox();
+                    const childBox = child.geometry.boundingBox.clone();
+                    childBox.applyMatrix4(child.matrixWorld);
+                    box.union(childBox);
+                }
+            }
+        });
+        if (box.isEmpty()) return object.position.y;
+        return box.max.y;
+    }
+
     startPlacement(template) {
         this.cancelPlacement(); // Clear existing ghost
         this.deselect(); // Clear selection
@@ -316,8 +334,11 @@ export class LevelEditor {
 
     confirmPlacement() {
         if (this.ghostObject) {
-            // Create a real solid instance
             const template = this.ghostObject.userData.template;
+            const isBlocked = this._checkOccupied(this.ghostObject.position.x, this.ghostObject.position.z, this.ghostObject.position.y, template);
+            if (isBlocked) return;
+
+            // Create a real solid instance
             const realObject = this._createObjectFromTemplate(template);
             
             realObject.position.copy(this.ghostObject.position);
@@ -498,10 +519,17 @@ export class LevelEditor {
     // --- Input Handling ---
 
     onPointerDown(e) {
-        if (!this.enabled || e.button !== 0) return;
+        if (!this.enabled) return;
         
         // Ignore clicks on UI panels
         if (e.target.closest('.editor-panel') || e.target.closest('.editor-top-bar')) return;
+
+        if (e.button === 2) {
+            this.rightClickStart = { x: e.clientX, y: e.clientY };
+            return;
+        }
+
+        if (e.button !== 0) return;
 
         const mouse = { 
             x: (e.clientX / window.innerWidth) * 2 - 1, 
@@ -537,8 +565,15 @@ export class LevelEditor {
             // Raycast for selection
             const candidates = [];
             this.scene.traverse(c => {
-                // Find root objects
-                if (c.userData && (c.userData.type === 'station' || c.userData.type === 'counter' || c.userData.stationType)) {
+                // Find root objects that are direct children of the scene and not system helpers or the floor
+                if (c.parent === this.scene && 
+                    c !== this.gridHelper && 
+                    c !== this.selectionBox && 
+                    c !== this.handlesGroup && 
+                    c !== this.orbit && 
+                    c.name !== "Floor" &&
+                    c.userData && 
+                    c.userData.type !== 'floor') {
                     candidates.push(c);
                 }
             });
@@ -665,7 +700,7 @@ export class LevelEditor {
         this.scene.traverse(c => {
             // Must be visible, and not the object currently being dragged/placed
             if (c.visible && c !== this.ghostObject && c !== this.selectedObject) {
-                if (c.userData && (c.userData.stationType === STATION_TYPES.COUNTER || c.userData.stationType === STATION_TYPES.TABLE || c.userData.stationType === STATION_TYPES.SERVING)) {
+                if (c.userData && (c.userData.stationType === STATION_TYPES.COUNTER || c.userData.stationType === STATION_TYPES.TABLE || c.userData.stationType === STATION_TYPES.SERVING || c.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE || c.userData.stationType === STATION_TYPES.ITEM_SOURCE)) {
                     supports.push(c);
                 }
             }
@@ -686,7 +721,14 @@ export class LevelEditor {
             const p = hit.point;
             targetX = p.x;
             targetZ = p.z;
-            targetY = MODULE_HEIGHT; // Place on top of counter (0.9)
+            
+            let root = hit.object;
+            while(root && !supports.includes(root)) root = root.parent;
+            if (root) {
+                targetY = this._getVisualTopY(root);
+            } else {
+                targetY = MODULE_HEIGHT;
+            }
         } else {
             // Hit nothing valid -> Check Ground Plane (Y=0)
             const target = new THREE.Vector3();
@@ -705,69 +747,145 @@ export class LevelEditor {
 
             if (this.placementMode && this.ghostObject) {
                 this.ghostObject.position.set(finalX, targetY, finalZ);
+                
+                // Color ghost based on occupancy
+                const template = this.ghostObject.userData.template;
+                const isBlocked = this._checkOccupied(finalX, finalZ, targetY, template);
+                const emissiveColor = isBlocked ? new THREE.Color(0xFF0000) : new THREE.Color(0x00FF00);
+                
+                this.ghostObject.traverse(c => {
+                    if (c.isMesh && c.material) {
+                        c.material.emissive = emissiveColor;
+                    }
+                });
             } else if (this.isDragging && this.selectedObject) {
                 this.selectedObject.position.set(finalX, targetY, finalZ);
             }
         }
     }
 
-    onPointerUp() {
-        if (this.enabled) {
-            if (this.activeHandle) {
-                // Finish Extend/Resize
-                if (this.extendingGhosts.length > 0) {
-                    // Solidify ghosts
-                    this.extendingGhosts.forEach(g => {
-                         const t = g.userData.template;
-                         const real = this._createObjectFromTemplate(t);
-                         real.position.copy(g.position);
-                         real.rotation.copy(g.rotation);
-                         this.scene.add(real);
-                         this.scene.remove(g);
-                    });
-                    this.extendingGhosts = [];
-                    refreshSmartObjects(this.scene); // Fuse visuals
+    onPointerUp(e) {
+        if (!this.enabled) return;
+
+        if (e && e.button === 2 && this.rightClickStart) {
+            const dx = e.clientX - this.rightClickStart.x;
+            const dy = e.clientY - this.rightClickStart.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < 5) {
+                if (this.placementMode) {
+                    this.cancelPlacement();
+                } else if (this.selectedObject) {
+                    this.deselect();
                 }
-                
-                this.activeHandle = null;
-                this._updateHandles();
+            }
+            return;
+        }
+
+        if (this.activeHandle) {
+            // Finish Extend/Resize
+            if (this.extendingGhosts.length > 0) {
+                // Solidify ghosts
+                this.extendingGhosts.forEach(g => {
+                     const t = g.userData.template;
+                     const real = this._createObjectFromTemplate(t);
+                     real.position.copy(g.position);
+                     real.rotation.copy(g.rotation);
+                     this.scene.add(real);
+                     this.scene.remove(g);
+                });
+                this.extendingGhosts = [];
+                refreshSmartObjects(this.scene); // Fuse visuals
             }
             
-            this.isDragging = false;
-            this.orbit.enabled = true;
+            this.activeHandle = null;
+            this._updateHandles();
         }
-    }
+        
+        this.isDragging = false;
+        this.orbit.enabled = true;
+    } 
 
     // --- Export ---
 
     exportLayout() {
         const layout = [];
         this.scene.traverse(c => {
-            if (c.parent === this.scene && c.userData && (c.userData.type === 'station' || c.userData.type === 'counter')) {
-                const entry = {
-                    name: c.name,
-                    type: c.userData.stationType || c.userData.type,
-                    position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
-                };
+            if (c.parent === this.scene && 
+                c !== this.gridHelper && 
+                c !== this.selectionBox && 
+                c !== this.handlesGroup && 
+                c !== this.orbit && 
+                c.name !== "Floor" &&
+                c.userData) {
                 
-                // Include rotation if not zero
-                if (c.rotation.y !== 0) {
-                    entry.rotation = parseFloat(c.rotation.y.toFixed(2));
-                }
-
-                if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
-                if (c.userData.template?.color) entry.color = c.userData.template.color;
-                if (c.userData.isServing) entry.isServing = true;
+                let entry = null;
+                const type = c.userData.stationType || c.userData.type;
                 
-                // Config: Prioritize userData.config (preserved from loaded levels)
-                // Fallback to template config if available (editor-created items)
-                if (c.userData.config) {
-                    entry.config = c.userData.config;
-                } else if (c.userData.template?.config) {
-                    entry.config = c.userData.template.config;
-                }
+                if (type === STATION_TYPES.TABLE || 
+                    type === STATION_TYPES.COUNTER || 
+                    type === STATION_TYPES.SERVING || 
+                    type === STATION_TYPES.TRASH || 
+                    type === STATION_TYPES.WALL ||
+                    type === STATION_TYPES.INGREDIENT_SOURCE ||
+                    type === STATION_TYPES.ITEM_SOURCE ||
+                    type === STATION_TYPES.PROCESSOR ||
+                    c.userData.type === 'station') {
+                    
+                    entry = {
+                        name: c.name,
+                        type: c.userData.stationType || c.userData.type || 'station',
+                        position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
+                    };
+                    
+                    if (c.rotation.y !== 0) {
+                        entry.rotation = parseFloat(c.rotation.y.toFixed(2));
+                    }
 
-                layout.push(entry);
+                    if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
+                    if (c.userData.template?.color) entry.color = c.userData.template.color;
+                    if (c.userData.isServing) entry.isServing = true;
+                    
+                    if (c.userData.config) {
+                        entry.config = c.userData.config;
+                    } else if (c.userData.template?.config) {
+                        entry.config = c.userData.template.config;
+                    }
+                } 
+                else if (c.userData.type === ITEM_TYPES.ITEM || c.userData.type === ITEM_TYPES.INGREDIENT || c.userData.stationType === STATION_TYPES.PREPLACED_ITEM) {
+                    let itemType = '';
+                    let contents = null;
+                    
+                    if (c.userData.stationType === STATION_TYPES.PREPLACED_ITEM) {
+                        itemType = c.userData.config?.item || c.userData.template?.config?.item || 'plate';
+                        contents = c.userData.config?.contents || c.userData.template?.config?.contents;
+                    } else if (c.userData.type === ITEM_TYPES.ITEM) {
+                        itemType = c.userData.itemType;
+                        contents = c.userData.contents;
+                    } else {
+                        itemType = c.userData.ingredientType;
+                    }
+                    
+                    const config = { item: itemType };
+                    if (contents && contents.length > 0) {
+                        config.contents = [...contents];
+                    }
+                    
+                    entry = {
+                        name: c.name || (itemType.charAt(0).toUpperCase() + itemType.slice(1)),
+                        type: STATION_TYPES.PREPLACED_ITEM,
+                        position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
+                        config: config
+                    };
+                    
+                    if (c.rotation.y !== 0) {
+                        entry.rotation = parseFloat(c.rotation.y.toFixed(2));
+                    }
+                }
+                
+                if (entry) {
+                    layout.push(entry);
+                }
             }
         });
         
@@ -787,5 +905,170 @@ export class LevelEditor {
         downloadAnchorNode.remove();
         
         alert(`Level Exported! Replace the file in 'levels/${fileName}' to persist changes.`);
+    }
+
+    generateThumbnail(item) {
+        const cacheKey = JSON.stringify(item);
+        if (this.thumbnailCache.has(cacheKey)) {
+            return this.thumbnailCache.get(cacheKey);
+        }
+
+        const model = this._createObjectFromTemplate(item);
+        const dataURL = this.renderModelToDataURL(model);
+        this.thumbnailCache.set(cacheKey, dataURL);
+        return dataURL;
+    }
+
+    renderModelToDataURL(model) {
+        const width = 128;
+        const height = 128;
+
+        const renderTarget = new THREE.WebGLRenderTarget(width, height, {
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.NearestFilter,
+            format: THREE.RGBAFormat
+        });
+
+        const tempScene = new THREE.Scene();
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+        tempScene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+        dirLight.position.set(3, 5, 4);
+        tempScene.add(dirLight);
+
+        const fillLight = new THREE.DirectionalLight(0x8899ff, 0.35);
+        fillLight.position.set(-3, 3, -4);
+        tempScene.add(fillLight);
+
+        tempScene.add(model);
+
+        const box = new THREE.Box3().setFromObject(model);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+
+        const maxDim = Math.max(size.x, size.y, size.z, 0.1);
+        const fov = 35;
+        const camera = new THREE.PerspectiveCamera(fov, 1, 0.1, 100);
+
+        const dist = (maxDim / (2 * Math.tan((fov * Math.PI) / 360))) * 1.5;
+        camera.position.set(
+            center.x + dist * 0.7,
+            center.y + dist * 0.7,
+            center.z + dist * 1.1
+        );
+        camera.lookAt(center);
+
+        const originalClearColor = new THREE.Color();
+        this.renderer.getClearColor(originalClearColor);
+        const originalClearAlpha = this.renderer.getClearAlpha();
+
+        this.renderer.setClearColor(0x000000, 0);
+        this.renderer.setRenderTarget(renderTarget);
+        this.renderer.clear();
+        this.renderer.render(tempScene, camera);
+
+        const pixels = new Uint8Array(width * height * 4);
+        this.renderer.readRenderTargetPixels(renderTarget, 0, 0, width, height, pixels);
+
+        this.renderer.setRenderTarget(null);
+        this.renderer.setClearColor(originalClearColor, originalClearAlpha);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        const imgData = ctx.createImageData(width, height);
+
+        // Helper to convert linear color channel to sRGB
+        const linearToSRGB = (c) => {
+            const val = c / 255;
+            if (val <= 0.0031308) {
+                return Math.max(0, Math.min(255, Math.round(val * 12.92 * 255)));
+            }
+            return Math.max(0, Math.min(255, Math.round((1.055 * Math.pow(val, 1 / 2.4) - 0.055) * 255)));
+        };
+
+        for (let y = 0; y < height; y++) {
+            const srcY = height - 1 - y;
+            for (let x = 0; x < width; x++) {
+                const srcIdx = (srcY * width + x) * 4;
+                const dstIdx = (y * width + x) * 4;
+                imgData.data[dstIdx] = linearToSRGB(pixels[srcIdx]);
+                imgData.data[dstIdx + 1] = linearToSRGB(pixels[srcIdx + 1]);
+                imgData.data[dstIdx + 2] = linearToSRGB(pixels[srcIdx + 2]);
+                imgData.data[dstIdx + 3] = pixels[srcIdx + 3];
+            }
+        }
+        ctx.putImageData(imgData, 0, 0);
+        const dataURL = canvas.toDataURL('image/png');
+
+        tempScene.remove(model);
+        model.traverse(c => {
+            if (c.geometry) c.geometry.dispose();
+            if (c.material) {
+                if (Array.isArray(c.material)) c.material.forEach(m => m.dispose());
+                else c.material.dispose();
+            }
+        });
+        ambientLight.dispose();
+        dirLight.dispose();
+        fillLight.dispose();
+        renderTarget.dispose();
+
+        return dataURL;
+    }
+
+    _checkOccupied(x, z, y, ghostTemplate) {
+        const gx = Math.round(x * 100) / 100;
+        const gz = Math.round(z * 100) / 100;
+        
+        const isTopGhost = [
+            STATION_TYPES.PROCESSOR, 
+            STATION_TYPES.INGREDIENT_SOURCE, 
+            STATION_TYPES.ITEM_SOURCE, 
+            STATION_TYPES.PREPLACED_ITEM
+        ].includes(ghostTemplate.type);
+        
+        const isBaseGhost = !isTopGhost;
+        
+        // Base items cannot be placed on top of other items (y > 0.1)
+        if (isBaseGhost && y > 0.1) {
+            return true;
+        }
+
+        let occupied = false;
+        this.scene.traverse(c => {
+            if (occupied) return; // fast exit
+            if (c.parent === this.scene && 
+                c !== this.ghostObject && 
+                c !== this.selectedObject &&
+                c !== this.gridHelper && 
+                c !== this.selectionBox && 
+                c !== this.handlesGroup && 
+                c !== this.orbit && 
+                c.name !== "Floor" &&
+                c.userData && c.userData.type !== 'floor') {
+                
+                const cx = Math.round(c.position.x * 100) / 100;
+                const cz = Math.round(c.position.z * 100) / 100;
+                
+                if (Math.abs(cx - gx) < 0.1 && Math.abs(cz - gz) < 0.1) {
+                    const cIsTop = c.position.y > 0.1;
+                    
+                    if (y < 0.1) {
+                        // Ghost is on the floor. Blocked by any other floor object.
+                        if (!cIsTop) occupied = true;
+                    } else {
+                        // Ghost is on a counter. Blocked by any other top object.
+                        if (cIsTop) occupied = true;
+                    }
+                }
+            }
+        });
+        return occupied;
     }
 }

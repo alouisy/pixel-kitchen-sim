@@ -10,7 +10,8 @@ import {
     createItemMesh, createTableMesh
 } from './voxelBuilder.js';
 import { getTrans } from './i18nData.js';
-import { createItem } from './items.js';
+import { createItem, updatePlateVisuals } from './items.js';
+import { RECIPES } from './gameData.js';
 
 let currentKitchenObjects = [];
 let currentLabels = [];
@@ -267,9 +268,19 @@ export function createStationPrefab(def) {
     group.userData = { ...config, type: 'station', stationType: type, name: name, size: { width: w, height: h, depth: d } };
     if (config) group.userData.config = config;
 
+    if (type === STATION_TYPES.PREPLACED_ITEM && config?.contents) {
+        group.userData.contents = [...config.contents];
+        if (RECIPES[name]) {
+            group.userData.mealName = name;
+        }
+        updatePlateVisuals(group, group, null);
+    }
+
     if (type === STATION_TYPES.PROCESSOR) {
         group.userData.occupiedBy = null;
         if (config?.requiredIngredients) group.userData.internalContents = [];
+    } else if (type === STATION_TYPES.INGREDIENT_SOURCE || type === STATION_TYPES.ITEM_SOURCE) {
+        group.userData.grid = new GridSystem(GRID_UNIT, GRID_UNIT, 0, 0, group);
     }
     return group;
 }
@@ -387,13 +398,22 @@ export function buildKitchen(scene, levelLayout, preloadedModels) {
             // This item will be pickup-able immediately
             const item = createItem(scene, def.config.item, preloadedModels);
             
-            // Adjust position to sit on top of counters (which are at y=0.9)
-            // Or use floor level if no counter under it? Assuming placement on counters for now.
-            // The level layout usually puts items where counters are.
-            // Voxel items have origin at bottom.
-            item.position.set(x, MODULE_HEIGHT + 0.01, z);
+            // Adjust position to sit on top of counters/tables if present, otherwise on the floor
+            const kx = Math.round(x * 100) / 100;
+            const kz = Math.round(z * 100) / 100;
+            const hasSupport = occupancyMap.has(`${kx},${kz}`);
+            const spawnY = hasSupport ? MODULE_HEIGHT + 0.01 : 0.01;
+            item.position.set(x, spawnY, z);
             
             if (def.rotation) item.rotation.y = def.rotation;
+            
+            if (def.config.contents) {
+                item.userData.contents = [...def.config.contents];
+                if (RECIPES[def.name]) {
+                    item.userData.mealName = def.name;
+                }
+                updatePlateVisuals(scene, item, preloadedModels);
+            }
             
             currentKitchenObjects.push(item);
             newStationInteractables.push(item);
@@ -410,6 +430,10 @@ export function buildKitchen(scene, levelLayout, preloadedModels) {
             
             if (def.type !== STATION_TYPES.WALL) {
                 object3D.add(createLabel(scene, def.name, new THREE.Vector3(0,0.5,0), 0));
+            }
+            if (object3D.userData.grid) {
+                object3D.userData.grid.originX = x - (GRID_UNIT/2);
+                object3D.userData.grid.originZ = z - (GRID_UNIT/2);
             }
         }
 

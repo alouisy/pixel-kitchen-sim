@@ -689,6 +689,9 @@ canvas {
     display: flex;
     background: #222;
     border-bottom: 1px solid #555;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: thin;
 }
 
 .tab-btn {
@@ -745,6 +748,20 @@ canvas {
 .library-item-icon {
     font-size: 2em;
     margin-bottom: 5px;
+}
+
+.library-item-icon-3d {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    margin-bottom: 5px;
+    image-rendering: pixelated;
+    filter: drop-shadow(0px 3px 4px rgba(0, 0, 0, 0.4));
+    transition: transform 0.15s ease;
+}
+
+.library-item:hover .library-item-icon-3d {
+    transform: translateY(-2px) scale(1.05);
 }
 
 .library-item-name {
