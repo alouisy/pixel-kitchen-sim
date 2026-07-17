@@ -136,21 +136,48 @@
 
         <!-- Level Metadata Modal (Hidden by default) -->
         <div id="editor-meta-modal" class="editor-panel center-panel" style="display: none;">
-            <h3>Level Settings</h3>
-            <div class="meta-row"><label>Name:</label> <input type="text" id="meta-name"></div>
-            <div class="meta-row"><label>Duration (s):</label> <input type="number" id="meta-duration"></div>
-            <div class="meta-row"><label>Delay (s):</label> <input type="number" id="meta-delay"></div>
-            <div class="meta-row"><label>Max Orders:</label> <input type="number" id="meta-max-orders"></div>
-            <div class="meta-row"><label>1 Star:</label> <input type="number" id="meta-star1"></div>
-            <div class="meta-row"><label>2 Stars:</label> <input type="number" id="meta-star2"></div>
-            <div class="meta-row"><label>3 Stars:</label> <input type="number" id="meta-star3"></div>
-            <div class="meta-row">
-                <label>Meals:</label>
-                <select id="meta-meals" multiple size="4">
-                    <!-- Populated by JS -->
-                </select>
+            <h3>⚙️ Level Settings</h3>
+            
+            <div class="meta-grid">
+                <div class="meta-field">
+                    <label for="meta-name">Level Name:</label>
+                    <input type="text" id="meta-name">
+                </div>
+                <div class="meta-field">
+                    <label for="meta-duration">Duration (s):</label>
+                    <input type="number" id="meta-duration">
+                </div>
+                <div class="meta-field">
+                    <label for="meta-delay">Order Delay (s):</label>
+                    <input type="number" id="meta-delay">
+                </div>
+                <div class="meta-field">
+                    <label for="meta-max-orders">Max Active Orders:</label>
+                    <input type="number" id="meta-max-orders">
+                </div>
             </div>
-            <p style="font-size:0.6em; color:#aaa;">Hold Ctrl to select multiple meals.</p>
+            
+            <div class="meta-section-title">⭐ Star Score Thresholds</div>
+            <div class="star-grid">
+                <div class="meta-field">
+                    <label for="meta-star1">1 Star:</label>
+                    <input type="number" id="meta-star1">
+                </div>
+                <div class="meta-field">
+                    <label for="meta-star2">2 Stars:</label>
+                    <input type="number" id="meta-star2">
+                </div>
+                <div class="meta-field">
+                    <label for="meta-star3">3 Stars:</label>
+                    <input type="number" id="meta-star3">
+                </div>
+            </div>
+            
+            <div class="meta-section-title">🍳 Available Recipes</div>
+            <div id="meta-meals-grid" class="meals-grid">
+                <!-- Populated dynamically as custom tags by JS -->
+            </div>
+            
             <button id="meta-close-btn" class="editor-action-btn">Close</button>
         </div>
 

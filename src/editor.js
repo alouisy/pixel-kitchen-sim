@@ -388,13 +388,21 @@ export class LevelEditor {
         this._renderLibrary('all');
 
         // Populate Meals for Meta
-        const mealsSelect = document.getElementById('meta-meals');
-        Object.keys(RECIPES).forEach(r => {
-            const opt = document.createElement('option');
-            opt.value = r;
-            opt.textContent = r;
-            mealsSelect.appendChild(opt);
-        });
+        const mealsGrid = document.getElementById('meta-meals-grid');
+        if (mealsGrid) {
+            mealsGrid.innerHTML = '';
+            Object.keys(RECIPES).forEach(r => {
+                const tag = document.createElement('div');
+                tag.className = 'meal-tag';
+                tag.dataset.value = r;
+                tag.innerHTML = `<span class="checkbox-box"></span><span class="meal-name">${r}</span>`;
+                tag.addEventListener('click', () => {
+                    tag.classList.toggle('selected');
+                    this.saveMetaFromModal(); // Autosave in memory
+                });
+                mealsGrid.appendChild(tag);
+            });
+        }
 
         // Bind Tab Switching
         const tabs = document.querySelectorAll('.tab-btn');
@@ -578,26 +586,28 @@ export class LevelEditor {
         document.getElementById('meta-star2').value = d.starThresholds ? d.starThresholds[1] : 200;
         document.getElementById('meta-star3').value = d.starThresholds ? d.starThresholds[2] : 300;
         
-        const mealsSelect = document.getElementById('meta-meals');
-        Array.from(mealsSelect.options).forEach(opt => {
-            opt.selected = d.availableMeals ? d.availableMeals.includes(opt.value) : false;
+        const tags = document.querySelectorAll('#meta-meals-grid .meal-tag');
+        tags.forEach(tag => {
+            const val = tag.dataset.value;
+            const isSelected = d.availableMeals ? d.availableMeals.includes(val) : false;
+            tag.classList.toggle('selected', isSelected);
         });
     }
 
     saveMetaFromModal() {
         const d = this.currentLevelData;
         d.name = document.getElementById('meta-name').value;
-        d.duration = parseInt(document.getElementById('meta-duration').value);
-        d.newOrderDelay = parseInt(document.getElementById('meta-delay').value);
-        d.maxActiveOrders = parseInt(document.getElementById('meta-max-orders').value);
+        d.duration = parseInt(document.getElementById('meta-duration').value) || 180;
+        d.newOrderDelay = parseInt(document.getElementById('meta-delay').value) || 15;
+        d.maxActiveOrders = parseInt(document.getElementById('meta-max-orders').value) || 2;
         d.starThresholds = [
-            parseInt(document.getElementById('meta-star1').value),
-            parseInt(document.getElementById('meta-star2').value),
-            parseInt(document.getElementById('meta-star3').value),
+            parseInt(document.getElementById('meta-star1').value) || 100,
+            parseInt(document.getElementById('meta-star2').value) || 200,
+            parseInt(document.getElementById('meta-star3').value) || 300,
         ];
         
-        const mealsSelect = document.getElementById('meta-meals');
-        d.availableMeals = Array.from(mealsSelect.selectedOptions).map(opt => opt.value);
+        const selectedTags = Array.from(document.querySelectorAll('#meta-meals-grid .meal-tag.selected'));
+        d.availableMeals = selectedTags.map(tag => tag.dataset.value);
 
         document.getElementById('editor-current-level-name').textContent = d.name;
         this.validateLevel();
