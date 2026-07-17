@@ -162,11 +162,29 @@ export class InteractionManager {
         for (const intersect of intersects) {
             if (intersect.distance > INTERACTION_DISTANCE) continue;
             let obj = intersect.object;
+            
+            // Ignore purely visual UI labels/sprites from the raycast target selection
+            if (obj.isSprite) continue;
+            
             while (obj.parent && obj !== this.scene) {
                 if (this.interactables.includes(obj) || obj === this.floorMesh) break;
                 obj = obj.parent;
             }
             if (obj === this.player.getHeldItem()) continue;
+            
+            // Redirect from Counter/Table to any Station placed on top of it at the same grid position (X/Z coordinates)
+            if (obj.userData && (obj.userData.stationType === STATION_TYPES.COUNTER || obj.userData.stationType === STATION_TYPES.TABLE)) {
+                const stationOnTop = this.stations.find(s => 
+                    s.userData && 
+                    s.userData.type === 'station' && 
+                    Math.abs(s.position.x - obj.position.x) < 0.1 && 
+                    Math.abs(s.position.z - obj.position.z) < 0.1
+                );
+                if (stationOnTop) {
+                    obj = stationOnTop;
+                }
+            }
+            
             return { object: obj, point: intersect.point };
         }
         return null;

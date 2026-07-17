@@ -1009,9 +1009,9 @@ function confirmStartLevel() {
 function resetWorldState() {
     if (player) player.forceDropItem();
     if (interactionManager) {
-        if (interactionManager.currentlyHighlighted) {
-            interactionManager.revertHighlight(interactionManager.currentlyHighlighted);
-            interactionManager.currentlyHighlighted = null;
+        if (interactionManager.currentlyHighlightedObject) {
+            interactionManager.revertObjectHighlight(interactionManager.currentlyHighlightedObject);
+            interactionManager.currentlyHighlightedObject = null;
         }
         interactionManager.clearDynamicItems();
     }
@@ -1083,7 +1083,7 @@ function animate() {
                 if (uiManager) uiManager.updateHolding(player.getHeldItemName());
             } else {
                  if (uiManager) uiManager.updateHolding(null);
-                 if (interactionManager.currentlyHighlighted) { interactionManager.revertHighlight(interactionManager.currentlyHighlighted); interactionManager.currentlyHighlighted = null; }
+                 if (interactionManager.currentlyHighlightedObject) { interactionManager.revertObjectHighlight(interactionManager.currentlyHighlightedObject); interactionManager.currentlyHighlightedObject = null; }
             }
         }
     }
