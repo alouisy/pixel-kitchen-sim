@@ -917,9 +917,9 @@ export function createItemMesh(type, contents = [], mealName = null) {
         vb.addBox(10, 4, 7, 12, 4, 8, PALETTE.GLASS_BLUE);
     }
     // --- Completed Meals ---
-    else if (type === 'Hamburger' || type === 'Cheeseburger') {
-        const hasCheese = type === 'Cheeseburger';
-        const cx = 7.5, cz = 7.5;
+    else if (type === 'Hamburger' || type === 'Cheeseburger' || type === 'Cheeseburger Combo') {
+        const hasCheese = type.includes('Cheeseburger');
+        const cx = (type === 'Cheeseburger Combo') ? 5.5 : 7.5, cz = 7.5;
         for (let y = 0; y <= 1; y++) {
             let r = y === 0 ? 4.2 : 4.8;
             for (let x = 2; x <= 13; x++) {
@@ -942,9 +942,11 @@ export function createItemMesh(type, contents = [], mealName = null) {
         }
         let currentY = 4;
         if (hasCheese) {
-            vb.addBox(3, currentY, 3, 12, currentY, 12, PALETTE.CHEESE);
-            vb.addBox(3, currentY-1, 6, 3, currentY, 9, PALETTE.CHEESE); 
-            vb.addBox(12, currentY-1, 6, 12, currentY, 9, PALETTE.CHEESE); 
+            const lx = Math.floor(cx - 4.5);
+            const rx = Math.floor(cx + 4.5);
+            vb.addBox(lx, currentY, 3, rx, currentY, 12, PALETTE.CHEESE);
+            vb.addBox(lx, currentY-1, 6, lx, currentY, 9, PALETTE.CHEESE); 
+            vb.addBox(rx, currentY-1, 6, rx, currentY, 9, PALETTE.CHEESE); 
             currentY++;
         }
         for (let y = currentY; y <= currentY+2; y++) {
@@ -960,6 +962,14 @@ export function createItemMesh(type, contents = [], mealName = null) {
                     }
                 }
             }
+        }
+        if (type === 'Cheeseburger Combo') {
+            // Draw some fries on the side
+            vb.addBox(11, 0, 4, 12, 2, 5, PALETTE.FRIES_COOKED);
+            vb.addBox(13, 0, 5, 14, 3, 6, PALETTE.FRIES_COOKED);
+            vb.addBox(12, 0, 7, 13, 2, 8, PALETTE.FRIES_COOKED);
+            vb.addBox(11, 1, 6, 13, 1, 9, PALETTE.FRIES_COOKED);
+            vb.addBox(12, 0, 9, 14, 2, 10, PALETTE.FRIES_COOKED);
         }
     }
     else if (type === 'French Fries') {
@@ -1014,10 +1024,20 @@ export function createItemMesh(type, contents = [], mealName = null) {
         };
         ring(0, 0, 0); ring(1, 1, -1); ring(2, -1, 1); ring(3, 0, 0);
     }
-    else if (type === 'Chicken Tenders') {
-        vb.addBox(4, 0, 4, 10, 2, 6, PALETTE.WOOD_BOARD);
-        vb.addBox(6, 1, 7, 12, 3, 9, PALETTE.WOOD_BOARD);
-        vb.addBox(3, 0, 9, 9, 2, 11, PALETTE.WOOD_BOARD);
+    else if (type === 'Chicken Tenders' || type === 'Chicken Tenders & Fries') {
+        // Chicken tenders on the left side
+        vb.addBox(2, 0, 4, 8, 2, 6, PALETTE.CHICKEN_COOKED);
+        vb.addBox(4, 1, 7, 10, 3, 9, PALETTE.CHICKEN_COOKED);
+        vb.addBox(2, 0, 9, 8, 2, 11, PALETTE.CHICKEN_COOKED);
+        
+        if (type === 'Chicken Tenders & Fries') {
+            // Fries on the right side
+            vb.addBox(10, 0, 4, 11, 3, 5, PALETTE.FRIES_COOKED);
+            vb.addBox(12, 0, 5, 13, 4, 6, PALETTE.FRIES_COOKED);
+            vb.addBox(13, 0, 7, 14, 3, 8, PALETTE.FRIES_COOKED);
+            vb.addBox(11, 1, 6, 13, 2, 9, PALETTE.FRIES_COOKED);
+            vb.addBox(10, 0, 8, 11, 4, 9, PALETTE.FRIES_COOKED);
+        }
     }
     else if (type === 'BLT Sandwich') {
         vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.WOOD_DARK);
@@ -1045,9 +1065,18 @@ export function createItemMesh(type, contents = [], mealName = null) {
         vb.addBox(5, 1, 8, 5, 3, 8, PALETTE.WOOD_DARK);
         vb.addBox(10, 0, 6, 10, 3, 6, PALETTE.WOOD_DARK);
     }
-    else if (type === 'Omelette') {
+    else if (type === 'Omelette' || type === 'Cheese Omelette') {
         vb.addBox(2, 0, 5, 13, 2, 10, PALETTE.EGG_YOLK);
         vb.addBox(3, 2, 6, 12, 3, 9, PALETTE.EGG_YOLK);
+        
+        if (type === 'Cheese Omelette') {
+            // Cheese melting out / on top
+            vb.addBox(4, 2, 4, 6, 2, 5, PALETTE.CHEESE);
+            vb.addBox(10, 2, 4, 11, 2, 5, PALETTE.CHEESE);
+            vb.addBox(6, 3, 6, 9, 3, 8, PALETTE.CHEESE);
+        }
+        
+        // Chives (green specks)
         vb.addBox(5, 3, 7, 5, 3, 7, 0x2e7d32);
         vb.addBox(8, 3, 8, 8, 3, 8, 0x2e7d32);
         vb.addBox(10, 3, 6, 10, 3, 6, 0x2e7d32);
@@ -1445,5 +1474,19 @@ export function createKitchenLampMesh() {
     vb.addBox(6, 1, 6, 9, 2, 9, 0xffeb3b);
     const mesh = vb.buildMesh();
     mesh.position.y = GRID_UNIT / 2;
+    return mesh;
+}
+
+export function createCoatingStationMesh() {
+    const vb = new VoxelBuilder();
+    // Metal tray/container base
+    vb.addBox(2, 0, 2, 13, 2, 13, PALETTE.METAL_DARK);
+    // Breading/panure powder inside the container
+    vb.addBox(3, 2, 3, 12, 4, 12, PALETTE.PIZZA_CRUST); // golden flour/crumb color
+    // Highlights in the breadcrumbs
+    vb.addBox(4, 4, 4, 6, 4, 6, PALETTE.CHEESE); // brighter yellow crumbs
+    vb.addBox(9, 4, 8, 10, 4, 9, PALETTE.CHEESE);
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT/2;
     return mesh;
 }

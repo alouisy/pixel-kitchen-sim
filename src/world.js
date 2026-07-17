@@ -8,7 +8,7 @@ import {
     createIngredientBinMesh, createPlateStackMesh, createCupStackMesh, createBowlStackMesh,
     createToasterMesh, createMixerMesh, createBlenderMesh, createDoughPressMesh, createPizzaOvenMesh,
     createItemMesh, createTableMesh,
-    createExhaustHoodMesh, createPlantMesh, createKitchenLampMesh
+    createExhaustHoodMesh, createPlantMesh, createKitchenLampMesh, createCoatingStationMesh
 } from './voxelBuilder.js';
 import { getTrans } from './i18nData.js';
 import { createItem, updatePlateVisuals } from './items.js';
@@ -297,6 +297,9 @@ export function createStationPrefab(def, theme) {
     }
     else if (n.includes('oven') || n.includes('pizza')) {
         mesh = createPizzaOvenMesh();
+    }
+    else if (n.includes('coating') || n.includes('panure')) {
+        mesh = createCoatingStationMesh();
     }
     else {
         // Generic fallback

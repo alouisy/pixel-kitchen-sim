@@ -99,17 +99,20 @@ export const RECIPES = {
             ]
         }
     },
-    'Cheeseburger': {
-        ingredients: ['bun', 'cheese_slice', 'cooked_patty'].sort(),
-        timeLimit: 110, baseScore: 120, penalty: 60,
+    'Cheeseburger Combo': {
+        ingredients: ['bun', 'cheese_slice', 'cooked_fries', 'cooked_patty'].sort(),
+        timeLimit: 130, baseScore: 120, penalty: 60,
         instructions: {
             en: [
                 "Get Patty (Bin)",
                 "Use Grill -> Cooked Patty",
                 "Get Bun (Rack)",
                 "Get Cheese Slice (Fridge)",
+                "Get Potato (Bin)",
+                "Use Cutting Board -> Raw Fries",
+                "Use Fryer -> Cooked Fries",
                 "Get Plate (Stack)",
-                "Combine Plate + Bun + Cooked Patty + Cheese Slice (Assembly)",
+                "Combine Plate + Bun + Cooked Patty + Cheese Slice + Cooked Fries (Assembly)",
                 "Serve (Counter)"
             ],
             fr: [
@@ -117,8 +120,11 @@ export const RECIPES = {
                 "Utiliser Grill -> Steak Cuit",
                 "Prendre Pain (Étagère)",
                 "Prendre Tranche Fromage (Frigo)",
+                "Prendre Patate (Bac)",
+                "Utiliser Planche -> Frites Crues",
+                "Utiliser Friteuse -> Frites Cuites",
                 "Prendre Assiette (Pile)",
-                "Combiner Assiette + Pain + Steak Cuit + Fromage (Assemblage)",
+                "Combiner Assiette + Pain + Steak Cuit + Fromage + Frites Cuites (Assemblage)",
                 "Servir (Comptoir)"
             ],
             es: [
@@ -126,8 +132,11 @@ export const RECIPES = {
                 "Usar Parrilla -> Hamburguesa Cocida",
                 "Coger Pan (Estante)",
                 "Coger Loncha Queso (Nevera)",
+                "Coger Patata (Contenedor)",
+                "Usar Tabla -> Patatas Crudas",
+                "Usar Freidora -> Patatas Cocidas",
                 "Coger Plato (Pila)",
-                "Combinar Plato + Pan + Hamburguesa Cocida + Queso (Ensamblaje)",
+                "Combinar Plato + Pan + Hamburguesa Cocida + Queso + Patatas Cocidas (Ensamblaje)",
                 "Servir (Mostrador)"
             ]
         }
@@ -169,38 +178,47 @@ export const RECIPES = {
             ]
         }
     },
-    'Chicken Tenders': {
-        ingredients: ['cooked_chicken_tenders'].sort(),
-        timeLimit: 95, baseScore: 90, penalty: 45,
-        instructions: { // Assuming Chicken -> Cut -> Coat -> Fry
+    'Chicken Tenders & Fries': {
+        ingredients: ['cooked_chicken_tenders', 'cooked_fries'].sort(),
+        timeLimit: 120, baseScore: 120, penalty: 45,
+        instructions: { // Assuming Chicken -> Cut -> Coat -> Fry, plus fries
             en: [
                 "Get Raw Chicken (Source)",
                 "Use Cutting Board -> Raw Chicken Strips",
                 "Get Coating Mix (Source)",
-                "Use Coating Station w/ Strips -> Coated Chicken Strips", // Needs station
+                "Use Coating Station w/ Strips -> Coated Chicken Strips",
                 "Use Fryer -> Cooked Chicken Tenders",
+                "Get Potato (Bin)",
+                "Use Cutting Board -> Raw Fries",
+                "Use Fryer -> Cooked Fries",
                 "Get Plate (Stack)",
-                "Combine Plate + Cooked Chicken Tenders (Assembly)",
+                "Combine Plate + Cooked Chicken Tenders + Cooked Fries (Assembly)",
                 "Serve (Counter)"
             ],
             fr: [
                 "Prendre Poulet Cru (Source)",
                 "Utiliser Planche -> Lanières Poulet Crues",
                 "Prendre Panure (Source)",
-                "Utiliser Station Panure avec Lanières -> Lanières Panées", // Needs station
+                "Utiliser Station Panure avec Lanières -> Lanières Panées",
                 "Utiliser Friteuse -> Lanières Cuites",
+                "Prendre Patate (Bac)",
+                "Utiliser Planche -> Frites Crues",
+                "Utiliser Friteuse -> Frites Cuites",
                 "Prendre Assiette (Pile)",
-                "Combiner Assiette + Lanières Cuites (Assemblage)",
+                "Combiner Assiette + Lanières Cuites + Frites Cuites (Assemblage)",
                 "Servir (Comptoir)"
             ],
             es: [
                 "Coger Pollo Crudo (Fuente)",
                 "Usar Tabla -> Tiras Pollo Crudas",
                 "Coger Mezcla Rebozar (Fuente)",
-                "Usar Estación Rebozado con Tiras -> Tiras Rebozadas", // Needs station
+                "Usar Estación Rebozado con Tiras -> Tiras Rebozadas",
                 "Usar Freidora -> Tiras Cocidas",
+                "Coger Patata (Contenedor)",
+                "Usar Tabla -> Patatas Crudas",
+                "Usar Freidora -> Patatas Cocidas",
                 "Coger Plato (Pila)",
-                "Combinar Plato + Tiras Cocidas (Ensamblaje)",
+                "Combinar Plato + Tiras Cocidas + Patatas Cocidas (Ensamblaje)",
                 "Servir (Mostrador)"
             ]
         }
@@ -316,32 +334,35 @@ export const RECIPES = {
             ]
         }
     },
-    'Omelette': {
-        ingredients: ['cooked_omelette'].sort(),
+    'Cheese Omelette': {
+        ingredients: ['cheese_slice', 'cooked_omelette'].sort(),
         timeLimit: 90, baseScore: 80, penalty: 40,
         instructions: {
             en: [
                 "Get Egg (Source)",
+                "Get Cheese Slice (Fridge)",
                 "Use Mixer -> Omelette Mix",
                 "Use Griddle -> Cooked Omelette",
                 "Get Plate (Stack)",
-                "Combine Plate + Cooked Omelette (Assembly)",
+                "Combine Plate + Cooked Omelette + Cheese Slice (Assembly)",
                 "Serve (Counter)"
             ],
             fr: [
                 "Prendre Oeuf (Source)",
+                "Prendre Tranche Fromage (Frigo)",
                 "Utiliser Mixeur -> Mélange Omelette",
                 "Utiliser Plaque -> Omelette Cuite",
                 "Prendre Assiette (Pile)",
-                "Combiner Assiette + Omelette Cuite (Assemblage)",
+                "Combiner Assiette + Omelette Cuite + Fromage (Assemblage)",
                 "Servir (Comptoir)"
             ],
             es: [
                 "Coger Huevo (Fuente)",
+                "Coger Loncha Queso (Nevera)",
                 "Usar Batidora -> Mezcla Tortilla",
                 "Usar Plancha -> Tortilla Cocida",
                 "Coger Plato (Pila)",
-                "Combinar Plato + Tortilla Cocida (Ensamblaje)",
+                "Combinar Plato + Tortilla Cocida + Queso (Ensamblaje)",
                 "Servir (Mostrador)"
             ]
         }

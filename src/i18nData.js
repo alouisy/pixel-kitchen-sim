@@ -10,13 +10,13 @@ export const DATA_TRANSLATIONS = {
         "French Fries": "French Fries",
         "Salad": "Salad",
         "Hamburger": "Hamburger",
-        "Cheeseburger": "Cheeseburger",
+        "Cheeseburger Combo": "Cheeseburger Combo",
         "Onion Rings": "Onion Rings",
-        "Chicken Tenders": "Chicken Tenders",
+        "Chicken Tenders & Fries": "Chicken Tenders & Fries",
         "BLT Sandwich": "BLT Sandwich",
         "Grilled Cheese Sandwich": "Grilled Cheese Sandwich",
         "Pancakes": "Pancakes",
-        "Omelette": "Omelette",
+        "Cheese Omelette": "Cheese Omelette",
         "Fruit & Yogurt Bowl": "Fruit & Yogurt Bowl",
         "Smoothie": "Smoothie",
         "Pizza Margherita": "Pizza Margherita",
@@ -54,6 +54,11 @@ export const DATA_TRANSLATIONS = {
         "chopped_tomato": "Chopped Tomato",
         
         // Stations
+        "Potato Bin": "Potato Bin",
+        "Cutting Board": "Cutting Board",
+        "Deep Fryer": "Deep Fryer",
+        "Plate Stack": "Plate Stack",
+        "Coating Station": "Coating Station",
         "PotatoBin": "Potato Bin",
         "CuttingBoard": "Cutting Board",
         "Fryer": "Fryer",
@@ -89,13 +94,13 @@ export const DATA_TRANSLATIONS = {
         "French Fries": "Frites",
         "Salad": "Salade",
         "Hamburger": "Hamburger",
-        "Cheeseburger": "Cheeseburger",
+        "Cheeseburger Combo": "Menu Cheeseburger",
         "Onion Rings": "Rondelles d'Oignon",
-        "Chicken Tenders": "Aiguillettes",
+        "Chicken Tenders & Fries": "Aiguillettes & Frites",
         "BLT Sandwich": "Sandwich BLT",
-        "Grilled Cheese Sandwich": "Croque-monsieur",
+        "Grilled Cheese Sandwich": "Grilled Cheese",
         "Pancakes": "Pancakes",
-        "Omelette": "Omelette",
+        "Cheese Omelette": "Omelette au Fromage",
         "Fruit & Yogurt Bowl": "Yaourt aux Fruits",
         "Smoothie": "Smoothie",
         "Pizza Margherita": "Pizza Margherita",
@@ -118,8 +123,8 @@ export const DATA_TRANSLATIONS = {
         "cooked_pancakes": "Pancakes Cuits",
         "cooked_chicken_tenders": "Aiguillettes Cuites",
         "cooked_onion_rings": "Rondelles Cuites",
-        "grilled_cheese_cooked": "Croque-monsieur Cuit",
-        "grilled_cheese_raw": "Croque-monsieur Cru",
+        "grilled_cheese_cooked": "Grilled Cheese Cuit",
+        "grilled_cheese_raw": "Grilled Cheese Cru",
         "pizza_margherita_raw": "Pizza Margherita Crue",
         "cooked_pizza_margherita": "Pizza Margherita Cuite",
 
@@ -132,6 +137,11 @@ export const DATA_TRANSLATIONS = {
         "tomato": "Tomate",
         "chopped_tomato": "Tomate Hachée",
 
+        "Potato Bin": "Bac Patates",
+        "Cutting Board": "Planche de Découpe",
+        "Deep Fryer": "Friteuse",
+        "Plate Stack": "Assiettes",
+        "Coating Station": "Station Panure",
         "PotatoBin": "Bac Patates",
         "CuttingBoard": "Planche",
         "Fryer": "Friteuse",
@@ -166,13 +176,13 @@ export const DATA_TRANSLATIONS = {
         "French Fries": "Patatas Fritas",
         "Salad": "Ensalada",
         "Hamburger": "Hamburguesa",
-        "Cheeseburger": "Hamburguesa con Queso",
+        "Cheeseburger Combo": "Menú Cheeseburger",
         "Onion Rings": "Aros de Cebolla",
-        "Chicken Tenders": "Tiras de Pollo",
+        "Chicken Tenders & Fries": "Tiras de Pollo y Patatas",
         "BLT Sandwich": "Sándwich BLT",
         "Grilled Cheese Sandwich": "Sándwich de Queso",
         "Pancakes": "Tortitas",
-        "Omelette": "Tortilla francesa",
+        "Cheese Omelette": "Tortilla con Queso",
         "Fruit & Yogurt Bowl": "Bol de Yogur y Fruta",
         "Smoothie": "Batido",
         "Pizza Margherita": "Pizza Margherita",
@@ -209,6 +219,11 @@ export const DATA_TRANSLATIONS = {
         "tomato": "Tomate",
         "chopped_tomato": "Tomate Picado",
 
+        "Potato Bin": "Patatas",
+        "Cutting Board": "Tabla de Cortar",
+        "Deep Fryer": "Freidora",
+        "Plate Stack": "Platos",
+        "Coating Station": "Estación de Rebozado",
         "PotatoBin": "Patatas",
         "CuttingBoard": "Tabla",
         "Fryer": "Freidora",
@@ -238,13 +253,22 @@ export const DATA_TRANSLATIONS = {
 };
 
 export function getTrans(key, lang = 'en') {
+    if (!key) return '';
     // 1. Try direct key match
     if (DATA_TRANSLATIONS[lang] && DATA_TRANSLATIONS[lang][key]) {
         return DATA_TRANSLATIONS[lang][key];
     }
+    // Try clean key match (without spaces)
+    const cleanKey = key.replace(/\s+/g, '');
+    if (DATA_TRANSLATIONS[lang] && DATA_TRANSLATIONS[lang][cleanKey]) {
+        return DATA_TRANSLATIONS[lang][cleanKey];
+    }
     // 2. Fallback to English
     if (DATA_TRANSLATIONS['en'][key]) {
         return DATA_TRANSLATIONS['en'][key];
+    }
+    if (DATA_TRANSLATIONS['en'][cleanKey]) {
+        return DATA_TRANSLATIONS['en'][cleanKey];
     }
     // 3. Return key as is (debug)
     return key;

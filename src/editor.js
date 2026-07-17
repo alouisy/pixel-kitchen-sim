@@ -4,6 +4,103 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT, ITEM_TYPES } from './constants.js';
 import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh, resizeWall, refreshSmartObjects } from './world.js';
 import { RECIPES } from './gameData.js';
+import { getTrans } from './i18nData.js';
+
+// Editor translations dictionary
+const EDITOR_TRANSLATIONS = {
+    en: {
+        title: "🏗️ LEVEL EDITOR: ",
+        controls_hint: "<span><b>Left Click:</b> Place</span> | <span><b>Right Drag:</b> Pan</span> | <span><b>T:</b> Save JSON</span>",
+        btn_settings: "⚙️ Level Settings",
+        btn_save_json: "💾 Save JSON",
+        btn_exit: "Exit",
+        map_status: "📋 MAP STATUS",
+        playable: "✓ Playable",
+        issues_detected: "⚠️ Issues Detected",
+        setup_incomplete: "⚠️ Setup Incomplete",
+        playable_msg: "Level is playable! All required stations, ingredients, and utensils are present on the map.",
+        no_recipes_msg: "No recipes selected. Click level settings to add them.",
+        missing_objects: "Missing Required Objects:",
+        required_by: "Required by: ",
+        warning_export: "⚠️ Warning: This level is missing required objects for the selected recipes. It may not be playable.\n\nAre you sure you want to export?",
+
+        settings_title: "⚙️ Level Settings",
+        lbl_level_name: "Level Name:",
+        lbl_duration: "Duration (s):",
+        lbl_order_delay: "Order Delay (s):",
+        lbl_max_orders: "Max Active Orders:",
+        sec_stars: "⭐ Star Score Thresholds",
+        lbl_star1: "1 Star:",
+        lbl_star2: "2 Stars:",
+        lbl_star3: "3 Stars:",
+        sec_recipes: "🍳 Available Recipes",
+        btn_close: "Close",
+
+        tab_all: "All",
+        tab_arch: "Walls/Floors",
+        tab_furniture: "Furniture",
+        tab_stations: "Stations",
+        tab_sources: "Sources",
+        tab_utensils: "Utensils",
+        tab_ingredients: "Ingredients",
+        tab_dishes: "Dishes",
+        tab_decorations: "Decorations",
+
+        inspector_title: "Selected Object",
+        btn_rotate: "🔄 Rotate",
+        btn_clone: "📋 Duplicate",
+        btn_delete: "🗑️ Delete",
+        lbl_config: "Config (JSON):",
+        btn_save_config: "💾 Save Config",
+        inspector_none: "None"
+    },
+    fr: {
+        title: "🏗️ ÉDITEUR DE NIVEAU : ",
+        controls_hint: "<span><b>Clic Gauche :</b> Placer</span> | <span><b>Clic Droit Glisser :</b> Déplacer</span> | <span><b>T :</b> Enregistrer le JSON</span>",
+        btn_settings: "⚙️ Paramètres",
+        btn_save_json: "💾 Enregistrer",
+        btn_exit: "Quitter",
+        map_status: "📋 STATUS DE LA MAP",
+        playable: "✓ Jouable",
+        issues_detected: "⚠️ Problèmes détectés",
+        setup_incomplete: "⚠️ Config incomplète",
+        playable_msg: "Le niveau est jouable ! Toutes les stations, ingrédients et ustensiles requis sont présents sur le niveau.",
+        no_recipes_msg: "Aucune recette sélectionnée. Cliquez sur Paramètres pour en ajouter.",
+        missing_objects: "Objets requis manquants :",
+        required_by: "Requis par : ",
+        warning_export: "⚠️ Attention : Ce niveau ne contient pas tous les objets requis pour les recettes sélectionnées. Il risque de ne pas être jouable.\n\nVoulez-vous vraiment l'exporter ?",
+
+        settings_title: "⚙️ Paramètres du niveau",
+        lbl_level_name: "Nom du niveau :",
+        lbl_duration: "Durée (s) :",
+        lbl_order_delay: "Délai des commandes (s) :",
+        lbl_max_orders: "Commandes actives max :",
+        sec_stars: "⭐ Seuils des étoiles",
+        lbl_star1: "1 Étoile :",
+        lbl_star2: "2 Étoiles :",
+        lbl_star3: "3 Étoiles :",
+        sec_recipes: "🍳 Recettes disponibles",
+        btn_close: "Fermer",
+
+        tab_all: "Tout",
+        tab_arch: "Murs/Sols",
+        tab_furniture: "Meubles",
+        tab_stations: "Stations",
+        tab_sources: "Bacs ingrédients",
+        tab_utensils: "Ustensiles",
+        tab_ingredients: "Ingrédients (Unité)",
+        tab_dishes: "Plats",
+        tab_decorations: "Décorations",
+
+        inspector_title: "Objet sélectionné",
+        btn_rotate: "🔄 Pivoter",
+        btn_clone: "📋 Dupliquer",
+        btn_delete: "🗑️ Supprimer",
+        lbl_config: "Configuration (JSON) :",
+        btn_save_config: "💾 Enregistrer",
+        inspector_none: "Aucun"
+    }
+};
 
 // Mappings for validation check descriptions
 const FRIENDLY_NAMES = {
@@ -29,12 +126,12 @@ const FRIENDLY_NAMES = {
     'pizza_dough': 'Pizza Dough (or preplaced Pizza Dough)',
     'tomato_sauce': 'Tomato Sauce (or preplaced Tomato Sauce)',
     'shredded_mozzarella': 'Mozzarella Bin (or preplaced Mozzarella)',
-    
+
     // Containers
     'plate': 'Plate Stack (or preplaced Plate)',
     'bowl': 'Bowl Stack (or preplaced Bowl)',
     'cup': 'Cup Stack (or preplaced Cup)',
-    
+
     // General
     'serving': 'Serving Pass'
 };
@@ -46,15 +143,15 @@ const RECIPE_REQUIREMENTS = {
         processors: [
             {
                 name: 'Cutting Board',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('potato') || obj.name?.toLowerCase().includes('cutting'))
                 )
             },
             {
                 name: 'Deep Fryer',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('raw_fries') || obj.name?.toLowerCase().includes('fryer'))
                 )
             }
@@ -66,8 +163,8 @@ const RECIPE_REQUIREMENTS = {
         processors: [
             {
                 name: 'Cutting Board',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('lettuce') || obj.config?.processes?.includes('tomato') || obj.name?.toLowerCase().includes('cutting'))
                 )
             }
@@ -79,22 +176,36 @@ const RECIPE_REQUIREMENTS = {
         processors: [
             {
                 name: 'Stove Top',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('patty') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Cheeseburger': {
-        ingredients: ['bun', 'patty', 'cheese_slice'],
+    'Cheeseburger Combo': {
+        ingredients: ['bun', 'patty', 'cheese_slice', 'potato'],
         processors: [
             {
                 name: 'Stove Top',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('patty') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                )
+            },
+            {
+                name: 'Cutting Board',
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
+                    (obj.config?.processes?.includes('potato') || obj.name?.toLowerCase().includes('cutting'))
+                )
+            },
+            {
+                name: 'Deep Fryer',
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
+                    (obj.config?.processes?.includes('raw_fries') || obj.name?.toLowerCase().includes('fryer'))
                 )
             }
         ],
@@ -105,15 +216,15 @@ const RECIPE_REQUIREMENTS = {
         processors: [
             {
                 name: 'Cutting Board',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('onion') || obj.name?.toLowerCase().includes('cutting'))
                 )
             },
             {
                 name: 'Coating Station',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (
                         obj.config?.processes?.includes('onion_rings_raw') ||
                         obj.config?.result?.['onion_rings_raw'] === 'onion_rings_coated' ||
@@ -125,28 +236,28 @@ const RECIPE_REQUIREMENTS = {
             },
             {
                 name: 'Deep Fryer',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('onion_rings_coated') || obj.name?.toLowerCase().includes('fryer'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Chicken Tenders': {
-        ingredients: ['raw_chicken', 'coating_mix'],
+    'Chicken Tenders & Fries': {
+        ingredients: ['raw_chicken', 'coating_mix', 'potato'],
         processors: [
             {
                 name: 'Cutting Board',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('raw_chicken') || obj.name?.toLowerCase().includes('cutting'))
                 )
             },
             {
                 name: 'Coating Station',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (
                         obj.config?.processes?.includes('raw_chicken_strips') ||
                         obj.config?.result?.['raw_chicken_strips'] === 'coated_chicken_strips' ||
@@ -158,8 +269,8 @@ const RECIPE_REQUIREMENTS = {
             },
             {
                 name: 'Deep Fryer',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('coated_chicken_strips') || obj.name?.toLowerCase().includes('fryer'))
                 )
             }
@@ -171,22 +282,22 @@ const RECIPE_REQUIREMENTS = {
         processors: [
             {
                 name: 'Toaster',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('bread_slice') || obj.name?.toLowerCase().includes('toaster'))
                 )
             },
             {
                 name: 'Stove Top',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('raw_bacon') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
                 )
             },
             {
                 name: 'Cutting Board',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('lettuce') || obj.config?.processes?.includes('tomato') || obj.name?.toLowerCase().includes('cutting'))
                 )
             }
@@ -198,8 +309,8 @@ const RECIPE_REQUIREMENTS = {
         processors: [
             {
                 name: 'Stove Top',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('grilled_cheese_raw') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
                 )
             }
@@ -211,35 +322,35 @@ const RECIPE_REQUIREMENTS = {
         processors: [
             {
                 name: 'Stand Mixer',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('pancake_mix') || obj.name?.toLowerCase().includes('mixer'))
                 )
             },
             {
                 name: 'Stove Top',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('pancake_batter') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Omelette': {
-        ingredients: ['egg'],
+    'Cheese Omelette': {
+        ingredients: ['egg', 'cheese_slice'],
         processors: [
             {
                 name: 'Stand Mixer',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('egg') || obj.name?.toLowerCase().includes('mixer'))
                 )
             },
             {
                 name: 'Stove Top',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('omelette_mix') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
                 )
             }
@@ -251,8 +362,8 @@ const RECIPE_REQUIREMENTS = {
         processors: [
             {
                 name: 'Cutting Board',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('banana') || obj.config?.processes?.includes('strawberry') || obj.name?.toLowerCase().includes('cutting'))
                 )
             }
@@ -264,15 +375,15 @@ const RECIPE_REQUIREMENTS = {
         processors: [
             {
                 name: 'Cutting Board',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('banana') || obj.config?.processes?.includes('strawberry') || obj.name?.toLowerCase().includes('cutting'))
                 )
             },
             {
                 name: 'Blender',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.outputItem === 'smoothie_ready' || obj.name?.toLowerCase().includes('blender'))
                 )
             }
@@ -284,15 +395,15 @@ const RECIPE_REQUIREMENTS = {
         processors: [
             {
                 name: 'Dough Press',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('pizza_dough') || obj.name?.toLowerCase().includes('press'))
                 )
             },
             {
                 name: 'Pizza Oven',
-                check: (objects) => objects.some(obj => 
-                    obj.type === 'processor' && 
+                check: (objects) => objects.some(obj =>
+                    obj.type === 'processor' &&
                     (obj.config?.processes?.includes('pizza_margherita_raw') || obj.name?.toLowerCase().includes('oven'))
                 )
             }
@@ -310,17 +421,18 @@ export class LevelEditor {
         this.onExit = onExit;
         this.enabled = false;
         this.raycaster = new THREE.Raycaster();
-        
+
         // Loaded Level Metadata
         this.currentLevelData = {};
         this.validationWarningsCount = 0;
+        this.lang = 'en';
 
         // State
         this.selectedObject = null;
         this.ghostObject = null; // Object currently being placed
         this.isDragging = false;
         this.placementMode = false; // If true, we are trying to place a new item
-        
+
         // Resize/Extend State
         this.activeHandle = null;
         this.startDragPos = new THREE.Vector3();
@@ -388,21 +500,7 @@ export class LevelEditor {
         this._renderLibrary('all');
 
         // Populate Meals for Meta
-        const mealsGrid = document.getElementById('meta-meals-grid');
-        if (mealsGrid) {
-            mealsGrid.innerHTML = '';
-            Object.keys(RECIPES).forEach(r => {
-                const tag = document.createElement('div');
-                tag.className = 'meal-tag';
-                tag.dataset.value = r;
-                tag.innerHTML = `<span class="checkbox-box"></span><span class="meal-name">${r}</span>`;
-                tag.addEventListener('click', () => {
-                    tag.classList.toggle('selected');
-                    this.saveMetaFromModal(); // Autosave in memory
-                });
-                mealsGrid.appendChild(tag);
-            });
-        }
+        this._populateMealsGrid();
 
         // Bind Tab Switching
         const tabs = document.querySelectorAll('.tab-btn');
@@ -449,26 +547,27 @@ export class LevelEditor {
 
     _renderLibrary(category) {
         this.libraryContent.innerHTML = '';
-        const items = category === 'all' 
-            ? CATALOG_ITEMS 
+        const items = category === 'all'
+            ? CATALOG_ITEMS
             : CATALOG_ITEMS.filter(i => i.category === category);
 
         items.forEach(item => {
             const el = document.createElement('div');
             el.className = 'library-item';
-            
+
             const imgSrc = this.generateThumbnail(item);
 
+            const displayName = this.translateText(item.name);
             el.innerHTML = `
-                <img class="library-item-icon-3d" src="${imgSrc}" alt="${item.name}">
-                <div class="library-item-name">${item.name}</div>
+                <img class="library-item-icon-3d" src="${imgSrc}" alt="${displayName}">
+                <div class="library-item-name">${displayName}</div>
             `;
-            
+
             el.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent canvas click
                 this.startPlacement(item);
             });
-            
+
             this.libraryContent.appendChild(el);
         });
     }
@@ -478,32 +577,32 @@ export class LevelEditor {
         this.renderer.domElement.addEventListener('pointerdown', (e) => this.onPointerDown(e));
         this.renderer.domElement.addEventListener('pointermove', (e) => this.onPointerMove(e));
         this.renderer.domElement.addEventListener('pointerup', (e) => this.onPointerUp(e));
-        
+
         // Prevent default context menu in editor mode
         this.renderer.domElement.addEventListener('contextmenu', (e) => {
             if (this.enabled) e.preventDefault();
         });
-        
+
         // Keyboard Shortcuts
         window.addEventListener('keydown', (e) => {
             if (!this.enabled) return;
             // Do not trigger shortcuts if user is typing in textarea or inputs
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
 
-            switch(e.key.toLowerCase()) {
-                case 'escape': 
-                    this.cancelPlacement(); 
-                    this.deselect(); 
+            switch (e.key.toLowerCase()) {
+                case 'escape':
+                    this.cancelPlacement();
+                    this.deselect();
                     break;
-                case 'delete': 
+                case 'delete':
                 case 'backspace':
-                    this.deleteSelected(); 
+                    this.deleteSelected();
                     break;
-                case 'r': 
-                    this.rotateSelected(); 
+                case 'r':
+                    this.rotateSelected();
                     break;
-                case 'c': 
-                    this.cloneSelected(); 
+                case 'c':
+                    this.cloneSelected();
                     break;
                 case 't':
                     this.exportLayout();
@@ -525,23 +624,27 @@ export class LevelEditor {
         this.enabled = true;
         this.orbit.enabled = true;
         this.ui.style.display = 'block';
-        
+
+        // Load active language and translate UI
+        this.loadActiveLanguage();
+        this.translateUI();
+
         // Show Schematic Grid
         this.gridHelper.visible = true;
-        
+
         // Hide textured floor for clean CAD look
         const gameFloor = getFloorMesh();
-        if(gameFloor) gameFloor.visible = false;
+        if (gameFloor) gameFloor.visible = false;
 
         // Set optimal editor view
         this.camera.position.set(0, 12, 8);
         this.camera.lookAt(0, 0, 0);
-        this.orbit.target.set(0,0,0);
+        this.orbit.target.set(0, 0, 0);
 
         // Show validation panel on load
         const validationPanel = document.getElementById('editor-validation-panel');
         if (validationPanel) validationPanel.style.display = 'flex';
-        
+
         this.validateLevel();
     }
 
@@ -555,17 +658,176 @@ export class LevelEditor {
         // Revert Visuals
         this.gridHelper.visible = false;
         const gameFloor = getFloorMesh();
-        if(gameFloor) gameFloor.visible = true;
+        if (gameFloor) gameFloor.visible = true;
 
         // Hide validation panel
         const validationPanel = document.getElementById('editor-validation-panel');
         if (validationPanel) validationPanel.style.display = 'none';
     }
 
+    loadActiveLanguage() {
+        const savedString = localStorage.getItem('pixelKitchenSaveData');
+        if (savedString) {
+            try {
+                const data = JSON.parse(savedString);
+                if (data.settings && data.settings.language) {
+                    this.lang = data.settings.language;
+                    return;
+                }
+            } catch (e) { }
+        }
+        this.lang = 'en';
+    }
+
+    translateText(key) {
+        const lang = this.lang || 'en';
+        if (EDITOR_TRANSLATIONS[lang] && EDITOR_TRANSLATIONS[lang][key]) {
+            return EDITOR_TRANSLATIONS[lang][key];
+        }
+        if (FRIENDLY_NAMES[key]) {
+            return this.translateText(FRIENDLY_NAMES[key]);
+        }
+        const transVal = getTrans(key, lang);
+        if (transVal !== key) return transVal;
+        return key;
+    }
+
+    translateUI() {
+        // 1. Top bar title & controls hint
+        const titleContainer = document.querySelector('.editor-title');
+        if (titleContainer) {
+            const textNode = Array.from(titleContainer.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
+            if (textNode) {
+                textNode.textContent = this.translateText('title');
+            }
+        }
+
+        const controlsHint = document.querySelector('.editor-controls-hint');
+        if (controlsHint) {
+            controlsHint.innerHTML = this.translateText('controls_hint');
+        }
+
+        // Top action buttons
+        const btnSettings = document.getElementById('editor-meta-btn');
+        if (btnSettings) btnSettings.textContent = this.translateText('btn_settings');
+
+        const btnSaveJson = document.getElementById('editor-export-btn');
+        if (btnSaveJson) btnSaveJson.textContent = this.translateText('btn_save_json');
+
+        const btnExit = document.getElementById('editor-exit-btn');
+        if (btnExit) btnExit.textContent = this.translateText('btn_exit');
+
+        // 2. Validation Panel Title
+        const valTitle = document.querySelector('.validation-title');
+        if (valTitle) valTitle.textContent = this.translateText('map_status');
+
+        // 3. Settings Modal Title
+        const modalTitle = document.querySelector('#editor-meta-modal h3');
+        if (modalTitle) modalTitle.textContent = this.translateText('settings_title');
+
+        // Settings Modal Inputs
+        const nameLabel = document.querySelector('label[for="meta-name"]');
+        if (nameLabel) nameLabel.textContent = this.translateText('lbl_level_name');
+
+        const durationLabel = document.querySelector('label[for="meta-duration"]');
+        if (durationLabel) durationLabel.textContent = this.translateText('lbl_duration');
+
+        const delayLabel = document.querySelector('label[for="meta-delay"]');
+        if (delayLabel) delayLabel.textContent = this.translateText('lbl_order_delay');
+
+        const maxOrdersLabel = document.querySelector('label[for="meta-max-orders"]');
+        if (maxOrdersLabel) maxOrdersLabel.textContent = this.translateText('lbl_max_orders');
+
+        const star1Label = document.querySelector('label[for="meta-star1"]');
+        if (star1Label) star1Label.textContent = this.translateText('lbl_star1');
+
+        const star2Label = document.querySelector('label[for="meta-star2"]');
+        if (star2Label) star2Label.textContent = this.translateText('lbl_star2');
+
+        const star3Label = document.querySelector('label[for="meta-star3"]');
+        if (star3Label) star3Label.textContent = this.translateText('lbl_star3');
+
+        const secTitles = document.querySelectorAll('#editor-meta-modal .meta-section-title');
+        if (secTitles[0]) secTitles[0].textContent = this.translateText('sec_stars');
+        if (secTitles[1]) secTitles[1].textContent = this.translateText('sec_recipes');
+
+        const btnClose = document.getElementById('meta-close-btn');
+        if (btnClose) btnClose.textContent = this.translateText('btn_close');
+
+        // 4. Library Tabs
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(btn => {
+            const cat = btn.dataset.category;
+            let key = '';
+            if (cat === 'all') key = 'tab_all';
+            else if (cat === 'Architecture') key = 'tab_arch';
+            else if (cat === 'Furniture') key = 'tab_furniture';
+            else if (cat === 'Stations') key = 'tab_stations';
+            else if (cat === 'Sources') key = 'tab_sources';
+            else if (cat === 'Items') key = 'tab_utensils';
+            else if (cat === 'Ingredients') key = 'tab_ingredients';
+            else if (cat === 'Dishes') key = 'tab_dishes';
+            else if (cat === 'Decorations') key = 'tab_decorations';
+
+            if (key) {
+                btn.textContent = this.translateText(key);
+            }
+        });
+
+        // 5. Inspector Panel
+        const inspectorTitle = document.querySelector('#editor-inspector h3');
+        if (inspectorTitle) inspectorTitle.textContent = this.translateText('inspector_title');
+
+        const inspectorLabel = document.querySelector('#editor-inspector label');
+        if (inspectorLabel) inspectorLabel.textContent = this.translateText('lbl_config');
+
+        const btnSaveConfig = document.getElementById('btn-save-config');
+        if (btnSaveConfig) btnSaveConfig.textContent = this.translateText('btn_save_config');
+
+        const btnRotate = document.getElementById('btn-rotate');
+        if (btnRotate) btnRotate.textContent = this.translateText('btn_rotate');
+
+        const btnClone = document.getElementById('btn-clone');
+        if (btnClone) btnClone.textContent = this.translateText('btn_clone');
+
+        const btnDelete = document.getElementById('btn-delete');
+        if (btnDelete) btnDelete.textContent = this.translateText('btn_delete');
+
+        // 6. Refresh meals tag selectors
+        this._populateMealsGrid();
+    }
+
+    _populateMealsGrid() {
+        const mealsGrid = document.getElementById('meta-meals-grid');
+        if (mealsGrid) {
+            mealsGrid.innerHTML = '';
+            Object.keys(RECIPES).forEach(r => {
+                const tag = document.createElement('div');
+                tag.className = 'meal-tag';
+                tag.dataset.value = r;
+
+                const translatedMealName = this.translateText(r);
+
+                tag.innerHTML = `<span class="checkbox-box"></span><span class="meal-name">${translatedMealName}</span>`;
+
+                const isSelected = this.currentLevelData?.availableMeals?.includes(r) || false;
+                if (isSelected) {
+                    tag.classList.add('selected');
+                }
+
+                tag.addEventListener('click', () => {
+                    tag.classList.toggle('selected');
+                    this.saveMetaFromModal(); // Autosave in memory
+                });
+                mealsGrid.appendChild(tag);
+            });
+        }
+    }
+
     update(delta) {
         if (!this.enabled) return;
         this.orbit.update();
-        
+
         if (this.selectedObject) {
             this.selectionBox.update();
             this._updateInspectorData();
@@ -585,7 +847,7 @@ export class LevelEditor {
         document.getElementById('meta-star1').value = d.starThresholds ? d.starThresholds[0] : 100;
         document.getElementById('meta-star2').value = d.starThresholds ? d.starThresholds[1] : 200;
         document.getElementById('meta-star3').value = d.starThresholds ? d.starThresholds[2] : 300;
-        
+
         const tags = document.querySelectorAll('#meta-meals-grid .meal-tag');
         tags.forEach(tag => {
             const val = tag.dataset.value;
@@ -605,7 +867,7 @@ export class LevelEditor {
             parseInt(document.getElementById('meta-star2').value) || 200,
             parseInt(document.getElementById('meta-star3').value) || 300,
         ];
-        
+
         const selectedTags = Array.from(document.querySelectorAll('#meta-meals-grid .meal-tag.selected'));
         d.availableMeals = selectedTags.map(tag => tag.dataset.value);
 
@@ -635,10 +897,10 @@ export class LevelEditor {
     startPlacement(template) {
         this.cancelPlacement(); // Clear existing ghost
         this.deselect(); // Clear selection
-        
+
         this.placementMode = true;
         this.ghostObject = this._createObjectFromTemplate(template);
-        
+
         // Make ghost transparent
         this.ghostObject.traverse(c => {
             if (c.isMesh) {
@@ -669,12 +931,12 @@ export class LevelEditor {
 
             // Create a real solid instance
             const realObject = this._createObjectFromTemplate(template);
-            
+
             realObject.position.copy(this.ghostObject.position);
             realObject.rotation.copy(this.ghostObject.rotation);
-            
+
             this.scene.add(realObject);
-            
+
             // Auto-fuse visuals
             refreshSmartObjects(this.scene);
             this.validateLevel();
@@ -691,7 +953,7 @@ export class LevelEditor {
             obj = createCounterPrefab(t.name, fakeColor, t.isServing, this.currentLevelData?.theme);
         } else if (t.type === STATION_TYPES.TABLE) {
             // Neighbors default to false, will fuse later
-            obj = createTablePrefab(t.name, fakeColor, {n:false, s:false, e:false, w:false});
+            obj = createTablePrefab(t.name, fakeColor, { n: false, s: false, e: false, w: false });
         } else {
             // Generic Station / Wall / Source / Preplaced Item / Decoration
             const def = {
@@ -706,7 +968,7 @@ export class LevelEditor {
         }
 
         // Store template data for serialization later
-        obj.userData.template = t; 
+        obj.userData.template = t;
         // Y position will be handled by onPointerMove snapping
         obj.position.y = 0;
 
@@ -718,7 +980,7 @@ export class LevelEditor {
         this.selectedObject = object;
         this.selectionBox.setFromObject(object);
         this.selectionBox.visible = true;
-        
+
         // Update UI
         this.inspector.style.display = 'flex';
         this.inspectorName.textContent = object.name;
@@ -727,7 +989,7 @@ export class LevelEditor {
         // Use existing userData.config if set, otherwise fallback to template config
         const config = object.userData.config || object.userData.template?.config || {};
         this.inspectorConfig.value = JSON.stringify(config, null, 2);
-        
+
         this._updateHandles();
     }
 
@@ -745,14 +1007,14 @@ export class LevelEditor {
         try {
             const newConfig = JSON.parse(this.inspectorConfig.value);
             this.selectedObject.userData.config = newConfig;
-            
+
             // Visual feedback
             const btn = document.getElementById('btn-save-config');
             const originalText = btn.innerText;
             btn.innerText = "✅ Saved!";
             setTimeout(() => btn.innerText = originalText, 1000);
             this.validateLevel();
-            
+
         } catch (e) {
             alert("Invalid JSON syntax! Check your brackets and quotes.");
         }
@@ -787,7 +1049,7 @@ export class LevelEditor {
                 name: this.selectedObject.name,
                 type: this.selectedObject.userData.stationType || this.selectedObject.userData.type,
             };
-            
+
             if (this.selectedObject.userData.template) {
                 this.startPlacement(this.selectedObject.userData.template);
             } else {
@@ -807,7 +1069,7 @@ export class LevelEditor {
             this.inspectorZ.textContent = this.selectedObject.position.z.toFixed(1);
         }
     }
-    
+
     // --- Handle Management ---
 
     _updateHandles() {
@@ -816,18 +1078,18 @@ export class LevelEditor {
             this.handlesGroup.visible = false;
             return;
         }
-        
+
         const type = obj.userData.stationType || obj.userData.type;
         const resizable = type === STATION_TYPES.WALL;
         const extendable = type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING;
-        
+
         if (!resizable && !extendable) {
             this.handlesGroup.visible = false;
             return;
         }
-        
+
         this.handlesGroup.visible = true;
-        
+
         // Calculate bounds
         const box = new THREE.Box3().setFromObject(obj);
         const center = obj.position;
@@ -840,15 +1102,15 @@ export class LevelEditor {
             w = box.max.x - box.min.x;
             d = box.max.z - box.min.z;
         }
-        
+
         const y = center.y;
         const offset = 0.3;
 
-        this.handles.n.position.set(center.x, y, center.z - d/2 - offset);
-        this.handles.s.position.set(center.x, y, center.z + d/2 + offset);
-        this.handles.e.position.set(center.x + w/2 + offset, y, center.z);
-        this.handles.w.position.set(center.x - w/2 - offset, y, center.z);
-        
+        this.handles.n.position.set(center.x, y, center.z - d / 2 - offset);
+        this.handles.s.position.set(center.x, y, center.z + d / 2 + offset);
+        this.handles.e.position.set(center.x + w / 2 + offset, y, center.z);
+        this.handles.w.position.set(center.x - w / 2 - offset, y, center.z);
+
         Object.values(this.handles).forEach(h => h.visible = true);
     }
 
@@ -856,7 +1118,7 @@ export class LevelEditor {
 
     onPointerDown(e) {
         if (!this.enabled) return;
-        
+
         // Ignore clicks on UI panels
         if (e.target.closest('.editor-panel') || e.target.closest('.editor-top-bar')) return;
 
@@ -867,9 +1129,9 @@ export class LevelEditor {
 
         if (e.button !== 0) return;
 
-        const mouse = { 
-            x: (e.clientX / window.innerWidth) * 2 - 1, 
-            y: -(e.clientY / window.innerHeight) * 2 + 1 
+        const mouse = {
+            x: (e.clientX / window.innerWidth) * 2 - 1,
+            y: -(e.clientY / window.innerHeight) * 2 + 1
         };
         this.raycaster.setFromCamera(mouse, this.camera);
 
@@ -880,17 +1142,17 @@ export class LevelEditor {
                 this.activeHandle = handleIntersects[0].object;
                 this.isDragging = true;
                 this.orbit.enabled = false;
-                
+
                 // Setup drag state
                 const planeIntersect = new THREE.Vector3();
                 this.raycaster.ray.intersectPlane(this.groundPlane, planeIntersect);
                 this.startDragPos.copy(planeIntersect);
                 this.originalPos.copy(this.selectedObject.position);
-                
+
                 if (this.selectedObject.userData.stationType === STATION_TYPES.WALL) {
                     this.originalSize = { ...this.selectedObject.userData.size };
                 }
-                
+
                 return; // Consumed
             }
         }
@@ -902,30 +1164,30 @@ export class LevelEditor {
             const candidates = [];
             this.scene.traverse(c => {
                 // Find root objects that are direct children of the scene and not system helpers or the floor
-                if (c.parent === this.scene && 
-                    c !== this.gridHelper && 
-                    c !== this.selectionBox && 
-                    c !== this.handlesGroup && 
-                    c !== this.orbit && 
+                if (c.parent === this.scene &&
+                    c !== this.gridHelper &&
+                    c !== this.selectionBox &&
+                    c !== this.handlesGroup &&
+                    c !== this.orbit &&
                     c.name !== "Floor" &&
-                    c.userData && 
+                    c.userData &&
                     c.userData.type !== 'floor') {
                     candidates.push(c);
                 }
             });
 
             const hits = this.raycaster.intersectObjects(candidates, true);
-            
+
             if (hits.length > 0) {
                 // Walk up to the root group
                 let root = hits[0].object;
-                while(root.parent && root.parent !== this.scene) { root = root.parent; }
-                
+                while (root.parent && root.parent !== this.scene) { root = root.parent; }
+
                 if (this.selectedObject !== root) {
                     this.select(root);
                 }
                 this.isDragging = true;
-                this.orbit.enabled = false; 
+                this.orbit.enabled = false;
             } else {
                 this.deselect();
             }
@@ -935,40 +1197,40 @@ export class LevelEditor {
     onPointerMove(e) {
         if (!this.enabled) return;
 
-        const mouse = { 
-            x: (e.clientX / window.innerWidth) * 2 - 1, 
-            y: -(e.clientY / window.innerHeight) * 2 + 1 
+        const mouse = {
+            x: (e.clientX / window.innerWidth) * 2 - 1,
+            y: -(e.clientY / window.innerHeight) * 2 + 1
         };
         this.raycaster.setFromCamera(mouse, this.camera);
-        
+
         // --- RESIZE / EXTEND LOGIC ---
         if (this.isDragging && this.activeHandle && this.selectedObject) {
             const intersect = new THREE.Vector3();
             if (this.raycaster.ray.intersectPlane(this.groundPlane, intersect)) {
                 const delta = intersect.clone().sub(this.startDragPos);
                 const type = this.selectedObject.userData.stationType;
-                
+
                 // Direction multipliers based on handle
                 const dir = this.activeHandle.userData.direction;
                 // n: z-, s: z+, e: x+, w: x-
-                
+
                 if (type === STATION_TYPES.WALL) {
                     // Resize Logic
-                    let dw = 0; 
+                    let dw = 0;
                     let dd = 0;
                     let dx = 0;
                     let dz = 0;
-                    
+
                     // Calculate dimension changes locally aligned
                     if (dir === 'e') dw = delta.x;
                     if (dir === 'w') dw = -delta.x;
                     if (dir === 's') dd = delta.z;
                     if (dir === 'n') dd = -delta.z;
-                    
+
                     // Snap to grid unit
                     let newW = Math.max(GRID_UNIT, Math.round((this.originalSize.width + dw) * 2) / 2);
                     let newD = Math.max(GRID_UNIT, Math.round((this.originalSize.depth + dd) * 2) / 2);
-                    
+
                     // Shift center to compensate anchor
                     if (dir === 'e') dx = (newW - this.originalSize.width) / 2;
                     if (dir === 'w') dx = -(newW - this.originalSize.width) / 2;
@@ -983,33 +1245,33 @@ export class LevelEditor {
                         this.originalPos.z + dz
                     );
                     this.selectionBox.setFromObject(this.selectedObject);
-                } 
+                }
                 else if (type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.SERVING) {
                     // Tiling Logic
                     // Calculate how many units moved along axis
                     let axisDelta = 0;
                     let axisVector = new THREE.Vector3();
-                    
-                    if (dir === 'e') { axisDelta = delta.x; axisVector.set(1,0,0); }
-                    if (dir === 'w') { axisDelta = -delta.x; axisVector.set(-1,0,0); }
-                    if (dir === 's') { axisDelta = delta.z; axisVector.set(0,0,1); }
-                    if (dir === 'n') { axisDelta = -delta.z; axisVector.set(0,0,-1); }
-                    
-                    const count = Math.floor((axisDelta + (GRID_UNIT/2)) / GRID_UNIT);
-                    
+
+                    if (dir === 'e') { axisDelta = delta.x; axisVector.set(1, 0, 0); }
+                    if (dir === 'w') { axisDelta = -delta.x; axisVector.set(-1, 0, 0); }
+                    if (dir === 's') { axisDelta = delta.z; axisVector.set(0, 0, 1); }
+                    if (dir === 'n') { axisDelta = -delta.z; axisVector.set(0, 0, -1); }
+
+                    const count = Math.floor((axisDelta + (GRID_UNIT / 2)) / GRID_UNIT);
+
                     // Cleanup old ghosts
                     this.extendingGhosts.forEach(g => this.scene.remove(g));
                     this.extendingGhosts = [];
-                    
+
                     if (count > 0) {
                         // Create ghosts
                         const t = this.selectedObject.userData.template;
-                        for(let i=1; i<=count; i++) {
+                        for (let i = 1; i <= count; i++) {
                             const ghost = this._createObjectFromTemplate(t);
                             ghost.position.copy(this.originalPos).add(axisVector.clone().multiplyScalar(i * GRID_UNIT));
-                            
+
                             // Make ghost transparent
-                             ghost.traverse(c => {
+                            ghost.traverse(c => {
                                 if (c.isMesh) {
                                     c.material = c.material.clone();
                                     c.material.transparent = true;
@@ -1017,15 +1279,15 @@ export class LevelEditor {
                                     c.material.color.setHex(0x00FF00);
                                 }
                             });
-                            
+
                             this.scene.add(ghost);
                             this.extendingGhosts.push(ghost);
                         }
                     }
                 }
-                
+
                 // Update handle positions to follow the expansion
-                this._updateHandles(); 
+                this._updateHandles();
             }
             return;
         }
@@ -1044,7 +1306,7 @@ export class LevelEditor {
 
         // 2. Check intersections with supports
         const hits = this.raycaster.intersectObjects(supports, true);
-        
+
         let targetY = 0;
         let targetX = 0;
         let targetZ = 0;
@@ -1057,9 +1319,9 @@ export class LevelEditor {
             const p = hit.point;
             targetX = p.x;
             targetZ = p.z;
-            
+
             let root = hit.object;
-            while(root && !supports.includes(root)) root = root.parent;
+            while (root && !supports.includes(root)) root = root.parent;
             if (root) {
                 targetY = this._getVisualTopY(root);
             } else {
@@ -1089,17 +1351,17 @@ export class LevelEditor {
 
         if (foundSupport) {
             // Snap X/Z to grid
-            const finalX = Math.round(targetX * 2) / 2; 
+            const finalX = Math.round(targetX * 2) / 2;
             const finalZ = Math.round(targetZ * 2) / 2;
 
             if (this.placementMode && this.ghostObject) {
                 this.ghostObject.position.set(finalX, targetY, finalZ);
-                
+
                 // Color ghost based on occupancy
                 const template = this.ghostObject.userData.template;
                 const isBlocked = this._checkOccupied(finalX, finalZ, targetY, template);
                 const emissiveColor = isBlocked ? new THREE.Color(0xFF0000) : new THREE.Color(0x00FF00);
-                
+
                 this.ghostObject.traverse(c => {
                     if (c.isMesh && c.material) {
                         c.material.emissive = emissiveColor;
@@ -1118,7 +1380,7 @@ export class LevelEditor {
             const dx = e.clientX - this.rightClickStart.x;
             const dy = e.clientY - this.rightClickStart.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            
+
             if (dist < 5) {
                 if (this.placementMode) {
                     this.cancelPlacement();
@@ -1134,40 +1396,40 @@ export class LevelEditor {
             if (this.extendingGhosts.length > 0) {
                 // Solidify ghosts
                 this.extendingGhosts.forEach(g => {
-                     const t = g.userData.template;
-                     const real = this._createObjectFromTemplate(t);
-                     real.position.copy(g.position);
-                     real.rotation.copy(g.rotation);
-                     this.scene.add(real);
-                     this.scene.remove(g);
+                    const t = g.userData.template;
+                    const real = this._createObjectFromTemplate(t);
+                    real.position.copy(g.position);
+                    real.rotation.copy(g.rotation);
+                    this.scene.add(real);
+                    this.scene.remove(g);
                 });
                 this.extendingGhosts = [];
                 refreshSmartObjects(this.scene); // Fuse visuals
                 this.validateLevel();
             }
-            
+
             this.activeHandle = null;
             this._updateHandles();
         }
-        
+
         this.isDragging = false;
         this.orbit.enabled = true;
-    } 
+    }
 
     validateLevel() {
         if (!this.enabled) return;
 
         const placedObjects = [];
         this.scene.traverse(c => {
-            if (c.parent === this.scene && 
-                c !== this.gridHelper && 
-                c !== this.selectionBox && 
-                c !== this.handlesGroup && 
-                c !== this.orbit && 
+            if (c.parent === this.scene &&
+                c !== this.gridHelper &&
+                c !== this.selectionBox &&
+                c !== this.handlesGroup &&
+                c !== this.orbit &&
                 c.name !== "Floor" &&
                 c.userData &&
                 c.userData.type !== 'floor') {
-                
+
                 placedObjects.push({
                     name: c.name,
                     type: c.userData.stationType || c.userData.type,
@@ -1188,9 +1450,9 @@ export class LevelEditor {
         };
 
         // Serving Pass Check
-        const hasServingPass = placedObjects.some(obj => 
-            obj.type === STATION_TYPES.SERVING || 
-            obj.isServing === true || 
+        const hasServingPass = placedObjects.some(obj =>
+            obj.type === STATION_TYPES.SERVING ||
+            obj.isServing === true ||
             obj.name?.toLowerCase().includes('serving')
         );
 
@@ -1201,14 +1463,14 @@ export class LevelEditor {
         const availableMeals = this.currentLevelData.availableMeals || [];
 
         if (availableMeals.length === 0) {
-            warnings.push({ desc: "No recipes selected. Edit Level Settings." });
+            warnings.push({ desc: this.translateText("no_recipes_msg") });
         } else {
             availableMeals.forEach(mealName => {
                 const reqs = RECIPE_REQUIREMENTS[mealName];
                 if (!reqs) return;
 
                 reqs.ingredients.forEach(ing => {
-                    const hasIng = placedObjects.some(obj => 
+                    const hasIng = placedObjects.some(obj =>
                         (obj.type === STATION_TYPES.INGREDIENT_SOURCE && obj.config?.ingredient === ing) ||
                         (obj.type === STATION_TYPES.PREPLACED_ITEM && obj.config?.item === ing)
                     );
@@ -1218,7 +1480,7 @@ export class LevelEditor {
                 });
 
                 reqs.containers.forEach(container => {
-                    const hasContainer = placedObjects.some(obj => 
+                    const hasContainer = placedObjects.some(obj =>
                         (obj.type === STATION_TYPES.ITEM_SOURCE && obj.config?.item === container) ||
                         (obj.type === STATION_TYPES.PREPLACED_ITEM && obj.config?.item === container)
                     );
@@ -1237,9 +1499,9 @@ export class LevelEditor {
 
         missingItemsMap.forEach((recipesSet, itemKey) => {
             const friendlyName = FRIENDLY_NAMES[itemKey] || itemKey;
-            const recipesList = Array.from(recipesSet).join(', ');
+            const recipesList = Array.from(recipesSet).map(r => this.translateText(r)).join(', ');
             warnings.push({
-                desc: friendlyName,
+                desc: this.translateText(friendlyName),
                 recipes: recipesList
             });
         });
@@ -1252,23 +1514,23 @@ export class LevelEditor {
         this.validationWarningsCount = warnings.length;
 
         if (warnings.length === 0 && availableMeals.length > 0) {
-            statusBadge.textContent = "✓ Playable";
+            statusBadge.textContent = this.translateText("playable");
             statusBadge.className = "status-badge valid";
-            detailsContainer.innerHTML = `<div class="validation-success-msg">Level is playable! All required stations, ingredients, and utensils are present on the map.</div>`;
+            detailsContainer.innerHTML = `<div class="validation-success-msg">${this.translateText("playable_msg")}</div>`;
         } else {
-            statusBadge.textContent = availableMeals.length === 0 ? "⚠️ Setup Incomplete" : "⚠️ Issues Detected";
+            statusBadge.textContent = availableMeals.length === 0 ? this.translateText("setup_incomplete") : this.translateText("issues_detected");
             statusBadge.className = "status-badge invalid";
 
             let html = "";
             if (availableMeals.length === 0) {
-                html = `<div class="validation-item" style="color: #ffaa55; font-size: 0.9em; padding-left: 0;">No recipes selected. Click level settings to add them.</div>`;
+                html = `<div class="validation-item" style="color: #ffaa55; font-size: 0.9em; padding-left: 0;">${this.translateText("no_recipes_msg")}</div>`;
             } else {
-                html = `<div class="validation-group-title">Missing Required Objects:</div>`;
+                html = `<div class="validation-group-title">${this.translateText("missing_objects")}</div>`;
                 warnings.forEach(w => {
                     html += `
                         <div class="validation-item">
                             <strong style="color: #ffb3b3;">${w.desc}</strong>
-                            <div style="font-size: 0.85em; color: #aaa; margin-top: 2px;">Required by: ${w.recipes}</div>
+                            <div style="font-size: 0.85em; color: #aaa; margin-top: 2px;">${this.translateText("required_by")}${w.recipes}</div>
                         </div>
                     `;
                 });
@@ -1281,23 +1543,23 @@ export class LevelEditor {
 
     exportLayout() {
         if (this.validationWarningsCount > 0) {
-            const confirmExport = confirm(`⚠️ Warning: This level is missing required objects for the selected recipes. It may not be playable.\n\nAre you sure you want to export?`);
+            const confirmExport = confirm(this.translateText('warning_export'));
             if (!confirmExport) return;
         }
         const layout = [];
         this.scene.traverse(c => {
-            if (c.parent === this.scene && 
-                c !== this.gridHelper && 
-                c !== this.selectionBox && 
-                c !== this.handlesGroup && 
-                c !== this.orbit && 
+            if (c.parent === this.scene &&
+                c !== this.gridHelper &&
+                c !== this.selectionBox &&
+                c !== this.handlesGroup &&
+                c !== this.orbit &&
                 c.name !== "Floor" &&
                 c.userData &&
                 c.userData.type !== 'floor') {
-                
+
                 let entry = null;
                 const type = c.userData.stationType || c.userData.type;
-                
+
                 // Any station-like object (including decorations, trash, walls)
                 const isStation = [
                     STATION_TYPES.TABLE,
@@ -1311,14 +1573,14 @@ export class LevelEditor {
                     'decoration',
                     'station'
                 ].includes(type) || c.userData.type === 'station';
-                
+
                 if (isStation) {
                     entry = {
                         name: c.name,
                         type: c.userData.stationType || c.userData.type || 'station',
                         position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
                     };
-                    
+
                     if (c.rotation.y !== 0) {
                         entry.rotation = parseFloat(c.rotation.y.toFixed(2));
                     }
@@ -1326,17 +1588,17 @@ export class LevelEditor {
                     if (c.userData.size) entry.size = { width: c.userData.size.width, depth: c.userData.size.depth };
                     if (c.userData.template?.color) entry.color = c.userData.template.color;
                     if (c.userData.isServing) entry.isServing = true;
-                    
+
                     if (c.userData.config) {
                         entry.config = c.userData.config;
                     } else if (c.userData.template?.config) {
                         entry.config = c.userData.template.config;
                     }
-                } 
+                }
                 else if (c.userData.type === ITEM_TYPES.ITEM || c.userData.type === ITEM_TYPES.INGREDIENT || c.userData.stationType === STATION_TYPES.PREPLACED_ITEM) {
                     let itemType = '';
                     let contents = null;
-                    
+
                     if (c.userData.stationType === STATION_TYPES.PREPLACED_ITEM) {
                         itemType = c.userData.config?.item || c.userData.template?.config?.item || 'plate';
                         contents = c.userData.config?.contents || c.userData.template?.config?.contents;
@@ -1346,38 +1608,38 @@ export class LevelEditor {
                     } else {
                         itemType = c.userData.ingredientType;
                     }
-                    
+
                     const config = { item: itemType };
                     if (contents && contents.length > 0) {
                         config.contents = [...contents];
                     }
-                    
+
                     entry = {
                         name: c.name || (itemType.charAt(0).toUpperCase() + itemType.slice(1)),
                         type: STATION_TYPES.PREPLACED_ITEM,
                         position: { x: parseFloat(c.position.x.toFixed(2)), z: parseFloat(c.position.z.toFixed(2)) },
                         config: config
                     };
-                    
+
                     if (c.rotation.y !== 0) {
                         entry.rotation = parseFloat(c.rotation.y.toFixed(2));
                     }
                 }
-                
+
                 if (entry) {
                     layout.push(entry);
                 }
             }
         });
-        
+
         // Update current level data
         this.currentLevelData.layout = layout;
-        
+
         // Construct a compact, single-line formatted JSON string
         const data = this.currentLevelData;
         const indent = "  ";
         const lines = [];
-        
+
         lines.push("{");
         lines.push(`${indent}"levelId": ${data.levelId || 1},`);
         lines.push(`${indent}"name": ${JSON.stringify(data.name || "New Level")},`);
@@ -1387,19 +1649,19 @@ export class LevelEditor {
         lines.push(`${indent}"duration": ${data.duration || 120},`);
         lines.push(`${indent}"newOrderDelay": ${data.newOrderDelay || 15},`);
         lines.push(`${indent}"maxActiveOrders": ${data.maxActiveOrders || 2},`);
-        
+
         const starsStr = JSON.stringify(data.starThresholds || [100, 200, 300]);
         lines.push(`${indent}"starThresholds": ${starsStr.replace(/,/g, ', ')},`);
-        
+
         const mealsStr = JSON.stringify(data.availableMeals || ["burger"]);
         lines.push(`${indent}"availableMeals": ${mealsStr.replace(/,/g, ', ')},`);
-        
+
         lines.push(`${indent}"layout": [`);
-        
+
         const layoutLines = data.layout.map((item, idx) => {
             const isLast = idx === data.layout.length - 1;
             const flatStr = JSON.stringify(item);
-            
+
             // Format spacing nicely: {"name":"Wall"} -> { "name": "Wall" }
             const prettyFlat = flatStr
                 .replace(/\{"/g, '{ "')
@@ -1407,14 +1669,14 @@ export class LevelEditor {
                 .replace(/","/g, '", "')
                 .replace(/":/g, '": ')
                 .replace(/,"/g, ', "');
-                
+
             return `${indent}${indent}${prettyFlat}${isLast ? "" : ","}`;
         });
-        
+
         lines.push(...layoutLines);
         lines.push(`${indent}]`);
         lines.push("}");
-        
+
         const jsonStr = lines.join("\n");
         const fileName = `level_${data.levelId || 'custom'}.json`;
 
@@ -1426,7 +1688,7 @@ export class LevelEditor {
         document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
-        
+
         alert(`Level Exported! Replace the file in 'levels/${fileName}' to persist changes.`);
     }
 
@@ -1548,23 +1810,23 @@ export class LevelEditor {
     _checkOccupied(x, z, y, ghostTemplate) {
         const gx = Math.round(x * 100) / 100;
         const gz = Math.round(z * 100) / 100;
-        
+
         const isTopGhost = [
-            STATION_TYPES.PROCESSOR, 
-            STATION_TYPES.INGREDIENT_SOURCE, 
-            STATION_TYPES.ITEM_SOURCE, 
+            STATION_TYPES.PROCESSOR,
+            STATION_TYPES.INGREDIENT_SOURCE,
+            STATION_TYPES.ITEM_SOURCE,
             STATION_TYPES.PREPLACED_ITEM,
             'decoration'
         ].includes(ghostTemplate.type);
-        
+
         const isBaseGhost = !isTopGhost;
-        
+
         if (ghostTemplate.type !== 'decoration') {
             // Base items cannot be placed on top of other items (y > 0.1)
             if (isBaseGhost && y > 0.1) {
                 return true;
             }
-            
+
             // Top items MUST be placed on top of a support (y > 0.1)
             if (isTopGhost && y < 0.1) {
                 return true;
@@ -1574,19 +1836,19 @@ export class LevelEditor {
         let occupied = false;
         this.scene.traverse(c => {
             if (occupied) return; // fast exit
-            if (c.parent === this.scene && 
-                c !== this.ghostObject && 
+            if (c.parent === this.scene &&
+                c !== this.ghostObject &&
                 c !== this.selectedObject &&
-                c !== this.gridHelper && 
-                c !== this.selectionBox && 
-                c !== this.handlesGroup && 
-                c !== this.orbit && 
+                c !== this.gridHelper &&
+                c !== this.selectionBox &&
+                c !== this.handlesGroup &&
+                c !== this.orbit &&
                 c.name !== "Floor" &&
                 c.userData && c.userData.type !== 'floor') {
-                
+
                 const cx = Math.round(c.position.x * 100) / 100;
                 const cz = Math.round(c.position.z * 100) / 100;
-                
+
                 if (Math.abs(cx - gx) < 0.1 && Math.abs(cz - gz) < 0.1) {
                     // Walls block everything on the same cell
                     if (c.userData.stationType === STATION_TYPES.WALL || ghostTemplate.type === STATION_TYPES.WALL) {
