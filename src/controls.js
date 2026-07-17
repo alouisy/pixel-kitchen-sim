@@ -1,5 +1,5 @@
 // src/controls.js
-import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import {
     GAMEPAD_DEADZONE, GAMEPAD_INTERACT_BUTTON, GAMEPAD_PAUSE_BUTTON,
     GAMEPAD_LOOK_SENSITIVITY_X, GAMEPAD_LOOK_SENSITIVITY_Y,
@@ -238,5 +238,11 @@ export class PlayerControls {
 
     moveRight(distance) {
         this._pointerLockControls.moveRight(distance);
+    }
+
+    setSensitivity(value) {
+        if (this._pointerLockControls) {
+            this._pointerLockControls.pointerSpeed = Number(value) || 1.0;
+        }
     }
 }

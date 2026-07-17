@@ -1,5 +1,5 @@
 // src/items.js
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import * as THREE from 'three';
 import { ITEM_TYPES, INGREDIENT_STATES, INGREDIENT_RENDER_ORDER } from './constants.js';
 import { RECIPES } from './gameData.js';
 import { createItemMesh } from './voxelBuilder.js';
@@ -24,7 +24,7 @@ export function checkPlateCompletion(plate) {
     return false;
 }
 
-export function createItem(scene, type, preloadedModels, state = INGREDIENT_STATES.RAW, position = null) {
+export function createItem(scene, type, state = INGREDIENT_STATES.RAW, position = null) {
     // Use Voxel Generator instead of Primitives
     const mesh = createItemMesh(type);
 
@@ -55,7 +55,7 @@ export function createItem(scene, type, preloadedModels, state = INGREDIENT_STAT
     return mesh;
 }
 
-export function updatePlateVisuals(scene, plate, preloadedModels) {
+export function updatePlateVisuals(scene, plate) {
     if (!plate) return;
 
     // Clear existing ingredient meshes
@@ -74,7 +74,7 @@ export function updatePlateVisuals(scene, plate, preloadedModels) {
     
     // If it's a completed meal, render the meal mesh instead of stacked ingredients
     if (plate.userData.mealName) {
-        const mesh = createItem(scene, plate.userData.mealName, preloadedModels);
+        const mesh = createItem(scene, plate.userData.mealName);
         if (mesh) {
             scene.remove(mesh);
             if (typeof mesh.raycast === 'function') mesh.userData.originalRaycast = mesh.raycast;
@@ -102,7 +102,7 @@ export function updatePlateVisuals(scene, plate, preloadedModels) {
     });
 
     for (const itemName of itemsToDraw) {
-        const mesh = createItem(scene, itemName, preloadedModels);
+        const mesh = createItem(scene, itemName);
         if (!mesh) continue;
         
         scene.remove(mesh); // It's going to be a child of the plate

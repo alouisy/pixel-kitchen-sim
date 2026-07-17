@@ -1,6 +1,7 @@
 // src/player.js
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { PLAYER_HEIGHT, PLAYER_SPEED, KITCHEN_BOUNDS, ITEM_TYPES } from './constants.js'; // Added ITEM_TYPES
+import * as THREE from 'three';
+import { PLAYER_HEIGHT, PLAYER_SPEED, KITCHEN_BOUNDS, ITEM_TYPES, STATION_TYPES } from './constants.js';
+import { getKitchenObjects } from './world.js'; // Added ITEM_TYPES
 
 export class Player {
     constructor(controls) {
@@ -27,15 +28,68 @@ export class Player {
             this.velocity.set(0, 0, 0);
         }
 
-        this.controls.moveRight(this.velocity.x);
-        this.controls.moveForward(-this.velocity.z); // Use negative Z for forward relative to camera
+        const oldX = this.cameraObject.position.x;
+        const oldZ = this.cameraObject.position.z;
 
-        // Apply bounds - consider making bounds dynamic based on level layout later
-        this.cameraObject.position.x = Math.max(KITCHEN_BOUNDS.xMin, Math.min(KITCHEN_BOUNDS.xMax, this.cameraObject.position.x));
-        this.cameraObject.position.z = Math.max(KITCHEN_BOUNDS.zMin, Math.min(KITCHEN_BOUNDS.zMax, this.cameraObject.position.z));
+        // Try X movement first for sliding
+        if (this.velocity.x !== 0) {
+            this.controls.moveRight(this.velocity.x);
+            this.cameraObject.position.x = Math.max(KITCHEN_BOUNDS.xMin, Math.min(KITCHEN_BOUNDS.xMax, this.cameraObject.position.x));
+            if (this.checkCollisions()) {
+                this.cameraObject.position.x = oldX;
+            }
+        }
+
+        // Try Z movement next for sliding
+        if (this.velocity.z !== 0) {
+            this.controls.moveForward(-this.velocity.z);
+            this.cameraObject.position.z = Math.max(KITCHEN_BOUNDS.zMin, Math.min(KITCHEN_BOUNDS.zMax, this.cameraObject.position.z));
+            if (this.checkCollisions()) {
+                this.cameraObject.position.z = oldZ;
+            }
+        }
+
         this.cameraObject.position.y = PLAYER_HEIGHT;
 
         this._updateHeldItemPosition();
+    }
+
+    checkCollisions() {
+        const objects = getKitchenObjects ? getKitchenObjects() : [];
+        const px = this.cameraObject.position.x;
+        const pz = this.cameraObject.position.z;
+        const playerRadius = 0.3; // Player thickness radius
+
+        for (const obj of objects) {
+            const type = obj.userData?.stationType;
+            if (!type || type === 'floor' || type === 'ceiling') continue;
+            
+            // Skip overhead objects
+            if (obj.position.y > 1.2) continue;
+
+            let halfX = 0.25;
+            let halfZ = 0.25;
+
+            if (type === STATION_TYPES.WALL) {
+                const size = obj.userData.size || { width: 0.5, depth: 0.5 };
+                const isRotated = Math.abs(Math.sin(obj.rotation.y)) > 0.707;
+                halfX = (isRotated ? size.depth : size.width) / 2;
+                halfZ = (isRotated ? size.width : size.depth) / 2;
+            } else if (type === 'decoration') {
+                const name = (obj.name || '').toLowerCase();
+                if (name.includes('lamp') || name.includes('hood') || name.includes('exhaust')) continue;
+            }
+
+            const minX = obj.position.x - halfX - playerRadius;
+            const maxX = obj.position.x + halfX + playerRadius;
+            const minZ = obj.position.z - halfZ - playerRadius;
+            const maxZ = obj.position.z + halfZ + playerRadius;
+
+            if (px > minX && px < maxX && pz > minZ && pz < maxZ) {
+                return true; // Collision!
+            }
+        }
+        return false;
     }
 
     _updateHeldItemPosition() {

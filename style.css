@@ -106,6 +106,73 @@ canvas {
     color: #BBB;
 }
 
+.nickname-box,
+.leaderboard-box {
+    width: min(100%, 540px);
+}
+
+.nickname-box label {
+    text-align: left;
+    font-size: 0.85em;
+}
+
+.nickname-input {
+    width: 100%;
+    padding: 12px;
+    border: 3px solid #333;
+    background: #171717;
+    color: #fff;
+    font: inherit;
+    font-size: 1em;
+}
+
+.nickname-input:focus {
+    border-color: #ffd700;
+    outline: none;
+}
+
+.leaderboard-tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.leaderboard-list {
+    min-height: 180px;
+    max-height: 42vh;
+    overflow-y: auto;
+    border: 2px solid #555;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.leaderboard-row {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #444;
+    text-align: left;
+    font-size: 0.8em;
+}
+
+.leaderboard-row span:nth-child(2) {
+    overflow-wrap: anywhere;
+}
+
+.leaderboard-row span:last-child {
+    color: #ffd700;
+    text-align: right;
+}
+
+.leaderboard-empty {
+    padding: 24px 16px;
+    color: #bbb;
+    font-size: 0.8em;
+    line-height: 1.6;
+}
+
 #credits {
     margin-top: 20px;
     font-size: 0.8em;
@@ -224,6 +291,12 @@ canvas {
 .level-button .level-locked {
     color: #F00;
     font-weight: bold;
+}
+
+.level-custom-badge {
+    color: #87ceeb;
+    font-size: 0.7em;
+    margin-top: 4px;
 }
 
 /* =========================================
@@ -631,6 +704,34 @@ canvas {
 
 .editor-controls-hint span {
     margin: 0 10px;
+}
+
+.editor-top-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+@media (max-width: 900px) {
+    .editor-top-bar {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .editor-controls-hint {
+        order: 3;
+        width: 100%;
+    }
+
+    .editor-controls-hint span {
+        margin: 0 4px;
+    }
+
+    .editor-top-actions {
+        justify-content: flex-start;
+    }
 }
 
 .editor-panel {

@@ -174,7 +174,7 @@ export const CATALOG_ITEMS = [
     { name: "Grilled Cheese Sandwich", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["grilled_cheese_cooked"] } },
     { name: "Pancakes", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["cooked_pancakes", "syrup"] } },
     { name: "Cheese Omelette", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["cheese_slice", "cooked_omelette"] } },
-    { name: "Yogurt Bowl", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "bowl", contents: ["granola", "sliced_banana", "sliced_strawberry", "yogurt"] } },
+    { name: "Fruit & Yogurt Bowl", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "bowl", contents: ["granola", "sliced_banana", "sliced_strawberry", "yogurt"] } },
     { name: "Smoothie", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "cup", contents: ["smoothie_ready"] } },
     { name: "Pizza Margherita", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["cooked_pizza_margherita"] } }
 ];

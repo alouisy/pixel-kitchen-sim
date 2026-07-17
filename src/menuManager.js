@@ -41,7 +41,7 @@ export class MenuManager {
 
         let defaultIndex = 0;
         // Prioritize specific buttons like "Resume" or "Start" if they exist and are visible
-        const priorityActions = ['start-level-confirm', 'resume', 'next-level', 'restart-level'];
+        const priorityActions = ['save-nickname', 'start-level-confirm', 'resume', 'next-level', 'restart-level'];
         let priorityButtonFound = false;
         for (const action of priorityActions) {
             const button = menuElement.querySelector(`[data-action="${action}"]`);

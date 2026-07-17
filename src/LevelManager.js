@@ -179,13 +179,13 @@ export class LevelManager {
         this.uiManager.updateLevelTimer(0);
 
         let stars = 0;
-        const thresholds = this.currentLevelData.starThresholds.sort((a, b) => a - b);
+        const thresholds = [...(this.currentLevelData.starThresholds || [])].sort((a, b) => a - b);
         if (this.currentScore >= thresholds[0]) stars = 1;
         if (thresholds.length > 1 && this.currentScore >= thresholds[1]) stars = 2;
         if (thresholds.length > 2 && this.currentScore >= thresholds[2]) stars = 3;
 
         if (this.saveManager) {
-            this.saveManager.updateLevelCompletion(this.currentLevelIndex, this.currentScore, stars);
+            this.saveManager.updateLevelCompletion(this.currentLevelData, this.currentScore, stars);
         } else { console.warn("SaveManager not available to save progress."); }
 
         if (this.onLevelEnd) this.onLevelEnd(this.currentScore, stars, this.currentLevelIndex);

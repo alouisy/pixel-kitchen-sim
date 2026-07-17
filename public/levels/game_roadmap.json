@@ -1,0 +1,27 @@
+[
+  {
+    "levelId": 1,
+    "name": "Fry Cook Training",
+    "filename": "level_1.json"
+  },
+  {
+    "levelId": 2,
+    "name": "Burger & Fries",
+    "filename": "level_2.json"
+  },
+  {
+    "levelId": 3,
+    "name": "Breakfast Shift",
+    "filename": "level_3.json"
+  },
+  {
+    "levelId": 4,
+    "name": "Smoothie Cafe",
+    "filename": "level_4.json"
+  },
+  {
+    "levelId": 5,
+    "name": "Pizza & Diner",
+    "filename": "level_5.json"
+  }
+]

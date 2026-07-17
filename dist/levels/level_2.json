@@ -6,7 +6,7 @@
   "newOrderDelay": 15,
   "maxActiveOrders": 2,
   "starThresholds": [200, 400, 600],
-  "availableMeals": ["Hamburger", "Cheeseburger", "French Fries", "Salad"],
+  "availableMeals": ["Hamburger", "Cheeseburger Combo", "French Fries", "Salad"],
   "layout": [
     { "name": "Wall Back", "type": "wall", "position": { "x": 0, "z": -4}, "size": { "width": 8.5, "depth": 0.5}},
     { "name": "Wall Left", "type": "wall", "position": { "x": -4, "z": 0}, "rotation": -1.57, "size": { "width": 8.5, "depth": 0.5}},

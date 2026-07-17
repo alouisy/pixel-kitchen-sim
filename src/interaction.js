@@ -1,11 +1,11 @@
 // src/interaction.js
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { INTERACTION_DISTANCE, STATION_TYPES, ITEM_TYPES, GRID_UNIT, INGREDIENT_RENDER_ORDER } from './constants.js';
 import { createItem, checkPlateCompletion, updatePlateVisuals } from './items.js';
 
 export class InteractionManager {
-    constructor(camera, scene, player, stations, stationInteractables, levelManager, uiManager, preloadedModels, floorMesh) {
+    constructor(camera, scene, player, stations, stationInteractables, levelManager, uiManager, floorMesh) {
         this.camera = camera;
         this.scene = scene;
         this.player = player;
@@ -13,12 +13,12 @@ export class InteractionManager {
         this.interactables = stationInteractables ? [...stationInteractables] : []; 
         this.levelManager = levelManager;
         this.uiManager = uiManager;
-        this.preloadedModels = preloadedModels;
         this.floorMesh = floorMesh;
         this.raycaster = new THREE.Raycaster();
         
         this.currentlyHighlightedObject = null;
         this.audioManager = null;
+        this.activeProcessingStations = new Set();
 
         // Slot Highlight
         const highlightGeo = new THREE.PlaneGeometry(GRID_UNIT * 0.9, GRID_UNIT * 0.9);
@@ -49,9 +49,10 @@ export class InteractionManager {
                         else child.material.dispose();
                     }
                 });
-                this.interactables.splice(i, 1); 
+                this.interactables.splice(i, 1);
             }
         }
+        this.activeProcessingStations.clear();
         this.slotHighlight.visible = false;
     }
 
@@ -116,6 +117,21 @@ export class InteractionManager {
 
             const type = targetObject.userData.type;
             const stType = targetObject.userData.stationType;
+
+            if (stType === STATION_TYPES.TRASH) {
+                const discardedItem = this.player.place();
+                this._removeDynamicInteractable(discardedItem);
+                discardedItem?.traverse(child => {
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) {
+                        if (Array.isArray(child.material)) child.material.forEach(material => material.dispose());
+                        else child.material.dispose();
+                    }
+                });
+                this.uiManager.showTemporaryMessage('Item discarded', 1200);
+                if (this.audioManager) this.audioManager.play('error');
+                return;
+            }
 
             if (type === 'station' || type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.FLOOR) {
                 if (stType === STATION_TYPES.PROCESSOR) {
@@ -263,7 +279,7 @@ export class InteractionManager {
             this.scene.remove(container);
             container.traverse(c => { if (c.geometry) c.geometry.dispose(); });
 
-            const newItem = createItem(this.scene, newType, this.preloadedModels);
+            const newItem = createItem(this.scene, newType);
             this.player.pickup(newItem);
             this.uiManager.showTemporaryMessage(`${newType.replace(/_/g, ' ')} assembled!`, 1500);
             if (this.audioManager) this.audioManager.play('pop');
@@ -284,7 +300,7 @@ export class InteractionManager {
             this.scene.remove(container);
             container.traverse(c => { if (c.geometry) c.geometry.dispose(); });
 
-            const newItem = createItem(this.scene, newType, this.preloadedModels);
+            const newItem = createItem(this.scene, newType);
             newItem.position.copy(oldPos);
 
             if (gridInfo) {
@@ -342,7 +358,7 @@ export class InteractionManager {
 
         const isMealComplete = checkPlateCompletion(container);
 
-        updatePlateVisuals(this.scene, container, this.preloadedModels);
+        updatePlateVisuals(this.scene, container);
 
         this._removeIngredientAfterAddition(ingredientObject);
 
@@ -360,7 +376,8 @@ export class InteractionManager {
     _pickupItem(item) {
         for (const station of this.stations) {
             if (station.userData?.stationType === STATION_TYPES.PROCESSOR && station.userData.occupiedBy === item) {
-                if (item.userData.processTimeoutId) { clearTimeout(item.userData.processTimeoutId); delete item.userData.processTimeoutId; }
+                delete station.userData.processingState;
+                this.activeProcessingStations.delete(station);
                 station.userData.occupiedBy = null; break;
             }
         }
@@ -413,11 +430,14 @@ export class InteractionManager {
                 // Remove from player
                 this.player.place();
                 this._removeDynamicInteractable(item);
+        
+
                 this.scene.remove(item);
                 item.traverse(c => { if(c.geometry) c.geometry.dispose(); });
                 
                 const currentCount = stationData.internalContents.length;
                 const reqCount = stationData.config.requiredIngredients.length;
+        
                 this.uiManager.showTemporaryMessage(`Added ${item.name.replace(/_/g, ' ')} to Blender (${currentCount}/${reqCount})`, 1500);
                 if (this.audioManager) this.audioManager.play('place');
                 return;
@@ -425,11 +445,8 @@ export class InteractionManager {
             
             // 2. If player holds a container (like cup)
             if (item.userData.type === ITEM_TYPES.ITEM && item.userData.itemType === acceptsContainer) {
-                if (!stationData.internalContents) stationData.internalContents = [];
-                
-                // Check if all required ingredients are in the blender
-                const required = stationData.config.requiredIngredients;
-                const contents = stationData.internalContents;
+                const required = stationData.config.requiredIngredients || [];
+                const contents = stationData.internalContents || [];
                 
                 const contentsCopy = [...contents];
                 let allPresent = true;
@@ -438,6 +455,20 @@ export class InteractionManager {
                     if (idx > -1) {
                         contentsCopy.splice(idx, 1);
                     } else {
+                        // Treat milk and yogurt as interchangeable in the blender
+                        if (req === 'milk') {
+                            const yIdx = contentsCopy.indexOf('yogurt');
+                            if (yIdx > -1) {
+                                contentsCopy.splice(yIdx, 1);
+                                continue;
+                            }
+                        } else if (req === 'yogurt') {
+                            const mIdx = contentsCopy.indexOf('milk');
+                            if (mIdx > -1) {
+                                contentsCopy.splice(mIdx, 1);
+                                continue;
+                            }
+                        }
                         allPresent = false;
                         break;
                     }
@@ -453,8 +484,7 @@ export class InteractionManager {
                     
                     // Complete order if it forms a meal
                     checkPlateCompletion(item);
-                    updatePlateVisuals(this.scene, item, this.preloadedModels);
-                    
+                    updatePlateVisuals(this.scene, item);
                     this.uiManager.showTemporaryMessage("Smoothie Poured!", 1500);
                     if (this.audioManager) this.audioManager.play('ding');
                 } else {
@@ -464,6 +494,20 @@ export class InteractionManager {
                         if (idx > -1) {
                             contentsCopyForFilter.splice(idx, 1);
                             return false;
+                        }
+                        // Special check: milk / yogurt interchangeability for missing filter
+                        if (req === 'milk') {
+                            const yIdx = contentsCopyForFilter.indexOf('yogurt');
+                            if (yIdx > -1) {
+                                contentsCopyForFilter.splice(yIdx, 1);
+                                return false;
+                            }
+                        } else if (req === 'yogurt') {
+                            const mIdx = contentsCopyForFilter.indexOf('milk');
+                            if (mIdx > -1) {
+                                contentsCopyForFilter.splice(mIdx, 1);
+                                return false;
+                            }
                         }
                         return true;
                     });
@@ -484,7 +528,6 @@ export class InteractionManager {
         if (!itemToPlace) return;
 
         if (stationData.processes?.includes(item.name)) {
-            // Calculate visual top ignoring labels
             const topY = this._getVisualTopY(station);
             itemToPlace.position.set(station.position.x, topY + 0.005, station.position.z);
             this.scene.add(itemToPlace);
@@ -493,13 +536,14 @@ export class InteractionManager {
             this._addDynamicInteractable(itemToPlace);
             
             if (stationData.processingTime) {
-                if(this.audioManager) this.audioManager.play('fry'); 
-                itemToPlace.userData.processTimeoutId = setTimeout(() => {
-                    if (station.userData.occupiedBy === itemToPlace) this._finishProcessing(itemToPlace, station);
-                    delete itemToPlace.userData.processTimeoutId;
-                }, stationData.processingTime);
+                if(this.audioManager) this.audioManager.play('fry');
+                stationData.processingState = {
+                    item: itemToPlace,
+                    remaining: stationData.processingTime / 1000
+                };
+                this.activeProcessingStations.add(station);
             } else {
-                if(this.audioManager) this.audioManager.play('chop'); 
+                if(this.audioManager) this.audioManager.play('chop');
                 this._finishProcessing(itemToPlace, station);
             }
         } else {
@@ -510,10 +554,13 @@ export class InteractionManager {
     }
 
     _finishProcessing(item, station) {
+         if (!station?.userData || station.userData.occupiedBy !== item) return;
          const resultType = station.userData.result?.[item.name];
-         const newItem = createItem(this.scene, resultType, this.preloadedModels);
+         const newItem = createItem(this.scene, resultType);
          if (!newItem) return;
 
+         delete station.userData.processingState;
+         this.activeProcessingStations.delete(station);
          this._removeDynamicInteractable(item);
          item.traverse(c => { if(c.geometry) c.geometry.dispose(); });
          this.scene.remove(item);
@@ -525,10 +572,28 @@ export class InteractionManager {
          if(this.audioManager) this.audioManager.play('ding');
     }
 
+    update(delta) {
+        if (!this.activeProcessingStations.size) return;
+
+        for (const station of Array.from(this.activeProcessingStations)) {
+            const state = station.userData?.processingState;
+            if (!state || station.userData.occupiedBy !== state.item) {
+                if (station.userData) delete station.userData.processingState;
+                this.activeProcessingStations.delete(station);
+                continue;
+            }
+
+            state.remaining -= delta;
+            if (state.remaining <= 0) {
+                this._finishProcessing(state.item, station);
+            }
+        }
+    }
+
     _useStation(station, point) {
         if (station.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE || station.userData.stationType === STATION_TYPES.ITEM_SOURCE) {
              const type = station.userData.ingredient || station.userData.item;
-             const newItem = createItem(this.scene, type, this.preloadedModels);
+             const newItem = createItem(this.scene, type);
              if(this.player.pickup(newItem)) { 
                  if(this.audioManager) this.audioManager.play('pop');
              }

@@ -1,5 +1,5 @@
 // src/world.js
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import * as THREE from 'three';
 import { LABEL_Y_OFFSET, STATION_TYPES, GRID_UNIT, MODULE_HEIGHT } from './constants.js';
 import { GridSystem } from './grid.js';
 import { 
@@ -22,6 +22,10 @@ let currentLabelVisibility = true;
 
 export function setWorldLanguage(lang) {
     currentLang = lang;
+}
+
+export function getKitchenObjects() {
+    return currentKitchenObjects;
 }
 
 export function refreshSmartObjects(scene) {
@@ -321,7 +325,7 @@ export function createStationPrefab(def, theme) {
         if (RECIPES[name]) {
             group.userData.mealName = name;
         }
-        updatePlateVisuals(group, group, null);
+        updatePlateVisuals(group, group);
     }
 
     if (type === STATION_TYPES.PROCESSOR) {
@@ -360,7 +364,7 @@ export function clearKitchen(scene) {
     }
 }
 
-export function buildKitchen(scene, levelLayout, preloadedModels, theme) {
+export function buildKitchen(scene, levelLayout, theme) {
     clearKitchen(scene);
     const newStations = [];
     const newStationInteractables = [];
@@ -448,7 +452,7 @@ export function buildKitchen(scene, levelLayout, preloadedModels, theme) {
         } else if (def.type === STATION_TYPES.PREPLACED_ITEM) {
             // Special Case: Create a dynamic item instead of a station
             // This item will be pickup-able immediately
-            const item = createItem(scene, def.config.item, preloadedModels);
+            const item = createItem(scene, def.config.item);
             
             // Adjust position to sit on top of counters/tables if present, otherwise on the floor
             const kx = Math.round(x * 100) / 100;
@@ -464,7 +468,7 @@ export function buildKitchen(scene, levelLayout, preloadedModels, theme) {
                 if (RECIPES[def.name]) {
                     item.userData.mealName = def.name;
                 }
-                updatePlateVisuals(scene, item, preloadedModels);
+                updatePlateVisuals(scene, item);
             }
             
             currentKitchenObjects.push(item);

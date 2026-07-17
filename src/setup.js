@@ -1,5 +1,5 @@
 // src/setup.js
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import * as THREE from 'three';
 import { PLAYER_HEIGHT } from './constants.js';
 
 export function setupScene() {

@@ -15,6 +15,10 @@ export class AudioManager {
         }
     }
 
+    setEnabled(enabled) {
+        this.enabled = Boolean(enabled);
+    }
+
     play(soundName) {
         if (!this.enabled) return;
         this.resume();
@@ -113,5 +117,11 @@ export class AudioManager {
         gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
         osc.start(time);
         osc.stop(time + duration);
+    }
+
+    setVolume(volume) {
+        if (this.masterGain) {
+            this.masterGain.gain.value = Math.max(0, Math.min(1, Number(volume) ?? 0.3));
+        }
     }
 }

@@ -6,7 +6,7 @@
   "newOrderDelay": 15,
   "maxActiveOrders": 2,
   "starThresholds": [300, 500, 750],
-  "availableMeals": ["French Fries", "BLT Sandwich", "Omelette"],
+  "availableMeals": ["French Fries", "BLT Sandwich", "Cheese Omelette"],
   "layout": [
     { "name": "Wall Back", "type": "wall", "position": { "x": 0, "z": -4}, "size": { "width": 8.5, "depth": 0.5}},
     { "name": "Wall Left", "type": "wall", "position": { "x": -4, "z": 0}, "rotation": -1.57, "size": { "width": 8.5, "depth": 0.5}},
@@ -55,6 +55,7 @@
     { "name": "Counter", "type": "counter", "position": { "x": 2.5, "z": 1}},
     { "name": "robotMixer", "type": "processor", "position": { "x": -2.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "processes": ["egg", "pancake_mix"], "result": { "egg": "omelette_mix", "pancake_mix": "pancake_batter" }, "processingTime": 2000}},
     { "name": "Egg Carton", "type": "ingredient_source", "position": { "x": -1.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "ingredient": "egg" }},
+    { "name": "Cheese Fridge", "type": "ingredient_source", "position": { "x": -3.5, "z": -2.5}, "rotation": 1.57, "size": { "width": 0.5, "depth": 0.5}, "config": { "ingredient": "cheese_slice" }},
     { "name": "Toaster", "type": "processor", "position": { "x": -0.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "processes": ["bread_slice"], "result": { "bread_slice": "toasted_bread" }, "processingTime": 3000}},
     { "name": "Bread Rack", "type": "ingredient_source", "position": { "x": 0.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "ingredient": "bread_slice" }},
     { "name": "Stove Top", "type": "processor", "position": { "x": 1.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "processes": ["patty", "raw_bacon", "pancake_batter", "omelette_mix", "grilled_cheese_raw"], "result": { "patty": "cooked_patty", "raw_bacon": "cooked_bacon", "pancake_batter": "cooked_pancakes", "omelette_mix": "cooked_omelette", "grilled_cheese_raw": "grilled_cheese_cooked" }, "processingTime": 4000}},

@@ -1,6 +1,6 @@
 // src/editor.js
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT, ITEM_TYPES } from './constants.js';
 import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh, resizeWall, refreshSmartObjects } from './world.js';
 import { RECIPES } from './gameData.js';
@@ -12,6 +12,7 @@ const EDITOR_TRANSLATIONS = {
         title: "🏗️ LEVEL EDITOR: ",
         controls_hint: "<span><b>Left Click:</b> Place</span> | <span><b>Right Drag:</b> Pan</span> | <span><b>T:</b> Save JSON</span>",
         btn_settings: "⚙️ Level Settings",
+        btn_save_local: "💾 Save Local",
         btn_save_json: "💾 Save JSON",
         btn_exit: "Exit",
         map_status: "📋 MAP STATUS",
@@ -58,6 +59,7 @@ const EDITOR_TRANSLATIONS = {
         title: "🏗️ ÉDITEUR DE NIVEAU : ",
         controls_hint: "<span><b>Clic Gauche :</b> Placer</span> | <span><b>Clic Droit Glisser :</b> Déplacer</span> | <span><b>T :</b> Enregistrer le JSON</span>",
         btn_settings: "⚙️ Paramètres",
+        btn_save_local: "💾 Sauvegarder localement",
         btn_save_json: "💾 Enregistrer",
         btn_exit: "Quitter",
         map_status: "📋 STATUS DE LA MAP",
@@ -413,17 +415,18 @@ const RECIPE_REQUIREMENTS = {
 };
 
 export class LevelEditor {
-    constructor(camera, renderer, scene, interactionManager, onExit) {
+    constructor(camera, renderer, scene, interactionManager, callbacks = {}) {
         this.camera = camera;
         this.renderer = renderer;
         this.scene = scene;
         this.interactionManager = interactionManager;
-        this.onExit = onExit;
+        this.callbacks = typeof callbacks === 'function' ? { onExit: callbacks } : callbacks;
         this.enabled = false;
         this.raycaster = new THREE.Raycaster();
 
         // Loaded Level Metadata
         this.currentLevelData = {};
+        this.currentSourceEntry = null;
         this.validationWarningsCount = 0;
         this.lang = 'en';
 
@@ -517,8 +520,9 @@ export class LevelEditor {
         document.getElementById('btn-clone').addEventListener('click', () => this.cloneSelected());
         document.getElementById('btn-delete').addEventListener('click', () => this.deleteSelected());
         document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLayout());
+        document.getElementById('editor-save-local-btn').addEventListener('click', () => this.saveLocalLevel());
         document.getElementById('editor-exit-btn').addEventListener('click', () => {
-            if (this.onExit) this.onExit();
+            this.callbacks.onExit?.();
         });
 
         // Meta Button
@@ -612,10 +616,11 @@ export class LevelEditor {
     }
 
     // Called when opening editor for a specific level
-    loadLevel(levelData) {
+    loadLevel(levelData, sourceEntry = null) {
         // We store the metadata locally. The 3D objects are already added by main.js using buildKitchen
         // We just need to sync our internal state.
         this.currentLevelData = JSON.parse(JSON.stringify(levelData)); // Deep copy
+        this.currentSourceEntry = sourceEntry ? JSON.parse(JSON.stringify(sourceEntry)) : null;
         document.getElementById('editor-current-level-name').textContent = levelData.name || "Untitled";
         this.validateLevel();
     }
@@ -710,6 +715,9 @@ export class LevelEditor {
         // Top action buttons
         const btnSettings = document.getElementById('editor-meta-btn');
         if (btnSettings) btnSettings.textContent = this.translateText('btn_settings');
+
+        const btnSaveLocal = document.getElementById('editor-save-local-btn');
+        if (btnSaveLocal) btnSaveLocal.textContent = this.translateText('btn_save_local');
 
         const btnSaveJson = document.getElementById('editor-export-btn');
         if (btnSaveJson) btnSaveJson.textContent = this.translateText('btn_save_json');
@@ -1541,11 +1549,7 @@ export class LevelEditor {
 
     // --- Export ---
 
-    exportLayout() {
-        if (this.validationWarningsCount > 0) {
-            const confirmExport = confirm(this.translateText('warning_export'));
-            if (!confirmExport) return;
-        }
+    _collectLayout() {
         const layout = [];
         this.scene.traverse(c => {
             if (c.parent === this.scene &&
@@ -1632,64 +1636,46 @@ export class LevelEditor {
             }
         });
 
-        // Update current level data
-        this.currentLevelData.layout = layout;
+        return layout;
+    }
 
-        // Construct a compact, single-line formatted JSON string
-        const data = this.currentLevelData;
-        const indent = "  ";
-        const lines = [];
+    buildLevelData() {
+        const data = JSON.parse(JSON.stringify(this.currentLevelData || {}));
+        data.name = String(data.name || 'Untitled Kitchen').trim().slice(0, 60) || 'Untitled Kitchen';
+        data.duration = Math.max(30, Number(data.duration) || 180);
+        data.newOrderDelay = Math.max(1, Number(data.newOrderDelay) || 15);
+        data.maxActiveOrders = Math.max(1, Math.floor(Number(data.maxActiveOrders) || 2));
+        data.starThresholds = Array.isArray(data.starThresholds) ? data.starThresholds.map(Number).filter(Number.isFinite) : [100, 200, 300];
+        data.availableMeals = Array.isArray(data.availableMeals) ? data.availableMeals : [];
+        data.layout = this._collectLayout();
+        delete data.customId;
+        delete data.source;
+        delete data.origin;
+        delete data.createdAt;
+        delete data.updatedAt;
+        delete data.filename;
+        return data;
+    }
 
-        lines.push("{");
-        lines.push(`${indent}"levelId": ${data.levelId || 1},`);
-        lines.push(`${indent}"name": ${JSON.stringify(data.name || "New Level")},`);
-        if (data.theme) {
-            lines.push(`${indent}"theme": ${JSON.stringify(data.theme)},`);
-        }
-        lines.push(`${indent}"duration": ${data.duration || 120},`);
-        lines.push(`${indent}"newOrderDelay": ${data.newOrderDelay || 15},`);
-        lines.push(`${indent}"maxActiveOrders": ${data.maxActiveOrders || 2},`);
+    _confirmIncompleteLevel() {
+        return this.validationWarningsCount === 0 || confirm(this.translateText('warning_export'));
+    }
 
-        const starsStr = JSON.stringify(data.starThresholds || [100, 200, 300]);
-        lines.push(`${indent}"starThresholds": ${starsStr.replace(/,/g, ', ')},`);
-
-        const mealsStr = JSON.stringify(data.availableMeals || ["burger"]);
-        lines.push(`${indent}"availableMeals": ${mealsStr.replace(/,/g, ', ')},`);
-
-        lines.push(`${indent}"layout": [`);
-
-        const layoutLines = data.layout.map((item, idx) => {
-            const isLast = idx === data.layout.length - 1;
-            const flatStr = JSON.stringify(item);
-
-            // Format spacing nicely: {"name":"Wall"} -> { "name": "Wall" }
-            const prettyFlat = flatStr
-                .replace(/\{"/g, '{ "')
-                .replace(/"\}/g, '" }')
-                .replace(/","/g, '", "')
-                .replace(/":/g, '": ')
-                .replace(/,"/g, ', "');
-
-            return `${indent}${indent}${prettyFlat}${isLast ? "" : ","}`;
-        });
-
-        lines.push(...layoutLines);
-        lines.push(`${indent}]`);
-        lines.push("}");
-
-        const jsonStr = lines.join("\n");
+    exportLayout() {
+        if (!this._confirmIncompleteLevel()) return;
+        const data = this.buildLevelData();
         const fileName = `level_${data.levelId || 'custom'}.json`;
-
-        // Trigger Download
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
         const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", fileName);
+        downloadAnchorNode.href = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
+        downloadAnchorNode.download = fileName;
         document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
+    }
 
-        alert(`Level Exported! Replace the file in 'levels/${fileName}' to persist changes.`);
+    saveLocalLevel() {
+        if (!this._confirmIncompleteLevel()) return;
+        this.callbacks.onSaveLocal?.(this.buildLevelData(), this.currentSourceEntry);
     }
 
     generateThumbnail(item) {
