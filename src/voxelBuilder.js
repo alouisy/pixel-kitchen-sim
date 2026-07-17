@@ -1027,12 +1027,14 @@ export function createItemMesh(type, contents = [], mealName = null) {
         vb.addBox(3, 3, 8, 12, 4, 10, PALETTE.BACON_COOKED);
         vb.addBox(3, 4, 3, 12, 5, 12, PALETTE.WOOD_DARK);
     }
-    else if (type === 'Grilled Cheese Sandwich') {
-        vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.WOOD_DARK);
+    else if (type.includes('grilled_cheese') || type === 'Grilled Cheese Sandwich') {
+        const isCooked = !type.includes('raw');
+        const breadColor = isCooked ? PALETTE.WOOD_DARK : PALETTE.BUN;
+        vb.addBox(3, 0, 3, 12, 1, 12, breadColor);
         vb.addBox(3, 1, 3, 12, 2, 12, PALETTE.CHEESE);
         vb.addBox(4, 0, 2, 6, 2, 3, PALETTE.CHEESE); 
         vb.addBox(12, 0, 8, 13, 2, 10, PALETTE.CHEESE); 
-        vb.addBox(3, 2, 3, 12, 3, 12, PALETTE.WOOD_DARK);
+        vb.addBox(3, 2, 3, 12, 3, 12, breadColor);
     }
     else if (type === 'Pancakes') {
         vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.PANCAKE);
@@ -1382,7 +1384,66 @@ export function createItemMesh(type, contents = [], mealName = null) {
     // *** KEY FIX: NORMALIZE ORIGIN ***
     // VoxelBuilder 0,0,0 is center of grid unit.
     // This shift makes (0,0,0) the BOTTOM of the mesh.
+    // (Note: grid coordinates are scaled inside items/prefabs)
     mesh.geometry.translate(0, GRID_UNIT/2, 0); 
     
+    return mesh;
+}
+
+export function createExhaustHoodMesh() {
+    const vb = new VoxelBuilder();
+    // Metal hood body
+    vb.addBox(0, 8, 0, 15, 15, 15, PALETTE.METAL_DARK);
+    vb.addBox(3, 0, 3, 12, 7, 12, PALETTE.METAL_LIGHT);
+    // Grid details on front
+    vb.addBox(1, 9, 14, 14, 14, 15, PALETTE.METAL_SHINY);
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT / 2;
+    return mesh;
+}
+
+export function createPlantMesh() {
+    const vb = new VoxelBuilder();
+    
+    // Pot (tapered shape)
+    vb.addBox(5, 0, 5, 10, 1, 10, 0x8d6e63); // Base
+    vb.addBox(4, 2, 4, 11, 4, 11, 0x8d6e63); // Middle
+    vb.addBox(3, 5, 3, 12, 6, 12, 0x8d6e63); // Rim
+    vb.addBox(4, 6, 4, 11, 6, 11, 0x3e2723); // Soil
+
+    // Stem
+    vb.addBox(7, 6, 7, 8, 11, 8, 0x2e7d32); 
+
+    // Leaves - Lower layer
+    vb.addBox(3, 8, 7, 6, 8, 8, 0x4caf50); // Left
+    vb.addBox(9, 8, 7, 12, 8, 8, 0x4caf50); // Right
+    vb.addBox(7, 8, 3, 8, 8, 6, 0x4caf50); // Front
+    vb.addBox(7, 8, 9, 8, 8, 12, 0x4caf50); // Back
+
+    // Leaves - Middle layer
+    vb.addBox(4, 10, 6, 7, 10, 9, 0x4caf50);
+    vb.addBox(8, 10, 6, 11, 10, 9, 0x4caf50);
+    vb.addBox(6, 10, 4, 9, 10, 7, 0x4caf50);
+    vb.addBox(6, 10, 8, 9, 10, 11, 0x4caf50);
+
+    // Leaves - Top bushy part
+    vb.addBox(5, 12, 5, 10, 14, 10, 0x2e7d32);
+    vb.addBox(6, 15, 6, 9, 15, 9, 0x4caf50);
+
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT / 2;
+    return mesh;
+}
+
+export function createKitchenLampMesh() {
+    const vb = new VoxelBuilder();
+    // Wire
+    vb.addBox(7, 8, 7, 8, 15, 8, PALETTE.BLACK);
+    // Lamp shade
+    vb.addBox(5, 3, 5, 10, 7, 10, PALETTE.METAL_LIGHT);
+    // Bulb
+    vb.addBox(6, 1, 6, 9, 2, 9, 0xffeb3b);
+    const mesh = vb.buildMesh();
+    mesh.position.y = GRID_UNIT / 2;
     return mesh;
 }

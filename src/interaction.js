@@ -222,42 +222,20 @@ export class InteractionManager {
     }
 
     _isDirectAdditionCheck(heldItem, targetObject) {
-        if (heldItem.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(heldItem.userData.itemType)) {
+        const containerTypes = ['plate', 'bowl', 'cup', 'pizza_base', 'bread_slice'];
+        if (heldItem.userData.type === ITEM_TYPES.ITEM && containerTypes.includes(heldItem.userData.itemType)) {
              if (targetObject.userData.type === ITEM_TYPES.INGREDIENT) return true;
              if (targetObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) return true;
         }
         if (heldItem.userData.type === ITEM_TYPES.INGREDIENT) {
-             if (targetObject.userData.type === ITEM_TYPES.ITEM && ['plate','bowl','cup'].includes(targetObject.userData.itemType)) {
+             if (targetObject.userData.type === ITEM_TYPES.ITEM && containerTypes.includes(targetObject.userData.itemType)) {
                  return true;
              }
         }
         return false;
     }
 
-    _handleDirectAddition(itemA, itemB) {
-        let container, ingredientObject;
-        if (itemA.userData.type === ITEM_TYPES.ITEM) { container = itemA; ingredientObject = itemB; } 
-        else { container = itemB; ingredientObject = itemA; }
-
-        const containerData = container.userData;
-        let ingredientName = ingredientObject.name;
-        if (ingredientObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) {
-            ingredientName = ingredientObject.userData.ingredient;
-        }
-
-        if (!['plate', 'bowl', 'cup'].includes(containerData.itemType)) return;
-        if (!Array.isArray(containerData.contents)) containerData.contents = [];
-        if (containerData.contents.includes(ingredientName)) {
-            this.uiManager.showTemporaryMessage("Already Added!", 1000);
-            return;
-        }
-
-        containerData.contents.push(ingredientName);
-        
-        const isMealComplete = checkPlateCompletion(container);
-
-        updatePlateVisuals(this.scene, container, this.preloadedModels);
-
+    _removeIngredientAfterAddition(ingredientObject) {
         if (ingredientObject === this.player.getHeldItem()) {
             this.player.place(); 
             this._removeDynamicInteractable(ingredientObject);
@@ -275,6 +253,98 @@ export class InteractionManager {
                 }
             }
         }
+    }
+
+    _morphContainer(container, newType) {
+        const heldItem = this.player.getHeldItem();
+        if (heldItem === container) {
+            this.player.place();
+            this._removeDynamicInteractable(container);
+            this.scene.remove(container);
+            container.traverse(c => { if (c.geometry) c.geometry.dispose(); });
+
+            const newItem = createItem(this.scene, newType, this.preloadedModels);
+            this.player.pickup(newItem);
+            this.uiManager.showTemporaryMessage(`${newType.replace(/_/g, ' ')} assembled!`, 1500);
+            if (this.audioManager) this.audioManager.play('pop');
+        } else {
+            let gridInfo = container.userData.gridInfo;
+            let foundStation = null;
+            if (!gridInfo) {
+                for (const station of this.stations) {
+                    if (station.userData?.occupiedBy === container) {
+                        foundStation = station;
+                        break;
+                    }
+                }
+            }
+
+            const oldPos = container.position.clone();
+            this._removeDynamicInteractable(container);
+            this.scene.remove(container);
+            container.traverse(c => { if (c.geometry) c.geometry.dispose(); });
+
+            const newItem = createItem(this.scene, newType, this.preloadedModels);
+            newItem.position.copy(oldPos);
+
+            if (gridInfo) {
+                const { grid, col, row } = gridInfo;
+                grid.occupy(col, row, 1, 1, newItem);
+            } else if (foundStation) {
+                foundStation.userData.occupiedBy = newItem;
+            }
+
+            this._addDynamicInteractable(newItem);
+            this.scene.add(newItem);
+            this.uiManager.showTemporaryMessage(`${newType.replace(/_/g, ' ')} assembled!`, 1500);
+            if (this.audioManager) this.audioManager.play('place');
+        }
+    }
+
+    _handleDirectAddition(itemA, itemB) {
+        let container, ingredientObject;
+        if (itemA.userData.type === ITEM_TYPES.ITEM) { container = itemA; ingredientObject = itemB; } 
+        else { container = itemB; ingredientObject = itemA; }
+
+        const containerData = container.userData;
+        let ingredientName = ingredientObject.name;
+        if (ingredientObject.userData.stationType === STATION_TYPES.INGREDIENT_SOURCE) {
+            ingredientName = ingredientObject.userData.ingredient;
+        }
+
+        const containerTypes = ['plate', 'bowl', 'cup', 'pizza_base', 'bread_slice'];
+        if (!containerTypes.includes(containerData.itemType)) return;
+        if (!Array.isArray(containerData.contents)) containerData.contents = [];
+        if (containerData.contents.includes(ingredientName)) {
+            this.uiManager.showTemporaryMessage("Already Added!", 1000);
+            return;
+        }
+
+        containerData.contents.push(ingredientName);
+        
+        // Raw Pizza check
+        if (containerData.itemType === 'pizza_base') {
+            if (containerData.contents.includes('tomato_sauce') && containerData.contents.includes('shredded_mozzarella')) {
+                this._removeIngredientAfterAddition(ingredientObject);
+                this._morphContainer(container, 'pizza_margherita_raw');
+                return;
+            }
+        }
+        
+        // Grilled Cheese check
+        if (containerData.itemType === 'bread_slice') {
+            if (containerData.contents.includes('cheese_slice')) {
+                this._removeIngredientAfterAddition(ingredientObject);
+                this._morphContainer(container, 'grilled_cheese_raw');
+                return;
+            }
+        }
+
+        const isMealComplete = checkPlateCompletion(container);
+
+        updatePlateVisuals(this.scene, container, this.preloadedModels);
+
+        this._removeIngredientAfterAddition(ingredientObject);
 
         if (isMealComplete) {
             this.uiManager.showTemporaryMessage(`${containerData.mealName} Ready!`, 1500);
@@ -326,8 +396,88 @@ export class InteractionManager {
     }
 
     _placeOrProcessItem(item, station, targetPoint) {
-         if ((station.name === 'robotMixer' || station.name === 'blender')) return; 
         const stationData = station.userData;
+        
+        // Handle blender / multi-ingredient stations (with requiredIngredients)
+        if (stationData.config?.requiredIngredients) {
+            const accepts = stationData.config.acceptsIngredients || [];
+            const acceptsContainer = stationData.config.acceptsContainer;
+            
+            // 1. If player holds an accepted ingredient
+            if (accepts.includes(item.name)) {
+                if (!stationData.internalContents) stationData.internalContents = [];
+                
+                // Add ingredient to blender
+                stationData.internalContents.push(item.name);
+                
+                // Remove from player
+                this.player.place();
+                this._removeDynamicInteractable(item);
+                this.scene.remove(item);
+                item.traverse(c => { if(c.geometry) c.geometry.dispose(); });
+                
+                const currentCount = stationData.internalContents.length;
+                const reqCount = stationData.config.requiredIngredients.length;
+                this.uiManager.showTemporaryMessage(`Added ${item.name.replace(/_/g, ' ')} to Blender (${currentCount}/${reqCount})`, 1500);
+                if (this.audioManager) this.audioManager.play('place');
+                return;
+            }
+            
+            // 2. If player holds a container (like cup)
+            if (item.userData.type === ITEM_TYPES.ITEM && item.userData.itemType === acceptsContainer) {
+                if (!stationData.internalContents) stationData.internalContents = [];
+                
+                // Check if all required ingredients are in the blender
+                const required = stationData.config.requiredIngredients;
+                const contents = stationData.internalContents;
+                
+                const contentsCopy = [...contents];
+                let allPresent = true;
+                for (const req of required) {
+                    const idx = contentsCopy.indexOf(req);
+                    if (idx > -1) {
+                        contentsCopy.splice(idx, 1);
+                    } else {
+                        allPresent = false;
+                        break;
+                    }
+                }
+                
+                if (allPresent) {
+                    // Empty blender
+                    stationData.internalContents = [];
+                    
+                    // Add outputItem to container contents
+                    if (!item.userData.contents) item.userData.contents = [];
+                    item.userData.contents.push(stationData.config.outputItem);
+                    
+                    // Complete order if it forms a meal
+                    checkPlateCompletion(item);
+                    updatePlateVisuals(this.scene, item, this.preloadedModels);
+                    
+                    this.uiManager.showTemporaryMessage("Smoothie Poured!", 1500);
+                    if (this.audioManager) this.audioManager.play('ding');
+                } else {
+                    const contentsCopyForFilter = [...contents];
+                    const missing = required.filter(req => {
+                        const idx = contentsCopyForFilter.indexOf(req);
+                        if (idx > -1) {
+                            contentsCopyForFilter.splice(idx, 1);
+                            return false;
+                        }
+                        return true;
+                    });
+                    this.uiManager.showTemporaryMessage(`Missing: ${missing.map(m => m.replace(/_/g, ' ')).join(', ')}`, 2000);
+                    if (this.audioManager) this.audioManager.play('error');
+                }
+                return;
+            }
+            
+            this.uiManager.showTemporaryMessage("Cannot put this in blender", 1500);
+            if (this.audioManager) this.audioManager.play('error');
+            return;
+        }
+
         if (stationData.occupiedBy) { this.uiManager.showTemporaryMessage("Station Busy", 1000); if(this.audioManager) this.audioManager.play('error'); return; }
         
         const itemToPlace = this.player.place();
@@ -382,6 +532,20 @@ export class InteractionManager {
              if(this.player.pickup(newItem)) { 
                  if(this.audioManager) this.audioManager.play('pop');
              }
+             return;
+        }
+
+        // Blender status check
+        if (station.userData.config?.requiredIngredients) {
+            const contents = station.userData.internalContents || [];
+            if (contents.length === 0) {
+                this.uiManager.showTemporaryMessage("Blender is empty", 1500);
+            } else {
+                const formatted = contents.map(c => c.replace(/_/g, ' ')).join(', ');
+                this.uiManager.showTemporaryMessage(`Blender contains: ${formatted}`, 2000);
+            }
+            if (this.audioManager) this.audioManager.play('pop');
+            return;
         }
     }
 

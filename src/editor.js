@@ -358,12 +358,12 @@ export class LevelEditor {
         const dummyPos = { x: 0, z: 0 }; // Position set later
 
         if (t.type === STATION_TYPES.COUNTER || t.type === STATION_TYPES.SERVING) {
-            obj = createCounterPrefab(t.name, fakeColor, t.isServing);
+            obj = createCounterPrefab(t.name, fakeColor, t.isServing, this.currentLevelData?.theme);
         } else if (t.type === STATION_TYPES.TABLE) {
             // Neighbors default to false, will fuse later
             obj = createTablePrefab(t.name, fakeColor, {n:false, s:false, e:false, w:false});
         } else {
-            // Generic Station / Wall / Source / Preplaced Item
+            // Generic Station / Wall / Source / Preplaced Item / Decoration
             const def = {
                 name: t.name,
                 type: t.type,
@@ -372,7 +372,7 @@ export class LevelEditor {
                 config: t.config,
                 position: dummyPos
             };
-            obj = createStationPrefab(def);
+            obj = createStationPrefab(def, this.currentLevelData?.theme);
         }
 
         // Store template data for serialization later
@@ -740,6 +740,17 @@ export class LevelEditor {
             }
         }
 
+        // Global height overrides based on template type or active object name
+        const activeObject = (this.placementMode && this.ghostObject) ? this.ghostObject : this.selectedObject;
+        if (activeObject) {
+            const n = activeObject.name.toLowerCase();
+            if (n.includes('lamp') || n.includes('light')) {
+                targetY = 2.0; // Snap to ceiling lamp height (matching world.js)
+            } else if (n.includes('hood') || n.includes('exhaust')) {
+                targetY = MODULE_HEIGHT + 0.6; // Snap above stoves/counters (matching world.js)
+            }
+        }
+
         if (foundSupport) {
             // Snap X/Z to grid
             const finalX = Math.round(targetX * 2) / 2; 
@@ -817,21 +828,27 @@ export class LevelEditor {
                 c !== this.handlesGroup && 
                 c !== this.orbit && 
                 c.name !== "Floor" &&
-                c.userData) {
+                c.userData &&
+                c.userData.type !== 'floor') {
                 
                 let entry = null;
                 const type = c.userData.stationType || c.userData.type;
                 
-                if (type === STATION_TYPES.TABLE || 
-                    type === STATION_TYPES.COUNTER || 
-                    type === STATION_TYPES.SERVING || 
-                    type === STATION_TYPES.TRASH || 
-                    type === STATION_TYPES.WALL ||
-                    type === STATION_TYPES.INGREDIENT_SOURCE ||
-                    type === STATION_TYPES.ITEM_SOURCE ||
-                    type === STATION_TYPES.PROCESSOR ||
-                    c.userData.type === 'station') {
-                    
+                // Any station-like object (including decorations, trash, walls)
+                const isStation = [
+                    STATION_TYPES.TABLE,
+                    STATION_TYPES.COUNTER,
+                    STATION_TYPES.SERVING,
+                    STATION_TYPES.TRASH,
+                    STATION_TYPES.WALL,
+                    STATION_TYPES.INGREDIENT_SOURCE,
+                    STATION_TYPES.ITEM_SOURCE,
+                    STATION_TYPES.PROCESSOR,
+                    'decoration',
+                    'station'
+                ].includes(type) || c.userData.type === 'station';
+                
+                if (isStation) {
                     entry = {
                         name: c.name,
                         type: c.userData.stationType || c.userData.type || 'station',
@@ -889,11 +906,53 @@ export class LevelEditor {
             }
         });
         
-        // Update current level data with new layout
+        // Update current level data
         this.currentLevelData.layout = layout;
         
-        const jsonStr = JSON.stringify(this.currentLevelData, null, 2);
-        const fileName = `level_${this.currentLevelData.levelId || 'custom'}.json`;
+        // Construct a compact, single-line formatted JSON string
+        const data = this.currentLevelData;
+        const indent = "  ";
+        const lines = [];
+        
+        lines.push("{");
+        lines.push(`${indent}"levelId": ${data.levelId || 1},`);
+        lines.push(`${indent}"name": ${JSON.stringify(data.name || "New Level")},`);
+        if (data.theme) {
+            lines.push(`${indent}"theme": ${JSON.stringify(data.theme)},`);
+        }
+        lines.push(`${indent}"duration": ${data.duration || 120},`);
+        lines.push(`${indent}"newOrderDelay": ${data.newOrderDelay || 15},`);
+        lines.push(`${indent}"maxActiveOrders": ${data.maxActiveOrders || 2},`);
+        
+        const starsStr = JSON.stringify(data.starThresholds || [100, 200, 300]);
+        lines.push(`${indent}"starThresholds": ${starsStr.replace(/,/g, ', ')},`);
+        
+        const mealsStr = JSON.stringify(data.availableMeals || ["burger"]);
+        lines.push(`${indent}"availableMeals": ${mealsStr.replace(/,/g, ', ')},`);
+        
+        lines.push(`${indent}"layout": [`);
+        
+        const layoutLines = data.layout.map((item, idx) => {
+            const isLast = idx === data.layout.length - 1;
+            const flatStr = JSON.stringify(item);
+            
+            // Format spacing nicely: {"name":"Wall"} -> { "name": "Wall" }
+            const prettyFlat = flatStr
+                .replace(/\{"/g, '{ "')
+                .replace(/"\}/g, '" }')
+                .replace(/","/g, '", "')
+                .replace(/":/g, '": ')
+                .replace(/,"/g, ', "');
+                
+            return `${indent}${indent}${prettyFlat}${isLast ? "" : ","}`;
+        });
+        
+        lines.push(...layoutLines);
+        lines.push(`${indent}]`);
+        lines.push("}");
+        
+        const jsonStr = lines.join("\n");
+        const fileName = `level_${data.levelId || 'custom'}.json`;
 
         // Trigger Download
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
@@ -1030,19 +1089,22 @@ export class LevelEditor {
             STATION_TYPES.PROCESSOR, 
             STATION_TYPES.INGREDIENT_SOURCE, 
             STATION_TYPES.ITEM_SOURCE, 
-            STATION_TYPES.PREPLACED_ITEM
+            STATION_TYPES.PREPLACED_ITEM,
+            'decoration'
         ].includes(ghostTemplate.type);
         
         const isBaseGhost = !isTopGhost;
         
-        // Base items cannot be placed on top of other items (y > 0.1)
-        if (isBaseGhost && y > 0.1) {
-            return true;
-        }
-        
-        // Top items MUST be placed on top of a support (y > 0.1)
-        if (isTopGhost && y < 0.1) {
-            return true;
+        if (ghostTemplate.type !== 'decoration') {
+            // Base items cannot be placed on top of other items (y > 0.1)
+            if (isBaseGhost && y > 0.1) {
+                return true;
+            }
+            
+            // Top items MUST be placed on top of a support (y > 0.1)
+            if (isTopGhost && y < 0.1) {
+                return true;
+            }
         }
 
         let occupied = false;
@@ -1062,14 +1124,14 @@ export class LevelEditor {
                 const cz = Math.round(c.position.z * 100) / 100;
                 
                 if (Math.abs(cx - gx) < 0.1 && Math.abs(cz - gz) < 0.1) {
-                    const cIsTop = c.position.y > 0.1;
-                    
-                    if (y < 0.1) {
-                        // Ghost is on the floor. Blocked by any other floor object.
-                        if (!cIsTop) occupied = true;
+                    // Walls block everything on the same cell
+                    if (c.userData.stationType === STATION_TYPES.WALL || ghostTemplate.type === STATION_TYPES.WALL) {
+                        occupied = true;
                     } else {
-                        // Ghost is on a counter. Blocked by any other top object.
-                        if (cIsTop) occupied = true;
+                        // Otherwise, block only if they occupy the same height level
+                        if (Math.abs(c.position.y - y) < 0.3) {
+                            occupied = true;
+                        }
                     }
                 }
             }

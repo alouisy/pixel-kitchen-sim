@@ -35,7 +35,7 @@ export function createItem(scene, type, preloadedModels, state = INGREDIENT_STAT
     // Determine type based on string analysis or direct match
     // This logic is critical for interaction compatibility
     
-    if (['plate', 'bowl', 'cup'].includes(type)) {
+    if (['plate', 'bowl', 'cup', 'pizza_base', 'bread_slice'].includes(type)) {
          userData = { type: ITEM_TYPES.ITEM, itemType: type, contents: [], mealName: null };
     }
     else if (type.includes('smoothie_ready') || type.includes('cooked') || type.includes('chopped') || type.includes('sliced') || type.includes('toasted') || type.includes('coated') || type.includes('mixed') || type.includes('batter') || type.includes('base')) {

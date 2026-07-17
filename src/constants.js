@@ -80,6 +80,11 @@ export const CATALOG_ITEMS = [
     { name: "Table", type: STATION_TYPES.TABLE, category: "Furniture", color: "#CCCCCC" },
     { name: "Trash Bin", type: STATION_TYPES.TRASH, category: "Furniture", size: { width: 0.5, depth: 0.5 } },
 
+    // --- DECORATIONS ---
+    { name: "Potted Plant", type: "decoration", category: "Decorations", size: { width: 0.5, depth: 0.5 } },
+    { name: "Exhaust Hood", type: "decoration", category: "Decorations", size: { width: 0.5, depth: 0.5 } },
+    { name: "Hanging Lamp", type: "decoration", category: "Decorations", size: { width: 0.5, depth: 0.5 } },
+
     // --- ITEMS (Single Placeable) ---
     { name: "Plate (Single)", type: STATION_TYPES.PREPLACED_ITEM, category: "Items", size: { width: 0.5, depth: 0.5 }, config: { item: "plate" } },
     { name: "Bowl (Single)", type: STATION_TYPES.PREPLACED_ITEM, category: "Items", size: { width: 0.5, depth: 0.5 }, config: { item: "bowl" } },
@@ -165,7 +170,7 @@ export const CATALOG_ITEMS = [
     { name: "Onion Rings", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["cooked_onion_rings"] } },
     { name: "Chicken Tenders", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["cooked_chicken_tenders"] } },
     { name: "BLT Sandwich", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["cooked_bacon", "chopped_lettuce", "chopped_tomato", "toasted_bread"] } },
-    { name: "Grilled Cheese", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["grilled_cheese_cooked"] } },
+    { name: "Grilled Cheese Sandwich", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["grilled_cheese_cooked"] } },
     { name: "Pancakes", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["cooked_pancakes", "syrup"] } },
     { name: "Omelette", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "plate", contents: ["cooked_omelette"] } },
     { name: "Yogurt Bowl", type: STATION_TYPES.PREPLACED_ITEM, category: "Dishes", size: { width: 0.5, depth: 0.5 }, config: { item: "bowl", contents: ["granola", "sliced_banana", "sliced_strawberry", "yogurt"] } },

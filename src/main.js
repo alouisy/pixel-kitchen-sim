@@ -462,7 +462,7 @@ async function prepareEditLevel(index) {
         clearKitchen(scene);
         
         // Use builder to show current state
-        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, data.layout || [], preloadedModels);
+        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, data.layout || [], preloadedModels, data.theme);
         interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
         
         // Initialize Editor with this data
@@ -506,7 +506,7 @@ async function prepareStartLevel(levelIndex) {
         clearKitchen(scene);
         
         // Pass preloadedModels to buildKitchen so preplaced items can be instantiated
-        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout, preloadedModels);
+        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout, preloadedModels, levelData.theme);
         interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
         
         pendingLevelIndex = levelIndex;

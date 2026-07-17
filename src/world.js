@@ -7,7 +7,8 @@ import {
     createTrashBinMesh, createFryerMesh, createCuttingBoardMesh, createStoveMesh, createSinkMesh, 
     createIngredientBinMesh, createPlateStackMesh, createCupStackMesh, createBowlStackMesh,
     createToasterMesh, createMixerMesh, createBlenderMesh, createDoughPressMesh, createPizzaOvenMesh,
-    createItemMesh, createTableMesh
+    createItemMesh, createTableMesh,
+    createExhaustHoodMesh, createPlantMesh, createKitchenLampMesh
 } from './voxelBuilder.js';
 import { getTrans } from './i18nData.js';
 import { createItem, updatePlateVisuals } from './items.js';
@@ -142,20 +143,49 @@ export function getFloorMesh() {
     return currentFloor;
 }
 
-function createCounterMesh(isServing, isCorner) {
+function createCounterMesh(isServing, isCorner, theme) {
     const vb = new VoxelBuilder();
+    
+    // Determine colors based on theme.counterStyle or theme colors
+    let baseCol = isServing ? PALETTE.WOOD_LIGHT : PALETTE.WOOD_DARK;
+    let topCol = PALETTE.COUNTER_TOP;
+    let boardCol = PALETTE.WOOD_BOARD;
+    let handleCol = PALETTE.METAL_LIGHT;
+    
+    if (theme?.counterStyle === 'industrial') {
+        baseCol = 0x616161; // steel grey
+        topCol = 0xbdbdbd;  // light steel
+        boardCol = 0x424242; // dark drawer
+        handleCol = 0xe0e0e0;
+    } else if (theme?.counterStyle === 'retro') {
+        baseCol = 0xc62828; // bright retro red
+        topCol = 0xffffff;  // retro white top
+        boardCol = 0x1565c0; // retro blue details
+        handleCol = 0xe0e0e0;
+    } else if (theme?.counterStyle === 'organic') {
+        baseCol = 0xffffff; // white base
+        topCol = 0xa5d6a7;  // minty light green top
+        boardCol = 0x81c784; // solid green drawers
+        handleCol = 0x5d4037; // wood handle
+    } else if (theme?.counterStyle === 'diner') {
+        baseCol = 0x8d6e63; // light wood
+        topCol = 0xffeb3b;  // bright yellow top
+        boardCol = 0xffd54f; // golden yellow drawers
+        handleCol = 0xe0e0e0;
+    }
+
     vb.addBox(1, 0, 1, 14, 1, 14, PALETTE.BLACK);
-    vb.addBox(0, 2, 0, 15, 14, 15, isServing ? PALETTE.WOOD_LIGHT : PALETTE.WOOD_DARK);
-    vb.addBox(0, 15, 0, 15, 15, 15, PALETTE.COUNTER_TOP);
+    vb.addBox(0, 2, 0, 15, 14, 15, baseCol);
+    vb.addBox(0, 15, 0, 15, 15, 15, topCol);
     
     // Only add front details if it's NOT a serving counter AND NOT a corner
     if (!isServing && !isCorner) {
-        vb.addBox(1, 11, 15, 14, 13, 15, PALETTE.WOOD_BOARD); 
-        vb.addBox(6, 12, 16, 9, 12, 16, PALETTE.METAL_LIGHT);
-        vb.addBox(1, 3, 15, 14, 9, 15, PALETTE.WOOD_BOARD);
-        vb.addBox(12, 6, 16, 12, 8, 16, PALETTE.METAL_LIGHT);
+        vb.addBox(1, 11, 15, 14, 13, 15, boardCol); 
+        vb.addBox(6, 12, 16, 9, 12, 16, handleCol);
+        vb.addBox(1, 3, 15, 14, 9, 15, boardCol);
+        vb.addBox(12, 6, 16, 12, 8, 16, handleCol);
     } else if (isServing) {
-        vb.addBox(1, 3, 15, 14, 13, 15, PALETTE.PLASTIC_RED);
+        vb.addBox(1, 3, 15, 14, 13, 15, theme?.servingColor || PALETTE.PLASTIC_RED);
     }
     const mesh = vb.buildMesh();
     mesh.scale.set(1, MODULE_HEIGHT / GRID_UNIT, 1);
@@ -164,12 +194,12 @@ function createCounterMesh(isServing, isCorner) {
 }
 
 // Exported for Editor use
-export function createCounterPrefab(name, color, isServing) {
+export function createCounterPrefab(name, color, isServing, theme) {
     const group = new THREE.Group();
     group.name = name;
     // Detect corner from name
     const isCorner = name && name.toLowerCase().includes('corner');
-    const visual = createCounterMesh(isServing, isCorner);
+    const visual = createCounterMesh(isServing, isCorner, theme);
     group.add(visual);
     group.userData = { type: isServing ? 'station' : 'counter', stationType: isServing ? STATION_TYPES.SERVING : STATION_TYPES.COUNTER, name: name, isBase: true };
     group.userData.grid = new GridSystem(GRID_UNIT, GRID_UNIT, 0, 0, group);
@@ -188,7 +218,7 @@ export function createTablePrefab(name, color, neighbors) {
 }
 
 // Exported for Editor use
-export function createStationPrefab(def) {
+export function createStationPrefab(def, theme) {
     const { name, type, size, color, config } = def;
     const group = new THREE.Group();
     group.name = name;
@@ -201,12 +231,27 @@ export function createStationPrefab(def) {
     if (type === STATION_TYPES.WALL) {
         const wallH = 2.5;
         const geo = new THREE.BoxGeometry(w, wallH, d);
-        const mat = new THREE.MeshStandardMaterial({ color: color || PALETTE.WALL_WHITE });
+        const mat = new THREE.MeshStandardMaterial({ color: color || theme?.wallColor || PALETTE.WALL_WHITE });
         mesh = new THREE.Mesh(geo, mat);
         mesh.position.y = wallH / 2;
         mesh.castShadow = true; 
         mesh.receiveShadow = true;
     } 
+    else if (type === 'decoration') {
+        if (n.includes('hood') || n.includes('exhaust')) {
+            mesh = createExhaustHoodMesh();
+        } else if (n.includes('plant')) {
+            mesh = createPlantMesh();
+        } else if (n.includes('lamp') || n.includes('light')) {
+            mesh = createKitchenLampMesh();
+        } else {
+            const geo = new THREE.BoxGeometry(w - 0.05, h, d - 0.05);
+            const mat = new THREE.MeshStandardMaterial({ color: color || 0x555555 });
+            mesh = new THREE.Mesh(geo, mat);
+            mesh.position.y = h/2;
+            mesh.castShadow = true; mesh.receiveShadow = true;
+        }
+    }
     else if (type === STATION_TYPES.TRASH) {
         mesh = createTrashBinMesh();
     } 
@@ -312,7 +357,7 @@ export function clearKitchen(scene) {
     }
 }
 
-export function buildKitchen(scene, levelLayout, preloadedModels) {
+export function buildKitchen(scene, levelLayout, preloadedModels, theme) {
     clearKitchen(scene);
     const newStations = [];
     const newStationInteractables = [];
@@ -335,18 +380,22 @@ export function buildKitchen(scene, levelLayout, preloadedModels) {
     canvas.height = 128;
     const ctx = canvas.getContext('2d');
     
+    // Theme defaults
+    const bgCol = theme?.floorColor1 || '#37474F';
+    const tileCol = theme?.floorColor2 || '#546E7A';
+    const borderCol = theme?.borderColor || '#263238';
+
     // Dark slate background
-    ctx.fillStyle = '#37474F'; 
+    ctx.fillStyle = bgCol; 
     ctx.fillRect(0, 0, 128, 128);
     
     // Lighter grey tiles (checkerboard pattern)
-    ctx.fillStyle = '#546E7A'; 
+    ctx.fillStyle = tileCol; 
     ctx.fillRect(0, 0, 64, 64);
     ctx.fillRect(64, 64, 64, 64);
     
-    // Border/Grout line effect included by gap logic or simply drawing rectangles slightly smaller?
-    // Let's draw a thin border
-    ctx.strokeStyle = '#263238';
+    // Draw a thin border
+    ctx.strokeStyle = borderCol;
     ctx.lineWidth = 4;
     ctx.strokeRect(0,0,128,128);
     ctx.beginPath();
@@ -375,7 +424,7 @@ export function buildKitchen(scene, levelLayout, preloadedModels) {
         const z = def.position.z;
 
         if (def.type === STATION_TYPES.COUNTER || def.type === STATION_TYPES.SERVING) {
-            object3D = createCounterPrefab(def.name, def.color, def.type === STATION_TYPES.SERVING);
+            object3D = createCounterPrefab(def.name, def.color, def.type === STATION_TYPES.SERVING, theme);
             object3D.position.set(x, 0, z);
             object3D.userData.grid.originX = x - (GRID_UNIT/2);
             object3D.userData.grid.originZ = z - (GRID_UNIT/2);
@@ -420,15 +469,27 @@ export function buildKitchen(scene, levelLayout, preloadedModels) {
             // Do NOT add to newStations, as it's not a fixed machine
             object3D = null; 
 
-        } else if (Object.values(STATION_TYPES).includes(def.type)) {
-            object3D = createStationPrefab(def);
-            if (def.type === STATION_TYPES.TRASH || def.type === STATION_TYPES.WALL) {
+        } else if (Object.values(STATION_TYPES).includes(def.type) || def.type === 'decoration') {
+            object3D = createStationPrefab(def, theme);
+            if (def.type === STATION_TYPES.WALL) {
                 object3D.position.set(x, 0, z);
+            } else if (def.type === 'decoration' || def.type === STATION_TYPES.TRASH) {
+                const n = def.name.toLowerCase();
+                if (n.includes('lamp') || n.includes('light')) {
+                    object3D.position.set(x, 2.0, z);
+                } else if (n.includes('hood') || n.includes('exhaust')) {
+                    object3D.position.set(x, MODULE_HEIGHT + 0.6, z);
+                } else {
+                    const kx = Math.round(x * 100) / 100;
+                    const kz = Math.round(z * 100) / 100;
+                    const hasSupport = occupancyMap.has(`${kx},${kz}`);
+                    object3D.position.set(x, hasSupport ? MODULE_HEIGHT : 0, z);
+                }
             } else {
                 object3D.position.set(x, MODULE_HEIGHT, z);
             }
             
-            if (def.type !== STATION_TYPES.WALL) {
+            if (def.type !== STATION_TYPES.WALL && def.type !== 'decoration') {
                 object3D.add(createLabel(scene, def.name, new THREE.Vector3(0,0.5,0), 0));
             }
             if (object3D.userData.grid) {
