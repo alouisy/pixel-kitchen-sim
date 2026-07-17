@@ -850,7 +850,8 @@ function getIngredientColor(type) {
     if(type.includes('tomato')) return type.includes('sauce') ? PALETTE.SAUCE_RED : PALETTE.TOMATO;
     if(type.includes('lettuce')) return PALETTE.LETTUCE;
     if(type.includes('cheese') || type.includes('mozzarella')) return PALETTE.CHEESE;
-    if(type.includes('bun') || type.includes('bread')) return PALETTE.BUN;
+    if(type.includes('bread')) return type.includes('toasted') ? PALETTE.WOOD_BOARD : 0xFFF8DC;
+    if(type.includes('bun')) return PALETTE.BUN;
     if(type.includes('patty')) return PALETTE.MEAT_RAW;
     if(type.includes('cooked_patty')) return PALETTE.MEAT_COOKED;
     if(type.includes('potato')) return PALETTE.POTATO;
@@ -864,6 +865,87 @@ function getIngredientColor(type) {
     if(type.includes('pizza')) return PALETTE.PIZZA_CRUST;
     if(type.includes('coating')) return PALETTE.WOOD_BOARD;
     return null;
+}
+
+const BREAD_GRID = [
+    "  CC  CC  ",
+    " CWWCCWWC ",
+    "CWWWWWWWWC",
+    "CWWWWWWWWC",
+    "CWWWWWWWWC",
+    "CWWWWWWWWC",
+    "CWWWWWWWWC",
+    "CWWWWWWWWC",
+    " CWWWWWWC ",
+    "  CCCCCC  "
+];
+
+function addSandwichHalf(vb, dx, dy, dz, isHalf2, isBLT, isCooked) {
+    const crustColor = isCooked ? 0x5d4037 : 0xa0522d; // toasted vs raw sienna crust
+    const crumbBaseColor = isCooked ? 0xeecfa1 : 0xFFF8DC; // toasted wood board vs cornsilk
+    
+    const maxLy = isBLT ? 6 : 5;
+    
+    for (let ly = 0; ly <= maxLy; ly++) {
+        let layerType = 'bread'; 
+        if (isBLT) {
+            if (ly === 2) layerType = 'lettuce';
+            else if (ly === 3) layerType = 'tomato';
+            else if (ly === 4) layerType = 'bacon';
+        } else {
+            if (ly === 2 || ly === 3) layerType = 'cheese';
+        }
+        
+        for (let pz = 0; pz < 10; pz++) {
+            for (let px = 0; px < 10; px++) {
+                const inHalf = !isHalf2 ? (px + pz <= 9) : (px + pz >= 10);
+                if (!inHalf) continue;
+                
+                const gridChar = BREAD_GRID[pz][px];
+                if (gridChar === ' ') continue; 
+                
+                const isCutFace = !isHalf2 ? (px + pz === 9) : (px + pz === 10);
+                
+                const x = px + 3 + dx;
+                const z = pz + 3 + dz;
+                const y = ly + dy;
+                
+                if (layerType === 'bread') {
+                    const isCrust = (gridChar === 'C') && !isCutFace;
+                    if (isCrust) {
+                        vb.add(x, y, z, crustColor);
+                    } else {
+                        let color = crumbBaseColor;
+                        if (isCooked) {
+                            const noise = (x * 7 + z * 13 + y * 3) % 6;
+                            if (noise === 0) color = 0xcd853f; 
+                            else if (noise === 1) color = 0x8b4513; 
+                            else if (noise === 2) color = 0xd7ccc8;
+                        }
+                        vb.add(x, y, z, color);
+                    }
+                } 
+                else if (layerType === 'lettuce') {
+                    let color = PALETTE.LETTUCE;
+                    if ((x + z) % 3 === 0) color = 0x66bb6a; 
+                    vb.add(x, y, z, color);
+                } 
+                else if (layerType === 'tomato') {
+                    let color = PALETTE.TOMATO;
+                    if ((x + z) % 2 === 0) color = 0xe53935; 
+                    vb.add(x, y, z, color);
+                } 
+                else if (layerType === 'bacon') {
+                    let color = PALETTE.BACON_COOKED;
+                    if ((x + z) % 4 === 0) color = 0xffa07a; 
+                    vb.add(x, y, z, color);
+                } 
+                else if (layerType === 'cheese') {
+                    vb.add(x, y, z, PALETTE.CHEESE);
+                }
+            }
+        }
+    }
 }
 
 // --- ITEMS (Physical objects in hand/world) ---
@@ -1040,21 +1122,77 @@ export function createItemMesh(type, contents = [], mealName = null) {
         }
     }
     else if (type === 'BLT Sandwich') {
-        vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.WOOD_DARK);
-        vb.addBox(2, 1, 2, 13, 2, 13, PALETTE.LETTUCE);
-        vb.addBox(4, 2, 4, 11, 3, 11, PALETTE.TOMATO);
-        vb.addBox(3, 3, 5, 12, 4, 7, PALETTE.BACON_COOKED);
-        vb.addBox(3, 3, 8, 12, 4, 10, PALETTE.BACON_COOKED);
-        vb.addBox(3, 4, 3, 12, 5, 12, PALETTE.WOOD_DARK);
+        // Half 1: shifted to dx = -1, dz = -1, dy = 0
+        addSandwichHalf(vb, -1, 0, -1, false, true, true);
+        // Half 2: shifted to dx = 1, dz = 1, dy = 0
+        addSandwichHalf(vb, 1, 0, 1, true, true, true);
+        
+        // --- BLT Extras (garnish, extensions) ---
+        // Half 1 extras (Lettuce, Tomato, Bacon)
+        vb.add(1, 2, 6, 0x66bb6a);
+        vb.add(2, 2, 9, PALETTE.LETTUCE);
+        vb.add(5, 2, 1, 0x66bb6a);
+        vb.add(9, 2, 2, PALETTE.LETTUCE);
+        
+        vb.addBox(1, 3, 7, 1, 3, 8, PALETTE.TOMATO);
+        vb.addBox(7, 3, 1, 8, 3, 1, PALETTE.TOMATO);
+        
+        vb.addBox(1, 4, 4, 11, 4, 4, PALETTE.BACON_COOKED);
+        vb.add(0, 4, 4, 0xffa07a);
+        vb.add(12, 4, 4, PALETTE.BACON_COOKED);
+        vb.addBox(1, 4, 7, 11, 4, 7, PALETTE.BACON_COOKED);
+        vb.add(12, 4, 7, 0xffa07a);
+        
+        // Half 2 extras (Lettuce, Tomato, Bacon)
+        vb.add(14, 2, 7, 0x66bb6a);
+        vb.add(13, 2, 10, PALETTE.LETTUCE);
+        vb.add(10, 2, 14, 0x66bb6a);
+        vb.add(7, 2, 13, PALETTE.LETTUCE);
+        
+        vb.addBox(13, 3, 8, 13, 3, 9, PALETTE.TOMATO);
+        vb.addBox(8, 3, 13, 9, 3, 13, PALETTE.TOMATO);
+        
+        vb.addBox(4, 4, 8, 4, 4, 14, PALETTE.BACON_COOKED);
+        vb.add(4, 4, 15, 0xffa07a);
+        vb.add(4, 4, 7, PALETTE.BACON_COOKED);
+        vb.addBox(8, 4, 4, 8, 4, 14, PALETTE.BACON_COOKED);
+        vb.add(8, 4, 15, 0xffa07a);
+        
+        // Toothpick & Olive Garnish on Half 2
+        vb.addBox(10, 7, 10, 10, 10, 10, 0xeecfa1);
+        vb.addBox(9, 11, 9, 11, 12, 11, 0x2e7d32);
+        vb.add(10, 12, 10, 0xd32f2f);
     }
     else if (type.includes('grilled_cheese') || type === 'Grilled Cheese Sandwich') {
         const isCooked = !type.includes('raw');
-        const breadColor = isCooked ? PALETTE.WOOD_DARK : PALETTE.BUN;
-        vb.addBox(3, 0, 3, 12, 1, 12, breadColor);
-        vb.addBox(3, 1, 3, 12, 2, 12, PALETTE.CHEESE);
-        vb.addBox(4, 0, 2, 6, 2, 3, PALETTE.CHEESE); 
-        vb.addBox(12, 0, 8, 13, 2, 10, PALETTE.CHEESE); 
-        vb.addBox(3, 2, 3, 12, 3, 12, breadColor);
+        
+        // Half 1: shifted to dx = -1, dz = -1, dy = 0
+        addSandwichHalf(vb, -1, 0, -1, false, false, isCooked);
+        // Half 2: shifted to dx = 1, dz = 1, dy = 0
+        addSandwichHalf(vb, 1, 0, 1, true, false, isCooked);
+        
+        // --- Grilled Cheese Extras (melty gooey cheese drips) ---
+        if (isCooked) {
+            // Half 1 cut face & edge drips
+            vb.add(5, 1, 6, PALETTE.CHEESE);
+            vb.add(5, 0, 6, PALETTE.CHEESE); // drips onto plate
+            vb.add(7, 1, 4, PALETTE.CHEESE);
+            vb.add(7, 0, 4, PALETTE.CHEESE);
+            vb.add(2, 2, 2, PALETTE.CHEESE); 
+            vb.add(2, 1, 2, PALETTE.CHEESE); 
+            
+            // Half 2 cut face & edge drips
+            vb.add(10, 1, 9, PALETTE.CHEESE);
+            vb.add(10, 0, 9, PALETTE.CHEESE);
+            vb.add(8, 1, 11, PALETTE.CHEESE);
+            vb.add(8, 0, 11, PALETTE.CHEESE);
+            vb.add(13, 2, 13, PALETTE.CHEESE);
+            vb.add(13, 1, 13, PALETTE.CHEESE);
+        } else {
+            // Raw cheese corners sticking out
+            vb.add(2, 2, 2, PALETTE.CHEESE);
+            vb.add(13, 2, 13, PALETTE.CHEESE);
+        }
     }
     else if (type === 'Pancakes') {
         vb.addBox(3, 0, 3, 12, 1, 12, PALETTE.PANCAKE);
@@ -1285,7 +1423,35 @@ export function createItemMesh(type, contents = [], mealName = null) {
             }
         }
     }
-    else if (type === 'bun' || type.includes('bread') || type === 'bun_bottom' || type === 'bun_top') {
+    else if (type.includes('bread')) {
+        const isToasted = type.includes('toasted');
+        const crustColor = isToasted ? 0x5d4037 : 0xa0522d; // WOOD_DARK vs sienna
+        const crumbBaseColor = isToasted ? 0xeecfa1 : 0xFFF8DC; // WOOD_BOARD vs cornsilk
+        
+        for (let y = 0; y <= 1; y++) {
+            for (let r = 0; r < 10; r++) {
+                const z = r + 3;
+                const row = BREAD_GRID[r];
+                for (let c = 0; c < 10; c++) {
+                    const x = c + 3;
+                    const char = row[c];
+                    if (char === 'C') {
+                        vb.add(x, y, z, crustColor);
+                    } else if (char === 'W') {
+                        let color = crumbBaseColor;
+                        if (isToasted) {
+                            const noise = (x * 7 + z * 13 + y * 3) % 6;
+                            if (noise === 0) color = 0xcd853f; 
+                            else if (noise === 1) color = 0x8b4513; 
+                            else if (noise === 2) color = 0xd7ccc8;
+                        }
+                        vb.add(x, y, z, color);
+                    }
+                }
+            }
+        }
+    }
+    else if (type === 'bun' || type === 'bun_bottom' || type === 'bun_top') {
         const isToasted = type.includes('toasted');
         const c = isToasted ? PALETTE.WOOD_DARK : PALETTE.BUN;
         const drawBottom = type !== 'bun_top';
