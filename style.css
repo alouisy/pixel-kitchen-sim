@@ -1350,3 +1350,227 @@ body.resizing-e-w { cursor: ew-resize; }
 .menu-screen > .menu-button {
     margin-top: 10px;
 }
+
+/* Settings Screen Visual Enhancements and Controls Panel styling */
+.settings-wrapper {
+    display: flex;
+    gap: 30px;
+    align-items: stretch;
+    justify-content: center;
+    max-width: 960px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.settings-panel, .controls-panel {
+    flex: 1;
+    min-width: 320px;
+    max-width: 460px;
+}
+
+.controls-panel {
+    text-align: left;
+}
+
+.controls-panel h2 {
+    font-size: 1.5em;
+    color: #FFD700;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #888;
+    padding-bottom: 10px;
+    text-shadow: 1px 1px #000;
+    text-align: center;
+}
+
+.controls-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px;
+}
+
+.control-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.control-label {
+    font-weight: bold;
+    font-size: 0.95em;
+    color: #ddd;
+    max-width: 150px;
+}
+
+.control-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.input-separator {
+    color: #888;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+/* Keyboard Keys styling */
+.key-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    background: linear-gradient(180deg, #ffffff 0%, #dcdcdc 100%);
+    border: 1px solid #ffffff;
+    border-bottom: 3px solid #a1a1a1;
+    border-radius: 4px;
+    color: #111;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 12px;
+    text-shadow: 0 1px 0 #fff;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.3);
+    box-sizing: border-box;
+}
+
+/* Mouse visual icon styling */
+.mouse-icon {
+    display: inline-block;
+    width: 16px;
+    height: 24px;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.3);
+    box-sizing: border-box;
+}
+
+.mouse-icon::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 4px;
+    background-color: #fff;
+    border-radius: 1px;
+}
+
+.mouse-icon.left-click::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 50%;
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+    border-top-left-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Gamepad Buttons styling */
+.gp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 11px;
+    color: #fff;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.3);
+    box-sizing: border-box;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+}
+
+.gp-btn.btn-a {
+    background-color: #2e7d32;
+    border: 1.5px solid #4caf50;
+}
+
+.gp-btn.btn-b {
+    background-color: #c62828;
+    border: 1.5px solid #ef5350;
+}
+
+.gp-btn.btn-y {
+    background-color: #f57f17;
+    border: 1.5px solid #fdd835;
+}
+
+.gp-stick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle, #555 40%, #222 80%);
+    border: 1.5px solid #666;
+    border-radius: 50%;
+    color: #ddd;
+    font-family: monospace;
+    font-size: 9px;
+    font-weight: bold;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.3);
+    box-sizing: border-box;
+}
+
+/* Responsive layout rules for Pause settings & Controls */
+@media (max-width: 768px) {
+    .settings-wrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+    .settings-panel, .controls-panel {
+        width: 100%;
+        max-width: 400px;
+    }
+}
+
+/* PlayStation button styling & controller toggle states */
+.gp-btn.btn-ps-cross {
+    background-color: #1565c0; /* PS Blue Cross */
+    border: 1.5px solid #42a5f5;
+}
+
+.gp-btn.btn-ps-triangle {
+    background-color: #2e7d32; /* PS Green Triangle */
+    border: 1.5px solid #4caf50;
+}
+
+.gp-btn.btn-ps-options {
+    background-color: #424242; /* PS Grey Options */
+    border: 1.5px solid #757575;
+}
+
+.controller-toggle-btn.active {
+    background-color: #ffaa44 !important;
+    color: #000 !important;
+}
+
+.controller-toggle-btn:hover {
+    color: #fff !important;
+}

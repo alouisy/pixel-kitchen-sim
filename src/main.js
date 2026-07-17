@@ -107,6 +107,13 @@ function initializeGameComponents() {
     playerControls = new PlayerControls(camera, renderer.domElement);
     scene.add(playerControls.object);
 
+    // Unify Escape / Pause Menu flow: when PointerLock is unlocked while playing, pause the game
+    playerControls._pointerLockControls.addEventListener('unlock', () => {
+        if (currentGameState === GameState.GAME_RUNNING) {
+            pauseGame();
+        }
+    });
+
     player = new Player(playerControls);
     player.setScene(scene);
 
@@ -377,7 +384,7 @@ function changeGameState(newState) {
     const previousState = currentGameState;
     if (isMenuState(previousState) && !isMenuState(newState) && newState !== GameState.EDITOR_HUB) menuManager.deactivateMenu();
     
-    if ((previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS) && newState !== GameState.PAUSED && newState !== GameState.VIEWING_INSTRUCTIONS && newState !== GameState.EDITOR) {
+    if (previousState === GameState.GAME_RUNNING && newState !== GameState.GAME_RUNNING) {
         if (playerControls) playerControls.unlock();
     }
 
@@ -580,6 +587,11 @@ function handleMenuAction(eventOrAction) {
             uiManager.setLanguage(lang);
             setWorldLanguage(lang); // Set for future levels
             saveManager.saveSetting('language', lang); // Persist
+            break;
+        case 'set-controller-type':
+            const cType = element.dataset.type;
+            uiManager.setControllerType(cType);
+            saveManager.saveSetting('controllerType', cType); // Persist
             break;
         case 'resume': resumeGame(); break;
         case 'next-level':

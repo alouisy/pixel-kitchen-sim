@@ -1,101 +1,975 @@
 {
   "levelId": 3,
   "name": "Breakfast Shift",
-  "theme": {"floorColor1":"#FFF9C4","floorColor2":"#FFFFFF","borderColor":"#FFF176","counterStyle":"diner","wallColor":"#FFF9C4"},
+  "theme": {
+    "floorColor1": "#FFF9C4",
+    "floorColor2": "#FFFFFF",
+    "borderColor": "#FFF176",
+    "counterStyle": "diner",
+    "wallColor": "#FFF9C4"
+  },
   "duration": 180,
   "newOrderDelay": 15,
   "maxActiveOrders": 2,
-  "starThresholds": [300, 500, 750],
-  "availableMeals": ["French Fries", "BLT Sandwich", "Cheese Omelette"],
+  "starThresholds": [
+    300,
+    500,
+    750
+  ],
+  "availableMeals": [
+    "French Fries",
+    "BLT Sandwich",
+    "Cheese Omelette"
+  ],
   "layout": [
-    { "name": "Wall Back", "type": "wall", "position": { "x": 0, "z": -4}, "size": { "width": 8.5, "depth": 0.5}},
-    { "name": "Wall Left", "type": "wall", "position": { "x": -4, "z": 0}, "rotation": -1.57, "size": { "width": 8.5, "depth": 0.5}},
-    { "name": "Wall Right", "type": "wall", "position": { "x": 4, "z": 0}, "rotation": -1.57, "size": { "width": 8.5, "depth": 0.5}},
-    { "name": "Wall Front Left", "type": "wall", "position": { "x": -2.75, "z": 4}, "size": { "width": 2.5, "depth": 0.5}},
-    { "name": "Wall Front Right", "type": "wall", "position": { "x": 2.75, "z": 4}, "size": { "width": 2.5, "depth": 0.5}},
-    { "name": "Serving Pass", "type": "serving", "position": { "x": -0.5, "z": 4}, "rotation": 0},
-    { "name": "Serving Pass", "type": "serving", "position": { "x": 0, "z": 4}, "rotation": 0},
-    { "name": "Serving Pass", "type": "serving", "position": { "x": 0.5, "z": 4}, "rotation": 0},
-    { "name": "Counter Corner", "type": "counter", "position": { "x": -3.5, "z": -3.5}},
-    { "name": "Counter Corner", "type": "counter", "position": { "x": 3.5, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": -3, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": -2.5, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": -2, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": -1.5, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": -1, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": -0.5, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": 0, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": 0.5, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": 1, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": 1.5, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": 2, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": 2.5, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": 3, "z": -3.5}},
-    { "name": "Counter", "type": "counter", "position": { "x": -3.5, "z": -3}, "rotation": -4.71},
-    { "name": "Counter", "type": "counter", "position": { "x": -3.5, "z": -2.5}, "rotation": -4.71},
-    { "name": "Counter", "type": "counter", "position": { "x": -3.5, "z": -2}, "rotation": -4.71},
-    { "name": "Counter", "type": "counter", "position": { "x": -3.5, "z": -1.5}, "rotation": -4.71},
-    { "name": "Counter", "type": "counter", "position": { "x": -3.5, "z": -1}, "rotation": -4.71},
-    { "name": "Counter", "type": "counter", "position": { "x": 3.5, "z": -3}, "rotation": -1.57},
-    { "name": "Counter", "type": "counter", "position": { "x": 3.5, "z": -2.5}, "rotation": -1.57},
-    { "name": "Counter", "type": "counter", "position": { "x": 3.5, "z": -2}, "rotation": -1.57},
-    { "name": "Counter", "type": "counter", "position": { "x": 3.5, "z": -1.5}, "rotation": -1.57},
-    { "name": "Counter", "type": "counter", "position": { "x": 3.5, "z": -1}, "rotation": -1.57},
-    { "name": "Counter", "type": "counter", "position": { "x": 3.5, "z": -0.5}, "rotation": -7.85},
-    { "name": "Counter", "type": "counter", "position": { "x": -2.5, "z": 1}},
-    { "name": "Counter", "type": "counter", "position": { "x": -2, "z": 1}},
-    { "name": "Counter", "type": "counter", "position": { "x": -1.5, "z": 1}},
-    { "name": "Counter", "type": "counter", "position": { "x": -1, "z": 1}},
-    { "name": "Counter", "type": "counter", "position": { "x": -0.5, "z": 1}},
-    { "name": "Counter", "type": "counter", "position": { "x": 0, "z": 1}},
-    { "name": "Counter", "type": "counter", "position": { "x": 0.5, "z": 1}},
-    { "name": "Counter", "type": "counter", "position": { "x": 1, "z": 1}},
-    { "name": "Counter", "type": "counter", "position": { "x": 1.5, "z": 1}},
-    { "name": "Counter", "type": "counter", "position": { "x": 2, "z": 1}},
-    { "name": "Counter", "type": "counter", "position": { "x": 2.5, "z": 1}},
-    { "name": "robotMixer", "type": "processor", "position": { "x": -2.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "processes": ["egg", "pancake_mix"], "result": { "egg": "omelette_mix", "pancake_mix": "pancake_batter" }, "processingTime": 2000}},
-    { "name": "Egg Carton", "type": "ingredient_source", "position": { "x": -1.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "ingredient": "egg" }},
-    { "name": "Cheese Fridge", "type": "ingredient_source", "position": { "x": -3.5, "z": -2.5}, "rotation": 1.57, "size": { "width": 0.5, "depth": 0.5}, "config": { "ingredient": "cheese_slice" }},
-    { "name": "Toaster", "type": "processor", "position": { "x": -0.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "processes": ["bread_slice"], "result": { "bread_slice": "toasted_bread" }, "processingTime": 3000}},
-    { "name": "Bread Rack", "type": "ingredient_source", "position": { "x": 0.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "ingredient": "bread_slice" }},
-    { "name": "Stove Top", "type": "processor", "position": { "x": 1.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "processes": ["patty", "raw_bacon", "pancake_batter", "omelette_mix", "grilled_cheese_raw"], "result": { "patty": "cooked_patty", "raw_bacon": "cooked_bacon", "pancake_batter": "cooked_pancakes", "omelette_mix": "cooked_omelette", "grilled_cheese_raw": "grilled_cheese_cooked" }, "processingTime": 4000}},
-    { "name": "Bacon Pack", "type": "ingredient_source", "position": { "x": 2.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "ingredient": "raw_bacon" }},
-    { "name": "Potato Bin", "type": "ingredient_source", "position": { "x": 0, "z": 1}, "rotation": 3.14, "size": { "width": 0.5, "depth": 0.5}, "config": { "ingredient": "potato" }},
-    { "name": "Cutting Board", "type": "processor", "position": { "x": -1, "z": 1}, "rotation": 3.14, "size": { "width": 0.5, "depth": 0.5}, "config": { "processes": ["potato", "tomato", "lettuce", "onion"], "result": { "potato": "raw_fries", "tomato": "chopped_tomato", "lettuce": "chopped_lettuce", "onion": "onion_rings_raw" }}},
-    { "name": "Deep Fryer", "type": "processor", "position": { "x": -3.5, "z": -1}, "rotation": 1.57, "size": { "width": 0.5, "depth": 0.5}, "config": { "processes": ["raw_fries"], "result": { "raw_fries": "cooked_fries" }, "processingTime": 3000}},
-    { "name": "Tomato Bin", "type": "ingredient_source", "position": { "x": 1, "z": 1}, "rotation": 3.14, "size": { "width": 0.5, "depth": 0.5}, "config": { "ingredient": "tomato" }},
-    { "name": "Plate Stack", "type": "item_source", "position": { "x": 2, "z": 1}, "rotation": 3.14, "size": { "width": 0.5, "depth": 0.5}, "config": { "item": "plate" }},
-    { "name": "Trash Bin", "type": "trash", "position": { "x": 3.5, "z": -0.5}, "rotation": -1.57, "size": { "width": 0.5, "depth": 0.5}},
-    { "name": "Potted Plant", "type": "decoration", "position": { "x": -3.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}},
-    { "name": "Potted Plant", "type": "decoration", "position": { "x": 3.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}},
-    { "name": "Exhaust Hood", "type": "decoration", "position": { "x": 1.5, "z": -3.5}, "size": { "width": 0.5, "depth": 0.5}},
-    { "name": "Hanging Lamp", "type": "decoration", "position": { "x": -1.5, "z": 1}, "size": { "width": 0.5, "depth": 0.5}},
-    { "name": "Hanging Lamp", "type": "decoration", "position": { "x": 1.5, "z": 1}, "size": { "width": 0.5, "depth": 0.5}},
-    { "name": "Table", "type": "table", "position": { "x": -2, "z": -2}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": -1.5, "z": -2}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": -1, "z": -2}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": 1.5, "z": -2}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": 2, "z": -2}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": 1.5, "z": -1}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": 1.5, "z": -1.5}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": -0.5, "z": -1}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": 0, "z": -1}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": 0, "z": -0.5}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": 0.5, "z": -0.5}, "color": "#CCCCCC" },
-    { "name": "Table", "type": "table", "position": { "x": -1.5, "z": -1.5}, "color": "#CCCCCC" },
-    { "name": "Lettuce Bin", "type": "ingredient_source", "position": { "x": 0.5, "z": 1}, "size": { "width": 0.5, "depth": 0.5}, "color": "#90EE90", "config": { "ingredient": "lettuce" }},
-    { "name": "Plate (Single)", "type": "preplaced_item", "position": { "x": -0.5, "z": -1}, "size": { "width": 0.5, "depth": 0.5}, "config": { "item": "plate" }},
-    { "name": "Plate (Single)", "type": "preplaced_item", "position": { "x": 0.5, "z": -0.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "item": "plate" }},
-    { "name": "Plate (Single)", "type": "preplaced_item", "position": { "x": 2, "z": -2}, "size": { "width": 0.5, "depth": 0.5}, "config": { "item": "plate" }},
-    { "name": "Plate (Single)", "type": "preplaced_item", "position": { "x": 1.5, "z": -1}, "size": { "width": 0.5, "depth": 0.5}, "config": { "item": "plate" }},
-    { "name": "Plate (Single)", "type": "preplaced_item", "position": { "x": -1, "z": -2}, "size": { "width": 0.5, "depth": 0.5}, "config": { "item": "plate" }},
-    { "name": "Plate (Single)", "type": "preplaced_item", "position": { "x": -1.5, "z": -1.5}, "size": { "width": 0.5, "depth": 0.5}, "config": { "item": "plate" }},
-    { "name": "Plate (Single)", "type": "preplaced_item", "position": { "x": -2, "z": -2}, "size": { "width": 0.5, "depth": 0.5}, "config": { "item": "plate" }},
-    { "name": "Serving Pass", "type": "serving", "position": { "x": 1, "z": 4}},
-    { "name": "Serving Pass", "type": "serving", "position": { "x": -1, "z": 4}},
-    { "name": "Counter (Wood)", "type": "counter", "position": { "x": -3.5, "z": -0.5}, "rotation": -4.71, "color": "#8B4513" },
-    { "name": "Cutting Board", "type": "processor", "position": { "x": -3.5, "z": -2}, "rotation": -4.71, "size": { "width": 0.5, "depth": 0.5}, "color": "#DEB887", "config": { "processes": ["potato", "tomato", "lettuce", "onion", "banana", "strawberry", "raw_chicken"], "result": { "potato": "raw_fries", "tomato": "chopped_tomato", "lettuce": "chopped_lettuce", "onion": "onion_rings_raw", "banana": "sliced_banana", "strawberry": "sliced_strawberry", "raw_chicken": "raw_chicken_strips" }}},
-    { "name": "Exhaust Hood", "type": "decoration", "position": { "x": -3.5, "z": -1}, "rotation": -11, "size": { "width": 0.5, "depth": 0.5}},
-    { "name": "Cutting Board", "type": "processor", "position": { "x": -2, "z": 1}, "rotation": -3.14, "size": { "width": 0.5, "depth": 0.5}, "color": "#DEB887", "config": { "processes": ["potato", "tomato", "lettuce", "onion", "banana", "strawberry", "raw_chicken"], "result": { "potato": "raw_fries", "tomato": "chopped_tomato", "lettuce": "chopped_lettuce", "onion": "onion_rings_raw", "banana": "sliced_banana", "strawberry": "sliced_strawberry", "raw_chicken": "raw_chicken_strips" }}}
+    {
+      "name": "Wall Back",
+      "type": "wall",
+      "position": {
+        "x": 0,
+        "z": -4
+      },
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Wall Left",
+      "type": "wall",
+      "position": {
+        "x": -4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Wall Right",
+      "type": "wall",
+      "position": {
+        "x": 4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Wall Front Left",
+      "type": "wall",
+      "position": {
+        "x": -2.75,
+        "z": 4
+      },
+      "size": {
+        "width": 2.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Wall Front Right",
+      "type": "wall",
+      "position": {
+        "x": 2.75,
+        "z": 4
+      },
+      "size": {
+        "width": 2.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": -0.5,
+        "z": 4
+      }
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": 0,
+        "z": 4
+      }
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": 0.5,
+        "z": 4
+      }
+    },
+    {
+      "name": "Counter Corner",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter Corner",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -3,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -2.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -2,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -1,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 0,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 1,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 2,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 2.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 3,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3
+      },
+      "rotation": -4.71
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      },
+      "rotation": -4.71
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2
+      },
+      "rotation": -4.71
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1.5
+      },
+      "rotation": -4.71
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1
+      },
+      "rotation": -4.71
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3
+      },
+      "rotation": -1.57
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2.5
+      },
+      "rotation": -1.57
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2
+      },
+      "rotation": -1.57
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1.5
+      },
+      "rotation": -1.57
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1
+      },
+      "rotation": -1.57
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      },
+      "rotation": -7.85
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -2,
+        "z": 1
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -1.5,
+        "z": 1
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -1,
+        "z": 1
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": -0.5,
+        "z": 1
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 0,
+        "z": 1
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 0.5,
+        "z": 1
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 1,
+        "z": 1
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 1.5,
+        "z": 1
+      }
+    },
+    {
+      "name": "Counter",
+      "type": "counter",
+      "position": {
+        "x": 2,
+        "z": 1
+      }
+    },
+    {
+      "name": "robotMixer",
+      "type": "processor",
+      "position": {
+        "x": -2.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "processes": [
+          "egg",
+          "pancake_mix"
+        ],
+        "result": {
+          "egg": "omelette_mix",
+          "pancake_mix": "pancake_batter"
+        },
+        "processingTime": 2000
+      }
+    },
+    {
+      "name": "Egg Carton",
+      "type": "ingredient_source",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "ingredient": "egg"
+      }
+    },
+    {
+      "name": "Cheese Fridge",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      },
+      "rotation": 1.57,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "ingredient": "cheese_slice"
+      }
+    },
+    {
+      "name": "Toaster",
+      "type": "processor",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "processes": [
+          "bread_slice"
+        ],
+        "result": {
+          "bread_slice": "toasted_bread"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "Bread Rack",
+      "type": "ingredient_source",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "ingredient": "bread_slice"
+      }
+    },
+    {
+      "name": "Stove Top",
+      "type": "processor",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "processes": [
+          "patty",
+          "raw_bacon",
+          "pancake_batter",
+          "omelette_mix",
+          "grilled_cheese_raw"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "raw_bacon": "cooked_bacon",
+          "pancake_batter": "cooked_pancakes",
+          "omelette_mix": "cooked_omelette",
+          "grilled_cheese_raw": "grilled_cheese_cooked"
+        },
+        "processingTime": 4000
+      }
+    },
+    {
+      "name": "Bacon Pack",
+      "type": "ingredient_source",
+      "position": {
+        "x": 2.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "ingredient": "raw_bacon"
+      }
+    },
+    {
+      "name": "Potato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": 0,
+        "z": 1
+      },
+      "rotation": 3.14,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "ingredient": "potato"
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": -1,
+        "z": 1
+      },
+      "rotation": 3.14,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw"
+        }
+      }
+    },
+    {
+      "name": "Deep Fryer",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": -1
+      },
+      "rotation": 1.57,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "processes": [
+          "raw_fries"
+        ],
+        "result": {
+          "raw_fries": "cooked_fries"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "Tomato Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": 1,
+        "z": 1
+      },
+      "rotation": 3.14,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "ingredient": "tomato"
+      }
+    },
+    {
+      "name": "Plate Stack",
+      "type": "item_source",
+      "position": {
+        "x": 2,
+        "z": 1
+      },
+      "rotation": 3.14,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Trash Bin",
+      "type": "trash",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Potted Plant",
+      "type": "decoration",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Potted Plant",
+      "type": "decoration",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Exhaust Hood",
+      "type": "decoration",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Hanging Lamp",
+      "type": "decoration",
+      "position": {
+        "x": -1.5,
+        "z": 1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Hanging Lamp",
+      "type": "decoration",
+      "position": {
+        "x": 1.5,
+        "z": 1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -2,
+        "z": -1
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -1.5,
+        "z": -1
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -2,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 1.5,
+        "z": -1
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 2,
+        "z": -1
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 2,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 1.5,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -1
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -0.5
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -2
+      }
+    },
+    {
+      "name": "Table",
+      "type": "table",
+      "position": {
+        "x": -1.5,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "Lettuce Bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": 0.5,
+        "z": 1
+      },
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "ingredient": "lettuce"
+      }
+    },
+    {
+      "name": "plate",
+      "type": "preplaced_item",
+      "position": {
+        "x": 0,
+        "z": -1.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "plate",
+      "type": "preplaced_item",
+      "position": {
+        "x": 2,
+        "z": -1
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "plate",
+      "type": "preplaced_item",
+      "position": {
+        "x": 1.5,
+        "z": -1.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "plate",
+      "type": "preplaced_item",
+      "position": {
+        "x": 0,
+        "z": -1
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "plate",
+      "type": "preplaced_item",
+      "position": {
+        "x": -1.5,
+        "z": -1.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "plate",
+      "type": "preplaced_item",
+      "position": {
+        "x": -2,
+        "z": -1
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": 1,
+        "z": 4
+      }
+    },
+    {
+      "name": "Serving Pass",
+      "type": "serving",
+      "position": {
+        "x": -1,
+        "z": 4
+      }
+    },
+    {
+      "name": "Counter (Wood)",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      },
+      "rotation": -4.71
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": -2
+      },
+      "rotation": -4.71,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "Cutting Board",
+      "type": "processor",
+      "position": {
+        "x": -2,
+        "z": 1
+      },
+      "rotation": -3.14,
+      "size": {
+        "width": 0.5,
+        "depth": 0.5
+      },
+      "config": {
+        "processes": [
+          "potato",
+          "tomato",
+          "lettuce",
+          "onion",
+          "banana",
+          "strawberry",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw",
+          "banana": "sliced_banana",
+          "strawberry": "sliced_strawberry",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    }
   ]
 }

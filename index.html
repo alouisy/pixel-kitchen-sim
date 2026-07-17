@@ -75,40 +75,115 @@
 
     <!-- Settings Screen -->
     <div id="settings-screen" class="overlay menu-screen">
-        <h1>Settings</h1>
-        <div class="menu-container">
-            <div class="setting-group">
-                <label id="language-label">Language:</label>
-                <div id="language-options" class="button-group">
-                    <button class="menu-button lang-button" data-lang="en" data-action="set-language">English</button>
-                    <button class="menu-button lang-button" data-lang="fr" data-action="set-language">Français</button>
-                    <button class="menu-button lang-button" data-lang="es" data-action="set-language">Español</button>
+        <h1 id="settings-title">Settings</h1>
+        <div class="settings-wrapper">
+            <!-- Settings Panel -->
+            <div class="menu-container settings-panel">
+                <div class="setting-group">
+                    <label id="language-label">Language:</label>
+                    <div id="language-options" class="button-group">
+                        <button class="menu-button lang-button" data-lang="en" data-action="set-language">English</button>
+                        <button class="menu-button lang-button" data-lang="fr" data-action="set-language">Français</button>
+                        <button class="menu-button lang-button" data-lang="es" data-action="set-language">Español</button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label for="toggle-labels-setting">Show Station Labels:</label>
+                    <input type="checkbox" id="toggle-labels-setting" class="menu-toggle" data-action="toggle-labels"
+                        checked>
+                </div>
+                <div class="setting-group">
+                    <label for="sound-effects-setting">Sound Effects:</label>
+                    <input type="checkbox" id="sound-effects-setting" class="menu-toggle" data-action="toggle-sound"
+                        checked>
+                </div>
+                <div class="setting-group">
+                    <label for="volume-setting">Master Volume:</label>
+                    <input type="range" id="volume-setting" min="0" max="1" step="0.05" class="menu-slider" data-action="set-volume" style="width: 150px;" checked>
+                    <span id="volume-value-display" style="margin-left: 10px; font-family: monospace;">100%</span>
+                </div>
+                <div class="setting-group">
+                    <label for="sensitivity-setting">Mouse Sensitivity:</label>
+                    <input type="range" id="sensitivity-setting" min="0.1" max="3" step="0.1" class="menu-slider" data-action="set-sensitivity" style="width: 150px;">
+                    <span id="sensitivity-value-display" style="margin-left: 10px; font-family: monospace;">1.0</span>
+                </div>
+                <p id="game-version">Version: 1.0 Beta</p>
+                <button id="back-to-main-button" class="menu-button" data-action="back-to-main">Back</button>
+                <button id="resume-button-settings" class="menu-button" data-action="resume" style="display: none;">Resume Game</button>
+            </div>
+
+            <!-- Controls Panel -->
+            <div id="controls-guide-panel" class="menu-container controls-panel">
+                <div class="controls-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #888; padding-bottom: 10px;">
+                    <h2 id="controls-guide-title" style="margin: 0; border: none; padding: 0; font-size: 1.5em; color: #FFD700; text-shadow: 1px 1px #000;">Controls</h2>
+                    <div class="controller-type-toggle" style="display: flex; gap: 4px; background: rgba(0,0,0,0.6); padding: 3px; border: 1.5px solid #555; border-radius: 4px;">
+                        <button class="controller-toggle-btn active" data-type="xbox" data-action="set-controller-type" style="padding: 2px 8px; font-family: monospace; font-size: 10px; font-weight: bold; background: none; border: none; color: #aaa; cursor: pointer; border-radius: 2px;">Xbox</button>
+                        <button class="controller-toggle-btn" data-type="playstation" data-action="set-controller-type" style="padding: 2px 8px; font-family: monospace; font-size: 10px; font-weight: bold; background: none; border: none; color: #aaa; cursor: pointer; border-radius: 2px;">PS</button>
+                    </div>
+                </div>
+                <div class="controls-list">
+                    <!-- Move -->
+                    <div class="control-row">
+                        <span class="control-label" id="ctrl-move">Move:</span>
+                        <div class="control-inputs">
+                            <span class="input-group">
+                                <span class="key-icon">W</span>
+                                <span class="key-icon">A</span>
+                                <span class="key-icon">S</span>
+                                <span class="key-icon">D</span>
+                            </span>
+                            <span class="input-separator">/</span>
+                            <span class="gp-stick">L</span>
+                        </div>
+                    </div>
+                    <!-- Look Around -->
+                    <div class="control-row">
+                        <span class="control-label" id="ctrl-look">Look Around:</span>
+                        <div class="control-inputs">
+                            <span class="input-group">
+                                <span class="mouse-icon"></span>
+                                <span style="font-size: 0.8em; opacity: 0.8; margin-left: 4px;">Move</span>
+                            </span>
+                            <span class="input-separator">/</span>
+                            <span class="gp-stick">R</span>
+                        </div>
+                    </div>
+                    <!-- Interact / Pick / Place -->
+                    <div class="control-row">
+                        <span class="control-label" id="ctrl-interact">Interact:</span>
+                        <div class="control-inputs">
+                            <span class="input-group">
+                                <span class="key-icon">E</span>
+                                <span class="input-separator">or</span>
+                                <span class="mouse-icon left-click"></span>
+                                <span style="font-size: 0.8em; opacity: 0.8; margin-left: 4px;">L-Click</span>
+                            </span>
+                            <span class="input-separator">/</span>
+                            <span class="gp-btn btn-a gp-button-interact">A</span>
+                        </div>
+                    </div>
+                    <!-- Recipes / Instructions -->
+                    <div class="control-row">
+                        <span class="control-label" id="ctrl-recipes">Recipes / Instructions:</span>
+                        <div class="control-inputs">
+                            <span class="key-icon">I</span>
+                            <span class="input-separator">/</span>
+                            <span class="gp-btn btn-y gp-button-recipes">Y</span>
+                        </div>
+                    </div>
+                    <!-- Pause -->
+                    <div class="control-row">
+                        <span class="control-label" id="ctrl-pause">Pause / Menu:</span>
+                        <div class="control-inputs">
+                            <span class="key-icon">P</span>
+                            <span class="input-separator">or</span>
+                            <span class="key-icon" style="font-size: 10px; min-width: 38px;">Esc</span>
+                            <span class="input-separator">/</span>
+                            <span class="gp-btn btn-b gp-button-pause" style="font-size: 9px; line-height: 24px; min-width: 58px; border-radius: 4px;">START</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="setting-group">
-                <label for="toggle-labels-setting">Show Station Labels:</label>
-                <input type="checkbox" id="toggle-labels-setting" class="menu-toggle" data-action="toggle-labels"
-                    checked>
-            </div>
-            <div class="setting-group">
-                <label for="sound-effects-setting">Sound Effects:</label>
-                <input type="checkbox" id="sound-effects-setting" class="menu-toggle" data-action="toggle-sound"
-                    checked>
-            </div>
-            <div class="setting-group">
-                <label for="volume-setting">Master Volume:</label>
-                <input type="range" id="volume-setting" min="0" max="1" step="0.05" class="menu-slider" data-action="set-volume" style="width: 150px;" checked>
-                <span id="volume-value-display" style="margin-left: 10px; font-family: monospace;">100%</span>
-            </div>
-            <div class="setting-group">
-                <label for="sensitivity-setting">Mouse Sensitivity:</label>
-                <input type="range" id="sensitivity-setting" min="0.1" max="3" step="0.1" class="menu-slider" data-action="set-sensitivity" style="width: 150px;">
-                <span id="sensitivity-value-display" style="margin-left: 10px; font-family: monospace;">1.0</span>
-            </div>
-            <p id="game-version">Version: 1.0 Beta</p>
-            <button id="back-to-main-button" class="menu-button" data-action="back-to-main">Back</button>
-            <button id="resume-button-settings" class="menu-button" data-action="resume" style="display: none;">Resume
-                Game</button>
         </div>
         <p id="settings-hint" class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]</p>
     </div>

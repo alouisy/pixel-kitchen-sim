@@ -32,20 +32,30 @@ export class Player {
         const oldZ = this.cameraObject.position.z;
 
         // Try X movement first for sliding
+        // moveRight is camera-relative and affects both world X and Z,
+        // so we must save/restore both axes on collision.
         if (this.velocity.x !== 0) {
             this.controls.moveRight(this.velocity.x);
             this.cameraObject.position.x = Math.max(KITCHEN_BOUNDS.xMin, Math.min(KITCHEN_BOUNDS.xMax, this.cameraObject.position.x));
+            this.cameraObject.position.z = Math.max(KITCHEN_BOUNDS.zMin, Math.min(KITCHEN_BOUNDS.zMax, this.cameraObject.position.z));
             if (this.checkCollisions()) {
                 this.cameraObject.position.x = oldX;
+                this.cameraObject.position.z = oldZ;
             }
         }
 
+        const midX = this.cameraObject.position.x;
+        const midZ = this.cameraObject.position.z;
+
         // Try Z movement next for sliding
+        // moveForward is camera-relative and affects both world X and Z.
         if (this.velocity.z !== 0) {
             this.controls.moveForward(-this.velocity.z);
+            this.cameraObject.position.x = Math.max(KITCHEN_BOUNDS.xMin, Math.min(KITCHEN_BOUNDS.xMax, this.cameraObject.position.x));
             this.cameraObject.position.z = Math.max(KITCHEN_BOUNDS.zMin, Math.min(KITCHEN_BOUNDS.zMax, this.cameraObject.position.z));
             if (this.checkCollisions()) {
-                this.cameraObject.position.z = oldZ;
+                this.cameraObject.position.x = midX;
+                this.cameraObject.position.z = midZ;
             }
         }
 
