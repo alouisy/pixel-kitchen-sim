@@ -35,6 +35,15 @@ const clock = new THREE.Clock();
 
 let scene, camera, renderer, playerControls, player, interactionManager, levelManager, uiManager, menuManager, saveManager, levelEditor, audioManager, onlineServices;
 let officialLevelDatabase = [];
+let currentPlayingCommunityLevel = null;
+let pendingPublishIndex = -1;
+let communityLevelsState = {
+    page: 1,
+    sortBy: 'newest',
+    levels: [],
+    hasMore: false,
+    loading: false
+};
 let levelDatabase = [];
 let levelDataCache = {}; // Cache level contents: filename/id -> json data
 let pendingLevelIndex = -1;
@@ -76,6 +85,7 @@ async function loadLevelData() {
         if (!Array.isArray(officialLevelDatabase) || officialLevelDatabase.length === 0) throw new Error("Loaded level roadmap is not a valid non-empty array.");
         if (saveManager) saveManager.setLevelDatabase(officialLevelDatabase);
         refreshPlayableLevelDatabase();
+        loadCommunityLevels().catch(err => console.error("Initial load of community levels failed:", err));
     } catch (error) {
         console.error("Failed to load level data:", error);
         officialLevelDatabase = [];
@@ -216,6 +226,151 @@ function addEventListeners() {
 
     window.addEventListener('gamepadconnected', (event) => { console.log('Gamepad connected:', event.gamepad.id); });
     window.addEventListener('gamepaddisconnected', (event) => { console.log('Gamepad disconnected:', event.gamepad.id); activeGamepad = null; });
+
+    // Community level sorting
+    const communitySort = document.getElementById('community-sort');
+    if (communitySort) {
+        communitySort.addEventListener('change', (e) => {
+            communityLevelsState.sortBy = e.target.value;
+            communityLevelsState.page = 1;
+            loadCommunityLevels();
+        });
+    }
+
+    // Community pagination buttons
+    const prevBtn = document.getElementById('community-prev-btn');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            if (communityLevelsState.page > 1) {
+                communityLevelsState.page--;
+                loadCommunityLevels();
+            }
+        });
+    }
+
+    const nextBtn = document.getElementById('community-next-btn');
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            if (communityLevelsState.hasMore) {
+                communityLevelsState.page++;
+                loadCommunityLevels();
+            }
+        });
+    }
+
+    // Confirm/Cancel buttons inside Publish Level Modal
+    const publishConfirm = document.getElementById('publish-confirm-btn');
+    if (publishConfirm) {
+        publishConfirm.addEventListener('click', async () => {
+            if (pendingPublishIndex === -1) return;
+            
+            const descInput = document.getElementById('publish-level-description');
+            const diffInput = document.getElementById('publish-level-difficulty');
+            const description = descInput ? descInput.value.trim() : '';
+            const difficulty = diffInput ? parseInt(diffInput.value, 10) : 3;
+            
+            const modal = document.getElementById('publish-level-modal');
+            if (modal) modal.style.display = 'none';
+            
+            await executePublishLevel(pendingPublishIndex, description, difficulty);
+            pendingPublishIndex = -1;
+        });
+    }
+
+    const publishCancel = document.getElementById('publish-cancel-btn');
+    if (publishCancel) {
+        publishCancel.addEventListener('click', () => {
+            const modal = document.getElementById('publish-level-modal');
+            if (modal) modal.style.display = 'none';
+            pendingPublishIndex = -1;
+        });
+    }
+
+    // Stars rating system for community levels
+    const ratingSection = document.getElementById('community-rating-section');
+    if (ratingSection) {
+        const stars = ratingSection.querySelectorAll('.rate-star');
+        stars.forEach(star => {
+            // Hover effect
+            star.addEventListener('mouseenter', (e) => {
+                const hoverRating = parseInt(e.target.dataset.rating, 10);
+                stars.forEach((s, idx) => {
+                    if (idx < hoverRating) {
+                        s.textContent = '★';
+                        s.style.color = '#ffeb3b';
+                    } else {
+                        s.textContent = '☆';
+                        s.style.color = '#666';
+                    }
+                });
+            });
+            
+            // Revert hover when mouse leaves
+            const starRatingContainer = ratingSection.querySelector('.star-rating');
+            if (starRatingContainer) {
+                starRatingContainer.addEventListener('mouseleave', () => {
+                    const activeRating = parseInt(ratingSection.dataset.selectedRating || '0', 10);
+                    stars.forEach((s, idx) => {
+                        if (idx < activeRating) {
+                            s.textContent = '★';
+                            s.style.color = '#ffeb3b';
+                        } else {
+                            s.textContent = '☆';
+                            s.style.color = '#666';
+                        }
+                    });
+                });
+            }
+
+            // Click to submit rating
+            star.addEventListener('click', async (e) => {
+                const rating = parseInt(e.target.dataset.rating, 10);
+                ratingSection.dataset.selectedRating = rating;
+                
+                stars.forEach((s, idx) => {
+                    if (idx < rating) {
+                        s.textContent = '★';
+                        s.style.color = '#ffeb3b';
+                    } else {
+                        s.textContent = '☆';
+                        s.style.color = '#666';
+                    }
+                });
+
+                const statusMsg = document.getElementById('rating-status-message');
+                if (statusMsg) {
+                    statusMsg.textContent = 'Submitting rating...';
+                    statusMsg.style.color = '#aaa';
+                }
+
+                if (!currentPlayingCommunityLevel || !currentPlayingCommunityLevel.id) {
+                    if (statusMsg) {
+                        statusMsg.textContent = 'Error: Level ID not found.';
+                        statusMsg.style.color = '#f44336';
+                    }
+                    return;
+                }
+
+                try {
+                    await onlineServices.submitLevelRating({
+                        levelId: currentPlayingCommunityLevel.id,
+                        token: saveManager.getPlayerProfile().token,
+                        rating: rating
+                    });
+                    if (statusMsg) {
+                        statusMsg.textContent = 'Rating submitted! Thank you!';
+                        statusMsg.style.color = '#4caf50';
+                    }
+                } catch (error) {
+                    console.error("Submit rating failed:", error);
+                    if (statusMsg) {
+                        statusMsg.textContent = `Failed: ${error.message}`;
+                        statusMsg.style.color = '#f44336';
+                    }
+                }
+            });
+        });
+    }
 }
 
 function changeGameState(newState) {
@@ -260,7 +415,27 @@ function changeGameState(newState) {
             const isPause = previousState === GameState.PAUSED || previousState === GameState.GAME_RUNNING || previousState === GameState.VIEWING_INSTRUCTIONS;
             uiManager.showSettings(isPause); menuManager.activateMenu(uiManager.settingsScreen);
             break;
-        case GameState.LEVEL_SELECT: uiManager.populateLevelSelect(levelDatabase, saveManager); uiManager.showLevelSelect(); menuManager.activateMenu(uiManager.levelSelectScreen); break;
+        case GameState.LEVEL_SELECT: {
+            const tabOfficial = document.getElementById('tab-official');
+            const tabMyLevels = document.getElementById('tab-my-levels');
+            const tabCommunity = document.getElementById('tab-community');
+            const officialContainer = document.getElementById('official-levels-container');
+            const myLevelsContainer = document.getElementById('my-levels-container');
+            const communityContainer = document.getElementById('community-levels-container');
+            
+            if (tabOfficial) tabOfficial.classList.add('selected');
+            if (tabMyLevels) tabMyLevels.classList.remove('selected');
+            if (tabCommunity) tabCommunity.classList.remove('selected');
+            if (officialContainer) officialContainer.style.display = 'block';
+            if (myLevelsContainer) myLevelsContainer.style.display = 'none';
+            if (communityContainer) communityContainer.style.display = 'none';
+
+            const officialLevelsOnly = levelDatabase.filter(l => !l.customId);
+            uiManager.populateLevelSelect(officialLevelsOnly, saveManager);
+            uiManager.showLevelSelect();
+            menuManager.activateMenu(uiManager.levelSelectScreen);
+            break;
+        }
         case GameState.LEVEL_INSTRUCTIONS: menuManager.activateMenu(uiManager.levelInstructionsScreen); break;
         case GameState.VIEWING_INSTRUCTIONS: 
             if (currentLevelData) uiManager.showLevelInstructions(currentLevelData, true); 
@@ -328,6 +503,51 @@ function handleMenuAction(eventOrAction) {
     }
 
     switch (action) {
+        case 'toggle-level-tab': {
+            const tab = element.dataset.tab;
+            const tabOfficial = document.getElementById('tab-official');
+            const tabMyLevels = document.getElementById('tab-my-levels');
+            const tabCommunity = document.getElementById('tab-community');
+            const officialContainer = document.getElementById('official-levels-container');
+            const myLevelsContainer = document.getElementById('my-levels-container');
+            const communityContainer = document.getElementById('community-levels-container');
+            
+            if (tab === 'official') {
+                if (tabOfficial) tabOfficial.classList.add('selected');
+                if (tabMyLevels) tabMyLevels.classList.remove('selected');
+                if (tabCommunity) tabCommunity.classList.remove('selected');
+                if (officialContainer) officialContainer.style.display = 'block';
+                if (myLevelsContainer) myLevelsContainer.style.display = 'none';
+                if (communityContainer) communityContainer.style.display = 'none';
+            } else if (tab === 'my-levels') {
+                if (tabOfficial) tabOfficial.classList.remove('selected');
+                if (tabMyLevels) tabMyLevels.classList.add('selected');
+                if (tabCommunity) tabCommunity.classList.remove('selected');
+                if (officialContainer) officialContainer.style.display = 'none';
+                if (myLevelsContainer) myLevelsContainer.style.display = 'block';
+                if (communityContainer) communityContainer.style.display = 'none';
+                
+                renderMyLevelsList();
+            } else if (tab === 'community') {
+                if (tabOfficial) tabOfficial.classList.remove('selected');
+                if (tabMyLevels) tabMyLevels.classList.remove('selected');
+                if (tabCommunity) tabCommunity.classList.add('selected');
+                if (officialContainer) officialContainer.style.display = 'none';
+                if (myLevelsContainer) myLevelsContainer.style.display = 'none';
+                if (communityContainer) communityContainer.style.display = 'block';
+                
+                communityLevelsState.page = 1;
+                loadCommunityLevels();
+            }
+            break;
+        }
+        case 'play-community-level': {
+            const onlineId = element.dataset.onlineId;
+            if (onlineId) {
+                prepareStartCommunityLevel(onlineId);
+            }
+            break;
+        }
         case 'play': changeGameState(GameState.LEVEL_SELECT); break;
         case 'save-nickname':
             saveManager.setPlayerNickname(uiManager.nicknameInput?.value);
@@ -452,10 +672,9 @@ function renderEditorHub() {
 }
 
 function createNewLevel() {
-    const newId = levelDatabase.length > 0 ? Math.max(...levelDatabase.map(l => l.levelId || 0)) + 1 : 1;
+    const customLevelsCount = levelDatabase.filter(l => l.customId).length + 1;
     const newData = {
-        levelId: newId,
-        name: `New Level ${newId}`,
+        name: `Custom Level ${customLevelsCount}`,
         duration: 180,
         starThresholds: [100, 200, 300],
         availableMeals: [],
@@ -466,16 +685,35 @@ function createNewLevel() {
     };
 
     if (saveManager) {
-        saveManager.saveCustomLevel(newData);
+        const saved = saveManager.saveCustomLevel(newData);
+        levelDataCache[`custom:${saved.customId}`] = cloneData(saved);
         refreshPlayableLevelDatabase();
     } else {
-        levelDataCache[`custom:${newId}`] = cloneData(newData);
-        levelDatabase.push({ ...newData, customId: `temp-${newId}` });
+        const tempId = `temp-${Date.now()}`;
+        const saved = { ...newData, customId: tempId, levelId: `custom-${tempId.slice(-6)}` };
+        levelDataCache[`custom:${tempId}`] = cloneData(saved);
+        levelDatabase.push(saved);
     }
     renderEditorHub();
 }
 
-async function shareLevel(index) {
+function shareLevel(index) {
+    const entry = levelDatabase[index];
+    if (!entry || !entry.customId) return;
+
+    pendingPublishIndex = index;
+    
+    // Open the publish modal
+    const modal = document.getElementById('publish-level-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Populate inputs if they already have defaults or are previously typed
+        document.getElementById('publish-level-description').value = entry.description || '';
+        document.getElementById('publish-level-difficulty').value = entry.difficulty || '3';
+    }
+}
+
+async function executePublishLevel(index, description, difficulty) {
     const entry = levelDatabase[index];
     if (!entry || !entry.customId) return;
 
@@ -498,13 +736,17 @@ async function shareLevel(index) {
             token: saveManager.getPlayerProfile().token,
             nickname,
             name: entry.name,
+            description,
+            difficulty,
             data: data,
             id: onlineId
         });
 
         if (result.id) {
             const updatedOrigin = { type: 'online', onlineId: result.id };
-            saveManager.saveCustomLevel(data, entry.customId, updatedOrigin);
+            entry.description = description;
+            entry.difficulty = difficulty;
+            saveManager.saveCustomLevel(entry, entry.customId, updatedOrigin);
             refreshPlayableLevelDatabase();
             renderEditorHub();
             await navigator.clipboard.writeText(result.id).catch(() => {});
@@ -606,8 +848,19 @@ function saveEditedLevelLocally(levelData, sourceEntry) {
         levelId: sourceEntry.levelId,
         sourceKey: saveManager.resolveLevelKey(sourceEntry)
     } : null;
+
+    const cleanData = { ...levelData };
+    delete cleanData.levelId;
+
+    if (origin && origin.type === 'official' && !sourceEntry?.customId) {
+        // Appending (Custom) to custom variant
+        if (!cleanData.name.includes('(Custom)')) {
+            cleanData.name = `${sourceEntry.name} (Custom)`;
+        }
+    }
+
     const existingCopy = sourceEntry?.customId ? sourceEntry : origin?.sourceKey ? saveManager.findCustomLevelBySource(origin.sourceKey) : null;
-    const saved = saveManager.saveCustomLevel(levelData, existingCopy?.customId, origin);
+    const saved = saveManager.saveCustomLevel(cleanData, existingCopy?.customId, origin);
     levelDataCache[`custom:${saved.customId}`] = cloneData(saved);
     currentEditingLevelEntry = saved;
     refreshPlayableLevelDatabase();
@@ -654,11 +907,9 @@ async function duplicateLevel(index) {
     const sourceEntry = levelDatabase[index];
     const sourceData = await getLevelData(sourceEntry);
 
-    const newId = Math.max(...levelDatabase.map(l => l.levelId || 0)) + 1;
-
     // Clone data
     const newData = JSON.parse(JSON.stringify(sourceData));
-    newData.levelId = newId;
+    delete newData.levelId;
     newData.name = `${sourceData.name} (Copy)`;
     newData.source = 'local';
 
@@ -745,10 +996,10 @@ async function prepareStartLevel(levelIndex) {
 }
 
 function confirmStartLevel() {
-    if (pendingLevelIndex < 0 || !pendingLevelData || !levelManager) { changeGameState(GameState.LEVEL_SELECT); return; }
+    if ((pendingLevelIndex < 0 && pendingLevelIndex !== -999) || !pendingLevelData || !levelManager) { changeGameState(GameState.LEVEL_SELECT); return; }
     currentLevelData = pendingLevelData;
     uiManager.setCurrentLevelData(currentLevelData);
-    const loaded = levelManager.loadLevel(pendingLevelIndex, pendingLevelData);
+    const loaded = levelManager.loadLevel(pendingLevelIndex === -999 ? -1 : pendingLevelIndex, pendingLevelData);
     pendingLevelIndex = -1;
     pendingLevelData = null;
     if (loaded && levelManager.isRunning()) changeGameState(GameState.GAME_RUNNING);
@@ -777,10 +1028,13 @@ function resumeGame() {
     }
 }
 function handleLevelEnd(score, stars, levelIndex) {
-    submitLeaderboardScore(levelIndex, score, stars);
+    if (levelIndex !== -999) {
+        submitLeaderboardScore(levelIndex, score, stars);
+    }
     currentLevelData = null;
-    const hasNextLevel = (levelIndex + 1) < officialLevelDatabase.length;
-    uiManager.showLevelEnd(score, stars, levelIndex, hasNextLevel);
+    const isCommunityLevel = levelIndex === -999;
+    const hasNextLevel = !isCommunityLevel && (levelIndex + 1) < officialLevelDatabase.length;
+    uiManager.showLevelEnd(score, stars, levelIndex, hasNextLevel, isCommunityLevel);
     changeGameState(GameState.LEVEL_END);
 }
 function handleGameEnd() {
@@ -842,6 +1096,261 @@ function animate() {
     else if (isMenuState(currentGameState)) { if (inputCooldownTimer <= 0 && activeGamepad) { const menuAction = menuManager.handleGamepadNav(activeGamepad, delta); if (menuAction) handleMenuAction(menuAction); } }
     
     if (currentGameState !== GameState.EDITOR) renderer.render(scene, camera);
+}
+
+
+async function loadCommunityLevels() {
+    const listContainer = document.getElementById('community-level-list');
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; font-family: monospace; padding: 20px; color: #888;">Loading community levels...</div>';
+    communityLevelsState.loading = true;
+    
+    updateCommunityPaginationButtons(true);
+    
+    try {
+        const response = await onlineServices.listCommunityLevels({
+            page: communityLevelsState.page,
+            sortBy: communityLevelsState.sortBy,
+            limit: 6 // Show 6 per page
+        });
+        
+        communityLevelsState.levels = response.levels || [];
+        communityLevelsState.hasMore = response.hasMore || false;
+        
+        renderCommunityLevelsList();
+    } catch (error) {
+        console.error("Error loading community levels:", error);
+        listContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; font-family: monospace; padding: 20px; color: #f44;">Failed to load community levels.</div>';
+    } finally {
+        communityLevelsState.loading = false;
+        updateCommunityPaginationButtons(false);
+    }
+}
+
+function updateCommunityPaginationButtons(disabled) {
+    const prevBtn = document.getElementById('community-prev-btn');
+    const nextBtn = document.getElementById('community-next-btn');
+    const pageDisplay = document.getElementById('community-current-page');
+    
+    if (pageDisplay) pageDisplay.textContent = communityLevelsState.page;
+    if (prevBtn) prevBtn.disabled = disabled || communityLevelsState.page <= 1;
+    if (nextBtn) nextBtn.disabled = disabled || !communityLevelsState.hasMore;
+}
+
+function renderCommunityLevelsList() {
+    const listContainer = document.getElementById('community-level-list');
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = '';
+    
+    const onlineLevels = communityLevelsState.levels || [];
+    
+    if (onlineLevels.length === 0) {
+        const lang = uiManager ? uiManager.currentLanguage : 'en';
+        const noLevelsText = (uiManager && uiManager.uiText && uiManager.uiText[lang] && uiManager.uiText[lang].noCommunityLevels) || "No community levels available yet.";
+        listContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; font-family: monospace; padding: 20px; color: #888;">${noLevelsText}</div>`;
+        return;
+    }
+    
+    onlineLevels.forEach(level => {
+        const card = document.createElement('div');
+        card.className = 'menu-button level-button community-level-card';
+        card.style.height = 'auto';
+        card.style.padding = '15px';
+        card.style.flexDirection = 'column';
+        card.style.alignItems = 'flex-start';
+        card.style.textAlign = 'left';
+        card.style.cursor = 'pointer';
+        card.dataset.onlineId = level.id;
+        card.dataset.action = 'play-community-level';
+        
+        const nameEl = document.createElement('div');
+        nameEl.style.fontWeight = 'bold';
+        nameEl.style.fontSize = '16px';
+        nameEl.style.marginBottom = '5px';
+        nameEl.style.color = '#fff';
+        nameEl.textContent = level.name;
+        card.appendChild(nameEl);
+        
+        const authorEl = document.createElement('div');
+        authorEl.style.fontSize = '12px';
+        authorEl.style.color = '#888';
+        authorEl.style.marginBottom = '8px';
+        authorEl.textContent = `By ${level.nickname || 'Chef'}`;
+        card.appendChild(authorEl);
+        
+        const descEl = document.createElement('div');
+        descEl.style.fontSize = '13px';
+        descEl.style.color = '#ccc';
+        descEl.style.marginBottom = '10px';
+        descEl.style.fontStyle = 'italic';
+        descEl.style.lineHeight = '1.3';
+        descEl.textContent = level.description || 'No description provided.';
+        card.appendChild(descEl);
+        
+        const metaRow = document.createElement('div');
+        metaRow.style.display = 'flex';
+        metaRow.style.justifyContent = 'space-between';
+        metaRow.style.width = '100%';
+        metaRow.style.fontSize = '12px';
+        metaRow.style.fontFamily = 'monospace';
+        
+        const diffSpan = document.createElement('span');
+        diffSpan.style.color = '#ff9800';
+        diffSpan.textContent = `Diff: ${'★'.repeat(level.difficulty || 3)}`;
+        metaRow.appendChild(diffSpan);
+        
+        const ratingSpan = document.createElement('span');
+        ratingSpan.style.color = '#ffeb3b';
+        const avg = parseFloat(level.average_rating || 0).toFixed(1);
+        const count = level.rating_count || 0;
+        ratingSpan.textContent = `Rating: ${avg}★ (${count})`;
+        metaRow.appendChild(ratingSpan);
+        
+        card.appendChild(metaRow);
+        listContainer.appendChild(card);
+    });
+}
+
+// Hook to trigger community levels list refresh on language change
+window.onCommunityLanguageChange = renderCommunityLevelsList;
+
+function renderMyLevelsList() {
+    const listContainer = document.getElementById('my-level-list');
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = '';
+    
+    const localLevels = saveManager ? saveManager.getCustomLevels() : [];
+    
+    if (localLevels.length === 0) {
+        const lang = uiManager ? uiManager.currentLanguage : 'en';
+        const noLevelsText = (uiManager && uiManager.uiText && uiManager.uiText[lang] && uiManager.uiText[lang].noMyLevels) || "No custom levels created yet.";
+        listContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; font-family: monospace; padding: 20px; color: #888;">${noLevelsText}</div>`;
+        return;
+    }
+    
+    localLevels.forEach(level => {
+        const button = document.createElement('button');
+        button.className = 'menu-button level-button';
+        button.style.height = 'auto';
+        button.style.padding = '15px';
+        button.style.flexDirection = 'column';
+        button.style.alignItems = 'center';
+        button.style.textAlign = 'center';
+        button.style.cursor = 'pointer';
+        button.dataset.action = 'start-level';
+        
+        // Find global index in levelDatabase for play action
+        const globalIndex = levelDatabase.findIndex(l => l.customId === level.customId);
+        button.dataset.levelIndex = globalIndex >= 0 ? globalIndex : '';
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'level-name';
+        nameSpan.textContent = level.name;
+        button.appendChild(nameSpan);
+        
+        // Show if it is based on an official level
+        if (level.origin && level.origin.type === 'official') {
+            const basedOnSpan = document.createElement('span');
+            basedOnSpan.className = 'level-custom-badge';
+            basedOnSpan.style.fontSize = '11px';
+            basedOnSpan.style.color = '#ff9800';
+            basedOnSpan.style.marginTop = '6px';
+            basedOnSpan.style.display = 'block';
+            
+            const lang = uiManager ? uiManager.currentLanguage : 'en';
+            const basedOnText = (uiManager && uiManager.uiText && uiManager.uiText[lang] && uiManager.uiText[lang].basedOnOfficial) || "Based on Level";
+            const customVersionText = (uiManager && uiManager.uiText && uiManager.uiText[lang] && uiManager.uiText[lang].customVersion) || "Custom Version";
+            basedOnSpan.textContent = `${customVersionText} | ${basedOnText} ${level.origin.levelId}`;
+            button.appendChild(basedOnSpan);
+        } else {
+            // Original custom level
+            const customSpan = document.createElement('span');
+            customSpan.className = 'level-custom-badge';
+            customSpan.style.fontSize = '11px';
+            customSpan.style.color = '#87ceeb';
+            customSpan.style.marginTop = '6px';
+            customSpan.style.display = 'block';
+            
+            const lang = uiManager ? uiManager.currentLanguage : 'en';
+            const customVersionText = (uiManager && uiManager.uiText && uiManager.uiText[lang] && uiManager.uiText[lang].customVersion) || "Custom Version";
+            customSpan.textContent = customVersionText;
+            button.appendChild(customSpan);
+        }
+        
+        // Render progress if completed
+        const levelProgress = saveManager.getLevelProgress(level);
+        if (levelProgress && levelProgress.completed) {
+            const starsSpan = document.createElement('span');
+            starsSpan.className = 'level-stars';
+            starsSpan.style.display = 'block';
+            starsSpan.style.marginTop = '5px';
+            starsSpan.textContent = '★'.repeat(levelProgress.stars) + '☆'.repeat(3 - levelProgress.stars);
+            button.appendChild(starsSpan);
+
+            const scoreSpan = document.createElement('span');
+            scoreSpan.className = 'level-score';
+            scoreSpan.style.display = 'block';
+            scoreSpan.style.fontSize = '11px';
+            scoreSpan.style.marginTop = '4px';
+            scoreSpan.style.color = '#fff';
+            const lang = uiManager ? uiManager.currentLanguage : 'en';
+            const highScoreText = (uiManager && uiManager.uiText && uiManager.uiText[lang] && uiManager.uiText[lang].highScore) || "High Score";
+            scoreSpan.textContent = `${highScoreText}: ${levelProgress.highScore}`;
+            button.appendChild(scoreSpan);
+        }
+        
+        listContainer.appendChild(button);
+    });
+}
+
+// Hook to trigger My Levels list refresh on language change
+window.onMyLevelsLanguageChange = renderMyLevelsList;
+
+async function prepareStartCommunityLevel(onlineId) {
+    if (!levelManager || !interactionManager || !scene || !uiManager) { changeGameState(GameState.MAIN_MENU); return; }
+    
+    uiManager.showLoading();
+    
+    try {
+        const levelDataResponse = await onlineServices.fetchCustomLevel(onlineId);
+        if (!levelDataResponse || !levelDataResponse.data) {
+            throw new Error("Invalid level data");
+        }
+        
+        const levelData = levelDataResponse.data;
+        levelData.levelId = onlineId;
+        levelData.name = levelDataResponse.name || levelData.name || "Community Level";
+        levelData.description = levelDataResponse.description || "";
+        levelData.creator = levelDataResponse.nickname || "Chef";
+
+        resetWorldState();
+        clearKitchen(scene);
+        
+        const { stations, stationInteractables, floorMesh } = buildKitchen(scene, levelData.layout, levelData.theme);
+        interactionManager.updateWorldData(stations, stationInteractables, floorMesh);
+        
+        pendingLevelIndex = -999; // Sentinel indicating community level
+        pendingLevelData = levelData;
+        currentLevelData = null;
+        uiManager.setCurrentLevelData(null);
+        currentPlayingCommunityLevel = {
+            id: onlineId,
+            name: levelData.name,
+            creator: levelData.creator
+        };
+        
+        uiManager.hideLoading();
+        uiManager.showLevelInstructions(levelData, false);
+        changeGameState(GameState.LEVEL_INSTRUCTIONS);
+    } catch (e) {
+        console.error("Failed to load community level:", e);
+        uiManager.hideLoading();
+        uiManager.showTemporaryMessage("Error loading community level", 2000);
+        changeGameState(GameState.LEVEL_SELECT);
+    }
 }
 
 async function runGame() {

@@ -104,7 +104,38 @@ export class UIManager {
     _setActiveScreen(screenElement) { if (this.activeScreen && this.activeScreen !== screenElement) this.activeScreen.classList.remove('active'); if (screenElement) screenElement.classList.add('active'); this.activeScreen = screenElement; }
     showLoading() { this._setActiveScreen(this.loadingScreen); }
     hideLoading() { if (this.activeScreen === this.loadingScreen) this.loadingScreen.classList.remove('active'); }
-    showMainMenu() { this._setActiveScreen(this.mainMenu); this.hideGameUI(); }
+    areOfficialLevelsCompleted() {
+        // Automatically unlock the level editor for local testing
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return true;
+        }
+        if (!this.levelDatabase || this.levelDatabase.length === 0) return false;
+        const official = this.levelDatabase.filter(l => !l.customId);
+        if (official.length === 0) return false;
+        return official.every(l => this.saveManager.getLevelProgress(l).completed);
+    }
+    showMainMenu() { 
+        this._setActiveScreen(this.mainMenu); 
+        this.hideGameUI(); 
+        
+        // Lock Level Editor button if official levels are not completed
+        const editorBtn = document.getElementById('editor-button');
+        if (editorBtn) {
+            const completed = this.areOfficialLevelsCompleted();
+            editorBtn.disabled = !completed;
+            if (!completed) {
+                editorBtn.classList.add('locked');
+                editorBtn.title = "Complete all 5 official levels to unlock the Level Editor!";
+                editorBtn.style.opacity = '0.5';
+                editorBtn.style.cursor = 'not-allowed';
+            } else {
+                editorBtn.classList.remove('locked');
+                editorBtn.title = "";
+                editorBtn.style.opacity = '1';
+                editorBtn.style.cursor = 'pointer';
+            }
+        }
+    }
     showSettings(isPauseMenu = false) {
         this._setActiveScreen(this.settingsScreen);
         this.resumeButtonSettings.style.display = isPauseMenu ? 'block' : 'none';
@@ -158,15 +189,31 @@ export class UIManager {
         this._setActiveScreen(this.leaderboardScreen);
         this.hideGameUI();
     }
-    showLevelEnd(score, stars, levelIndex, canContinue) {
+    showLevelEnd(score, stars, levelIndex, canContinue, isCommunityLevel = false) {
         this.finalScoreElement.textContent = score;
         this.finalStarsElement.textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
         this.levelEndScreen.dataset.levelIndex = levelIndex;
+        
         const nextButton = document.getElementById('next-level-button');
-        const isNextLevelUnlocked = this.saveManager.isLevelUnlocked(levelIndex + 1);
+        const isNextLevelUnlocked = levelIndex !== -999 && this.saveManager.isLevelUnlocked(levelIndex + 1);
         if (nextButton) nextButton.style.display = (canContinue && isNextLevelUnlocked) ? 'block' : 'none';
+        
         const restartButton = document.getElementById('restart-level-button');
         if (restartButton) restartButton.textContent = this.uiText[this.currentLanguage].restartLevel || "Restart Level";
+        
+        // Handle community level rating section display
+        const ratingSection = document.getElementById('community-rating-section');
+        if (ratingSection) {
+            ratingSection.style.display = isCommunityLevel ? 'block' : 'none';
+            const stars = ratingSection.querySelectorAll('.rate-star');
+            stars.forEach(star => {
+                star.textContent = '☆';
+                star.style.color = '#666';
+            });
+            const statusMsg = document.getElementById('rating-status-message');
+            if (statusMsg) statusMsg.textContent = '';
+        }
+        
         this._setActiveScreen(this.levelEndScreen);
         this.hideGameUI();
     }
@@ -321,7 +368,6 @@ export class UIManager {
         if (card) {
             // Slide up animation
             card.style.transform = 'translateY(-120%)';
-            card.style.transform = 'translateY(-120%)';
             card.style.opacity = '0';
             setTimeout(() => card.remove(), 400);
         }
@@ -382,8 +428,19 @@ export class UIManager {
     }
 
     setLanguage(lang) {
+        if (!this.uiText) {
+            // Keep a fallback if not initialized yet
+            this.uiText = {};
+        }
         if (!this.uiText[lang]) { lang = 'en'; }
         this.currentLanguage = lang;
+
+        // Initial UI Dictionary
+        this.uiText = {
+            en: { select: "Select: Enter/[X]/[A]", title: "Pixel Kitchen Sim", play: "Play", levelEditor: "Level Editor", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", soundEffects: "Sound Effects:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked", levelInstructions: "Level Instructions", startLevel: "Start Level", recipe: "Recipe", close: "Close", hintToggleInstructions: "Toggle: [I] / [△/Y]", editorHubTitle: "Level Editor", createLevel: "New Level", downloadRoadmap: "Download Roadmap", backToMenu: "Back to Menu", credits: "A Game By Azzxl Studio", hintMenu: "Navigate: Arrows/Stick | Select: Enter/[X]/[A]", hintSettings: "Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]", leaderboard: "Leaderboard", nicknameTitle: "Choose Nickname", nicknameLabel: "Nickname", nicknameContinue: "Continue", nicknameHint: "Used for the online leaderboard.", leaderboardEmpty: "No scores yet. Be the first chef on the board.", leaderboardLoading: "Loading scores...", localLevel: "Local", officialLevels: "Official Levels", communityLevels: "Community Levels", noCommunityLevels: "No community levels available yet.", sortBy: "Sort By:", newest: "Newest", highestRated: "Highest Rated", mostPopular: "Most Popular", page: "Page", prev: "◀ Prev", next: "Next ▶", myLevels: "My Levels", noMyLevels: "No custom levels created yet.", customVersion: "Custom Version", basedOnOfficial: "Based on Level" },
+            fr: { select: "Confirmer: Entrée/[X]/[A]", title: "Pixel Cuisine Sim", play: "Jouer", levelEditor: "Éditeur de Niveau", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher les Étiquettes:", soundEffects: "Effets sonores:", version: "Version:", selectLevel: "Choisir le Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous les Niveaux sont Finis!", playAgain: "Rejouer?", loading: "Chargement...", levelTime: "Temps du Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé", levelInstructions: "Instructions du Niveau", startLevel: "Commencer le Niveau", recipe: "Recette", close: "Fermer", hintToggleInstructions: "Basculer: [I] / [△/Y]", editorHubTitle: "Éditeur", createLevel: "Nouveau", downloadRoadmap: "Télécharger le Niveau", backToMenu: "Retour au Menu", credits: "Un jeu par Azzxl Studio", hintMenu: "Naviguer: Flèches/Stick | Confirmer: Entrée/[X]/[A]", hintSettings: "Naviguer: Flèches/Stick | Confirmer: Entrée/[X]/[A] | Retour: Échap/[O]/[B]", leaderboard: "Classement", nicknameTitle: "Choisissez un pseudo", nicknameLabel: "Pseudo", nicknameContinue: "Continuer", nicknameHint: "Utilisé pour le classement en ligne.", leaderboardEmpty: "Aucun score. Soyez le premier chef.", leaderboardLoading: "Classement des scores...", localLevel: "Local", officialLevels: "Niveaux Officiels", communityLevels: "Niveaux de la Communauté", noCommunityLevels: "Aucun niveau de la communauté disponible pour le moment.", sortBy: "Trier par :", newest: "Plus récents", highestRated: "Mieux notés", mostPopular: "Plus populaires", page: "Page", prev: "◀ Précédent", next: "Suivant ▶", myLevels: "Mes Niveaux", noMyLevels: "Aucun niveau personnalisé créé pour le moment.", customVersion: "Version Personnalisée", basedOnOfficial: "Basé sur le Niveau" },
+            es: { select: "Entrar: Enter/[X]/[A]", title: "Pixel Cocina Sim", play: "Jugar", levelEditor: "Editor de Niveles", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menu Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", soundEffects: "Efectos de sonido:", version: "Versión:", selectLevel: "Elegir el Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos los Niveles están Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", levelTime: "Tiempo del Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado", levelInstructions: "Instrucciones del Nivel", startLevel: "Empezar el Nivel", recipe: "Receta", close: "Cerrar", hintToggleInstructions: "Alternar: [I] / [△/Y]", editorHubTitle: "Editor", createLevel: "Nuevo Nivel", downloadRoadmap: "Descargar el Nivel", backToMenu: "Volver al Menú", credits: "Un Juego De Azzxl Studio", hintMenu: "Navegar: Flechas/Stick | Entrar: Enter/[X]/[A]", hintSettings: "Navegar: Flechas/Stick | Entrar: Enter/[X]/[A] | Volver: Esc/[O]/[B]", leaderboard: "Clasificación", nicknameTitle: "Elige un apodo", nicknameLabel: "Apodo", nicknameContinue: "Continuar", nicknameHint: "Se usa para la clasificación en línea.", leaderboardEmpty: "Aún no hay puntuaciones. Sé el premier chef.", leaderboardLoading: "Cargando puntuaciones...", localLevel: "Local", officialLevels: "Niveles Oficiales", communityLevels: "Niveles de la Comunidad", noCommunityLevels: "No hay niveles de la comunidad disponibles todavía.", sortBy: "Ordenar por:", newest: "Más nuevos", highestRated: "Mejor valorados", mostPopular: "Más populares", page: "Página", prev: "◀ Anterior", next: "Siguiente ▶", myLevels: "Mis Niveles", noMyLevels: "No hay niveles personalizados creados todavía.", customVersion: "Versión Personalizada", basedOnOfficial: "Basado en el Nivel" }
+        };
 
         this.mainMenu.querySelector('h1').textContent = this.uiText[lang].title;
         document.getElementById('play-button').textContent = this.uiText[lang].play;
@@ -422,7 +479,6 @@ export class UIManager {
         if (this.nicknameSaveButton) this.nicknameSaveButton.textContent = this.uiText[lang].nicknameContinue;
         if (this.nicknameHint) this.nicknameHint.textContent = this.uiText[lang].nicknameHint;
         document.querySelector('#game-timer-container').firstChild.textContent = this.uiText[lang].levelTime + ": ";
-        // document.querySelector('#bottom-hud').firstChild.textContent = this.uiText[lang].holding + ": "; // Removed hardcoded prefix
         this.loadingScreen.querySelector('h2').textContent = this.uiText[lang].loading;
 
         if (this.instructionsTitle) this.instructionsTitle.textContent = this.uiText[lang].levelInstructions || "Level Instructions";
@@ -432,12 +488,47 @@ export class UIManager {
             this.instructionsHint.textContent = startButtonVisible ? (this.uiText[lang].select || "Select: Enter/[X]/[A]") : (this.uiText[lang].hintToggleInstructions || "Toggle: [I] / [△/Y]");
         }
 
+        const tabOfficial = document.getElementById('tab-official');
+        if (tabOfficial) tabOfficial.textContent = this.uiText[lang].officialLevels || "Official Levels";
+        const tabMyLevels = document.getElementById('tab-my-levels');
+        if (tabMyLevels) tabMyLevels.textContent = this.uiText[lang].myLevels || "My Levels";
+        const tabCommunity = document.getElementById('tab-community');
+        if (tabCommunity) tabCommunity.textContent = this.uiText[lang].communityLevels || "Community Levels";
+
+        const sortByLabel = document.getElementById('community-sort-label');
+        if (sortByLabel) sortByLabel.textContent = this.uiText[lang].sortBy || "Sort By:";
+        const sortSelect = document.getElementById('community-sort');
+        if (sortSelect && sortSelect.options.length >= 3) {
+            sortSelect.options[0].textContent = this.uiText[lang].newest || "Newest";
+            sortSelect.options[1].textContent = this.uiText[lang].highestRated || "Highest Rated";
+            sortSelect.options[2].textContent = this.uiText[lang].mostPopular || "Most Popular";
+        }
+        const pageLabel = document.getElementById('community-page-label');
+        if (pageLabel) pageLabel.textContent = this.uiText[lang].page || "Page";
+        const prevBtn = document.getElementById('community-prev-btn');
+        if (prevBtn) prevBtn.textContent = this.uiText[lang].prev || "◀ Prev";
+        const nextBtn = document.getElementById('community-next-btn');
+        if (nextBtn) nextBtn.textContent = this.uiText[lang].next || "Next ▶";
+
         this.languageButtons.forEach(btn => btn.classList.toggle('active-lang', btn.dataset.lang === lang));
 
         this.updateRecipeBook(lang);
 
         if (this.activeScreen === this.levelSelectScreen && this.saveManager) {
-            this.populateLevelSelect(this.levelDatabase, this.saveManager);
+            const isOfficialTab = tabOfficial && tabOfficial.classList.contains('selected');
+            const isMyLevelsTab = tabMyLevels && tabMyLevels.classList.contains('selected');
+            if (isOfficialTab) {
+                const officialLevelsOnly = this.levelDatabase.filter(l => !l.customId);
+                this.populateLevelSelect(officialLevelsOnly, this.saveManager);
+            } else if (isMyLevelsTab) {
+                if (typeof window.onMyLevelsLanguageChange === 'function') {
+                    window.onMyLevelsLanguageChange();
+                }
+            } else {
+                if (typeof window.onCommunityLanguageChange === 'function') {
+                    window.onCommunityLanguageChange();
+                }
+            }
         }
         if (this.activeScreen === this.levelInstructionsScreen && this.currentLevelData) {
             this.showLevelInstructions(this.currentLevelData, true);

@@ -27,11 +27,11 @@ export class OnlineServices {
         return parseResponse(response);
     }
 
-    async publishCustomLevel({ token, nickname, name, data, id = null }) {
+    async publishCustomLevel({ token, nickname, name, description, difficulty, data, id = null }) {
         const response = await fetch(`${this.baseUrl}/levels`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ playerToken: token, nickname, name, data, id })
+            body: JSON.stringify({ playerToken: token, nickname, name, description, difficulty, data, id })
         });
         return parseResponse(response);
     }
@@ -49,9 +49,22 @@ export class OnlineServices {
         return parseResponse(response);
     }
 
-    async listCommunityLevels() {
-        const response = await fetch(`${this.baseUrl}/levels`);
-        const body = await parseResponse(response);
-        return Array.isArray(body.levels) ? body.levels : [];
+    async listCommunityLevels({ page = 1, sortBy = 'newest', limit = 10 } = {}) {
+        const params = new URLSearchParams({
+            page: String(page),
+            sortBy,
+            limit: String(limit)
+        });
+        const response = await fetch(`${this.baseUrl}/levels?${params}`);
+        return parseResponse(response);
+    }
+
+    async submitLevelRating({ levelId, token, rating }) {
+        const response = await fetch(`${this.baseUrl}/rate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ levelId, playerToken: token, rating })
+        });
+        return parseResponse(response);
     }
 }

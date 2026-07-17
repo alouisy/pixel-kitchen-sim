@@ -116,7 +116,51 @@
     <!-- Level Select Screen -->
     <div id="level-select-screen" class="overlay menu-screen">
         <h1>Select Level</h1>
-        <div id="level-list" class="menu-container level-grid"></div>
+        
+        <div class="level-tabs" style="margin-bottom: 20px; display: flex; justify-content: center; gap: 15px;">
+            <button id="tab-official" class="menu-button selected" data-action="toggle-level-tab" data-tab="official" style="padding: 10px 20px;">Official Levels</button>
+            <button id="tab-my-levels" class="menu-button" data-action="toggle-level-tab" data-tab="my-levels" style="padding: 10px 20px;">My Levels</button>
+            <button id="tab-community" class="menu-button" data-action="toggle-level-tab" data-tab="community" style="padding: 10px 20px;">Community Levels</button>
+        </div>
+        
+        <!-- Official Levels Container -->
+        <div id="official-levels-container" class="level-select-container" style="width: 85%; max-width: 900px; margin: 0 auto 25px auto;">
+            <div id="level-list" class="menu-container level-grid"></div>
+        </div>
+
+        <!-- My Levels Container -->
+        <div id="my-levels-container" class="level-select-container" style="display: none; width: 85%; max-width: 900px; margin: 0 auto 25px auto;">
+            <div id="my-level-list" class="menu-container level-grid"></div>
+        </div>
+
+        <!-- Community Levels Container -->
+        <div id="community-levels-container" class="level-select-container" style="display: none; width: 85%; max-width: 900px; margin: 0 auto 25px auto;">
+            <!-- Sort and Filtering options -->
+            <div class="community-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="font-family: monospace; font-size: 14px;">
+                    <span id="community-sort-label">Sort By:</span>
+                    <select id="community-sort" style="background: rgba(0,0,0,0.8); color: #fff; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; font-family: monospace; cursor: pointer;">
+                        <option value="newest">Newest</option>
+                        <option value="highest_rated">Highest Rated</option>
+                        <option value="most_popular">Most Popular</option>
+                    </select>
+                </div>
+                <div style="font-family: monospace; font-size: 14px;">
+                    <span id="community-page-label">Page</span> <span id="community-current-page">1</span>
+                </div>
+            </div>
+            
+            <div id="community-level-list" class="menu-container level-grid" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px; min-height: 250px;">
+                <!-- Community items injected dynamically -->
+            </div>
+
+            <!-- Pagination controls -->
+            <div class="community-pagination" style="display: flex; justify-content: center; gap: 20px; align-items: center; margin-bottom: 15px;">
+                <button id="community-prev-btn" class="menu-button small" style="min-width: 100px;">◀ Prev</button>
+                <button id="community-next-btn" class="menu-button small" style="min-width: 100px;">Next ▶</button>
+            </div>
+        </div>
+
         <button id="back-to-main-from-level-select" class="menu-button" data-action="back-to-main">Back</button>
         <p id="level-select-hint" class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]
         </p>
@@ -258,6 +302,20 @@
         <div class="menu-container">
             <p>Score: <span id="final-score">0</span></p>
             <p>Stars: <span id="final-stars">☆☆☆</span></p>
+            
+            <!-- Rating Section for Community Levels -->
+            <div id="community-rating-section" style="display: none; margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid #444;">
+                <p style="font-family: monospace; margin: 0 0 10px 0; font-size: 14px;">Rate this community level:</p>
+                <div class="star-rating" style="display: flex; justify-content: center; gap: 10px; font-size: 28px; cursor: pointer; user-select: none;">
+                    <span class="rate-star" data-rating="1" style="color: #666; transition: color 0.2s;">☆</span>
+                    <span class="rate-star" data-rating="2" style="color: #666; transition: color 0.2s;">☆</span>
+                    <span class="rate-star" data-rating="3" style="color: #666; transition: color 0.2s;">☆</span>
+                    <span class="rate-star" data-rating="4" style="color: #666; transition: color 0.2s;">☆</span>
+                    <span class="rate-star" data-rating="5" style="color: #666; transition: color 0.2s;">☆</span>
+                </div>
+                <p id="rating-status-message" style="font-family: monospace; margin: 8px 0 0 0; font-size: 12px; color: #888; min-height: 15px;"></p>
+            </div>
+
             <button id="next-level-button" class="menu-button" data-action="next-level">Next Level</button>
             <button id="level-end-leaderboard-button" class="menu-button" data-action="leaderboard">Leaderboard</button>
             <button id="restart-level-button" class="menu-button" data-action="restart-level">Restart Level</button>
@@ -281,6 +339,35 @@
     <div id="mobile-warning" class="overlay" style="display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: rgba(0,0,0,0.95); z-index: 10000; color: white; padding: 20px;">
         <h2>Desktop Required</h2>
         <p style="margin-top: 15px; font-family: monospace; max-width: 400px; line-height: 1.5;">This game requires a keyboard or a gamepad to play, and is not optimized for mobile/touch screens.</p>
+    </div>
+
+    <!-- Publish Level Modal (Hidden by default) -->
+    <div id="publish-level-modal" class="overlay" style="display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10001; background: rgba(0, 0, 0, 0.85);">
+        <h1 style="color: #fff; font-family: monospace; font-size: 24px; margin-bottom: 20px;">Publish Level</h1>
+        <div class="menu-container" style="max-width: 500px; width: 90%; padding: 25px; border-radius: 8px; background: rgba(10, 10, 10, 0.95); border: 2px solid #555; box-sizing: border-box;">
+            <div style="margin-bottom: 20px; text-align: left;">
+                <label for="publish-level-description" style="font-family: monospace; display: block; margin-bottom: 8px; font-weight: bold; color: #aaa; font-size: 14px;">Short Description (Max 300 chars):</label>
+                <textarea id="publish-level-description" style="width: 100%; box-sizing: border-box; height: 100px; background: rgba(0,0,0,0.8); color: #fff; border: 1px solid #555; padding: 10px; font-family: monospace; border-radius: 4px; resize: none;" placeholder="Provide a short description of the level..."></textarea>
+            </div>
+            
+            <div style="margin-bottom: 25px; text-align: left;">
+                <label for="publish-level-difficulty" style="font-family: monospace; display: block; margin-bottom: 8px; font-weight: bold; color: #aaa; font-size: 14px;">Estimated Difficulty:</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <select id="publish-level-difficulty" style="background: rgba(0,0,0,0.8); color: #fff; border: 1px solid #555; padding: 8px 12px; border-radius: 4px; font-family: monospace; cursor: pointer; flex-grow: 1;">
+                        <option value="1">⭐ (Very Easy)</option>
+                        <option value="2">⭐⭐ (Easy)</option>
+                        <option value="3" selected>⭐⭐⭐ (Medium)</option>
+                        <option value="4">⭐⭐⭐⭐ (Hard)</option>
+                        <option value="5">⭐⭐⭐⭐⭐ (Expert)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <button id="publish-confirm-btn" class="menu-button" style="flex: 1;">Publish</button>
+                <button id="publish-cancel-btn" class="menu-button delete" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="/src/main.js"></script>
