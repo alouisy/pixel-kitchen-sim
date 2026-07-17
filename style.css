@@ -864,3 +864,175 @@ canvas {
 /* New Editor Handle Cursor */
 body.resizing-n-s { cursor: ns-resize; }
 body.resizing-e-w { cursor: ew-resize; }
+
+/* =========================================
+   EDITOR LEVEL VALIDATION PANEL
+   ========================================= */
+#editor-validation-panel {
+    position: absolute;
+    top: 70px;
+    left: 20px;
+    width: 290px;
+    max-height: calc(100% - 240px);
+    overflow-y: auto;
+    background: rgba(20, 22, 28, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: #eee;
+    font-family: 'Courier New', monospace;
+    pointer-events: auto;
+    z-index: 25;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#editor-validation-panel.collapsed {
+    width: 170px;
+    max-height: 48px;
+    overflow: hidden;
+    padding: 10px 12px;
+}
+
+.validation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 6px;
+    margin-bottom: 2px;
+    user-select: none;
+}
+
+#editor-validation-panel.collapsed .validation-header {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.validation-title {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #FFD700; /* Gold color */
+    letter-spacing: 0.5px;
+}
+
+.validation-header .toggle-btn {
+    background: transparent;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 0.8em;
+    padding: 2px 6px;
+    transition: color 0.2s, transform 0.3s;
+}
+
+.validation-header .toggle-btn:hover {
+    color: #fff;
+}
+
+#editor-validation-panel.collapsed .toggle-btn {
+    transform: rotate(-90deg);
+}
+
+.status-badge {
+    font-size: 0.8em;
+    padding: 6px 10px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.1);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.status-badge.valid {
+    background: rgba(46, 117, 89, 0.85); /* Premium emerald/green */
+    border: 1px solid rgba(46, 117, 89, 0.3);
+    color: #a7ffd6;
+    animation: pulse-green 2.5s infinite alternate;
+}
+
+.status-badge.invalid {
+    background: rgba(186, 75, 41, 0.85); /* Soft, intense amber/orange */
+    border: 1px solid rgba(186, 75, 41, 0.3);
+    color: #ffe0d6;
+    animation: pulse-orange 2s infinite alternate;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 2px rgba(46, 117, 89, 0.4), inset 0 0 4px rgba(255, 255, 255, 0.1); }
+    100% { box-shadow: 0 0 10px rgba(46, 117, 89, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.1); }
+}
+
+@keyframes pulse-orange {
+    0% { box-shadow: 0 0 2px rgba(186, 75, 41, 0.4), inset 0 0 4px rgba(255, 255, 255, 0.1); }
+    100% { box-shadow: 0 0 10px rgba(186, 75, 41, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.1); }
+}
+
+.validation-details {
+    font-size: 0.75em;
+    line-height: 1.4;
+    overflow-y: auto;
+    max-height: 250px;
+    padding-right: 2px;
+}
+
+.validation-details::-webkit-scrollbar {
+    width: 4px;
+}
+.validation-details::-webkit-scrollbar-track {
+    background: transparent;
+}
+.validation-details::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 2px;
+}
+.validation-details::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.validation-group-title {
+    font-weight: bold;
+    color: #ffaa55;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-bottom: 2px;
+}
+
+.validation-group-title:first-child {
+    margin-top: 2px;
+}
+
+.validation-item {
+    padding-left: 12px;
+    position: relative;
+    color: #ccc;
+    margin-bottom: 3px;
+}
+
+.validation-item::before {
+    content: "•";
+    position: absolute;
+    left: 2px;
+    color: #ba4b29;
+}
+
+.validation-item-serving::before {
+    color: #ba4b29;
+}
+
+.validation-success-msg {
+    color: #a7ffd6;
+    font-size: 0.9em;
+    text-align: center;
+    padding: 10px 5px;
+    line-height: 1.5;
+}

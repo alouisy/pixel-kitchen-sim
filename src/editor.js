@@ -5,6 +5,302 @@ import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGH
 import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh, resizeWall, refreshSmartObjects } from './world.js';
 import { RECIPES } from './gameData.js';
 
+// Mappings for validation check descriptions
+const FRIENDLY_NAMES = {
+    // Ingredients
+    'potato': 'Potato Bin (or preplaced Potato)',
+    'lettuce': 'Lettuce Bin (or preplaced Lettuce)',
+    'tomato': 'Tomato Bin (or preplaced Tomato)',
+    'bun': 'Bun Rack (or preplaced Burger Bun)',
+    'patty': 'Patty Box (or preplaced Patty)',
+    'cheese_slice': 'Cheese Fridge (or preplaced Cheese Slice)',
+    'onion': 'Onion Bin (or preplaced Onion)',
+    'coating_mix': 'Coating Mix (or preplaced Coating Mix)',
+    'raw_chicken': 'Chicken Box (or preplaced Raw Chicken)',
+    'raw_bacon': 'Bacon Pack (or preplaced Raw Bacon)',
+    'bread_slice': 'Bread Rack (or preplaced Bread Slice)',
+    'pancake_mix': 'Pancake Mix (or preplaced Pancake Mix)',
+    'egg': 'Egg Carton (or preplaced Egg)',
+    'banana': 'Banana Crate (or preplaced Banana)',
+    'strawberry': 'Strawberry Box (or preplaced Strawberry)',
+    'yogurt': 'Yogurt Pot (or preplaced Yogurt)',
+    'granola': 'Granola Jar (or preplaced Granola)',
+    'milk': 'Milk Carton (or preplaced Milk)',
+    'pizza_dough': 'Pizza Dough (or preplaced Pizza Dough)',
+    'tomato_sauce': 'Tomato Sauce (or preplaced Tomato Sauce)',
+    'shredded_mozzarella': 'Mozzarella Bin (or preplaced Mozzarella)',
+    
+    // Containers
+    'plate': 'Plate Stack (or preplaced Plate)',
+    'bowl': 'Bowl Stack (or preplaced Bowl)',
+    'cup': 'Cup Stack (or preplaced Cup)',
+    
+    // General
+    'serving': 'Serving Pass'
+};
+
+// Requirements tree for each recipe
+const RECIPE_REQUIREMENTS = {
+    'French Fries': {
+        ingredients: ['potato'],
+        processors: [
+            {
+                name: 'Cutting Board',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('potato') || obj.name?.toLowerCase().includes('cutting'))
+                )
+            },
+            {
+                name: 'Deep Fryer',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('raw_fries') || obj.name?.toLowerCase().includes('fryer'))
+                )
+            }
+        ],
+        containers: ['plate']
+    },
+    'Salad': {
+        ingredients: ['lettuce', 'tomato'],
+        processors: [
+            {
+                name: 'Cutting Board',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('lettuce') || obj.config?.processes?.includes('tomato') || obj.name?.toLowerCase().includes('cutting'))
+                )
+            }
+        ],
+        containers: ['plate']
+    },
+    'Hamburger': {
+        ingredients: ['bun', 'patty'],
+        processors: [
+            {
+                name: 'Stove Top',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('patty') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                )
+            }
+        ],
+        containers: ['plate']
+    },
+    'Cheeseburger': {
+        ingredients: ['bun', 'patty', 'cheese_slice'],
+        processors: [
+            {
+                name: 'Stove Top',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('patty') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                )
+            }
+        ],
+        containers: ['plate']
+    },
+    'Onion Rings': {
+        ingredients: ['onion', 'coating_mix'],
+        processors: [
+            {
+                name: 'Cutting Board',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('onion') || obj.name?.toLowerCase().includes('cutting'))
+                )
+            },
+            {
+                name: 'Coating Station',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (
+                        obj.config?.processes?.includes('onion_rings_raw') ||
+                        obj.config?.result?.['onion_rings_raw'] === 'onion_rings_coated' ||
+                        obj.config?.outputItem === 'onion_rings_coated' ||
+                        (obj.config?.requiredIngredients?.includes('onion_rings_raw') && obj.config?.requiredIngredients?.includes('coating_mix')) ||
+                        obj.name?.toLowerCase().includes('coating')
+                    )
+                )
+            },
+            {
+                name: 'Deep Fryer',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('onion_rings_coated') || obj.name?.toLowerCase().includes('fryer'))
+                )
+            }
+        ],
+        containers: ['plate']
+    },
+    'Chicken Tenders': {
+        ingredients: ['raw_chicken', 'coating_mix'],
+        processors: [
+            {
+                name: 'Cutting Board',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('raw_chicken') || obj.name?.toLowerCase().includes('cutting'))
+                )
+            },
+            {
+                name: 'Coating Station',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (
+                        obj.config?.processes?.includes('raw_chicken_strips') ||
+                        obj.config?.result?.['raw_chicken_strips'] === 'coated_chicken_strips' ||
+                        obj.config?.outputItem === 'coated_chicken_strips' ||
+                        (obj.config?.requiredIngredients?.includes('raw_chicken_strips') && obj.config?.requiredIngredients?.includes('coating_mix')) ||
+                        obj.name?.toLowerCase().includes('coating')
+                    )
+                )
+            },
+            {
+                name: 'Deep Fryer',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('coated_chicken_strips') || obj.name?.toLowerCase().includes('fryer'))
+                )
+            }
+        ],
+        containers: ['plate']
+    },
+    'BLT Sandwich': {
+        ingredients: ['bread_slice', 'raw_bacon', 'lettuce', 'tomato'],
+        processors: [
+            {
+                name: 'Toaster',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('bread_slice') || obj.name?.toLowerCase().includes('toaster'))
+                )
+            },
+            {
+                name: 'Stove Top',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('raw_bacon') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                )
+            },
+            {
+                name: 'Cutting Board',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('lettuce') || obj.config?.processes?.includes('tomato') || obj.name?.toLowerCase().includes('cutting'))
+                )
+            }
+        ],
+        containers: ['plate']
+    },
+    'Grilled Cheese Sandwich': {
+        ingredients: ['bread_slice', 'cheese_slice'],
+        processors: [
+            {
+                name: 'Stove Top',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('grilled_cheese_raw') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                )
+            }
+        ],
+        containers: ['plate']
+    },
+    'Pancakes': {
+        ingredients: ['pancake_mix', 'syrup'],
+        processors: [
+            {
+                name: 'Stand Mixer',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('pancake_mix') || obj.name?.toLowerCase().includes('mixer'))
+                )
+            },
+            {
+                name: 'Stove Top',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('pancake_batter') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                )
+            }
+        ],
+        containers: ['plate']
+    },
+    'Omelette': {
+        ingredients: ['egg'],
+        processors: [
+            {
+                name: 'Stand Mixer',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('egg') || obj.name?.toLowerCase().includes('mixer'))
+                )
+            },
+            {
+                name: 'Stove Top',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('omelette_mix') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                )
+            }
+        ],
+        containers: ['plate']
+    },
+    'Fruit & Yogurt Bowl': {
+        ingredients: ['banana', 'strawberry', 'yogurt', 'granola'],
+        processors: [
+            {
+                name: 'Cutting Board',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('banana') || obj.config?.processes?.includes('strawberry') || obj.name?.toLowerCase().includes('cutting'))
+                )
+            }
+        ],
+        containers: ['bowl']
+    },
+    'Smoothie': {
+        ingredients: ['banana', 'strawberry', 'milk'],
+        processors: [
+            {
+                name: 'Cutting Board',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('banana') || obj.config?.processes?.includes('strawberry') || obj.name?.toLowerCase().includes('cutting'))
+                )
+            },
+            {
+                name: 'Blender',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.outputItem === 'smoothie_ready' || obj.name?.toLowerCase().includes('blender'))
+                )
+            }
+        ],
+        containers: ['cup']
+    },
+    'Pizza Margherita': {
+        ingredients: ['pizza_dough', 'tomato_sauce', 'shredded_mozzarella'],
+        processors: [
+            {
+                name: 'Dough Press',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('pizza_dough') || obj.name?.toLowerCase().includes('press'))
+                )
+            },
+            {
+                name: 'Pizza Oven',
+                check: (objects) => objects.some(obj => 
+                    obj.type === 'processor' && 
+                    (obj.config?.processes?.includes('pizza_margherita_raw') || obj.name?.toLowerCase().includes('oven'))
+                )
+            }
+        ],
+        containers: ['plate']
+    }
+};
+
 export class LevelEditor {
     constructor(camera, renderer, scene, interactionManager, onExit) {
         this.camera = camera;
@@ -17,6 +313,7 @@ export class LevelEditor {
         
         // Loaded Level Metadata
         this.currentLevelData = {};
+        this.validationWarningsCount = 0;
 
         // State
         this.selectedObject = null;
@@ -130,6 +427,16 @@ export class LevelEditor {
         // Bind Config Editor
         this.inspectorConfig = document.getElementById('inspector-config');
         document.getElementById('btn-save-config').addEventListener('click', () => this.saveConfig());
+
+        // Bind Validation panel toggle
+        const toggleValBtn = document.getElementById('btn-toggle-validation');
+        const validationPanel = document.getElementById('editor-validation-panel');
+        if (toggleValBtn && validationPanel) {
+            toggleValBtn.addEventListener('click', () => {
+                validationPanel.classList.toggle('collapsed');
+                toggleValBtn.textContent = validationPanel.classList.contains('collapsed') ? '▲' : '▼';
+            });
+        }
     }
 
     _renderLibrary(category) {
@@ -203,6 +510,7 @@ export class LevelEditor {
         // We just need to sync our internal state.
         this.currentLevelData = JSON.parse(JSON.stringify(levelData)); // Deep copy
         document.getElementById('editor-current-level-name').textContent = levelData.name || "Untitled";
+        this.validateLevel();
     }
 
     enable() {
@@ -221,6 +529,12 @@ export class LevelEditor {
         this.camera.position.set(0, 12, 8);
         this.camera.lookAt(0, 0, 0);
         this.orbit.target.set(0,0,0);
+
+        // Show validation panel on load
+        const validationPanel = document.getElementById('editor-validation-panel');
+        if (validationPanel) validationPanel.style.display = 'flex';
+        
+        this.validateLevel();
     }
 
     disable() {
@@ -234,6 +548,10 @@ export class LevelEditor {
         this.gridHelper.visible = false;
         const gameFloor = getFloorMesh();
         if(gameFloor) gameFloor.visible = true;
+
+        // Hide validation panel
+        const validationPanel = document.getElementById('editor-validation-panel');
+        if (validationPanel) validationPanel.style.display = 'none';
     }
 
     update(delta) {
@@ -282,6 +600,7 @@ export class LevelEditor {
         d.availableMeals = Array.from(mealsSelect.selectedOptions).map(opt => opt.value);
 
         document.getElementById('editor-current-level-name').textContent = d.name;
+        this.validateLevel();
     }
 
     // --- Core Logic ---
@@ -348,6 +667,7 @@ export class LevelEditor {
             
             // Auto-fuse visuals
             refreshSmartObjects(this.scene);
+            this.validateLevel();
         }
     }
 
@@ -421,6 +741,7 @@ export class LevelEditor {
             const originalText = btn.innerText;
             btn.innerText = "✅ Saved!";
             setTimeout(() => btn.innerText = originalText, 1000);
+            this.validateLevel();
             
         } catch (e) {
             alert("Invalid JSON syntax! Check your brackets and quotes.");
@@ -434,7 +755,10 @@ export class LevelEditor {
             target.updateMatrixWorld();
             if (this.selectionBox.visible) this.selectionBox.update();
             // If rotating placed object, refresh visuals
-            if (!this.placementMode) refreshSmartObjects(this.scene);
+            if (!this.placementMode) {
+                refreshSmartObjects(this.scene);
+                this.validateLevel();
+            }
         }
     }
 
@@ -443,6 +767,7 @@ export class LevelEditor {
             this.scene.remove(this.selectedObject);
             this.deselect();
             refreshSmartObjects(this.scene);
+            this.validateLevel();
         }
     }
 
@@ -461,6 +786,7 @@ export class LevelEditor {
                 this.scene.add(clone);
                 this.select(clone);
                 refreshSmartObjects(this.scene);
+                this.validateLevel();
             }
         }
     }
@@ -807,6 +1133,7 @@ export class LevelEditor {
                 });
                 this.extendingGhosts = [];
                 refreshSmartObjects(this.scene); // Fuse visuals
+                this.validateLevel();
             }
             
             this.activeHandle = null;
@@ -817,9 +1144,136 @@ export class LevelEditor {
         this.orbit.enabled = true;
     } 
 
+    validateLevel() {
+        if (!this.enabled) return;
+
+        const placedObjects = [];
+        this.scene.traverse(c => {
+            if (c.parent === this.scene && 
+                c !== this.gridHelper && 
+                c !== this.selectionBox && 
+                c !== this.handlesGroup && 
+                c !== this.orbit && 
+                c.name !== "Floor" &&
+                c.userData &&
+                c.userData.type !== 'floor') {
+                
+                placedObjects.push({
+                    name: c.name,
+                    type: c.userData.stationType || c.userData.type,
+                    config: c.userData.config || c.userData.template?.config,
+                    isServing: c.userData.isServing || c.userData.template?.isServing
+                });
+            }
+        });
+
+        const warnings = [];
+        const missingItemsMap = new Map();
+
+        const addWarning = (itemKey, recipeName) => {
+            if (!missingItemsMap.has(itemKey)) {
+                missingItemsMap.set(itemKey, new Set());
+            }
+            missingItemsMap.get(itemKey).add(recipeName);
+        };
+
+        // Serving Pass Check
+        const hasServingPass = placedObjects.some(obj => 
+            obj.type === STATION_TYPES.SERVING || 
+            obj.isServing === true || 
+            obj.name?.toLowerCase().includes('serving')
+        );
+
+        if (!hasServingPass) {
+            addWarning('serving', 'All Recipes');
+        }
+
+        const availableMeals = this.currentLevelData.availableMeals || [];
+
+        if (availableMeals.length === 0) {
+            warnings.push({ desc: "No recipes selected. Edit Level Settings." });
+        } else {
+            availableMeals.forEach(mealName => {
+                const reqs = RECIPE_REQUIREMENTS[mealName];
+                if (!reqs) return;
+
+                reqs.ingredients.forEach(ing => {
+                    const hasIng = placedObjects.some(obj => 
+                        (obj.type === STATION_TYPES.INGREDIENT_SOURCE && obj.config?.ingredient === ing) ||
+                        (obj.type === STATION_TYPES.PREPLACED_ITEM && obj.config?.item === ing)
+                    );
+                    if (!hasIng) {
+                        addWarning(ing, mealName);
+                    }
+                });
+
+                reqs.containers.forEach(container => {
+                    const hasContainer = placedObjects.some(obj => 
+                        (obj.type === STATION_TYPES.ITEM_SOURCE && obj.config?.item === container) ||
+                        (obj.type === STATION_TYPES.PREPLACED_ITEM && obj.config?.item === container)
+                    );
+                    if (!hasContainer) {
+                        addWarning(container, mealName);
+                    }
+                });
+
+                reqs.processors.forEach(proc => {
+                    if (!proc.check(placedObjects)) {
+                        addWarning(proc.name, mealName);
+                    }
+                });
+            });
+        }
+
+        missingItemsMap.forEach((recipesSet, itemKey) => {
+            const friendlyName = FRIENDLY_NAMES[itemKey] || itemKey;
+            const recipesList = Array.from(recipesSet).join(', ');
+            warnings.push({
+                desc: friendlyName,
+                recipes: recipesList
+            });
+        });
+
+        const statusBadge = document.getElementById('validation-status-badge');
+        const detailsContainer = document.getElementById('validation-details');
+
+        if (!statusBadge || !detailsContainer) return;
+
+        this.validationWarningsCount = warnings.length;
+
+        if (warnings.length === 0 && availableMeals.length > 0) {
+            statusBadge.textContent = "✓ Playable";
+            statusBadge.className = "status-badge valid";
+            detailsContainer.innerHTML = `<div class="validation-success-msg">Level is playable! All required stations, ingredients, and utensils are present on the map.</div>`;
+        } else {
+            statusBadge.textContent = availableMeals.length === 0 ? "⚠️ Setup Incomplete" : "⚠️ Issues Detected";
+            statusBadge.className = "status-badge invalid";
+
+            let html = "";
+            if (availableMeals.length === 0) {
+                html = `<div class="validation-item" style="color: #ffaa55; font-size: 0.9em; padding-left: 0;">No recipes selected. Click level settings to add them.</div>`;
+            } else {
+                html = `<div class="validation-group-title">Missing Required Objects:</div>`;
+                warnings.forEach(w => {
+                    html += `
+                        <div class="validation-item">
+                            <strong style="color: #ffb3b3;">${w.desc}</strong>
+                            <div style="font-size: 0.85em; color: #aaa; margin-top: 2px;">Required by: ${w.recipes}</div>
+                        </div>
+                    `;
+                });
+            }
+            detailsContainer.innerHTML = html;
+        }
+    }
+
     // --- Export ---
 
     exportLayout() {
+        if (this.validationWarningsCount > 0) {
+            const confirmExport = confirm(`⚠️ Warning: This level is missing required objects for the selected recipes. It may not be playable.\n\nAre you sure you want to export?`);
+            if (!confirmExport) return;
+        }
         const layout = [];
         this.scene.traverse(c => {
             if (c.parent === this.scene && 
