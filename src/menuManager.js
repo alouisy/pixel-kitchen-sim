@@ -148,47 +148,29 @@ export class MenuManager {
 
 
         // --- Navigation Logic ---
-        if (moveVertical !== 0 || moveHorizontal !== 0) {
-            const currentElement = this.focusableElements[this.selectedIndex];
-            let moved = false;
+        let moveDirection = null;
+        if (dpadUp) moveDirection = 'up';
+        else if (dpadDown) moveDirection = 'down';
+        else if (dpadLeft) moveDirection = 'left';
+        else if (dpadRight) moveDirection = 'right';
+        else if (this.gamepadNavTimer <= 0 && (moveVertical !== 0 || moveHorizontal !== 0)) {
+            if (Math.abs(navX) > Math.abs(navY)) {
+                if (moveHorizontal !== 0) moveDirection = moveHorizontal > 0 ? 'right' : 'left';
+                else moveDirection = moveVertical > 0 ? 'down' : 'up';
+            } else {
+                if (moveVertical !== 0) moveDirection = moveVertical > 0 ? 'down' : 'up';
+                else moveDirection = moveHorizontal > 0 ? 'right' : 'left';
+            }
+        }
 
-            // Try horizontal first within specific groups (like language buttons)
-            if (moveHorizontal !== 0) {
-                const parentGroup = currentElement?.closest('.button-group, .level-grid'); // Add level-grid
-                if (parentGroup) {
-                    const groupElements = this.focusableElements.filter(el => parentGroup.contains(el));
-                    const currentIndexInGroup = groupElements.indexOf(currentElement);
-                    let newIndexInGroup = currentIndexInGroup + moveHorizontal;
-
-                    // Simple horizontal wrapping within the group
-                    if (newIndexInGroup >= groupElements.length) newIndexInGroup = 0;
-                    if (newIndexInGroup < 0) newIndexInGroup = groupElements.length - 1;
-
-                    if (newIndexInGroup >= 0 && newIndexInGroup < groupElements.length) {
-                        const newElement = groupElements[newIndexInGroup];
-                        const newOverallIndex = this.focusableElements.indexOf(newElement);
-                        if (newOverallIndex > -1) {
-                            this.setSelectedIndex(newOverallIndex);
-                            moved = true;
-                        }
-                    }
+        if (moveDirection) {
+            const nextElement = this._findNextElement(moveDirection);
+            if (nextElement) {
+                const newIndex = this.focusableElements.indexOf(nextElement);
+                if (newIndex > -1) {
+                    this.setSelectedIndex(newIndex);
+                    this.gamepadNavTimer = GAMEPAD_NAV_DELAY;
                 }
-            }
-
-            // If horizontal didn't move (or wasn't applicable), try vertical
-            if (!moved && moveVertical !== 0) {
-                // Simple vertical navigation: find next/prev element in the flat list
-                let newIndex = this.selectedIndex + moveVertical;
-                // Basic wrapping
-                if (newIndex >= this.focusableElements.length) newIndex = 0;
-                if (newIndex < 0) newIndex = this.focusableElements.length - 1;
-                this.setSelectedIndex(newIndex);
-                moved = true;
-            }
-
-            // Reset timer if movement occurred via stick or dpad press
-            if (moved && (stickMovedV || stickMovedH || dpadUp || dpadDown || dpadLeft || dpadRight)) {
-                this.gamepadNavTimer = GAMEPAD_NAV_DELAY;
             }
         }
 
@@ -236,6 +218,78 @@ export class MenuManager {
         // Update button history for the next frame
         this.prevGamepadButtons = currentButtons;
         return null; // No action confirmed this frame
+    }
+
+    _findNextElement(direction) {
+        if (this.selectedIndex < 0 || !this.focusableElements.length) return null;
+        const currentElement = this.focusableElements[this.selectedIndex];
+        const currRect = currentElement.getBoundingClientRect();
+        const currCenterX = currRect.left + currRect.width / 2;
+        const currCenterY = currRect.top + currRect.height / 2;
+
+        let dirX = 0;
+        let dirY = 0;
+        if (direction === 'left') dirX = -1;
+        else if (direction === 'right') dirX = 1;
+        else if (direction === 'up') dirY = -1;
+        else if (direction === 'down') dirY = 1;
+
+        let bestCandidate = null;
+        let minDistance = Infinity;
+
+        // Weight for orthogonal distance to penalize diagonal jumps
+        const orthoWeight = 3.0;
+
+        for (const el of this.focusableElements) {
+            if (el === currentElement) continue;
+            const rect = el.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const dx = centerX - currCenterX;
+            const dy = centerY - currCenterY;
+
+            // Project onto the movement vector
+            const proj = dx * dirX + dy * dirY;
+            const ortho = Math.abs(dx * -dirY + dy * dirX);
+
+            // We only consider candidates that are in the positive direction of movement
+            if (proj > 0.5) { // 0.5px threshold to avoid float precision issues
+                const dist = proj + orthoWeight * ortho;
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    bestCandidate = el;
+                }
+            }
+        }
+
+        // Optional wrap-around logic: if no element in direct path, wrap to the opposite edge
+        if (!bestCandidate) {
+            let oppositeMin = Infinity;
+            for (const el of this.focusableElements) {
+                if (el === currentElement) continue;
+                const rect = el.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                const dx = centerX - currCenterX;
+                const dy = centerY - currCenterY;
+
+                // For wrap around, we project in the OPPOSITE direction of movement
+                const proj = dx * -dirX + dy * -dirY;
+                const ortho = Math.abs(dx * dirY + dy * -dirX);
+
+                if (proj > 0.5) {
+                    const dist = -proj + orthoWeight * ortho;
+                    if (dist < oppositeMin) {
+                        oppositeMin = dist;
+                        bestCandidate = el;
+                    }
+                }
+            }
+        }
+
+        return bestCandidate;
     }
 
     getSelectedElement() {
