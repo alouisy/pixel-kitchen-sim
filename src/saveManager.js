@@ -62,6 +62,16 @@ export class SaveManager {
         if (!data.player.token) data.player.token = makeId('token');
         if (typeof data.player.nickname !== 'string') data.player.nickname = '';
         data.version = SAVE_SCHEMA_VERSION;
+        
+        // Auto-migrate legacy completion state
+        if (!data.gameCompleted) {
+            const l5Old = data.levels['4'];
+            const l5New = data.levels['level:5'];
+            if ((l5Old && l5Old.completed) || (l5New && l5New.completed)) {
+                data.gameCompleted = true;
+            }
+        }
+
         return data;
     }
 
