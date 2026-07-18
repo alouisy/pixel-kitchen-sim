@@ -239,8 +239,8 @@ function addEventListeners() {
         commSelect.addEventListener('change', (e) => {
             const scope = e.target.value;
             if (scope) {
-                const tabs = document.querySelectorAll('#leaderboard-level-tabs button');
-                tabs.forEach(t => t.classList.remove('selected'));
+                const buttons = document.querySelectorAll('#leaderboard-official-buttons button');
+                buttons.forEach(btn => btn.classList.remove('selected'));
                 openLeaderboard(scope);
             }
         });
@@ -583,6 +583,43 @@ function handleMenuAction(eventOrAction) {
             break;
         }
         case 'leaderboard-tab': openLeaderboard(element.dataset.scope || 'all'); break;
+        case 'leaderboard-category': {
+            const category = element.dataset.category;
+            const tabGlobal = document.getElementById('leaderboard-tab-global');
+            const tabLevels = document.getElementById('leaderboard-tab-levels');
+            const globalOptions = document.getElementById('leaderboard-global-options');
+            const levelOptions = document.getElementById('leaderboard-level-options');
+            
+            if (category === 'global') {
+                if (tabGlobal) tabGlobal.classList.add('selected');
+                if (tabLevels) tabLevels.classList.remove('selected');
+                if (globalOptions) globalOptions.style.display = 'flex';
+                if (levelOptions) levelOptions.style.display = 'none';
+                
+                const activeGlobalBtn = document.querySelector('#leaderboard-global-options .selected') 
+                    || document.getElementById('leaderboard-btn-global-official');
+                const scope = activeGlobalBtn?.dataset.scope || 'global:official';
+                openLeaderboard(scope);
+            } else if (category === 'levels') {
+                if (tabGlobal) tabGlobal.classList.remove('selected');
+                if (tabLevels) tabLevels.classList.add('selected');
+                if (globalOptions) globalOptions.style.display = 'none';
+                if (levelOptions) levelOptions.style.display = 'flex';
+                
+                const activeLevelBtn = document.querySelector('#leaderboard-official-buttons .selected');
+                const selectEl = document.getElementById('leaderboard-community-select');
+                if (selectEl && selectEl.value) {
+                    openLeaderboard(selectEl.value);
+                } else if (activeLevelBtn) {
+                    openLeaderboard(activeLevelBtn.dataset.scope);
+                } else {
+                    const lvl1Btn = document.querySelector('#leaderboard-official-buttons button[data-scope="level:1"]');
+                    if (lvl1Btn) lvl1Btn.classList.add('selected');
+                    openLeaderboard('level:1');
+                }
+            }
+            break;
+        }
         case 'editor-hub': changeGameState(GameState.EDITOR_HUB); break; 
         case 'settings': changeGameState(GameState.SETTINGS); break;
         case 'back-to-main': changeGameState(GameState.MAIN_MENU); break;
@@ -835,7 +872,13 @@ function leaderboardScopeForLevel(level) {
 }
 
 function leaderboardTitleForScope(scope) {
-    if (scope === 'all') return uiManager?.uiText?.[uiManager.currentLanguage]?.leaderboard || 'Leaderboard';
+    const text = uiManager?.uiText?.[uiManager.currentLanguage] || {};
+    if (scope === 'all' || scope === 'global:official') {
+        return text.globalLeaderboardOfficial || 'Official Global Leaderboard';
+    }
+    if (scope === 'global:community') {
+        return text.globalLeaderboardCommunity || 'Community Global Leaderboard';
+    }
     if (scope.startsWith('custom:')) {
         const id = scope.replace('custom:', '');
         if (currentPlayingCommunityLevel && currentPlayingCommunityLevel.id === id) {
@@ -846,11 +889,11 @@ function leaderboardTitleForScope(scope) {
             const opt = select.querySelector(`option[value="${scope}"]`);
             if (opt) return `🏆 ${opt.textContent}`;
         }
-        return 'Community Level Leaderboard';
+        return text.communityLeaderboardTitle || 'Community Level Leaderboard';
     }
     const levelId = scope.replace('level:', '');
     const level = officialLevelDatabase.find(entry => String(entry.levelId) === levelId);
-    return level ? `Level ${level.levelId}: ${level.name}` : 'Leaderboard';
+    return level ? `${text.level || 'Level'} ${level.levelId}: ${level.name}` : (text.leaderboard || 'Leaderboard');
 }
 
 async function openLeaderboard(scope = 'all') {

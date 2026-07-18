@@ -51,15 +51,40 @@
 
     <!-- Leaderboard Screen -->
     <div id="leaderboard-screen" class="overlay menu-screen">
-        <h1>Leaderboard</h1>
+        <h1 id="leaderboard-title">Leaderboard</h1>
         <div class="menu-container leaderboard-box">
-            <div id="leaderboard-level-tabs" class="button-group leaderboard-tabs"></div>
-            <div id="leaderboard-community-dropdown-container" style="margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span style="font-family: monospace; font-size: 14px; color: #aaa;">Community:</span>
-                <select id="leaderboard-community-select" style="padding: 6px 12px; background: #222; color: white; border: 1px solid #444; border-radius: 4px; font-family: monospace; cursor: pointer; max-width: 250px;">
-                    <option value="" disabled selected>-- Select a level --</option>
-                </select>
+            <!-- Main category tabs: Global vs Levels -->
+            <div class="leaderboard-main-tabs">
+                <button id="leaderboard-tab-global" class="menu-button tab-btn selected" data-action="leaderboard-category" data-category="global">Global Ranking</button>
+                <button id="leaderboard-tab-levels" class="menu-button tab-btn" data-action="leaderboard-category" data-category="levels">Level Rankings</button>
             </div>
+            
+            <!-- Sub-section for Global options -->
+            <div id="leaderboard-global-options" class="leaderboard-sub-section">
+                <button id="leaderboard-btn-global-official" class="menu-button small selected" data-action="leaderboard-tab" data-scope="global:official">Official Levels</button>
+                <button id="leaderboard-btn-global-community" class="menu-button small" data-action="leaderboard-tab" data-scope="global:community">With Community</button>
+            </div>
+            
+            <!-- Sub-section for Level options -->
+            <div id="leaderboard-level-options" class="leaderboard-sub-section" style="display: none;">
+                <div class="official-levels-row" style="width: 100%;">
+                    <span id="label-official-levels" class="leaderboard-label">Official:</span>
+                    <div id="leaderboard-official-buttons" class="button-group">
+                        <button class="menu-button small" data-action="leaderboard-tab" data-scope="level:1">1</button>
+                        <button class="menu-button small" data-action="leaderboard-tab" data-scope="level:2">2</button>
+                        <button class="menu-button small" data-action="leaderboard-tab" data-scope="level:3">3</button>
+                        <button class="menu-button small" data-action="leaderboard-tab" data-scope="level:4">4</button>
+                        <button class="menu-button small" data-action="leaderboard-tab" data-scope="level:5">5</button>
+                    </div>
+                </div>
+                <div class="community-levels-row" style="width: 100%;">
+                    <span id="label-community-level" class="leaderboard-label">Community:</span>
+                    <select id="leaderboard-community-select">
+                        <option value="" disabled selected>-- Select a level --</option>
+                    </select>
+                </div>
+            </div>
+            
             <div id="leaderboard-list" class="leaderboard-list"></div>
             <button id="leaderboard-back-button" class="menu-button" data-action="back-to-main">Back</button>
         </div>
