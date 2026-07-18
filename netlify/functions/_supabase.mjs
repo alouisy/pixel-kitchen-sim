@@ -22,6 +22,31 @@ export function getAllowedLevelKeys() {
         .filter(Boolean));
 }
 
+export async function isAllowedLevelKey(levelKey) {
+    const allowed = getAllowedLevelKeys();
+    if (allowed.has(levelKey)) return true;
+
+    if (typeof levelKey === 'string' && levelKey.startsWith('custom:')) {
+        const id = levelKey.substring(7);
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+            try {
+                const query = new URLSearchParams({
+                    select: 'id',
+                    id: `eq.${id}`,
+                    limit: '1'
+                });
+                const rows = await supabaseRequest(`custom_levels?${query}`);
+                return rows && rows.length > 0;
+            } catch (error) {
+                console.error('Error verifying custom level key:', error);
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
+
 export async function readJson(request) {
     try {
         return await request.json();

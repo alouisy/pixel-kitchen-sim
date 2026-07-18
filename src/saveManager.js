@@ -25,7 +25,8 @@ function defaultSave() {
             language: 'en',
             showLabels: true,
             audioEnabled: true
-        }
+        },
+        gameCompleted: false
     };
 }
 
@@ -155,6 +156,15 @@ export class SaveManager {
 
     saveSetting(name, value) {
         this.data.settings[name] = value;
+        this._persist();
+    }
+
+    isGameCompleted() {
+        return Boolean(this.data.gameCompleted);
+    }
+
+    setGameCompleted(completed) {
+        this.data.gameCompleted = Boolean(completed);
         this._persist();
     }
 

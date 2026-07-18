@@ -14,8 +14,8 @@ function assert(condition, message) {
     if (!condition) errors.push(message);
 }
 
-const roadmap = await readJson('levels/game_roadmap.json');
-assert(Array.isArray(roadmap), 'levels/game_roadmap.json must be an array.');
+const roadmap = await readJson('public/levels/game_roadmap.json');
+assert(Array.isArray(roadmap), 'public/levels/game_roadmap.json must be an array.');
 assert(roadmap.length >= 5, 'The first public release requires at least five official levels.');
 
 for (const entry of roadmap.slice(0, 5)) {
@@ -25,9 +25,9 @@ for (const entry of roadmap.slice(0, 5)) {
 
     let level;
     try {
-        level = await readJson(`levels/${entry.filename}`);
+        level = await readJson(`public/levels/${entry.filename}`);
     } catch (error) {
-        errors.push(`Could not read levels/${entry.filename}: ${error.message}`);
+        errors.push(`Could not read public/levels/${entry.filename}: ${error.message}`);
         continue;
     }
 
@@ -49,10 +49,10 @@ for (const entry of roadmap.slice(0, 5)) {
     }
 }
 
-const level3 = await readJson('levels/level_3.json');
+const level3 = await readJson('public/levels/level_3.json');
 assert(level3.layout.some(item => item.name === 'Cheese Fridge'), 'Level 3 requires a Cheese Fridge for Cheese Omelette.');
 
-const level5 = await readJson('levels/level_5.json');
+const level5 = await readJson('public/levels/level_5.json');
 for (const requiredObject of ['Bread Rack', 'Toaster', 'Bacon Pack']) {
     assert(level5.layout.some(item => item.name === requiredObject), `Level 5 is missing ${requiredObject}, required for BLT Sandwich.`);
 }

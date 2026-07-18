@@ -1574,3 +1574,23 @@ body.resizing-e-w { cursor: ew-resize; }
 .controller-toggle-btn:hover {
     color: #fff !important;
 }
+
+/* Disabled and locked menu button styling */
+.menu-button[disabled],
+.menu-button.locked {
+    background-color: #333 !important;
+    border-color: #222 !important;
+    color: #888 !important;
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* pulse animation for congratulations text */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+

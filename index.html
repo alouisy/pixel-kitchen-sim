@@ -25,6 +25,7 @@
             <button id="play-button" class="menu-button" data-action="play">Play</button>
             <button id="leaderboard-button" class="menu-button" data-action="leaderboard">Leaderboard</button>
             <button id="editor-button" class="menu-button" data-action="editor-hub">Level Editor</button>
+            <div id="editor-lock-message" style="display: none; font-size: 11px; color: #ff9800; font-family: monospace; margin-top: -5px; margin-bottom: 10px; text-align: center;">🔒 Complete 5 levels to unlock</div>
             <button id="settings-button" class="menu-button" data-action="settings">Settings</button>
             <div id="credits">
                 <p id="credits-text">A Game By Azzxl Studio</p>
@@ -53,6 +54,12 @@
         <h1>Leaderboard</h1>
         <div class="menu-container leaderboard-box">
             <div id="leaderboard-level-tabs" class="button-group leaderboard-tabs"></div>
+            <div id="leaderboard-community-dropdown-container" style="margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span style="font-family: monospace; font-size: 14px; color: #aaa;">Community:</span>
+                <select id="leaderboard-community-select" style="padding: 6px 12px; background: #222; color: white; border: 1px solid #444; border-radius: 4px; font-family: monospace; cursor: pointer; max-width: 250px;">
+                    <option value="" disabled selected>-- Select a level --</option>
+                </select>
+            </div>
             <div id="leaderboard-list" class="leaderboard-list"></div>
             <button id="leaderboard-back-button" class="menu-button" data-action="back-to-main">Back</button>
         </div>
@@ -397,6 +404,21 @@
             <button id="level-end-main-menu-button" class="menu-button" data-action="back-to-main">Main Menu</button>
         </div>
         <p id="level-end-hint" class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+    </div>
+
+    <!-- Game Completed Congrats Screen -->
+    <div id="game-completed-screen" class="overlay menu-screen" style="display: none;">
+        <h1 id="congrats-title" style="color: #ffeb3b; font-size: 32px; text-shadow: 0 0 10px rgba(255,235,59,0.5); animation: pulse 2s infinite;">🎉 CONGRATULATIONS! 🎉</h1>
+        <div class="menu-container" style="max-width: 500px; text-align: center;">
+            <p id="congrats-text" style="font-family: monospace; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+                You have completed all 5 official levels of Pixel Kitchen Sim!<br><br>
+                🛠️ The <strong>Level Editor</strong> and <strong>Community Levels</strong> are now fully unlocked!<br><br>
+                Go back to the main menu to build your own dream kitchens and share them with the world.
+            </p>
+            <p style="font-family: monospace; font-size: 14px; margin-bottom: 10px;"><span id="congrats-score-label">Final Level Score</span>: <span id="congrats-score" style="color: #4caf50; font-weight: bold;">0</span></p>
+            <p style="font-family: monospace; font-size: 14px; margin-bottom: 25px;"><span id="congrats-stars-label">Stars</span>: <span id="congrats-stars" style="color: #ffeb3b;">⭐⭐⭐</span></p>
+            <button id="congrats-back-button" class="menu-button" data-action="back-to-main">Back to Menu</button>
+        </div>
     </div>
 
     <!-- Level Instructions Screen -->

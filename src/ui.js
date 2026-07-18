@@ -26,6 +26,9 @@ export class UIManager {
         this.leaderboardLevelTabs = document.getElementById('leaderboard-level-tabs');
         this.leaderboardList = document.getElementById('leaderboard-list');
         this.leaderboardBackButton = document.getElementById('leaderboard-back-button');
+        this.gameCompletedScreen = document.getElementById('game-completed-screen');
+        this.congratsScore = document.getElementById('congrats-score');
+        this.congratsStars = document.getElementById('congrats-stars');
 
         this.orderListElement = document.getElementById('order-list');
         this.levelTimerDisplay = document.getElementById('level-timer-display');
@@ -124,19 +127,23 @@ export class UIManager {
         
         // Lock Level Editor button if official levels are not completed
         const editorBtn = document.getElementById('editor-button');
+        const lockMsg = document.getElementById('editor-lock-message');
         if (editorBtn) {
             const completed = this.areOfficialLevelsCompleted();
             editorBtn.disabled = !completed;
             if (!completed) {
                 editorBtn.classList.add('locked');
-                editorBtn.title = "Complete all 5 official levels to unlock the Level Editor!";
                 editorBtn.style.opacity = '0.5';
                 editorBtn.style.cursor = 'not-allowed';
+                if (lockMsg) {
+                    lockMsg.style.display = 'block';
+                    lockMsg.textContent = this.uiText[this.currentLanguage].editorLockedInfo || "🔒 Complete all 5 official levels to unlock";
+                }
             } else {
                 editorBtn.classList.remove('locked');
-                editorBtn.title = "";
                 editorBtn.style.opacity = '1';
                 editorBtn.style.cursor = 'pointer';
+                if (lockMsg) lockMsg.style.display = 'none';
             }
         }
     }
@@ -169,6 +176,14 @@ export class UIManager {
                 button.textContent = tab.label;
                 this.leaderboardLevelTabs.appendChild(button);
             });
+        }
+        const commSelect = document.getElementById('leaderboard-community-select');
+        if (commSelect) {
+            if (!scope.startsWith('custom:')) {
+                commSelect.value = '';
+            } else {
+                commSelect.value = scope;
+            }
         }
         if (this.leaderboardList) {
             this.leaderboardList.innerHTML = '';
@@ -219,6 +234,12 @@ export class UIManager {
         }
         
         this._setActiveScreen(this.levelEndScreen);
+        this.hideGameUI();
+    }
+    showGameCompletedCongrats(score, stars) {
+        if (this.congratsScore) this.congratsScore.textContent = score;
+        if (this.congratsStars) this.congratsStars.textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+        this._setActiveScreen(this.gameCompletedScreen);
         this.hideGameUI();
     }
     showGameEnd() {
@@ -433,17 +454,14 @@ export class UIManager {
 
     setLanguage(lang) {
         if (!this.uiText) {
-            // Keep a fallback if not initialized yet
             this.uiText = {};
         }
         if (!this.uiText[lang]) { lang = 'en'; }
         this.currentLanguage = lang;
-
-        // Initial UI Dictionary
         this.uiText = {
-            en: { select: "Select: Enter/[X]/[A]", title: "Pixel Kitchen Sim", play: "Play", levelEditor: "Level Editor", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", soundEffects: "Sound Effects:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked", levelInstructions: "Level Instructions", startLevel: "Start Level", recipe: "Recipe", close: "Close", hintToggleInstructions: "Toggle: [I] / [△/Y]", editorHubTitle: "Level Editor", createLevel: "New Level", downloadRoadmap: "Download Roadmap", backToMenu: "Back to Menu", credits: "A Game By Azzxl Studio", hintMenu: "Navigate: Arrows/Stick | Select: Enter/[X]/[A]", hintSettings: "Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]", leaderboard: "Leaderboard", nicknameTitle: "Choose Nickname", nicknameLabel: "Nickname", nicknameContinue: "Continue", nicknameHint: "Used for the online leaderboard.", leaderboardEmpty: "No scores yet. Be the first chef on the board.", leaderboardLoading: "Loading scores...", localLevel: "Local", officialLevels: "Official Levels", communityLevels: "Community Levels", noCommunityLevels: "No community levels available yet.", sortBy: "Sort By:", newest: "Newest", highestRated: "Highest Rated", mostPopular: "Most Popular", page: "Page", prev: "◀ Prev", next: "Next ▶", myLevels: "My Levels", noMyLevels: "No custom levels created yet.", customVersion: "Custom Version", basedOnOfficial: "Based on Level", controlsTitle: "Controls", ctrlMove: "Move", ctrlLook: "Look Around", ctrlInteract: "Interact", ctrlRecipes: "Recipes / Help", ctrlPause: "Pause / Menu" },
-            fr: { select: "Confirmer: Entrée/[X]/[A]", title: "Pixel Cuisine Sim", play: "Jouer", levelEditor: "Éditeur de Niveau", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher les Étiquettes:", soundEffects: "Effets sonores:", version: "Version:", selectLevel: "Choisir le Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous les Niveaux sont Finis!", playAgain: "Rejouer?", loading: "Chargement...", levelTime: "Temps du Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé", levelInstructions: "Instructions du Niveau", startLevel: "Commencer le Niveau", recipe: "Recette", close: "Fermer", hintToggleInstructions: "Basculer: [I] / [△/Y]", editorHubTitle: "Éditeur", createLevel: "Nouveau", downloadRoadmap: "Télécharger le Niveau", backToMenu: "Retour au Menu", credits: "Un jeu par Azzxl Studio", hintMenu: "Naviguer: Flèches/Stick | Confirmer: Entrée/[X]/[A]", hintSettings: "Naviguer: Flèches/Stick | Confirmer: Entrée/[X]/[A] | Retour: Échap/[O]/[B]", leaderboard: "Classement", nicknameTitle: "Choisissez un pseudo", nicknameLabel: "Pseudo", nicknameContinue: "Continuer", nicknameHint: "Utilisé pour le classement en ligne.", leaderboardEmpty: "Aucun score. Soyez le premier chef.", leaderboardLoading: "Classement des scores...", localLevel: "Local", officialLevels: "Niveaux Officiels", communityLevels: "Niveaux de la Communauté", noCommunityLevels: "Aucun niveau de la communauté disponible pour le moment.", sortBy: "Trier par :", newest: "Plus récents", highestRated: "Mieux notés", mostPopular: "Plus populaires", page: "Page", prev: "◀ Précédent", next: "Suivant ▶", myLevels: "Mes Niveaux", noMyLevels: "Aucun niveau personnalisé créé pour le moment.", customVersion: "Version Personnalisée", basedOnOfficial: "Basé sur le Niveau", controlsTitle: "Contrôles", ctrlMove: "Déplacer", ctrlLook: "Regarder", ctrlInteract: "Interagir", ctrlRecipes: "Recettes / Aide", ctrlPause: "Pause / Menu" },
-            es: { select: "Entrar: Enter/[X]/[A]", title: "Pixel Cocina Sim", play: "Jugar", levelEditor: "Editor de Niveles", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menu Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", soundEffects: "Efectos de sonido:", version: "Versión:", selectLevel: "Elegir el Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos los Niveles están Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", levelTime: "Tiempo del Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado", levelInstructions: "Instrucciones del Nivel", startLevel: "Empezar el Nivel", recipe: "Receta", close: "Cerrar", hintToggleInstructions: "Alternar: [I] / [△/Y]", editorHubTitle: "Editor", createLevel: "Nuevo Nivel", downloadRoadmap: "Descargar el Nivel", backToMenu: "Volver al Menú", credits: "Un Juego De Azzxl Studio", hintMenu: "Navegar: Flechas/Stick | Entrar: Enter/[X]/[A]", hintSettings: "Navegar: Flechas/Stick | Entrar: Enter/[X]/[A] | Volver: Esc/[O]/[B]", leaderboard: "Clasificación", nicknameTitle: "Elige un apodo", nicknameLabel: "Apodo", nicknameContinue: "Continuar", nicknameHint: "Se usa para la clasificación en línea.", leaderboardEmpty: "Aún no hay puntuaciones. Sé el premier chef.", leaderboardLoading: "Cargando puntuaciones...", localLevel: "Local", officialLevels: "Niveles Oficiales", communityLevels: "Niveles de la Comunidad", noCommunityLevels: "No hay niveles de la comunidad disponibles todavía.", sortBy: "Ordenar por:", newest: "Más nuevos", highestRated: "Mejor valorados", mostPopular: "Más populares", page: "Página", prev: "◀ Anterior", next: "Siguiente ▶", myLevels: "Mis Niveles", noMyLevels: "No hay niveles personalizados creados todavía.", customVersion: "Versión Personalizada", basedOnOfficial: "Basado en el Nivel", controlsTitle: "Controles", ctrlMove: "Mover", ctrlLook: "Mirar", ctrlInteract: "Interactuar", ctrlRecipes: "Recetas / Ayuda", ctrlPause: "Pausa / Menú" }
+            en: { select: "Select: Enter/[X]/[A]", title: "Pixel Kitchen Sim", play: "Play", levelEditor: "Level Editor", settings: "Settings", back: "Back", resume: "Resume Game", level: "Level", score: "Score", stars: "Stars", nextLevel: "Next Level", restartLevel: "Restart Level", mainMenu: "Main Menu", language: "Language", showLabels: "Show Station Labels:", soundEffects: "Sound Effects:", version: "Version:", selectLevel: "Select Level", paused: "Paused", holding: "Holding", nothing: "Nothing", levelComplete: "Level Complete!", allLevelsDone: "All Levels Done!", playAgain: "Play Again?", loading: "Loading Assets...", levelTime: "Level Time", highScore: "High Score", levelLocked: "Locked", levelInstructions: "Level Instructions", startLevel: "Start Level", recipe: "Recipe", close: "Close", hintToggleInstructions: "Toggle: [I] / [△/Y]", editorHubTitle: "Level Editor", createLevel: "New Level", downloadRoadmap: "Download Roadmap", backToMenu: "Back to Menu", credits: "A Game By Azzxl Studio", hintMenu: "Navigate: Arrows/Stick | Select: Enter/[X]/[A]", hintSettings: "Navigate: Arrows/Stick | Select: Enter/[X]/[A] | Back: Esc/[O]/[B]", leaderboard: "Leaderboard", nicknameTitle: "Choose Nickname", nicknameLabel: "Nickname", nicknameContinue: "Continue", nicknameHint: "Used for the online leaderboard.", leaderboardEmpty: "No scores yet. Be the first chef on the board.", leaderboardLoading: "Loading scores...", localLevel: "Local", officialLevels: "Official Levels", communityLevels: "Community Levels", noCommunityLevels: "No community levels available yet.", sortBy: "Sort By:", newest: "Newest", highestRated: "Highest Rated", mostPopular: "Most Popular", page: "Page", prev: "◀ Prev", next: "Next ▶", myLevels: "My Levels", noMyLevels: "No custom levels created yet.", customVersion: "Custom Version", basedOnOfficial: "Based on Level", controlsTitle: "Controls", ctrlMove: "Move", ctrlLook: "Look Around", ctrlInteract: "Interact", ctrlRecipes: "Recipes / Help", ctrlPause: "Pause / Menu", editorLockedInfo: "🔒 Complete all 5 official levels to unlock", congratsTitle: "🎉 CONGRATULATIONS! 🎉", congratsText: "You have completed all 5 official levels of Pixel Kitchen Sim!<br><br>🛠️ The <strong>Level Editor</strong> and <strong>Community Levels</strong> are now fully unlocked!<br><br>Go back to the main menu to build your own dream kitchens and share them with the world." },
+            fr: { select: "Confirmer: Entrée/[X]/[A]", title: "Pixel Cuisine Sim", play: "Jouer", levelEditor: "Éditeur de Niveau", settings: "Options", back: "Retour", resume: "Reprendre", level: "Niveau", score: "Score", stars: "Étoiles", nextLevel: "Niveau Suivant", restartLevel: "Recommencer", mainMenu: "Menu Principal", language: "Langue", showLabels: "Afficher les Étiquettes:", soundEffects: "Effets sonores:", version: "Version:", selectLevel: "Choisir le Niveau", paused: "Pause", holding: "Tient", nothing: "Rien", levelComplete: "Niveau Terminé!", allLevelsDone: "Tous les Niveaux sont Finis!", playAgain: "Rejouer?", loading: "Chargement...", levelTime: "Temps du Niveau", highScore: "Meilleur Score", levelLocked: "Verrouillé", levelInstructions: "Instructions du Niveau", startLevel: "Commencer le Niveau", recipe: "Recette", close: "Fermer", hintToggleInstructions: "Basculer: [I] / [△/Y]", editorHubTitle: "Éditeur", createLevel: "Nouveau", downloadRoadmap: "Télécharger le Niveau", backToMenu: "Retour au Menu", credits: "Un jeu par Azzxl Studio", hintMenu: "Naviguer: Flèches/Stick | Confirmer: Entrée/[X]/[A]", hintSettings: "Naviguer: Flèches/Stick | Confirmer: Entrée/[X]/[A] | Retour: Échap/[O]/[B]", leaderboard: "Classement", nicknameTitle: "Choisissez un pseudo", nicknameLabel: "Pseudo", nicknameContinue: "Continuer", nicknameHint: "Utilisé pour le classement en ligne.", leaderboardEmpty: "Aucun score. Soyez le premier chef.", leaderboardLoading: "Classement des scores...", localLevel: "Local", officialLevels: "Niveaux Officiels", communityLevels: "Niveaux de la Communauté", noCommunityLevels: "Aucun niveau de la communauté disponible pour le moment.", sortBy: "Trier par :", newest: "Plus récents", highestRated: "Mieux notés", mostPopular: "Plus populaires", page: "Page", prev: "◀ Précédent", next: "Suivant ▶", myLevels: "Mes Niveaux", noMyLevels: "Aucun niveau personnalisé créé pour le moment.", customVersion: "Version Personnalisée", basedOnOfficial: "Basé sur le Niveau", controlsTitle: "Contrôles", ctrlMove: "Déplacer", ctrlLook: "Regarder", ctrlInteract: "Interagir", ctrlRecipes: "Recettes / Aide", ctrlPause: "Pause / Menu", editorLockedInfo: "🔒 Complétez les 5 niveaux officiels pour déverrouiller", congratsTitle: "🎉 FÉLICITATIONS ! 🎉", congratsText: "Vous avez terminé les 5 niveaux officiels de Pixel Kitchen Sim !<br><br>🛠️ L'<strong>Éditeur de Niveaux</strong> et les <strong>Niveaux de la Communauté</strong> sont maintenant déverrouillés !<br><br>Retournez au menu principal pour créer vos cuisines et les partager avec le monde." },
+            es: { select: "Entrar: Enter/[X]/[A]", title: "Pixel Cocina Sim", play: "Jugar", levelEditor: "Editor de Niveles", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menu Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", soundEffects: "Efectos de sonido:", version: "Versión:", selectLevel: "Elegir el Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos los Niveles están Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", levelTime: "Tiempo del Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado", levelInstructions: "Instrucciones del Nivel", startLevel: "Empezar el Nivel", recipe: "Receta", close: "Cerrar", hintToggleInstructions: "Alternar: [I] / [△/Y]", editorHubTitle: "Editor", createLevel: "Nuevo Nivel", downloadRoadmap: "Descargar el Nivel", backToMenu: "Volver al Menú", credits: "Un Juego De Azzxl Studio", hintMenu: "Navegar: Flechas/Stick | Entrar: Enter/[X]/[A]", hintSettings: "Navegar: Flechas/Stick | Entrar: Enter/[X]/[A] | Volver: Esc/[O]/[B]", leaderboard: "Clasificación", nicknameTitle: "Elige un apodo", nicknameLabel: "Apodo", nicknameContinue: "Continuar", nicknameHint: "Se usa para la clasificación en línea.", leaderboardEmpty: "Aún no hay puntuaciones. Sé el primer chef.", leaderboardLoading: "Cargando puntuaciones...", localLevel: "Local", officialLevels: "Niveles Oficiales", communityLevels: "Niveles de la Comunidad", noCommunityLevels: "No hay niveles de la comunidad disponibles todavía.", sortBy: "Ordenar por:", newest: "Más nuevos", highestRated: "Mejor valorados", mostPopular: "Más populares", page: "Página", prev: "◀ Anterior", next: "Siguiente ▶", myLevels: "Mis Niveles", noMyLevels: "No hay niveles personalizados creados todavía.", customVersion: "Versión Personalizada", basedOnOfficial: "Basado en el Nivel", controlsTitle: "Controles", ctrlMove: "Mover", ctrlLook: "Mirar", ctrlInteract: "Interactuar", ctrlRecipes: "Recetas / Ayuda", ctrlPause: "Pausa / Menú", editorLockedInfo: "🔒 Completa los 5 niveles oficiales para desbloquear", congratsTitle: "🎉 ¡FELICITACIONES! 🎉", congratsText: "¡Has completado los 5 niveles oficiales de Pixel Cocina Sim!<br><br>🛠️ ¡El <strong>Editor de Niveles</strong> y los <strong>Niveles de la Comunidad</strong> ya están desbloqueados!<br><br>Vuelve al menú principal para diseñar tus cocinas y compartirlas con el mundo." }
         };
 
         this.mainMenu.querySelector('h1').textContent = this.uiText[lang].title;
@@ -477,6 +495,23 @@ export class UIManager {
         document.getElementById('back-to-main-button').textContent = this.uiText[lang].back;
         document.getElementById('resume-button-settings').textContent = this.uiText[lang].resume;
         document.getElementById('game-version').textContent = `${this.uiText[lang].version} 1.0 Beta`;
+        const congratsTitle = document.getElementById('congrats-title');
+        const congratsText = document.getElementById('congrats-text');
+        const congratsScoreLabel = document.getElementById('congrats-score-label');
+        const congratsStarsLabel = document.getElementById('congrats-stars-label');
+        const congratsBackBtn = document.getElementById('congrats-back-button');
+
+        if (congratsTitle) congratsTitle.textContent = this.uiText[lang].congratsTitle || "🎉 CONGRATULATIONS! 🎉";
+        if (congratsText) congratsText.innerHTML = this.uiText[lang].congratsText || "You have completed all 5 official levels...";
+        if (congratsScoreLabel) congratsScoreLabel.textContent = this.uiText[lang].score || "Score";
+        if (congratsStarsLabel) congratsStarsLabel.textContent = this.uiText[lang].stars || "Stars";
+        if (congratsBackBtn) congratsBackBtn.textContent = this.uiText[lang].backToMenu || "Back to Menu";
+
+        const lockMsg = document.getElementById('editor-lock-message');
+        if (lockMsg && lockMsg.style.display !== 'none') {
+            lockMsg.textContent = this.uiText[lang].editorLockedInfo || "🔒 Complete all 5 official levels to unlock";
+        }
+
         this.levelSelectScreen.querySelector('h1').textContent = this.uiText[lang].selectLevel;
         document.getElementById('back-to-main-from-level-select').textContent = this.uiText[lang].back;
         this.levelEndScreen.querySelector('h1').textContent = this.uiText[lang].levelComplete;

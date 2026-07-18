@@ -1,4 +1,4 @@
-import { getAllowedLevelKeys, isValidPlayerToken, json, readJson, sanitizeNickname, supabaseRequest } from './_supabase.mjs';
+import { isAllowedLevelKey, isValidPlayerToken, json, readJson, sanitizeNickname, supabaseRequest } from './_supabase.mjs';
 
 const MAX_SCORE = 50000;
 
@@ -13,8 +13,8 @@ export default async function handler(request) {
         const url = new URL(request.url);
         const scope = url.searchParams.get('scope') || 'all';
         const limit = toSafeInt(url.searchParams.get('limit'), 1, 25) || 10;
-        const allowedLevelKeys = getAllowedLevelKeys();
-        if (scope !== 'all' && !allowedLevelKeys.has(scope)) return json(400, { error: 'Unknown leaderboard scope.' });
+        const isAllowed = await isAllowedLevelKey(scope);
+        if (scope !== 'all' && !isAllowed) return json(400, { error: 'Unknown leaderboard scope.' });
 
         const query = new URLSearchParams({
             select: 'nickname,score,stars,updated_at',
@@ -40,7 +40,8 @@ export default async function handler(request) {
     const score = toSafeInt(body?.score, 0, MAX_SCORE);
     const stars = toSafeInt(body?.stars, 0, 3);
 
-    if (!nickname || !isValidPlayerToken(playerToken) || !getAllowedLevelKeys().has(levelKey) || score === null || stars === null) {
+    const isAllowed = await isAllowedLevelKey(levelKey);
+    if (!nickname || !isValidPlayerToken(playerToken) || !isAllowed || score === null || stars === null) {
         return json(400, { error: 'Invalid score submission.' });
     }
 
