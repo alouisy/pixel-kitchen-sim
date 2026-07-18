@@ -23,6 +23,7 @@ const GameState = {
     PAUSED: 'PAUSED', 
     VIEWING_INSTRUCTIONS: 'VIEWING_INSTRUCTIONS', 
     LEVEL_END: 'LEVEL_END',
+    GAME_COMPLETED: 'GAME_COMPLETED',
     EDITOR: 'EDITOR',
     EDITOR_HUB: 'EDITOR_HUB',
     NICKNAME: 'NICKNAME',
@@ -468,11 +469,12 @@ function changeGameState(newState) {
             break;
         case GameState.PAUSED: uiManager.showSettings(true); menuManager.activateMenu(uiManager.settingsScreen); break;
         case GameState.LEVEL_END: currentLevelData = null; uiManager.setCurrentLevelData(null); menuManager.activateMenu(uiManager.levelEndScreen); break;
+        case GameState.GAME_COMPLETED: currentLevelData = null; uiManager.setCurrentLevelData(null); menuManager.activateMenu(uiManager.gameCompletedScreen); break;
         case GameState.LOADING: uiManager.showLoading(); menuManager.deactivateMenu(); break;
     }
 }
 
-function isMenuState(state) { return [GameState.MAIN_MENU, GameState.NICKNAME, GameState.LEADERBOARD, GameState.SETTINGS, GameState.LEVEL_SELECT, GameState.LEVEL_INSTRUCTIONS, GameState.PAUSED, GameState.LEVEL_END].includes(state); }
+function isMenuState(state) { return [GameState.MAIN_MENU, GameState.NICKNAME, GameState.LEADERBOARD, GameState.SETTINGS, GameState.LEVEL_SELECT, GameState.LEVEL_INSTRUCTIONS, GameState.PAUSED, GameState.LEVEL_END, GameState.GAME_COMPLETED].includes(state); }
 
 function handleMenuAction(eventOrAction) {
     let action = null, element = null;
@@ -1191,10 +1193,11 @@ function handleLevelEnd(score, stars, levelIndex) {
     
     if (showCongrats) {
         uiManager.showGameCompletedCongrats(score, stars);
+        changeGameState(GameState.GAME_COMPLETED);
     } else {
         uiManager.showLevelEnd(score, stars, levelIndex, hasNextLevel, isCommunityLevel);
+        changeGameState(GameState.LEVEL_END);
     }
-    changeGameState(GameState.LEVEL_END);
 }
 function handleGameEnd() {
     currentLevelData = null; 
