@@ -540,6 +540,7 @@ function handleMenuAction(eventOrAction) {
                 if (officialContainer) officialContainer.style.display = 'block';
                 if (myLevelsContainer) myLevelsContainer.style.display = 'none';
                 if (communityContainer) communityContainer.style.display = 'none';
+                if (menuManager) menuManager.refreshFocusableElements();
             } else if (tab === 'my-levels') {
                 if (tabOfficial) tabOfficial.classList.remove('selected');
                 if (tabMyLevels) tabMyLevels.classList.add('selected');
@@ -1373,6 +1374,9 @@ function renderCommunityLevelsList() {
         card.appendChild(metaRow);
         listContainer.appendChild(card);
     });
+    if (menuManager && menuManager.activeMenuElement === document.getElementById('level-select-screen')) {
+        menuManager.refreshFocusableElements();
+    }
 }
 
 // Hook to trigger community levels list refresh on language change
@@ -1466,6 +1470,9 @@ function renderMyLevelsList() {
         
         listContainer.appendChild(button);
     });
+    if (menuManager && menuManager.activeMenuElement === document.getElementById('level-select-screen')) {
+        menuManager.refreshFocusableElements();
+    }
 }
 
 // Hook to trigger My Levels list refresh on language change

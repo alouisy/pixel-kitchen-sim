@@ -18,12 +18,15 @@
 
     <!-- Loading Indicator -->
     <div id="loading-screen" class="overlay active">
+        <img src="android-chrome-192x192.png" alt="Pixel Kitchen Sim Logo" class="loading-logo">
         <h2>Loading Assets...</h2>
     </div>
 
     <!-- Main Menu -->
     <div id="main-menu" class="overlay menu-screen">
-        <h1>Pixel Kitchen Sim</h1>
+        <div class="logo-container">
+            <img src="android-chrome-512x512.png" alt="Pixel Kitchen Sim Logo" class="main-menu-logo">
+        </div>
         <div class="menu-container">
             <button id="play-button" class="menu-button" data-action="play">Play</button>
             <button id="leaderboard-button" class="menu-button" data-action="leaderboard">Leaderboard</button>
@@ -58,13 +61,13 @@
         <div class="menu-container leaderboard-box">
             <!-- Main category tabs: Global vs Levels -->
             <div class="leaderboard-main-tabs">
-                <button id="leaderboard-tab-global" class="menu-button tab-btn selected" data-action="leaderboard-category" data-category="global">Global Ranking</button>
+                <button id="leaderboard-tab-global" class="menu-button tab-btn active" data-action="leaderboard-category" data-category="global">Global Ranking</button>
                 <button id="leaderboard-tab-levels" class="menu-button tab-btn" data-action="leaderboard-category" data-category="levels">Level Rankings</button>
             </div>
             
             <!-- Sub-section for Global options -->
             <div id="leaderboard-global-options" class="leaderboard-sub-section">
-                <button id="leaderboard-btn-global-official" class="menu-button small selected" data-action="leaderboard-tab" data-scope="global:official">Official Levels</button>
+                <button id="leaderboard-btn-global-official" class="menu-button small active" data-action="leaderboard-tab" data-scope="global:official">Official Levels</button>
                 <button id="leaderboard-btn-global-community" class="menu-button small" data-action="leaderboard-tab" data-scope="global:community">With Community</button>
             </div>
             

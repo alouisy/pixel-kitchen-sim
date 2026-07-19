@@ -201,21 +201,21 @@ export class UIManager {
         // Adjust visibility and selections based on the scope
         const isGlobal = scope === 'all' || scope === 'global:official' || scope === 'global:community';
         if (isGlobal) {
-            if (tabGlobal) tabGlobal.classList.add('selected');
-            if (tabLevels) tabLevels.classList.remove('selected');
+            if (tabGlobal) tabGlobal.classList.add('active');
+            if (tabLevels) tabLevels.classList.remove('active');
             if (globalOptions) globalOptions.style.display = 'flex';
             if (levelOptions) levelOptions.style.display = 'none';
 
             if (scope === 'all' || scope === 'global:official') {
-                if (btnGlobalOfficial) btnGlobalOfficial.classList.add('selected');
-                if (btnGlobalCommunity) btnGlobalCommunity.classList.remove('selected');
+                if (btnGlobalOfficial) btnGlobalOfficial.classList.add('active');
+                if (btnGlobalCommunity) btnGlobalCommunity.classList.remove('active');
             } else {
-                if (btnGlobalOfficial) btnGlobalOfficial.classList.remove('selected');
-                if (btnGlobalCommunity) btnGlobalCommunity.classList.add('selected');
+                if (btnGlobalOfficial) btnGlobalOfficial.classList.remove('active');
+                if (btnGlobalCommunity) btnGlobalCommunity.classList.add('active');
             }
         } else {
-            if (tabGlobal) tabGlobal.classList.remove('selected');
-            if (tabLevels) tabLevels.classList.add('selected');
+            if (tabGlobal) tabGlobal.classList.remove('active');
+            if (tabLevels) tabLevels.classList.add('active');
             if (globalOptions) globalOptions.style.display = 'none';
             if (levelOptions) levelOptions.style.display = 'flex';
 
@@ -223,14 +223,14 @@ export class UIManager {
             if (scope.startsWith('level:')) {
                 officialButtons.forEach(btn => {
                     if (btn.dataset.scope === scope) {
-                        btn.classList.add('selected');
+                        btn.classList.add('active');
                     } else {
-                        btn.classList.remove('selected');
+                        btn.classList.remove('active');
                     }
                 });
                 if (commSelect) commSelect.value = '';
             } else if (scope.startsWith('custom:')) {
-                officialButtons.forEach(btn => btn.classList.remove('selected'));
+                officialButtons.forEach(btn => btn.classList.remove('active'));
                 if (commSelect) commSelect.value = scope;
             }
         }
@@ -516,7 +516,10 @@ export class UIManager {
             es: { select: "Entrar: Enter/[X]/[A]", title: "Pixel Cocina Sim", play: "Jugar", levelEditor: "Editor de Niveles", settings: "Ajustes", back: "Volver", resume: "Reanudar", level: "Nivel", score: "Puntos", stars: "Estrellas", nextLevel: "Siguiente Nivel", restartLevel: "Reiniciar", mainMenu: "Menu Principal", language: "Idioma", showLabels: "Mostrar Etiquetas:", soundEffects: "Efectos de sonido:", version: "Versión:", selectLevel: "Elegir el Nivel", paused: "Pausa", holding: "Tiene", nothing: "Nada", levelComplete: "¡Nivel Completo!", allLevelsDone: "¡Todos los Niveles están Hechos!", playAgain: "¿Jugar Otra Vez?", loading: "Cargando...", levelTime: "Tiempo del Nivel", highScore: "Mejor Puntuación", levelLocked: "Bloqueado", levelInstructions: "Instrucciones del Nivel", startLevel: "Empezar el Nivel", recipe: "Receta", close: "Cerrar", hintToggleInstructions: "Alternar: [I] / [△/Y]", editorHubTitle: "Editor", createLevel: "Nuevo Nivel", downloadRoadmap: "Descargar el Nivel", backToMenu: "Volver al Menú", credits: "Un Juego De Azzxl Studio", hintMenu: "Navegar: Flechas/Stick | Entrar: Enter/[X]/[A]", hintSettings: "Navegar: Flechas/Stick | Entrar: Enter/[X]/[A] | Volver: Esc/[O]/[B]", leaderboard: "Clasificación", nicknameTitle: "Elige un apodo", nicknameLabel: "Apodo", nicknameContinue: "Continuar", nicknameHint: "Se usa para la clasificación en línea.", leaderboardEmpty: "Aún no hay puntuaciones. Sé el primer chef.", leaderboardLoading: "Cargando puntuaciones...", localLevel: "Local", officialLevels: "Niveles Oficiales", communityLevels: "Niveles de la Comunidad", noCommunityLevels: "No hay niveles de la comunidad disponibles todavía.", sortBy: "Ordenar por:", newest: "Más nuevos", highestRated: "Mejor valorados", mostPopular: "Más populares", page: "Página", prev: "◀ Anterior", next: "Siguiente ▶", myLevels: "Mis Niveles", noMyLevels: "No hay niveles personalizados creados todavía.", customVersion: "Versión Personalizada", basedOnOfficial: "Basado en el Nivel", controlsTitle: "Controles", ctrlMove: "Mover", ctrlLook: "Mirar", ctrlInteract: "Interactuar", ctrlRecipes: "Recetas / Ayuda", ctrlPause: "Pausa / Menú", editorLockedInfo: "🔒 Completa los 5 niveles oficiales para desbloquear", congratsTitle: "🎉 ¡FELICITACIONES! 🎉", congratsText: "¡Has completado los 5 niveles oficiales de Pixel Cocina Sim!<br><br>🛠️ ¡El <strong>Editor de Niveles</strong> y los <strong>Niveles de la Comunidad</strong> ya están desbloqueados!<br><br>Vuelve al menu principal para diseñar tus cocinas y compartirlas con el mundo.", globalRanking: "Clasificación General", levelRankings: "Clasificaciones por Nivel", globalOfficial: "Niveles Oficiales", globalCommunity: "Con Comunidad", labelOfficial: "Oficiales:", labelCommunity: "Comunidad:", selectLevelOption: "-- Elegir un nivel --", globalLeaderboardOfficial: "Clasificación General Oficial", globalLeaderboardCommunity: "Clasificación General de la Comunidad", communityLeaderboardTitle: "Clasificación del Nivel de la Comunidad" }
         };
 
-        this.mainMenu.querySelector('h1').textContent = this.uiText[lang].title;
+        const mainMenuTitle = this.mainMenu.querySelector('h1');
+        if (mainMenuTitle) mainMenuTitle.textContent = this.uiText[lang].title;
+        const mainMenuLogo = this.mainMenu.querySelector('.main-menu-logo');
+        if (mainMenuLogo) mainMenuLogo.alt = this.uiText[lang].title;
         document.getElementById('play-button').textContent = this.uiText[lang].play;
         const leaderboardButton = document.getElementById('leaderboard-button'); if (leaderboardButton) leaderboardButton.textContent = this.uiText[lang].leaderboard;
         const editorBtn = document.getElementById('editor-button'); if (editorBtn) editorBtn.textContent = this.uiText[lang].levelEditor;

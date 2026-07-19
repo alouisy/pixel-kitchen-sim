@@ -28,10 +28,26 @@ export class MenuManager {
             }
         });
 
+        document.addEventListener('mouseout', (event) => {
+            if (!this.activeMenuElement) return;
+            const target = event.target.closest('.menu-button, .menu-link, .menu-toggle');
+            if (target && this.focusableElements.includes(target)) {
+                const relatedTarget = event.relatedTarget;
+                if (!relatedTarget || !target.contains(relatedTarget)) {
+                    const index = this.focusableElements.indexOf(target);
+                    if (index === this.selectedIndex) {
+                        this.setSelectedIndex(-1);
+                    }
+                }
+            }
+        });
+
         // Clicks are handled by main.js calling handleMenuAction
     }
 
     activateMenu(menuElement) {
+        this.setSelectedIndex(-1); // Clean up previous selection before switching menus
+
         if (!menuElement) {
             this.deactivateMenu();
             return;
@@ -61,7 +77,8 @@ export class MenuManager {
             if (firstButtonIndex > -1) defaultIndex = firstButtonIndex;
         }
 
-        this.setSelectedIndex(defaultIndex);
+        this.defaultIndex = defaultIndex;
+        this.setSelectedIndex(-1); // Start with NO element selected visually
         this.prevGamepadButtons = []; // Reset button history when menu activates
         this.gamepadNavTimer = GAMEPAD_NAV_DELAY; // Add initial delay
     }
@@ -164,12 +181,18 @@ export class MenuManager {
         }
 
         if (moveDirection) {
-            const nextElement = this._findNextElement(moveDirection);
-            if (nextElement) {
-                const newIndex = this.focusableElements.indexOf(nextElement);
-                if (newIndex > -1) {
-                    this.setSelectedIndex(newIndex);
-                    this.gamepadNavTimer = GAMEPAD_NAV_DELAY;
+            if (this.selectedIndex === -1) {
+                // If nothing was selected yet (e.g. user is on mouse/touch), focus the default button first
+                this.setSelectedIndex(this.defaultIndex ?? 0);
+                this.gamepadNavTimer = GAMEPAD_NAV_DELAY;
+            } else {
+                const nextElement = this._findNextElement(moveDirection);
+                if (nextElement) {
+                    const newIndex = this.focusableElements.indexOf(nextElement);
+                    if (newIndex > -1) {
+                        this.setSelectedIndex(newIndex);
+                        this.gamepadNavTimer = GAMEPAD_NAV_DELAY;
+                    }
                 }
             }
         }
