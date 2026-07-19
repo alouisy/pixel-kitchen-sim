@@ -448,7 +448,6 @@ export function buildKitchen(scene, levelLayout, theme) {
             object3D.position.set(x, 0, z);
             object3D.userData.grid.originX = x - (GRID_UNIT/2);
             object3D.userData.grid.originZ = z - (GRID_UNIT/2);
-
         } else if (def.type === STATION_TYPES.PREPLACED_ITEM) {
             // Special Case: Create a dynamic item instead of a station
             // This item will be pickup-able immediately
@@ -516,6 +515,25 @@ export function buildKitchen(scene, levelLayout, theme) {
             if (def.type !== 'decoration' && def.type !== STATION_TYPES.WALL) {
                 newStations.push(object3D);
                 newStationInteractables.push(object3D);
+            }
+        }
+    });
+
+    // Post-processing pass: occupy grid slots for preplaced items
+    newStationInteractables.forEach(item => {
+        if (item.userData && (item.userData.type === 'item' || item.userData.type === 'ingredient')) {
+            const support = newStations.find(s => 
+                s.userData && 
+                (s.userData.stationType === STATION_TYPES.COUNTER || 
+                 s.userData.stationType === STATION_TYPES.TABLE || 
+                 s.userData.stationType === STATION_TYPES.SERVING) &&
+                Math.abs(s.position.x - item.position.x) < 0.1 && 
+                Math.abs(s.position.z - item.position.z) < 0.1
+            );
+            if (support && support.userData.grid) {
+                const grid = support.userData.grid;
+                const { col, row } = grid.worldToGrid(item.position);
+                grid.occupy(col, row, 1, 1, item);
             }
         }
     });

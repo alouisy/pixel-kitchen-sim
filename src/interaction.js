@@ -110,6 +110,60 @@ export class InteractionManager {
         }
 
         if (heldItem) {
+            // Check if transferring a single ingredient between plates/containers
+            const containerTypes = ['plate', 'bowl', 'cup', 'pizza_base', 'bread_slice'];
+            const heldIsContainer = heldItem.userData.type === ITEM_TYPES.ITEM && containerTypes.includes(heldItem.userData.itemType);
+            const targetIsContainer = targetObject.userData.type === ITEM_TYPES.ITEM && containerTypes.includes(targetObject.userData.itemType);
+
+            if (heldIsContainer && targetIsContainer) {
+                if (heldItem.userData.contents && heldItem.userData.contents.length === 1) {
+                    const ingredientName = heldItem.userData.contents[0];
+                    if (!targetObject.userData.contents) targetObject.userData.contents = [];
+                    if (targetObject.userData.contents.includes(ingredientName)) {
+                        this.uiManager.showTemporaryMessage("Already Added!", 1000);
+                        if (this.audioManager) this.audioManager.play('error');
+                        return;
+                    }
+                    
+                    // Perform transfer
+                    heldItem.userData.contents = [];
+                    targetObject.userData.contents.push(ingredientName);
+
+                    // Morph checks for destination container
+                    if (targetObject.userData.itemType === 'pizza_base') {
+                        if (targetObject.userData.contents.includes('tomato_sauce') && targetObject.userData.contents.includes('shredded_mozzarella')) {
+                            updatePlateVisuals(this.scene, heldItem);
+                            this._morphContainer(targetObject, 'pizza_margherita_raw');
+                            return;
+                        }
+                    }
+                    if (targetObject.userData.itemType === 'bread_slice') {
+                        if (targetObject.userData.contents.includes('cheese_slice')) {
+                            updatePlateVisuals(this.scene, heldItem);
+                            this._morphContainer(targetObject, 'grilled_cheese_raw');
+                            return;
+                        }
+                    }
+
+                    const isMealComplete = checkPlateCompletion(targetObject);
+                    updatePlateVisuals(this.scene, targetObject);
+                    updatePlateVisuals(this.scene, heldItem);
+
+                    if (isMealComplete) {
+                        this.uiManager.showTemporaryMessage(`${targetObject.userData.mealName} Ready!`, 1500);
+                        this._animateMealCompletion(targetObject);
+                        if (this.audioManager) this.audioManager.play('ding');
+                    } else {
+                        this.uiManager.showTemporaryMessage("Ingredient Transferred", 1000);
+                        if (this.audioManager) this.audioManager.play('place');
+                    }
+                    return;
+                } else if (heldItem.userData.contents && heldItem.userData.contents.length > 1) {
+                    // Do nothing for partially assembled recipes
+                    return;
+                }
+            }
+
             if (this._isDirectAdditionCheck(heldItem, targetObject)) {
                 this._handleDirectAddition(heldItem, targetObject);
                 return;
@@ -135,6 +189,56 @@ export class InteractionManager {
 
             if (type === 'station' || type === STATION_TYPES.COUNTER || type === STATION_TYPES.TABLE || type === STATION_TYPES.FLOOR) {
                 if (stType === STATION_TYPES.PROCESSOR) {
+                    const containerTypes = ['plate', 'bowl', 'cup', 'pizza_base', 'bread_slice'];
+                    const heldIsContainer = heldItem.userData.type === ITEM_TYPES.ITEM && containerTypes.includes(heldItem.userData.itemType);
+                    
+                    if (heldIsContainer && heldItem.userData.contents && heldItem.userData.contents.length === 1) {
+                        const ingredientName = heldItem.userData.contents[0];
+                        const stationData = targetObject.userData;
+                        
+                        // Check if processor accepts the ingredient
+                        let accepts = false;
+                        if (stationData.config?.requiredIngredients) {
+                            // Blender / RequiredIngredients station
+                            const acceptsList = stationData.config.acceptsIngredients || [];
+                            if (acceptsList.includes(ingredientName)) {
+                                accepts = true;
+                            }
+                        } else if (stationData.processes?.includes(ingredientName)) {
+                            // Regular processor
+                            accepts = true;
+                        }
+                        
+                        if (accepts) {
+                            const plate = heldItem;
+                            const ingredientObject = createItem(this.scene, ingredientName);
+                            
+                            // Temporarily set player's held item to the ingredient
+                            this.player.holdingItem = ingredientObject;
+                            plate.userData.contents = [];
+                            
+                            this._placeOrProcessItem(ingredientObject, targetObject, targetPoint);
+                            
+                            if (this.player.getHeldItem() !== ingredientObject) {
+                                // Successfully placed! Update plate visuals and restore plate to player's hands
+                                updatePlateVisuals(this.scene, plate);
+                                this.player.holdingItem = plate;
+                                plate.raycast = () => {};
+                            } else {
+                                // Failed! Restore ingredient to plate and player hands
+                                plate.userData.contents = [ingredientName];
+                                updatePlateVisuals(this.scene, plate);
+                                
+                                this.scene.remove(ingredientObject);
+                                ingredientObject.traverse(c => { if(c.geometry) c.geometry.dispose(); });
+                                
+                                this.player.holdingItem = plate;
+                                plate.raycast = () => {};
+                            }
+                            return;
+                        }
+                    }
+
                     this._placeOrProcessItem(heldItem, targetObject, targetPoint);
                     return;
                 }

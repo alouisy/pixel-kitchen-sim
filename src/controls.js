@@ -32,6 +32,12 @@ export class PlayerControls {
 
         this.crosshair = document.getElementById('crosshair'); // Keep crosshair reference
 
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        this.mobileControlsActive = false;
+        this.leftJoystickInput = { x: 0, y: 0 };
+        this.rightJoystickInput = { x: 0, y: 0 };
+        this._setupMobileControls();
+
         this._addEventListeners();
     }
 
@@ -173,8 +179,30 @@ export class PlayerControls {
         }
     }
 
-    getMovementInput() {
+    getMovementInput(delta = 0.016) {
         const direction = { x: 0, z: 0 };
+        
+        if (this.mobileControlsActive) {
+            // Update camera look rotation (right joystick)
+            const lookSpeedX = 2.5; 
+            const lookSpeedY = 1.8; 
+            
+            const camera = this._pointerLockControls.getObject();
+            if (camera) {
+                camera.rotation.y -= this.rightJoystickInput.x * lookSpeedX * delta;
+                camera.rotation.x -= this.rightJoystickInput.y * lookSpeedY * delta;
+                camera.rotation.x = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, camera.rotation.x));
+            }
+            
+            // Add left joystick movement
+            direction.x = this.leftJoystickInput.x;
+            direction.z = this.leftJoystickInput.y;
+            
+            if (direction.x !== 0 || direction.z !== 0) {
+                return direction;
+            }
+        }
+
         const forward = this.kbMovingForward || this.gpMovingForward;
         const backward = this.kbMovingBackward || this.gpMovingBackward;
         const left = this.kbMovingLeft || this.gpMovingLeft;
@@ -216,7 +244,7 @@ export class PlayerControls {
     }
 
     get isLocked() {
-        return this._pointerLockControls.isLocked;
+        return this._pointerLockControls.isLocked || this.mobileControlsActive;
     }
 
     get object() {
@@ -225,11 +253,25 @@ export class PlayerControls {
 
     // Explicit lock/unlock methods called by main.js state changes
     lock() {
-        this._pointerLockControls.lock();
+        if (this.isMobile) {
+            this.mobileControlsActive = true;
+            if (this.mobileOverlay) this.mobileOverlay.style.display = 'block';
+            if (this.mobilePauseBtn) this.mobilePauseBtn.style.display = 'flex';
+            if (this.crosshair) this.crosshair.style.display = 'block';
+        } else {
+            this._pointerLockControls.lock();
+        }
     }
 
     unlock() {
-        this._pointerLockControls.unlock();
+        if (this.isMobile) {
+            this.mobileControlsActive = false;
+            if (this.mobileOverlay) this.mobileOverlay.style.display = 'none';
+            if (this.mobilePauseBtn) this.mobilePauseBtn.style.display = 'none';
+            if (this.crosshair) this.crosshair.style.display = 'none';
+        } else {
+            this._pointerLockControls.unlock();
+        }
     }
 
     moveForward(distance) {
@@ -244,5 +286,200 @@ export class PlayerControls {
         if (this._pointerLockControls) {
             this._pointerLockControls.pointerSpeed = Number(value) || 1.0;
         }
+    }
+
+    _setupMobileControls() {
+        if (!this.isMobile) return;
+
+        // Create overlay element
+        this.mobileOverlay = document.createElement('div');
+        this.mobileOverlay.id = 'mobile-controls-overlay';
+        this.mobileOverlay.style.cssText = `
+            display: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 180px;
+            z-index: 9999;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-select: none;
+        `;
+
+        // Left joystick
+        const leftZone = document.createElement('div');
+        leftZone.id = 'joystick-left-zone';
+        leftZone.style.cssText = `
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.25);
+            pointer-events: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+        `;
+        const leftKnob = document.createElement('div');
+        leftKnob.style.cssText = `
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            box-shadow: 0 0 8px rgba(0,0,0,0.4);
+        `;
+        leftZone.appendChild(leftKnob);
+
+        // Right joystick
+        const rightZone = document.createElement('div');
+        rightZone.id = 'joystick-right-zone';
+        rightZone.style.cssText = `
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.25);
+            pointer-events: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+        `;
+        const rightKnob = document.createElement('div');
+        rightKnob.style.cssText = `
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            box-shadow: 0 0 8px rgba(0,0,0,0.4);
+        `;
+        rightZone.appendChild(rightKnob);
+
+        this.mobileOverlay.appendChild(leftZone);
+        this.mobileOverlay.appendChild(rightZone);
+        document.body.appendChild(this.mobileOverlay);
+
+        // Pause button
+        this.mobilePauseBtn = document.createElement('div');
+        this.mobilePauseBtn.id = 'mobile-pause-btn';
+        this.mobilePauseBtn.innerText = '⏸';
+        this.mobilePauseBtn.style.cssText = `
+            display: none;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            border: 2px solid rgba(255,255,255,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 10000;
+        `;
+        this.mobilePauseBtn.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            this.pauseToggleRequested = true;
+        }, { passive: true });
+        
+        document.body.appendChild(this.mobilePauseBtn);
+
+        // Handle Left Joystick touch events
+        this._setupJoystickEvents(leftZone, leftKnob, (input) => {
+            this.leftJoystickInput = input;
+        });
+
+        // Handle Right Joystick touch events
+        this._setupJoystickEvents(rightZone, rightKnob, (input) => {
+            this.rightJoystickInput = input;
+        });
+
+        // Handle touchstart on document for interaction
+        document.addEventListener('touchstart', (e) => {
+            if (!this.mobileControlsActive) return;
+            // Check if touch is inside joysticks or pause button
+            const touch = e.touches[0];
+            const leftRect = leftZone.getBoundingClientRect();
+            const rightRect = rightZone.getBoundingClientRect();
+            const pauseRect = this.mobilePauseBtn.getBoundingClientRect();
+            
+            const insideLeft = touch.clientX >= leftRect.left && touch.clientX <= leftRect.right &&
+                               touch.clientY >= leftRect.top && touch.clientY <= leftRect.bottom;
+            const insideRight = touch.clientX >= rightRect.left && touch.clientX <= rightRect.right &&
+                                touch.clientY >= rightRect.top && touch.clientY <= rightRect.bottom;
+            const insidePause = touch.clientX >= pauseRect.left && touch.clientX <= pauseRect.right &&
+                                touch.clientY >= pauseRect.top && touch.clientY <= pauseRect.bottom;
+                                
+            if (!insideLeft && !insideRight && !insidePause) {
+                // Trigger tap interaction
+                this.interactRequested = true;
+            }
+        }, { passive: true });
+    }
+
+    _setupJoystickEvents(zone, knob, onInput) {
+        const maxDist = 40; // max displacement in pixels
+        let touchId = null;
+        let startX = 0;
+        let startY = 0;
+
+        zone.addEventListener('touchstart', (e) => {
+            if (touchId !== null) return;
+            const touch = Array.from(e.changedTouches).find(t => t.target === zone || zone.contains(t.target));
+            if (!touch) return;
+            
+            touchId = touch.identifier;
+            const rect = zone.getBoundingClientRect();
+            startX = rect.left + rect.width / 2;
+            startY = rect.top + rect.height / 2;
+            
+            knob.style.transition = 'none';
+        }, { passive: true });
+
+        const handleMove = (e) => {
+            if (touchId === null) return;
+            const touch = Array.from(e.touches).find(t => t.identifier === touchId);
+            if (!touch) return;
+
+            let dx = touch.clientX - startX;
+            let dy = touch.clientY - startY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist > maxDist) {
+                dx = (dx / dist) * maxDist;
+                dy = (dy / dist) * maxDist;
+            }
+
+            knob.style.transform = `translate(${dx}px, ${dy}px)`;
+            onInput({ x: dx / maxDist, y: dy / maxDist });
+        };
+
+        const handleEnd = (e) => {
+            if (touchId === null) return;
+            const touch = Array.from(e.changedTouches).find(t => t.identifier === touchId);
+            if (!touch) return;
+
+            touchId = null;
+            knob.style.transition = 'transform 0.15s ease-out';
+            knob.style.transform = 'translate(0px, 0px)';
+            onInput({ x: 0, y: 0 });
+        };
+
+        window.addEventListener('touchmove', handleMove, { passive: true });
+        window.addEventListener('touchend', handleEnd, { passive: true });
+        window.addEventListener('touchcancel', handleEnd, { passive: true });
     }
 }

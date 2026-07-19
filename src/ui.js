@@ -546,7 +546,7 @@ export class UIManager {
         const soundLabel = this.settingsScreen.querySelector('label[for="sound-effects-setting"]'); if (soundLabel) soundLabel.textContent = this.uiText[lang].soundEffects;
         document.getElementById('back-to-main-button').textContent = this.uiText[lang].back;
         document.getElementById('resume-button-settings').textContent = this.uiText[lang].resume;
-        document.getElementById('game-version').textContent = `${this.uiText[lang].version} 1.0 Beta`;
+        document.getElementById('game-version').textContent = `${this.uiText[lang].version} V1`;
         const congratsTitle = document.getElementById('congrats-title');
         const congratsText = document.getElementById('congrats-text');
         const congratsScoreLabel = document.getElementById('congrats-score-label');

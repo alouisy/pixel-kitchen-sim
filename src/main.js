@@ -1239,7 +1239,7 @@ function animate() {
             levelManager.update(delta);
             interactionManager.update(delta);
             if (playerControls.isLocked) {
-                player.update(delta, playerControls.getMovementInput());
+                player.update(delta, playerControls.getMovementInput(delta));
                 interactionManager.updateAimHighlight();
                 if (inputCooldownTimer <= 0 && playerControls.consumeInteractionRequest()) interactionManager.handleInteractionRequest();
                 if (uiManager) uiManager.updateHolding(player.getHeldItemName());

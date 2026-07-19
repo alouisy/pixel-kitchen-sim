@@ -20,8 +20,10 @@ export class GridSystem {
     worldToGrid(point) {
         const localX = point.x - this.originX;
         const localZ = point.z - this.originZ;
-        const col = Math.floor(localX / GRID_UNIT);
-        const row = Math.floor(localZ / GRID_UNIT);
+        let col = Math.floor(localX / GRID_UNIT);
+        let row = Math.floor(localZ / GRID_UNIT);
+        col = Math.max(0, Math.min(this.cols - 1, col));
+        row = Math.max(0, Math.min(this.rows - 1, row));
         return { col, row };
     }
 
