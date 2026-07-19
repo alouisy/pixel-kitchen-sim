@@ -6,7 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Kitchen Simulator</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
 </head>
 
 <body>
@@ -224,40 +227,40 @@
     <div id="level-select-screen" class="overlay menu-screen">
         <h1>Select Level</h1>
         
-        <div class="level-tabs" style="margin-bottom: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button id="tab-official" class="menu-button selected" data-action="toggle-level-tab" data-tab="official" style="padding: 10px 20px;">Official Levels</button>
-            <button id="tab-my-levels" class="menu-button" data-action="toggle-level-tab" data-tab="my-levels" style="padding: 10px 20px;">My Levels</button>
-            <button id="tab-community" class="menu-button" data-action="toggle-level-tab" data-tab="community" style="padding: 10px 20px;">Community Levels</button>
+        <div class="level-tabs">
+            <button id="tab-official" class="menu-button selected" data-action="toggle-level-tab" data-tab="official">Official Levels</button>
+            <button id="tab-my-levels" class="menu-button" data-action="toggle-level-tab" data-tab="my-levels">My Levels</button>
+            <button id="tab-community" class="menu-button" data-action="toggle-level-tab" data-tab="community">Community Levels</button>
         </div>
         
         <!-- Official Levels Container -->
-        <div id="official-levels-container" class="level-select-container" style="width: 85%; max-width: 900px; margin: 0 auto 25px auto;">
+        <div id="official-levels-container" class="level-select-container">
             <div id="level-list" class="menu-container level-grid"></div>
         </div>
 
         <!-- My Levels Container -->
-        <div id="my-levels-container" class="level-select-container" style="display: none; width: 85%; max-width: 900px; margin: 0 auto 25px auto;">
+        <div id="my-levels-container" class="level-select-container" style="display: none;">
             <div id="my-level-list" class="menu-container level-grid"></div>
         </div>
 
         <!-- Community Levels Container -->
-        <div id="community-levels-container" class="level-select-container" style="display: none; width: 85%; max-width: 900px; margin: 0 auto 25px auto;">
+        <div id="community-levels-container" class="level-select-container" style="display: none;">
             <!-- Sort and Filtering options -->
-            <div class="community-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <div style="font-family: monospace; font-size: 14px;">
+            <div class="community-toolbar">
+                <div class="community-toolbar-sort">
                     <span id="community-sort-label">Sort By:</span>
-                    <select id="community-sort" style="background: rgba(0,0,0,0.8); color: #fff; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; font-family: monospace; cursor: pointer;">
+                    <select id="community-sort">
                         <option value="newest">Newest</option>
                         <option value="highest_rated">Highest Rated</option>
                         <option value="most_popular">Most Popular</option>
                     </select>
                 </div>
-                <div style="font-family: monospace; font-size: 14px;">
+                <div class="community-toolbar-page">
                     <span id="community-page-label">Page</span> <span id="community-current-page">1</span>
                 </div>
             </div>
             
-            <div id="community-level-list" class="menu-container level-grid" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px; min-height: 250px;">
+            <div id="community-level-list" class="menu-container level-grid">
                 <!-- Community items injected dynamically -->
             </div>
 

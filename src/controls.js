@@ -1,4 +1,5 @@
 // src/controls.js
+import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import {
     GAMEPAD_DEADZONE, GAMEPAD_INTERACT_BUTTON, GAMEPAD_PAUSE_BUTTON,
@@ -189,9 +190,15 @@ export class PlayerControls {
             
             const camera = this._pointerLockControls.getObject();
             if (camera) {
-                camera.rotation.y -= this.rightJoystickInput.x * lookSpeedX * delta;
-                camera.rotation.x -= this.rightJoystickInput.y * lookSpeedY * delta;
-                camera.rotation.x = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, camera.rotation.x));
+                const euler = new THREE.Euler( 0, 0, 0, 'YXZ' );
+                euler.setFromQuaternion( camera.quaternion );
+
+                euler.y -= this.rightJoystickInput.x * lookSpeedX * delta;
+                euler.x -= this.rightJoystickInput.y * lookSpeedY * delta;
+
+                euler.x = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, euler.x));
+
+                camera.quaternion.setFromEuler( euler );
             }
             
             // Add left joystick movement
@@ -371,25 +378,6 @@ export class PlayerControls {
         this.mobilePauseBtn = document.createElement('div');
         this.mobilePauseBtn.id = 'mobile-pause-btn';
         this.mobilePauseBtn.innerText = '⏸';
-        this.mobilePauseBtn.style.cssText = `
-            display: none;
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.6);
-            border: 2px solid rgba(255,255,255,0.4);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            pointer-events: auto;
-            z-index: 10000;
-        `;
         this.mobilePauseBtn.addEventListener('touchstart', (e) => {
             e.stopPropagation();
             this.pauseToggleRequested = true;
