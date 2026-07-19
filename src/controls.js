@@ -36,7 +36,22 @@ export class PlayerControls {
         this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
         this.mobileControlsActive = false;
         this.leftJoystickInput = { x: 0, y: 0 };
-        this.rightJoystickInput = { x: 0, y: 0 };
+
+        // Swipe-to-Look camera properties
+        this.lookTouchId = null;
+        this.lookLastX = 0;
+        this.lookLastY = 0;
+        this.lookDeltaX = 0;
+        this.lookDeltaY = 0;
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchMoved = false;
+
+        // Settings sensitivities
+        this.sensitivity = 1.0;
+        this.mobileLookSensitivity = 1.0;
+        this.mobileMoveSensitivity = 1.0;
+
         this._setupMobileControls();
 
         this._addEventListeners();
@@ -184,26 +199,29 @@ export class PlayerControls {
         const direction = { x: 0, z: 0 };
         
         if (this.mobileControlsActive) {
-            // Update camera look rotation (right joystick)
-            const lookSpeedX = 2.5; 
-            const lookSpeedY = 1.8; 
-            
+            // Update camera look rotation via swipe touch deltas
             const camera = this._pointerLockControls.getObject();
             if (camera) {
                 const euler = new THREE.Euler( 0, 0, 0, 'YXZ' );
                 euler.setFromQuaternion( camera.quaternion );
 
-                euler.y -= this.rightJoystickInput.x * lookSpeedX * delta;
-                euler.x -= this.rightJoystickInput.y * lookSpeedY * delta;
+                // Apply touch deltas scaled by mobile look sensitivity
+                const baseLookSpeed = 0.003; 
+                euler.y -= this.lookDeltaX * baseLookSpeed * this.mobileLookSensitivity;
+                euler.x -= this.lookDeltaY * baseLookSpeed * this.mobileLookSensitivity;
 
                 euler.x = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, euler.x));
 
                 camera.quaternion.setFromEuler( euler );
+                
+                // Clear look accumulation deltas
+                this.lookDeltaX = 0;
+                this.lookDeltaY = 0;
             }
             
-            // Add left joystick movement
-            direction.x = this.leftJoystickInput.x;
-            direction.z = this.leftJoystickInput.y;
+            // Add left joystick movement scaled by mobile move sensitivity
+            direction.x = this.leftJoystickInput.x * this.mobileMoveSensitivity;
+            direction.z = this.leftJoystickInput.y * this.mobileMoveSensitivity;
             
             if (direction.x !== 0 || direction.z !== 0) {
                 return direction;
@@ -342,36 +360,7 @@ export class PlayerControls {
         `;
         leftZone.appendChild(leftKnob);
 
-        // Right joystick
-        const rightZone = document.createElement('div');
-        rightZone.id = 'joystick-right-zone';
-        rightZone.style.cssText = `
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.08);
-            border: 2px solid rgba(255,255,255,0.25);
-            pointer-events: auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            touch-action: none;
-        `;
-        const rightKnob = document.createElement('div');
-        rightKnob.style.cssText = `
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.4);
-            box-shadow: 0 0 8px rgba(0,0,0,0.4);
-        `;
-        rightZone.appendChild(rightKnob);
-
         this.mobileOverlay.appendChild(leftZone);
-        this.mobileOverlay.appendChild(rightZone);
         document.body.appendChild(this.mobileOverlay);
 
         // Pause button
@@ -390,32 +379,69 @@ export class PlayerControls {
             this.leftJoystickInput = input;
         });
 
-        // Handle Right Joystick touch events
-        this._setupJoystickEvents(rightZone, rightKnob, (input) => {
-            this.rightJoystickInput = input;
-        });
-
-        // Handle touchstart on document for interaction
+        // Handle touchstart on document for look swipe or interaction
         document.addEventListener('touchstart', (e) => {
             if (!this.mobileControlsActive) return;
-            // Check if touch is inside joysticks or pause button
-            const touch = e.touches[0];
-            const leftRect = leftZone.getBoundingClientRect();
-            const rightRect = rightZone.getBoundingClientRect();
-            const pauseRect = this.mobilePauseBtn.getBoundingClientRect();
             
-            const insideLeft = touch.clientX >= leftRect.left && touch.clientX <= leftRect.right &&
-                               touch.clientY >= leftRect.top && touch.clientY <= leftRect.bottom;
-            const insideRight = touch.clientX >= rightRect.left && touch.clientX <= rightRect.right &&
-                                touch.clientY >= rightRect.top && touch.clientY <= rightRect.bottom;
-            const insidePause = touch.clientX >= pauseRect.left && touch.clientX <= pauseRect.right &&
-                                touch.clientY >= pauseRect.top && touch.clientY <= pauseRect.bottom;
-                                
-            if (!insideLeft && !insideRight && !insidePause) {
-                // Trigger tap interaction
-                this.interactRequested = true;
+            for (const touch of e.changedTouches) {
+                const leftRect = leftZone.getBoundingClientRect();
+                const pauseRect = this.mobilePauseBtn.getBoundingClientRect();
+                
+                const insideLeft = touch.clientX >= leftRect.left && touch.clientX <= leftRect.right &&
+                                   touch.clientY >= leftRect.top && touch.clientY <= leftRect.bottom;
+                const insidePause = touch.clientX >= pauseRect.left && touch.clientX <= pauseRect.right &&
+                                    touch.clientY >= pauseRect.top && touch.clientY <= pauseRect.bottom;
+                                    
+                if (!insideLeft && !insidePause) {
+                    if (this.lookTouchId === null) {
+                        this.lookTouchId = touch.identifier;
+                        this.lookLastX = touch.clientX;
+                        this.lookLastY = touch.clientY;
+                        this.touchStartX = touch.clientX;
+                        this.touchStartY = touch.clientY;
+                        this.touchMoved = false;
+                    }
+                }
             }
         }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!this.mobileControlsActive || this.lookTouchId === null) return;
+            
+            const touch = Array.from(e.touches).find(t => t.identifier === this.lookTouchId);
+            if (!touch) return;
+            
+            const dx = touch.clientX - this.lookLastX;
+            const dy = touch.clientY - this.lookLastY;
+            
+            this.lookLastX = touch.clientX;
+            this.lookLastY = touch.clientY;
+            
+            const dist = Math.sqrt((touch.clientX - this.touchStartX) ** 2 + (touch.clientY - this.touchStartY) ** 2);
+            if (dist > 8) {
+                this.touchMoved = true;
+            }
+            
+            this.lookDeltaX += dx;
+            this.lookDeltaY += dy;
+        }, { passive: true });
+
+        const handleTouchEnd = (e) => {
+            if (!this.mobileControlsActive || this.lookTouchId === null) return;
+            
+            const touch = Array.from(e.changedTouches).find(t => t.identifier === this.lookTouchId);
+            if (!touch) return;
+            
+            if (!this.touchMoved) {
+                this.interactRequested = true;
+            }
+            
+            this.lookTouchId = null;
+            this.touchMoved = false;
+        };
+        
+        document.addEventListener('touchend', handleTouchEnd, { passive: true });
+        document.addEventListener('touchcancel', handleTouchEnd, { passive: true });
     }
 
     _setupJoystickEvents(zone, knob, onInput) {

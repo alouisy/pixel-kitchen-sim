@@ -22,8 +22,10 @@ export class Player {
         const speed = PLAYER_SPEED * delta;
         this.velocity.set(movementInput.x, 0, movementInput.z);
 
-        if (this.velocity.lengthSq() > 0) {
-            this.velocity.normalize().multiplyScalar(speed);
+        const inputLen = this.velocity.length();
+        if (inputLen > 0) {
+            const clampedScale = Math.min(1.0, inputLen);
+            this.velocity.normalize().multiplyScalar(speed * clampedScale);
         } else {
             this.velocity.set(0, 0, 0);
         }

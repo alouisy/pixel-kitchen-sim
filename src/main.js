@@ -156,6 +156,27 @@ function initializeGameComponents() {
     const savedSens = saveManager.getSetting('mouseSensitivity') ?? 1.0;
     playerControls.setSensitivity(savedSens);
 
+    const savedMobileLook = saveManager.getSetting('mobileLookSensitivity') ?? 1.0;
+    if (playerControls) playerControls.mobileLookSensitivity = savedMobileLook;
+
+    const savedMobileMove = saveManager.getSetting('mobileMoveSensitivity') ?? 1.0;
+    if (playerControls) playerControls.mobileMoveSensitivity = savedMobileMove;
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const mouseSensGroup = document.getElementById('sensitivity-setting')?.closest('.setting-group');
+    const mobileLookGroup = document.getElementById('mobile-look-sens-setting')?.closest('.setting-group');
+    const mobileMoveGroup = document.getElementById('mobile-move-sens-setting')?.closest('.setting-group');
+
+    if (isMobile) {
+        if (mouseSensGroup) mouseSensGroup.style.display = 'none';
+        if (mobileLookGroup) mobileLookGroup.style.display = 'flex';
+        if (mobileMoveGroup) mobileMoveGroup.style.display = 'flex';
+    } else {
+        if (mouseSensGroup) mouseSensGroup.style.display = 'flex';
+        if (mobileLookGroup) mobileLookGroup.style.display = 'none';
+        if (mobileMoveGroup) mobileMoveGroup.style.display = 'none';
+    }
+
     addEventListeners();
     console.log("Kitchen Simulator Initialized.");
 }
@@ -229,6 +250,38 @@ function addEventListeners() {
             sensDisplay.textContent = val.toFixed(1);
             playerControls.setSensitivity(val);
             saveManager.saveSetting('mouseSensitivity', val);
+        });
+    }
+
+    const mobLookSlider = document.getElementById('mobile-look-sens-setting');
+    const mobLookDisplay = document.getElementById('mobile-look-sens-value-display');
+    if (mobLookSlider && mobLookDisplay) {
+        const savedMobLook = saveManager.getSetting('mobileLookSensitivity') ?? 1.0;
+        mobLookSlider.value = savedMobLook;
+        mobLookDisplay.textContent = savedMobLook.toFixed(1);
+        if (playerControls) playerControls.mobileLookSensitivity = savedMobLook;
+
+        mobLookSlider.addEventListener('input', (event) => {
+            const val = parseFloat(event.target.value);
+            mobLookDisplay.textContent = val.toFixed(1);
+            if (playerControls) playerControls.mobileLookSensitivity = val;
+            saveManager.saveSetting('mobileLookSensitivity', val);
+        });
+    }
+
+    const mobMoveSlider = document.getElementById('mobile-move-sens-setting');
+    const mobMoveDisplay = document.getElementById('mobile-move-sens-value-display');
+    if (mobMoveSlider && mobMoveDisplay) {
+        const savedMobMove = saveManager.getSetting('mobileMoveSensitivity') ?? 1.0;
+        mobMoveSlider.value = savedMobMove;
+        mobMoveDisplay.textContent = savedMobMove.toFixed(1);
+        if (playerControls) playerControls.mobileMoveSensitivity = savedMobMove;
+
+        mobMoveSlider.addEventListener('input', (event) => {
+            const val = parseFloat(event.target.value);
+            mobMoveDisplay.textContent = val.toFixed(1);
+            if (playerControls) playerControls.mobileMoveSensitivity = val;
+            saveManager.saveSetting('mobileMoveSensitivity', val);
         });
     }
 
