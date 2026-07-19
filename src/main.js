@@ -55,6 +55,67 @@ let currentLeaderboardState = { scope: 'all', rows: [], title: 'Leaderboard', st
 let inputCooldownTimer = 0;
 const INPUT_COOLDOWN_DURATION = 0.2;
 
+// FPS limit and calculation variables
+let targetFPS = 60; // 0 means unlimited
+let lastRenderTime = 0;
+let fpsFrameCount = 0;
+let fpsLastTime = 0;
+let currentFPS = 0;
+
+function setTargetFPS(fps) {
+    targetFPS = fps;
+}
+
+function updateFPSButtons(platform, value) {
+    if (platform === 'mobile') {
+        const buttons = document.querySelectorAll('#mobile-fps-options .fps-btn');
+        buttons.forEach(btn => {
+            btn.classList.toggle('active-fps', parseInt(btn.dataset.fps, 10) === parseInt(value, 10));
+        });
+    } else if (platform === 'desktop') {
+        const buttons = document.querySelectorAll('#desktop-fps-options .fps-btn');
+        buttons.forEach(btn => {
+            btn.classList.toggle('active-fps', btn.dataset.fps === String(value));
+        });
+    }
+}
+
+function applyResolutionSetting(enabled) {
+    if (!renderer) return;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    let ratio = window.devicePixelRatio;
+    if (enabled) {
+        ratio = Math.min(ratio, isMobile ? 2.0 : 2.5); // high quality caps
+    } else {
+        ratio = Math.min(ratio, isMobile ? 1.0 : 1.5); // standard/performance quality caps
+    }
+    renderer.setPixelRatio(ratio);
+    
+    // Force renderer size update to apply pixel ratio change immediately
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    renderer.setSize(width, height);
+    if (camera) {
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+    }
+}
+
+function applyShadowsSetting(enabled) {
+    if (!renderer || !scene) return;
+    renderer.shadowMap.enabled = enabled;
+    
+    // Toggle shadow casting on lights and force materials to recompile
+    scene.traverse(node => {
+        if (node.isDirectionalLight) {
+            node.castShadow = enabled;
+        }
+        if (node.isMesh && node.material) {
+            node.material.needsUpdate = true;
+        }
+    });
+}
+
 function cloneData(data) {
     return data ? JSON.parse(JSON.stringify(data)) : null;
 }
@@ -99,9 +160,16 @@ async function loadLevelData() {
 
 function initializeGameComponents() {
     console.log("Initializing game components...");
+    if (!saveManager) saveManager = new SaveManager();
+    if (!uiManager) uiManager = new UIManager(saveManager);
+    if (!audioManager) audioManager = new AudioManager();
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const antialiasEnabled = saveManager.getSetting('antiAliasing') ?? !isMobile;
+
     scene = setupScene();
     camera = setupCamera();
-    renderer = setupRenderer();
+    renderer = setupRenderer(antialiasEnabled);
     setupLighting(scene);
     setupResizeHandler(camera, renderer);
 
@@ -117,10 +185,6 @@ function initializeGameComponents() {
 
     player = new Player(playerControls);
     player.setScene(scene);
-
-    if (!saveManager) saveManager = new SaveManager();
-    if (!uiManager) uiManager = new UIManager(saveManager);
-    if (!audioManager) audioManager = new AudioManager();
 
     menuManager = new MenuManager(uiManager);
     levelManager = new LevelManager(uiManager, saveManager, levelDatabase);
@@ -162,19 +226,44 @@ function initializeGameComponents() {
     const savedMobileMove = saveManager.getSetting('mobileMoveSensitivity') ?? 1.0;
     if (playerControls) playerControls.mobileMoveSensitivity = savedMobileMove;
 
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    // --- APPLY GRAPHICS SETTINGS ---
+    const savedResolution = saveManager.getSetting('highResolution') ?? !isMobile;
+    applyResolutionSetting(savedResolution);
+    const resCheckbox = document.getElementById('graphics-resolution-setting');
+    if (resCheckbox) resCheckbox.checked = savedResolution;
+
+    const savedShadows = saveManager.getSetting('dynamicShadows') ?? true;
+    applyShadowsSetting(savedShadows);
+    const shadowsCheckbox = document.getElementById('graphics-shadows-setting');
+    if (shadowsCheckbox) shadowsCheckbox.checked = savedShadows;
+
     const mouseSensGroup = document.getElementById('sensitivity-setting')?.closest('.setting-group');
     const mobileLookGroup = document.getElementById('mobile-look-sens-setting')?.closest('.setting-group');
     const mobileMoveGroup = document.getElementById('mobile-move-sens-setting')?.closest('.setting-group');
+    const mobileFpsGroup = document.getElementById('mobile-fps-group');
+    const desktopFpsGroup = document.getElementById('desktop-fps-group');
 
     if (isMobile) {
         if (mouseSensGroup) mouseSensGroup.style.display = 'none';
         if (mobileLookGroup) mobileLookGroup.style.display = 'flex';
         if (mobileMoveGroup) mobileMoveGroup.style.display = 'flex';
+        if (mobileFpsGroup) mobileFpsGroup.style.display = 'flex';
+        if (desktopFpsGroup) desktopFpsGroup.style.display = 'none';
+
+        const savedMobileFPS = saveManager.getSetting('mobileFPS') ?? 60;
+        setTargetFPS(savedMobileFPS);
+        updateFPSButtons('mobile', savedMobileFPS);
     } else {
         if (mouseSensGroup) mouseSensGroup.style.display = 'flex';
         if (mobileLookGroup) mobileLookGroup.style.display = 'none';
         if (mobileMoveGroup) mobileMoveGroup.style.display = 'none';
+        if (mobileFpsGroup) mobileFpsGroup.style.display = 'none';
+        if (desktopFpsGroup) desktopFpsGroup.style.display = 'flex';
+
+        const savedDesktopFPS = saveManager.getSetting('desktopFPS') ?? 'unlimited';
+        const fpsVal = savedDesktopFPS === 'unlimited' ? 0 : parseInt(savedDesktopFPS, 10);
+        setTargetFPS(fpsVal);
+        updateFPSButtons('desktop', savedDesktopFPS);
     }
 
     addEventListeners();
@@ -213,6 +302,24 @@ function addEventListeners() {
         // Update ref in UI Manager
         uiManager.toggleLabelsCheckbox = newToggle;
     } else { console.error("Label toggle checkbox not found!"); }
+
+    const resCheckbox = document.getElementById('graphics-resolution-setting');
+    if (resCheckbox) {
+        resCheckbox.addEventListener('change', (event) => {
+            const isChecked = event.target.checked;
+            applyResolutionSetting(isChecked);
+            saveManager.saveSetting('highResolution', isChecked);
+        });
+    }
+
+    const shadowsCheckbox = document.getElementById('graphics-shadows-setting');
+    if (shadowsCheckbox) {
+        shadowsCheckbox.addEventListener('change', (event) => {
+            const isChecked = event.target.checked;
+            applyShadowsSetting(isChecked);
+            saveManager.saveSetting('dynamicShadows', isChecked);
+        });
+    }
 
     const soundToggle = document.getElementById('sound-effects-setting');
     if (soundToggle) {
@@ -538,11 +645,11 @@ function handleMenuAction(eventOrAction) {
         action = target.dataset.action;
         element = target;
         if (element.tagName === 'A' && action !== 'link') eventOrAction.preventDefault();
-        if (action === 'toggle-labels' || action === 'toggle-sound') return;
+        if (action === 'toggle-labels' || action === 'toggle-sound' || action === 'toggle-resolution' || action === 'toggle-shadows') return;
     } else if (eventOrAction?.action) {
         action = eventOrAction.action;
         element = eventOrAction.element;
-        if (action === 'toggle-labels') { inputCooldownTimer = INPUT_COOLDOWN_DURATION; return; }
+        if (action === 'toggle-labels' || action === 'toggle-resolution' || action === 'toggle-shadows') { inputCooldownTimer = INPUT_COOLDOWN_DURATION; return; }
         if (action === 'toggle-sound') {
             element.checked = !element.checked;
             element.dispatchEvent(new Event('change', { bubbles: true }));
@@ -702,6 +809,21 @@ function handleMenuAction(eventOrAction) {
             uiManager.setControllerType(cType);
             saveManager.saveSetting('controllerType', cType); // Persist
             break;
+        case 'set-mobile-fps': {
+            const fpsVal = parseInt(element.dataset.fps, 10);
+            setTargetFPS(fpsVal);
+            saveManager.saveSetting('mobileFPS', fpsVal);
+            updateFPSButtons('mobile', fpsVal);
+            break;
+        }
+        case 'set-desktop-fps': {
+            const fpsValStr = element.dataset.fps;
+            const fpsVal = fpsValStr === 'unlimited' ? 0 : parseInt(fpsValStr, 10);
+            setTargetFPS(fpsVal);
+            saveManager.saveSetting('desktopFPS', fpsValStr);
+            updateFPSButtons('desktop', fpsValStr);
+            break;
+        }
         case 'resume': resumeGame(); break;
         case 'next-level':
             const currentLevelIdx = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
@@ -1259,9 +1381,49 @@ function handleGameEnd() {
     changeGameState(GameState.LEVEL_END);
 }
 
-function animate() {
+function animate(timestamp) {
     requestAnimationFrame(animate);
     if (!renderer || !uiManager || !menuManager || !playerControls || !player || !interactionManager) return;
+
+    if (!timestamp) timestamp = performance.now();
+
+    // Frame rate limiting logic
+    if (targetFPS > 0) {
+        const frameInterval = 1000 / targetFPS;
+        const elapsed = timestamp - lastRenderTime;
+        if (elapsed < frameInterval - 1) { // 1ms buffer for frame jitter
+            return;
+        }
+        lastRenderTime = timestamp - (elapsed % frameInterval);
+    } else {
+        lastRenderTime = timestamp;
+    }
+
+    // FPS calculation
+    if (!fpsLastTime) fpsLastTime = timestamp;
+    fpsFrameCount++;
+    const fpsElapsed = timestamp - fpsLastTime;
+    if (fpsElapsed >= 1000) {
+        currentFPS = Math.round((fpsFrameCount * 1000) / fpsElapsed);
+        fpsFrameCount = 0;
+        fpsLastTime = timestamp;
+
+        const fpsValueEl = document.getElementById('fps-value');
+        if (fpsValueEl) {
+            fpsValueEl.textContent = currentFPS;
+            const fpsDisplayEl = document.getElementById('fps-display');
+            if (fpsDisplayEl) {
+                if (currentFPS >= 50) {
+                    fpsDisplayEl.style.color = '#4CAF50'; // green
+                } else if (currentFPS >= 30) {
+                    fpsDisplayEl.style.color = '#FFC107'; // yellow
+                } else {
+                    fpsDisplayEl.style.color = '#F44336'; // red
+                }
+            }
+        }
+    }
+
     const delta = clock.getDelta();
     if (inputCooldownTimer > 0) inputCooldownTimer -= delta;
     const gamepads = navigator.getGamepads();

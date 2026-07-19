@@ -15,17 +15,21 @@ export function setupCamera() {
     return camera;
 }
 
-export function setupRenderer() {
+export function setupRenderer(antialiasEnabled = true) {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     const renderer = new THREE.WebGLRenderer({
         canvas: document.getElementById('gameCanvas'),
-        antialias: true
+        antialias: antialiasEnabled
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    
+    // Cap pixel ratio on mobile (e.g. 1.5) and desktop (e.g. 2.0)
+    const maxPixelRatio = isMobile ? 1.5 : 2.0;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPixelRatio));
     
     // Shadow Map settings
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
+    renderer.shadowMap.type = isMobile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap; // Softer shadows on desktop, faster on mobile
     
     // Tone Mapping for better colors
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -44,9 +48,10 @@ export function setupLighting(scene) {
     dirLight.position.set(5, 10, 5);
     dirLight.castShadow = true;
     
-    // Optimize Shadow Map
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
+    // Optimize Shadow Map (lower resolution on mobile)
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    dirLight.shadow.mapSize.width = isMobile ? 1024 : 2048;
+    dirLight.shadow.mapSize.height = isMobile ? 1024 : 2048;
     dirLight.shadow.camera.near = 0.5;
     dirLight.shadow.camera.far = 50;
     const d = 10;
