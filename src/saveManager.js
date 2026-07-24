@@ -1,3 +1,5 @@
+import { normalizeLevelData } from './utils/legacyMigration.js';
+
 const STORAGE_KEY = 'pixelKitchenSim.save';
 const SAVE_SCHEMA_VERSION = 2;
 
@@ -24,7 +26,8 @@ function defaultSave() {
         settings: {
             language: 'en',
             showLabels: true,
-            audioEnabled: true
+            audioEnabled: true,
+            difficulty: 'beginner'
         },
         gameCompleted: false
     };
@@ -194,11 +197,12 @@ export class SaveManager {
     }
 
     getCustomLevels() {
-        return clone(this.data.customLevels);
+        return clone(this.data.customLevels.map(normalizeLevelData));
     }
 
     getCustomLevel(customId) {
-        return clone(this.data.customLevels.find(level => level.customId === customId) || null);
+        const raw = this.data.customLevels.find(level => level.customId === customId);
+        return raw ? clone(normalizeLevelData(raw)) : null;
     }
 
     findCustomLevelBySource(sourceKey) {

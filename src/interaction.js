@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { INTERACTION_DISTANCE, STATION_TYPES, ITEM_TYPES, GRID_UNIT, INGREDIENT_RENDER_ORDER } from './constants.js';
 import { createItem, checkPlateCompletion, updatePlateVisuals } from './items.js';
+import { getTrans } from './i18nData.js';
 
 export class InteractionManager {
     constructor(camera, scene, player, stations, stationInteractables, levelManager, uiManager, floorMesh) {
@@ -120,7 +121,7 @@ export class InteractionManager {
                     const ingredientName = heldItem.userData.contents[0];
                     if (!targetObject.userData.contents) targetObject.userData.contents = [];
                     if (targetObject.userData.contents.includes(ingredientName)) {
-                        this.uiManager.showTemporaryMessage("Already Added!", 1000);
+                        this.uiManager.showTemporaryMessage("already_added", 1000);
                         if (this.audioManager) this.audioManager.play('error');
                         return;
                     }
@@ -150,11 +151,14 @@ export class InteractionManager {
                     updatePlateVisuals(this.scene, heldItem);
 
                     if (isMealComplete) {
-                        this.uiManager.showTemporaryMessage(`${targetObject.userData.mealName} Ready!`, 1500);
+                        const mealName = targetObject.userData.mealName;
+                        const translatedMeal = getTrans(mealName, this.uiManager.currentLanguage);
+                        const readyPattern = getTrans('dish_ready', this.uiManager.currentLanguage) || '{dish} Ready!';
+                        this.uiManager.showTemporaryMessage(readyPattern.replace('{dish}', translatedMeal), 1500);
                         this._animateMealCompletion(targetObject);
                         if (this.audioManager) this.audioManager.play('ding');
                     } else {
-                        this.uiManager.showTemporaryMessage("Ingredient Transferred", 1000);
+                        this.uiManager.showTemporaryMessage("ingredient_transferred", 1000);
                         if (this.audioManager) this.audioManager.play('place');
                     }
                     return;
@@ -182,7 +186,7 @@ export class InteractionManager {
                         else child.material.dispose();
                     }
                 });
-                this.uiManager.showTemporaryMessage('Item discarded', 1200);
+                this.uiManager.showTemporaryMessage("item_discarded", 1200);
                 if (this.audioManager) this.audioManager.play('error');
                 return;
             }
@@ -311,7 +315,7 @@ export class InteractionManager {
                 this._handleDirectAddition(existingItem, item); 
                 return;
             } else {
-                this.uiManager.showTemporaryMessage("Slot Occupied", 1000);
+                this.uiManager.showTemporaryMessage("slot_occupied", 1000);
                 if(this.audioManager) this.audioManager.play('error');
                 return;
             }
@@ -351,7 +355,6 @@ export class InteractionManager {
                 this._removeDynamicInteractable(servedItem); 
                 this.scene.remove(servedItem); 
                 servedItem.traverse((c) => { if(c.geometry) c.geometry.dispose(); });
-                this.uiManager.showTemporaryMessage("Order Served!", 1500);
                 if(this.audioManager) this.audioManager.play('ding');
                 return true;
             }
@@ -403,7 +406,9 @@ export class InteractionManager {
 
             const newItem = createItem(this.scene, newType);
             this.player.pickup(newItem);
-            this.uiManager.showTemporaryMessage(`${newType.replace(/_/g, ' ')} assembled!`, 1500);
+            const translatedDish1 = getTrans(newType, this.uiManager.currentLanguage);
+            const assembledPattern1 = getTrans('dish_assembled', this.uiManager.currentLanguage) || '{dish} Assembled!';
+            this.uiManager.showTemporaryMessage(assembledPattern1.replace('{dish}', translatedDish1), 1500);
             if (this.audioManager) this.audioManager.play('pop');
         } else {
             let gridInfo = container.userData.gridInfo;
@@ -434,7 +439,9 @@ export class InteractionManager {
 
             this._addDynamicInteractable(newItem);
             this.scene.add(newItem);
-            this.uiManager.showTemporaryMessage(`${newType.replace(/_/g, ' ')} assembled!`, 1500);
+            const translatedDish2 = getTrans(newType, this.uiManager.currentLanguage);
+            const assembledPattern2 = getTrans('dish_assembled', this.uiManager.currentLanguage) || '{dish} Assembled!';
+            this.uiManager.showTemporaryMessage(assembledPattern2.replace('{dish}', translatedDish2), 1500);
             if (this.audioManager) this.audioManager.play('place');
         }
     }
@@ -454,7 +461,7 @@ export class InteractionManager {
         if (!containerTypes.includes(containerData.itemType)) return;
         if (!Array.isArray(containerData.contents)) containerData.contents = [];
         if (containerData.contents.includes(ingredientName)) {
-            this.uiManager.showTemporaryMessage("Already Added!", 1000);
+            this.uiManager.showTemporaryMessage("already_added", 1000);
             return;
         }
 
@@ -485,11 +492,14 @@ export class InteractionManager {
         this._removeIngredientAfterAddition(ingredientObject);
 
         if (isMealComplete) {
-            this.uiManager.showTemporaryMessage(`${containerData.mealName} Ready!`, 1500);
+            const mealName = containerData.mealName;
+            const translatedMeal = getTrans(mealName, this.uiManager.currentLanguage);
+            const readyPattern = getTrans('dish_ready', this.uiManager.currentLanguage) || '{dish} Ready!';
+            this.uiManager.showTemporaryMessage(readyPattern.replace('{dish}', translatedMeal), 1500);
             this._animateMealCompletion(container);
             if(this.audioManager) this.audioManager.play('ding');
         } else {
-            this.uiManager.showTemporaryMessage("Ingredient Added", 1000);
+            this.uiManager.showTemporaryMessage("ingredient_added", 1000);
             if(this.audioManager) this.audioManager.play('place');
         }
     }
@@ -508,7 +518,7 @@ export class InteractionManager {
         if (this.player.pickup(item)) {
              if(this.audioManager) this.audioManager.play('pop');
         } else {
-            this.uiManager.showTemporaryMessage("Hands Full!", 1000);
+            this.uiManager.showTemporaryMessage("hands_full", 1000);
             this._addDynamicInteractable(item);
         }
     }
@@ -560,7 +570,10 @@ export class InteractionManager {
                 const currentCount = stationData.internalContents.length;
                 const reqCount = stationData.config.requiredIngredients.length;
         
-                this.uiManager.showTemporaryMessage(`Added ${item.name.replace(/_/g, ' ')} to Blender (${currentCount}/${reqCount})`, 1500);
+                const translatedItemName = getTrans(item.name, this.uiManager.currentLanguage);
+                const blenderAddPattern = getTrans('added_to_blender', this.uiManager.currentLanguage) || 'Added {item} to Blender ({current}/{max})';
+                const blendMsg = blenderAddPattern.replace('{item}', translatedItemName).replace('{current}', currentCount).replace('{max}', reqCount);
+                this.uiManager.showTemporaryMessage(blendMsg, 1500);
                 if (this.audioManager) this.audioManager.play('place');
                 return;
             }
@@ -607,7 +620,7 @@ export class InteractionManager {
                     // Complete order if it forms a meal
                     checkPlateCompletion(item);
                     updatePlateVisuals(this.scene, item);
-                    this.uiManager.showTemporaryMessage("Smoothie Poured!", 1500);
+                    this.uiManager.showTemporaryMessage("smoothie_poured", 1500);
                     if (this.audioManager) this.audioManager.play('ding');
                 } else {
                     const contentsCopyForFilter = [...contents];
@@ -633,18 +646,20 @@ export class InteractionManager {
                         }
                         return true;
                     });
-                    this.uiManager.showTemporaryMessage(`Missing: ${missing.map(m => m.replace(/_/g, ' ')).join(', ')}`, 2000);
+                    const missingStr = missing.map(m => getTrans(m, this.uiManager.currentLanguage)).join(', ');
+                    const missingPattern = getTrans('missing_ingredients', this.uiManager.currentLanguage) || 'Missing: {list}';
+                    this.uiManager.showTemporaryMessage(missingPattern.replace('{list}', missingStr), 2000);
                     if (this.audioManager) this.audioManager.play('error');
                 }
                 return;
             }
             
-            this.uiManager.showTemporaryMessage("Cannot put this in blender", 1500);
+            this.uiManager.showTemporaryMessage("cannot_blend_item", 1500);
             if (this.audioManager) this.audioManager.play('error');
             return;
         }
 
-        if (stationData.occupiedBy) { this.uiManager.showTemporaryMessage("Station Busy", 1000); if(this.audioManager) this.audioManager.play('error'); return; }
+        if (stationData.occupiedBy) { this.uiManager.showTemporaryMessage("station_busy", 1000); if(this.audioManager) this.audioManager.play('error'); return; }
         
         const itemToPlace = this.player.place();
         if (!itemToPlace) return;
@@ -669,7 +684,7 @@ export class InteractionManager {
                 this._finishProcessing(itemToPlace, station);
             }
         } else {
-            this.uiManager.showTemporaryMessage("Cannot Process", 1000);
+            this.uiManager.showTemporaryMessage("cannot_process", 1000);
             if(this.audioManager) this.audioManager.play('error');
             this.player.pickup(itemToPlace);
         }
@@ -726,10 +741,11 @@ export class InteractionManager {
         if (station.userData.config?.requiredIngredients) {
             const contents = station.userData.internalContents || [];
             if (contents.length === 0) {
-                this.uiManager.showTemporaryMessage("Blender is empty", 1500);
+                this.uiManager.showTemporaryMessage("blender_empty", 1500);
             } else {
-                const formatted = contents.map(c => c.replace(/_/g, ' ')).join(', ');
-                this.uiManager.showTemporaryMessage(`Blender contains: ${formatted}`, 2000);
+                const formatted = contents.map(c => getTrans(c, this.uiManager.currentLanguage)).join(', ');
+                const blendContainsPattern = getTrans('blender_contains', this.uiManager.currentLanguage) || 'Blender contains: {list}';
+                this.uiManager.showTemporaryMessage(blendContainsPattern.replace('{list}', formatted), 2000);
             }
             if (this.audioManager) this.audioManager.play('pop');
             return;

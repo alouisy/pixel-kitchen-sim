@@ -12,10 +12,12 @@ import { SaveManager } from './saveManager.js';
 import { LevelEditor } from './editor.js';
 import { AudioManager } from './audioManager.js';
 import { OnlineServices } from './onlineService.js';
+import { setThumbnailRenderer } from './thumbnailHelper.js';
 
 const GameState = { 
     LOADING: 'LOADING', 
     MAIN_MENU: 'MAIN_MENU', 
+    ONBOARDING: 'ONBOARDING',
     SETTINGS: 'SETTINGS', 
     LEVEL_SELECT: 'LEVEL_SELECT', 
     LEVEL_INSTRUCTIONS: 'LEVEL_INSTRUCTIONS', 
@@ -170,6 +172,7 @@ function initializeGameComponents() {
     scene = setupScene();
     camera = setupCamera();
     renderer = setupRenderer(antialiasEnabled);
+    setThumbnailRenderer(renderer);
     setupLighting(scene);
     setupResizeHandler(camera, renderer);
 
@@ -236,6 +239,9 @@ function initializeGameComponents() {
     applyShadowsSetting(savedShadows);
     const shadowsCheckbox = document.getElementById('graphics-shadows-setting');
     if (shadowsCheckbox) shadowsCheckbox.checked = savedShadows;
+
+    const savedDiff = saveManager.getSetting('difficulty') || 'beginner';
+    uiManager.updateDifficultyButtons(savedDiff);
 
     const mouseSensGroup = document.getElementById('sensitivity-setting')?.closest('.setting-group');
     const mobileLookGroup = document.getElementById('mobile-look-sens-setting')?.closest('.setting-group');
@@ -579,13 +585,21 @@ function changeGameState(newState) {
     if (editorHubScreen) editorHubScreen.classList.remove('active');
 
     switch (newState) {
-        case GameState.MAIN_MENU: uiManager.showMainMenu(); menuManager.activateMenu(uiManager.mainMenu); break;
+        case GameState.MAIN_MENU: 
+            currentLevelData = null;
+            if (uiManager) uiManager.setCurrentLevelData(null);
+            uiManager.showMainMenu(); 
+            menuManager.activateMenu(uiManager.mainMenu); 
+            break;
+        case GameState.ONBOARDING: uiManager.showOnboarding(); menuManager.activateMenu(uiManager.onboardingScreen); break;
         case GameState.NICKNAME: uiManager.showNicknamePrompt(); menuManager.activateMenu(uiManager.nicknameScreen); break;
         case GameState.LEADERBOARD:
             uiManager.showLeaderboard(currentLeaderboardState.scope, currentLeaderboardState.rows, currentLeaderboardState.title, currentLeaderboardState.statusText);
             menuManager.activateMenu(uiManager.leaderboardScreen);
             break;
         case GameState.EDITOR_HUB: 
+            currentLevelData = null;
+            if (uiManager) uiManager.setCurrentLevelData(null);
             uiManager.hideGameUI();
             renderEditorHub();
             editorHubScreen.classList.add('active');
@@ -596,6 +610,8 @@ function changeGameState(newState) {
             uiManager.showSettings(isPause); menuManager.activateMenu(uiManager.settingsScreen);
             break;
         case GameState.LEVEL_SELECT: {
+            currentLevelData = null;
+            if (uiManager) uiManager.setCurrentLevelData(null);
             const tabOfficial = document.getElementById('tab-official');
             const tabMyLevels = document.getElementById('tab-my-levels');
             const tabCommunity = document.getElementById('tab-community');
@@ -634,7 +650,7 @@ function changeGameState(newState) {
     }
 }
 
-function isMenuState(state) { return [GameState.MAIN_MENU, GameState.NICKNAME, GameState.LEADERBOARD, GameState.SETTINGS, GameState.LEVEL_SELECT, GameState.LEVEL_INSTRUCTIONS, GameState.PAUSED, GameState.LEVEL_END, GameState.GAME_COMPLETED].includes(state); }
+function isMenuState(state) { return [GameState.MAIN_MENU, GameState.ONBOARDING, GameState.NICKNAME, GameState.LEADERBOARD, GameState.SETTINGS, GameState.LEVEL_SELECT, GameState.LEVEL_INSTRUCTIONS, GameState.PAUSED, GameState.LEVEL_END, GameState.GAME_COMPLETED].includes(state); }
 
 function handleMenuAction(eventOrAction) {
     let action = null, element = null;
@@ -684,6 +700,8 @@ function handleMenuAction(eventOrAction) {
     }
 
     switch (action) {
+        case 'how-to-play': changeGameState(GameState.ONBOARDING); break;
+        case 'dismiss-onboarding': changeGameState(GameState.MAIN_MENU); break;
         case 'toggle-level-tab': {
             const tab = element.dataset.tab;
             const tabOfficial = document.getElementById('tab-official');
@@ -791,7 +809,7 @@ function handleMenuAction(eventOrAction) {
             if (!isNaN(levelIndex) && saveManager.isLevelUnlocked(levelIndex)) {
                 prepareStartLevel(levelIndex);
             } else { 
-                if (!isNaN(levelIndex)) uiManager.showTemporaryMessage("Level Locked!", 1500); 
+                if (!isNaN(levelIndex)) uiManager.showTemporaryMessage('level_locked_msg', 1500); 
                 actionTaken = false; 
             }
             break;
@@ -808,6 +826,11 @@ function handleMenuAction(eventOrAction) {
             const cType = element.dataset.type;
             uiManager.setControllerType(cType);
             saveManager.saveSetting('controllerType', cType); // Persist
+            break;
+        case 'set-difficulty':
+            const diffVal = element.dataset.diff;
+            saveManager.saveSetting('difficulty', diffVal);
+            uiManager.updateDifficultyButtons(diffVal);
             break;
         case 'set-mobile-fps': {
             const fpsVal = parseInt(element.dataset.fps, 10);
@@ -970,7 +993,7 @@ async function executePublishLevel(index, description, difficulty) {
     if (!entry || !entry.customId) return;
 
     try {
-        uiManager.showTemporaryMessage('Publishing online...', 3000);
+        uiManager.showTemporaryMessage('publishing_online', 3000);
         const data = await getLevelData(entry);
         if (!data) {
             alert("Error: Could not retrieve level data.");
@@ -1015,7 +1038,7 @@ async function importLevelByCode() {
     if (!code) return;
 
     try {
-        uiManager.showTemporaryMessage('Importing level...', 3000);
+        uiManager.showTemporaryMessage('importing_level', 3000);
         const levelData = await onlineServices.fetchCustomLevel(code);
         if (levelData && levelData.data) {
             const imported = saveManager.saveCustomLevel({
@@ -1026,7 +1049,7 @@ async function importLevelByCode() {
             levelDataCache[`custom:${imported.customId}`] = cloneData(imported);
             refreshPlayableLevelDatabase();
             renderEditorHub();
-            uiManager.showTemporaryMessage('Level imported successfully!', 2000);
+            uiManager.showTemporaryMessage('level_imported', 2000);
         }
     } catch (error) {
         console.error("Import failed:", error);
@@ -1184,7 +1207,7 @@ function saveEditedLevelLocally(levelData, sourceEntry) {
     levelDataCache[`custom:${saved.customId}`] = cloneData(saved);
     currentEditingLevelEntry = saved;
     refreshPlayableLevelDatabase();
-    uiManager.showTemporaryMessage('Level saved locally', 1800);
+    uiManager.showTemporaryMessage('level_saved_local', 1800);
 }
 
 // Fetch logic helper
@@ -1310,7 +1333,7 @@ async function prepareStartLevel(levelIndex) {
     } catch (e) {
         console.error(e);
         uiManager.hideLoading();
-        uiManager.showTemporaryMessage("Error loading level", 2000);
+        uiManager.showTemporaryMessage('error_loading_level', 2000);
         changeGameState(GameState.LEVEL_SELECT);
     }
 }
@@ -1319,6 +1342,7 @@ function confirmStartLevel() {
     if ((pendingLevelIndex < 0 && pendingLevelIndex !== -999) || !pendingLevelData || !levelManager) { changeGameState(GameState.LEVEL_SELECT); return; }
     currentLevelData = pendingLevelData;
     uiManager.setCurrentLevelData(currentLevelData);
+    if (player) player.resetPosition(0, 0.9, 2.5);
     const loaded = levelManager.loadLevel(pendingLevelIndex, pendingLevelData);
     pendingLevelIndex = -1;
     pendingLevelData = null;
@@ -1327,7 +1351,7 @@ function confirmStartLevel() {
 }
 
 function resetWorldState() {
-    if (player) player.forceDropItem();
+    if (player) player.resetPosition(0, 0.9, 2.5);
     if (interactionManager) {
         if (interactionManager.currentlyHighlightedObject) {
             interactionManager.revertObjectHighlight(interactionManager.currentlyHighlightedObject);
@@ -1732,7 +1756,7 @@ async function prepareStartCommunityLevel(onlineId) {
     } catch (e) {
         console.error("Failed to load community level:", e);
         uiManager.hideLoading();
-        uiManager.showTemporaryMessage("Error loading community level", 2000);
+        uiManager.showTemporaryMessage('error_loading_community', 2000);
         changeGameState(GameState.LEVEL_SELECT);
     }
 }

@@ -1,14 +1,20 @@
 // src/gameData.js
-// import { INGREDIENT_STATES, STATION_TYPES, COUNTER_HEIGHT } from './constants.js'; // Keep imports if needed
+import { MEAL, STATION } from './ids.js';
 
 // --- RECIPES ---
-// Includes default timeLimit, baseScore, penalty, and NEW instructions per recipe
+// Includes default timeLimit, baseScore, penalty, and instructions per recipe
 // Ingredient names MUST match the 'finalName' generated in items.js
 export const RECIPES = {
-    // --- Existing ---
-    'French Fries': {
+    [MEAL.FRENCH_FRIES]: {
         ingredients: ['cooked_fries'].sort(),
         timeLimit: 75, baseScore: 60, penalty: 30,
+        visualSteps: [
+            { type: 'source', station: STATION.POTATO_BIN, item: 'potato' },
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'raw_fries' },
+            { type: 'process', station: STATION.DEEP_FRYER, item: 'cooked_fries' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.FRENCH_FRIES }
+        ],
         instructions: {
             en: [
                 "Get Potato (Bin)",
@@ -36,9 +42,17 @@ export const RECIPES = {
             ]
         }
     },
-    'Salad': {
+    [MEAL.SALAD]: {
         ingredients: ['chopped_lettuce', 'chopped_tomato'].sort(),
         timeLimit: 90, baseScore: 75, penalty: 40,
+        visualSteps: [
+            { type: 'source', station: STATION.LETTUCE_BIN, item: 'lettuce' },
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'chopped_lettuce' },
+            { type: 'source', station: STATION.TOMATO_BIN, item: 'tomato' },
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'chopped_tomato' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.SALAD }
+        ],
         instructions: {
             en: [
                 "Get Lettuce (Bin)",
@@ -69,9 +83,16 @@ export const RECIPES = {
             ]
         }
     },
-    'Hamburger': {
+    [MEAL.HAMBURGER]: {
         ingredients: ['bun', 'cooked_patty'].sort(),
         timeLimit: 100, baseScore: 100, penalty: 50,
+        visualSteps: [
+            { type: 'source', station: STATION.PATTY_BOX, item: 'patty' },
+            { type: 'process', station: STATION.STOVE_TOP, item: 'cooked_patty' },
+            { type: 'source', station: STATION.BUN_RACK, item: 'bun' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.HAMBURGER }
+        ],
         instructions: {
             en: [
                 "Get Patty (Bin)",
@@ -99,9 +120,18 @@ export const RECIPES = {
             ]
         }
     },
-    'Cheeseburger Combo': {
+    [MEAL.CHEESEBURGER_COMBO]: {
         ingredients: ['bun', 'cheese_slice', 'cooked_fries', 'cooked_patty'].sort(),
         timeLimit: 130, baseScore: 120, penalty: 60,
+        visualSteps: [
+            { type: 'source', station: STATION.PATTY_BOX, item: 'patty' },
+            { type: 'process', station: STATION.STOVE_TOP, item: 'cooked_patty' },
+            { type: 'source', station: STATION.BUN_RACK, item: 'bun' },
+            { type: 'source', station: STATION.CHEESE_FRIDGE, item: 'cheese_slice' },
+            { type: 'process', station: STATION.DEEP_FRYER, item: 'cooked_fries' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.CHEESEBURGER_COMBO }
+        ],
         instructions: {
             en: [
                 "Get Patty (Bin)",
@@ -141,16 +171,23 @@ export const RECIPES = {
             ]
         }
     },
-    // --- New Recipes ---
-    'Onion Rings': {
+    [MEAL.ONION_RINGS]: {
         ingredients: ['cooked_onion_rings'].sort(),
         timeLimit: 80, baseScore: 70, penalty: 35,
-        instructions: { // Assuming Onion -> Cut -> Coat -> Fry
+        visualSteps: [
+            { type: 'source', station: STATION.ONION_BIN, item: 'onion' },
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'raw_onion_rings' },
+            { type: 'process', station: STATION.COATING_STATION, item: 'onion_rings_coated' },
+            { type: 'process', station: STATION.DEEP_FRYER, item: 'cooked_onion_rings' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.ONION_RINGS }
+        ],
+        instructions: {
             en: [
                 "Get Onion (Bin)",
                 "Use Cutting Board -> Raw Onion Rings",
                 "Get Coating Mix (Source)",
-                "Use Coating Station w/ Rings -> Coated Onion Rings", // Needs station
+                "Use Coating Station w/ Rings -> Coated Onion Rings",
                 "Use Fryer -> Cooked Onion Rings",
                 "Get Plate (Stack)",
                 "Combine Plate + Cooked Onion Rings (Assembly)",
@@ -160,7 +197,7 @@ export const RECIPES = {
                 "Prendre Oignon (Bac)",
                 "Utiliser Planche -> Rondelles Oignon Crues",
                 "Prendre Panure (Source)",
-                "Utiliser Station Panure avec Rondelles -> Rondelles Panées", // Needs station
+                "Utiliser Station Panure avec Rondelles -> Rondelles Panées",
                 "Utiliser Friteuse -> Rondelles Cuites",
                 "Prendre Assiette (Pile)",
                 "Combiner Assiette + Rondelles Cuites (Assemblage)",
@@ -170,7 +207,7 @@ export const RECIPES = {
                 "Coger Cebolla (Contenedor)",
                 "Usar Tabla -> Aros Cebolla Crudos",
                 "Coger Mezcla Rebozar (Fuente)",
-                "Usar Estación Rebozado con Aros -> Aros Rebozados", // Needs station
+                "Usar Estación Rebozado con Aros -> Aros Rebozados",
                 "Usar Freidora -> Aros Cocidos",
                 "Coger Plato (Pila)",
                 "Combinar Plato + Aros Cocidos (Ensamblaje)",
@@ -178,10 +215,19 @@ export const RECIPES = {
             ]
         }
     },
-    'Chicken Tenders & Fries': {
+    [MEAL.CHICKEN_TENDERS_FRIES]: {
         ingredients: ['cooked_chicken_tenders', 'cooked_fries'].sort(),
         timeLimit: 120, baseScore: 120, penalty: 45,
-        instructions: { // Assuming Chicken -> Cut -> Coat -> Fry, plus fries
+        visualSteps: [
+            { type: 'source', station: STATION.CHICKEN_BOX, item: 'raw_chicken' },
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'raw_chicken_strips' },
+            { type: 'process', station: STATION.COATING_STATION, item: 'coated_chicken_strips' },
+            { type: 'process', station: STATION.DEEP_FRYER, item: 'cooked_chicken_tenders' },
+            { type: 'process', station: STATION.DEEP_FRYER, item: 'cooked_fries' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.CHICKEN_TENDERS_FRIES }
+        ],
+        instructions: {
             en: [
                 "Get Raw Chicken (Source)",
                 "Use Cutting Board -> Raw Chicken Strips",
@@ -223,9 +269,19 @@ export const RECIPES = {
             ]
         }
     },
-    'BLT Sandwich': {
+    [MEAL.BLT_SANDWICH]: {
         ingredients: ['cooked_bacon', 'chopped_lettuce', 'chopped_tomato', 'toasted_bread'].sort(),
         timeLimit: 120, baseScore: 110, penalty: 55,
+        visualSteps: [
+            { type: 'source', station: STATION.BREAD_RACK, item: 'bread_slice' },
+            { type: 'process', station: STATION.TOASTER, item: 'toasted_bread' },
+            { type: 'source', station: STATION.BACON_PACK, item: 'raw_bacon' },
+            { type: 'process', station: STATION.STOVE_TOP, item: 'cooked_bacon' },
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'chopped_lettuce' },
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'chopped_tomato' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.BLT_SANDWICH }
+        ],
         instructions: {
             en: [
                 "Get Bread Slice (Source)",
@@ -268,14 +324,21 @@ export const RECIPES = {
             ]
         }
     },
-    'Grilled Cheese Sandwich': {
+    [MEAL.GRILLED_CHEESE_SANDWICH]: {
         ingredients: ['grilled_cheese_cooked'].sort(),
         timeLimit: 85, baseScore: 80, penalty: 40,
-        instructions: { // Assuming Bread + Cheese -> Assemble -> Griddle
+        visualSteps: [
+            { type: 'source', station: STATION.BREAD_RACK, item: 'bread_slice' },
+            { type: 'source', station: STATION.CHEESE_FRIDGE, item: 'cheese_slice' },
+            { type: 'process', station: STATION.STOVE_TOP, item: 'grilled_cheese_cooked' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.GRILLED_CHEESE_SANDWICH }
+        ],
+        instructions: {
             en: [
                 "Get Bread Slice (Source)",
                 "Get Cheese Slice (Fridge)",
-                "Combine Bread + Cheese (Assembly) -> Grilled Cheese Raw", // Implicit assembly step
+                "Combine Bread + Cheese (Assembly) -> Grilled Cheese Raw",
                 "Use Griddle -> Grilled Cheese Cooked",
                 "Get Plate (Stack)",
                 "Combine Plate + Grilled Cheese Cooked (Assembly)",
@@ -284,7 +347,7 @@ export const RECIPES = {
             fr: [
                 "Prendre Tranche Pain (Source)",
                 "Prendre Tranche Fromage (Frigo)",
-                "Combiner Pain + Fromage (Assemblage) -> Sandwich Cru", // Implicit assembly step
+                "Combiner Pain + Fromage (Assemblage) -> Sandwich Cru",
                 "Utiliser Plaque -> Sandwich Grillé Cuit",
                 "Prendre Assiette (Pile)",
                 "Combiner Assiette + Sandwich Grillé Cuit (Assemblage)",
@@ -293,7 +356,7 @@ export const RECIPES = {
             es: [
                 "Coger Rebanada Pan (Fuente)",
                 "Coger Loncha Queso (Nevera)",
-                "Combinar Pan + Queso (Ensamblaje) -> Sándwich Crudo", // Implicit assembly step
+                "Combinar Pan + Queso (Ensamblaje) -> Sándwich Crudo",
                 "Usar Plancha -> Sándwich Queso Cocido",
                 "Coger Plato (Pila)",
                 "Combinar Plato + Sándwich Queso Cocido (Ensamblaje)",
@@ -301,9 +364,17 @@ export const RECIPES = {
             ]
         }
     },
-    'Pancakes': {
+    [MEAL.PANCAKES]: {
         ingredients: ['cooked_pancakes', 'syrup'].sort(),
         timeLimit: 120, baseScore: 90, penalty: 45,
+        visualSteps: [
+            { type: 'source', station: STATION.PANCAKE_MIX, item: 'pancake_mix' },
+            { type: 'process', station: STATION.STAND_MIXER, item: 'pancake_batter' },
+            { type: 'process', station: STATION.STOVE_TOP, item: 'cooked_pancakes' },
+            { type: 'source', station: STATION.SYRUP_BOTTLE, item: 'syrup' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.PANCAKES }
+        ],
         instructions: {
             en: [
                 "Get Pancake Mix (Source)",
@@ -334,9 +405,17 @@ export const RECIPES = {
             ]
         }
     },
-    'Cheese Omelette': {
+    [MEAL.CHEESE_OMELETTE]: {
         ingredients: ['cheese_slice', 'cooked_omelette'].sort(),
         timeLimit: 90, baseScore: 80, penalty: 40,
+        visualSteps: [
+            { type: 'source', station: STATION.EGG_CARTON, item: 'egg' },
+            { type: 'process', station: STATION.STAND_MIXER, item: 'omelette_mix' },
+            { type: 'process', station: STATION.STOVE_TOP, item: 'cooked_omelette' },
+            { type: 'source', station: STATION.CHEESE_FRIDGE, item: 'cheese_slice' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.CHEESE_OMELETTE }
+        ],
         instructions: {
             en: [
                 "Get Egg (Source)",
@@ -367,9 +446,17 @@ export const RECIPES = {
             ]
         }
     },
-    'Fruit & Yogurt Bowl': {
+    [MEAL.FRUIT_YOGURT_BOWL]: {
         ingredients: ['granola', 'sliced_banana', 'sliced_strawberry', 'yogurt'].sort(),
         timeLimit: 70, baseScore: 70, penalty: 30,
+        visualSteps: [
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'sliced_banana' },
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'sliced_strawberry' },
+            { type: 'source', station: STATION.YOGURT_POT, item: 'yogurt' },
+            { type: 'source', station: STATION.GRANOLA_JAR, item: 'granola' },
+            { type: 'container', station: STATION.BOWL_STACK, item: 'bowl' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.FRUIT_YOGURT_BOWL }
+        ],
         instructions: {
             en: [
                 "Get Banana (Bin)",
@@ -378,7 +465,7 @@ export const RECIPES = {
                 "Use Cutting Board -> Sliced Strawberry",
                 "Get Yogurt (Source)",
                 "Get Granola (Source)",
-                "Get Bowl (Source)", // Needs Bowl source
+                "Get Bowl (Source)",
                 "Combine Bowl + Yogurt + Banana + Strawberry + Granola (Assembly)",
                 "Serve (Counter)"
             ],
@@ -389,7 +476,7 @@ export const RECIPES = {
                 "Utiliser Planche -> Fraise Tranchée",
                 "Prendre Yaourt (Source)",
                 "Prendre Granola (Source)",
-                "Prendre Bol (Source)", // Needs Bowl source
+                "Prendre Bol (Source)",
                 "Combiner Bol + Yaourt + Banane + Fraise + Granola (Assemblage)",
                 "Servir (Comptoir)"
             ],
@@ -400,16 +487,23 @@ export const RECIPES = {
                 "Usar Tabla -> Fresa Rebanada",
                 "Coger Yogur (Fuente)",
                 "Coger Granola (Fuente)",
-                "Coger Bol (Fuente)", // Needs Bowl source
+                "Coger Bol (Fuente)",
                 "Combinar Bol + Yogur + Plátano + Fresa + Granola (Ensamblaje)",
                 "Servir (Mostrador)"
             ]
         }
     },
-    'Smoothie': {
+    [MEAL.SMOOTHIE]: {
         ingredients: ['smoothie_ready'].sort(),
         timeLimit: 60, baseScore: 65, penalty: 25,
-        instructions: { // Using new Blender logic
+        visualSteps: [
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'sliced_banana' },
+            { type: 'process', station: STATION.CUTTING_BOARD, item: 'sliced_strawberry' },
+            { type: 'process', station: STATION.BLENDER, item: 'smoothie_ready' },
+            { type: 'container', station: STATION.CUP_STACK, item: 'cup' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.SMOOTHIE }
+        ],
+        instructions: {
             en: [
                 "Get Banana (Bin)",
                 "Use Cutting Board -> Sliced Banana",
@@ -417,7 +511,7 @@ export const RECIPES = {
                 "Get Strawberry (Bin)",
                 "Use Cutting Board -> Sliced Strawberry",
                 "Use Blender w/ Sliced Strawberry",
-                "Get Milk/Yogurt (Source)", // Depends on level
+                "Get Milk/Yogurt (Source)",
                 "Use Blender w/ Milk/Yogurt",
                 "Get Cup (Source)",
                 "Use Blender w/ Cup -> Smoothie Ready",
@@ -430,7 +524,7 @@ export const RECIPES = {
                 "Prendre Fraise (Bac)",
                 "Utiliser Planche -> Fraise Tranchée",
                 "Utiliser Blender avec Fraise",
-                "Prendre Lait/Yaourt (Source)", // Depends on level
+                "Prendre Lait/Yaourt (Source)",
                 "Utiliser Blender avec Lait/Yaourt",
                 "Prendre Gobelet (Source)",
                 "Utiliser Blender avec Gobelet -> Smoothie Prêt",
@@ -443,7 +537,7 @@ export const RECIPES = {
                 "Coger Fresa (Contenedor)",
                 "Usar Tabla -> Fresa Rebanada",
                 "Usar Licuadora con Fresa",
-                "Coger Leche/Yogur (Fuente)", // Depends on level
+                "Coger Leche/Yogur (Fuente)",
                 "Usar Licuadora con Leche/Yogur",
                 "Coger Vaso (Fuente)",
                 "Usar Licuadora con Vaso -> Batido Listo",
@@ -451,10 +545,19 @@ export const RECIPES = {
             ]
         }
     },
-    'Pizza Margherita': {
+    [MEAL.PIZZA_MARGHERITA]: {
         ingredients: ['cooked_pizza_margherita'].sort(),
         timeLimit: 150, baseScore: 150, penalty: 70,
-        instructions: { // Dough -> Press -> Sauce -> Cheese -> Assemble -> Oven
+        visualSteps: [
+            { type: 'source', station: STATION.PIZZA_DOUGH, item: 'pizza_dough' },
+            { type: 'process', station: STATION.DOUGH_PRESS, item: 'pizza_base' },
+            { type: 'source', station: STATION.TOMATO_SAUCE, item: 'tomato_sauce' },
+            { type: 'source', station: STATION.MOZZARELLA_BIN, item: 'shredded_mozzarella' },
+            { type: 'process', station: STATION.PIZZA_OVEN, item: 'cooked_pizza_margherita' },
+            { type: 'container', station: STATION.PLATE_STACK, item: 'plate' },
+            { type: 'serve', station: STATION.SERVING_PASS, item: MEAL.PIZZA_MARGHERITA }
+        ],
+        instructions: {
             en: [
                 "Get Pizza Dough (Source)",
                 "Use Dough Press -> Pizza Base",
@@ -462,7 +565,7 @@ export const RECIPES = {
                 "Get Shredded Mozzarella (Source)",
                 "Combine Base + Sauce + Cheese (Assembly Pizza) -> Pizza Margherita Raw",
                 "Use Oven -> Cooked Pizza Margherita",
-                "Get Plate (Stack)", // Or maybe serve directly? Let's use plate for now.
+                "Get Plate (Stack)",
                 "Combine Plate + Cooked Pizza (Assembly)",
                 "Serve (Counter)"
             ],
@@ -489,22 +592,56 @@ export const RECIPES = {
                 "Servir (Mostrador)"
             ]
         }
-    },
+    }
 };
 
+// Calculate dynamic complexity weight based on station visual steps
+export function calculateRecipeWeight(mealName) {
+    const recipe = RECIPES[mealName];
+    if (!recipe) return 5;
+    if (typeof recipe.weight === 'number') return recipe.weight;
 
-// Helper function to get recipe *ingredients* by name
+    const visualSteps = recipe.visualSteps || [];
+    if (visualSteps.length === 0) return 5;
+
+    let totalWeight = 0;
+    visualSteps.forEach(step => {
+        if (step.type === 'process') totalWeight += 2.0;      // Station action
+        else if (step.type === 'source') totalWeight += 1.0;  // Fetching raw ingredient
+        else totalWeight += 1.0;                              // Plating / container / serve
+    });
+
+    return Math.max(3, totalWeight);
+}
+
+// Helper function to get recipe ingredients by name
 export function getRecipeIngredients(mealName) {
     return RECIPES[mealName]?.ingredients;
 }
-// Helper function to get recipe *details* (time, score, penalty, instructions)
-export function getRecipeDetails(mealName) {
+
+// Helper function to get recipe details (time, score, penalty, instructions)
+export function getRecipeDetails(mealName, orderTimeMultiplier = 1.0) {
     const recipe = RECIPES[mealName];
     if (!recipe) return null;
+
+    const weight = calculateRecipeWeight(mealName);
+    const multiplier = typeof orderTimeMultiplier === 'number' && !isNaN(orderTimeMultiplier) ? orderTimeMultiplier : 1.0;
+
+    // Standard timing: 10 seconds per weight unit at 1.0x multiplier
+    const calculatedTimeLimit = Math.max(30, Math.round(weight * 10 * multiplier));
+    
+    // Base score: 12 points per weight unit
+    const calculatedBaseScore = Math.max(30, Math.round(weight * 12));
+    
+    // Penalty on order failure (timeout): 50% of dish base score
+    const calculatedPenalty = Math.round(calculatedBaseScore * 0.5);
+
     return {
-        timeLimit: recipe.timeLimit,
-        baseScore: recipe.baseScore,
-        penalty: recipe.penalty,
-        instructions: recipe.instructions // Include instructions
+        weight: weight,
+        timeLimit: calculatedTimeLimit,
+        baseScore: calculatedBaseScore,
+        penalty: calculatedPenalty,
+        instructions: recipe.instructions,
+        visualSteps: recipe.visualSteps || []
     };
 }

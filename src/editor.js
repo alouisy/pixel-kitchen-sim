@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GRID_UNIT, GAMEPAD_DEADZONE, CATALOG_ITEMS, STATION_TYPES, MODULE_HEIGHT, ITEM_TYPES } from './constants.js';
 import { createCounterPrefab, createStationPrefab, createTablePrefab, getFloorMesh, resizeWall, refreshSmartObjects } from './world.js';
-import { RECIPES } from './gameData.js';
+import { RECIPES, getRecipeDetails } from './gameData.js';
 import { getTrans } from './i18nData.js';
 
 // Editor translations dictionary
@@ -30,6 +30,7 @@ const EDITOR_TRANSLATIONS = {
         lbl_duration: "Duration (s):",
         lbl_order_delay: "Order Delay (s):",
         lbl_max_orders: "Max Active Orders:",
+        lbl_time_multiplier: "Time Multiplier:",
         sec_stars: "⭐ Star Score Thresholds",
         lbl_star1: "1 Star:",
         lbl_star2: "2 Stars:",
@@ -77,6 +78,7 @@ const EDITOR_TRANSLATIONS = {
         lbl_duration: "Durée (s) :",
         lbl_order_delay: "Délai des commandes (s) :",
         lbl_max_orders: "Commandes actives max :",
+        lbl_time_multiplier: "Multiplicateur temps :",
         sec_stars: "⭐ Seuils des étoiles",
         lbl_star1: "1 Étoile :",
         lbl_star2: "2 Étoiles :",
@@ -105,126 +107,137 @@ const EDITOR_TRANSLATIONS = {
 };
 
 // Mappings for validation check descriptions
-const FRIENDLY_NAMES = {
-    // Ingredients
-    'potato': 'Potato Bin (or preplaced Potato)',
-    'lettuce': 'Lettuce Bin (or preplaced Lettuce)',
-    'tomato': 'Tomato Bin (or preplaced Tomato)',
-    'bun': 'Bun Rack (or preplaced Burger Bun)',
-    'patty': 'Patty Box (or preplaced Patty)',
-    'cheese_slice': 'Cheese Fridge (or preplaced Cheese Slice)',
-    'onion': 'Onion Bin (or preplaced Onion)',
-    'coating_mix': 'Coating Mix (or preplaced Coating Mix)',
-    'raw_chicken': 'Chicken Box (or preplaced Raw Chicken)',
-    'raw_bacon': 'Bacon Pack (or preplaced Raw Bacon)',
-    'bread_slice': 'Bread Rack (or preplaced Bread Slice)',
-    'pancake_mix': 'Pancake Mix (or preplaced Pancake Mix)',
-    'egg': 'Egg Carton (or preplaced Egg)',
-    'banana': 'Banana Crate (or preplaced Banana)',
-    'strawberry': 'Strawberry Box (or preplaced Strawberry)',
-    'yogurt': 'Yogurt Pot (or preplaced Yogurt)',
-    'granola': 'Granola Jar (or preplaced Granola)',
-    'milk': 'Milk Carton (or preplaced Milk)',
-    'pizza_dough': 'Pizza Dough (or preplaced Pizza Dough)',
-    'tomato_sauce': 'Tomato Sauce (or preplaced Tomato Sauce)',
-    'shredded_mozzarella': 'Mozzarella Bin (or preplaced Mozzarella)',
-
-    // Containers
-    'plate': 'Plate Stack (or preplaced Plate)',
-    'bowl': 'Bowl Stack (or preplaced Bowl)',
-    'cup': 'Cup Stack (or preplaced Cup)',
-
-    // General
-    'serving': 'Serving Pass'
+const ITEM_TO_SOURCE = {
+    potato: 'potato_bin',
+    lettuce: 'lettuce_bin',
+    tomato: 'tomato_bin',
+    bun: 'bun_rack',
+    patty: 'patty_box',
+    cheese_slice: 'cheese_fridge',
+    onion: 'onion_bin',
+    coating_mix: 'coating_mix_src',
+    raw_chicken: 'chicken_box',
+    raw_bacon: 'bacon_pack',
+    bread_slice: 'bread_rack',
+    pancake_mix: 'pancake_mix_src',
+    egg: 'egg_carton',
+    banana: 'banana_crate',
+    strawberry: 'strawberry_box',
+    yogurt: 'yogurt_pot',
+    granola: 'granola_jar',
+    milk: 'milk_carton',
+    pizza_dough: 'pizza_dough_src',
+    tomato_sauce: 'tomato_sauce_src',
+    shredded_mozzarella: 'mozzarella_bin',
+    plate: 'plate_stack',
+    bowl: 'bowl_stack',
+    cup: 'cup_stack',
+    serving: 'serving_pass'
 };
+
+function getFriendlyRequirementName(itemKey, lang) {
+    const sourceKey = ITEM_TO_SOURCE[itemKey];
+    if (!sourceKey) return getTrans(itemKey, lang);
+    
+    const translatedSource = getTrans(sourceKey, lang);
+    const translatedItem = getTrans(itemKey, lang);
+    
+    if (lang === 'fr') {
+        return `${translatedSource} (ou ${translatedItem} préplacé)`;
+    } else if (lang === 'es') {
+        return `${translatedSource} (o ${translatedItem} colocado)`;
+    } else {
+        return `${translatedSource} (or preplaced ${translatedItem})`;
+    }
+}
 
 // Requirements tree for each recipe
 const RECIPE_REQUIREMENTS = {
-    'French Fries': {
+    'french_fries': {
         ingredients: ['potato'],
         processors: [
             {
-                name: 'Cutting Board',
+                name: 'cutting_board',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('potato') || obj.name?.toLowerCase().includes('cutting'))
+                    (obj.config?.processes?.includes('potato') || obj.name === 'cutting_board' || obj.name?.toLowerCase().includes('cutting'))
                 )
             },
             {
-                name: 'Deep Fryer',
+                name: 'deep_fryer',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('raw_fries') || obj.name?.toLowerCase().includes('fryer'))
+                    (obj.config?.processes?.includes('raw_fries') || obj.name === 'deep_fryer' || obj.name?.toLowerCase().includes('fryer'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Salad': {
+    'salad': {
         ingredients: ['lettuce', 'tomato'],
         processors: [
             {
-                name: 'Cutting Board',
+                name: 'cutting_board',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('lettuce') || obj.config?.processes?.includes('tomato') || obj.name?.toLowerCase().includes('cutting'))
+                    (obj.config?.processes?.includes('lettuce') || obj.config?.processes?.includes('tomato') || obj.name === 'cutting_board' || obj.name?.toLowerCase().includes('cutting'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Hamburger': {
+    'hamburger': {
         ingredients: ['bun', 'patty'],
         processors: [
             {
-                name: 'Stove Top',
+                name: 'stove_top',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('patty') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                    (obj.config?.processes?.includes('patty') || obj.name === 'stove_top' || obj.name?.toLowerCase().includes('stove'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Cheeseburger Combo': {
+    'cheeseburger_combo': {
         ingredients: ['bun', 'patty', 'cheese_slice', 'potato'],
         processors: [
             {
-                name: 'Stove Top',
+                name: 'stove_top',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('patty') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                    (obj.config?.processes?.includes('patty') || obj.name === 'stove_top' || obj.name?.toLowerCase().includes('stove'))
                 )
             },
             {
-                name: 'Cutting Board',
+                name: 'cutting_board',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('potato') || obj.name?.toLowerCase().includes('cutting'))
+                    (obj.config?.processes?.includes('potato') || obj.name === 'cutting_board' || obj.name?.toLowerCase().includes('cutting'))
                 )
             },
             {
-                name: 'Deep Fryer',
+                name: 'deep_fryer',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('raw_fries') || obj.name?.toLowerCase().includes('fryer'))
+                    (obj.config?.processes?.includes('raw_fries') || obj.name === 'deep_fryer' || obj.name?.toLowerCase().includes('fryer'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Onion Rings': {
+    'onion_rings': {
         ingredients: ['onion', 'coating_mix'],
         processors: [
             {
-                name: 'Cutting Board',
+                name: 'cutting_board',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('onion') || obj.name?.toLowerCase().includes('cutting'))
+                    (obj.config?.processes?.includes('onion') || obj.name === 'cutting_board' || obj.name?.toLowerCase().includes('cutting'))
                 )
             },
             {
-                name: 'Coating Station',
+                name: 'coating_station',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
                     (
@@ -232,32 +245,33 @@ const RECIPE_REQUIREMENTS = {
                         obj.config?.result?.['onion_rings_raw'] === 'onion_rings_coated' ||
                         obj.config?.outputItem === 'onion_rings_coated' ||
                         (obj.config?.requiredIngredients?.includes('onion_rings_raw') && obj.config?.requiredIngredients?.includes('coating_mix')) ||
+                        obj.name === 'coating_station' ||
                         obj.name?.toLowerCase().includes('coating')
                     )
                 )
             },
             {
-                name: 'Deep Fryer',
+                name: 'deep_fryer',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('onion_rings_coated') || obj.name?.toLowerCase().includes('fryer'))
+                    (obj.config?.processes?.includes('onion_rings_coated') || obj.name === 'deep_fryer' || obj.name?.toLowerCase().includes('fryer'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Chicken Tenders & Fries': {
+    'chicken_tenders_fries': {
         ingredients: ['raw_chicken', 'coating_mix', 'potato'],
         processors: [
             {
-                name: 'Cutting Board',
+                name: 'cutting_board',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('raw_chicken') || obj.name?.toLowerCase().includes('cutting'))
+                    (obj.config?.processes?.includes('raw_chicken') || obj.name === 'cutting_board' || obj.name?.toLowerCase().includes('cutting'))
                 )
             },
             {
-                name: 'Coating Station',
+                name: 'coating_station',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
                     (
@@ -265,148 +279,149 @@ const RECIPE_REQUIREMENTS = {
                         obj.config?.result?.['raw_chicken_strips'] === 'coated_chicken_strips' ||
                         obj.config?.outputItem === 'coated_chicken_strips' ||
                         (obj.config?.requiredIngredients?.includes('raw_chicken_strips') && obj.config?.requiredIngredients?.includes('coating_mix')) ||
+                        obj.name === 'coating_station' ||
                         obj.name?.toLowerCase().includes('coating')
                     )
                 )
             },
             {
-                name: 'Deep Fryer',
+                name: 'deep_fryer',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('coated_chicken_strips') || obj.name?.toLowerCase().includes('fryer'))
+                    (obj.config?.processes?.includes('coated_chicken_strips') || obj.name === 'deep_fryer' || obj.name?.toLowerCase().includes('fryer'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'BLT Sandwich': {
+    'blt_sandwich': {
         ingredients: ['bread_slice', 'raw_bacon', 'lettuce', 'tomato'],
         processors: [
             {
-                name: 'Toaster',
+                name: 'toaster',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('bread_slice') || obj.name?.toLowerCase().includes('toaster'))
+                    (obj.config?.processes?.includes('bread_slice') || obj.name === 'toaster' || obj.name?.toLowerCase().includes('toaster'))
                 )
             },
             {
-                name: 'Stove Top',
+                name: 'stove_top',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('raw_bacon') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                    (obj.config?.processes?.includes('raw_bacon') || obj.name === 'stove_top' || obj.name?.toLowerCase().includes('stove'))
                 )
             },
             {
-                name: 'Cutting Board',
+                name: 'cutting_board',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('lettuce') || obj.config?.processes?.includes('tomato') || obj.name?.toLowerCase().includes('cutting'))
+                    (obj.config?.processes?.includes('lettuce') || obj.config?.processes?.includes('tomato') || obj.name === 'cutting_board' || obj.name?.toLowerCase().includes('cutting'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Grilled Cheese Sandwich': {
+    'grilled_cheese_sandwich': {
         ingredients: ['bread_slice', 'cheese_slice'],
         processors: [
             {
-                name: 'Stove Top',
+                name: 'stove_top',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('grilled_cheese_raw') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                    (obj.config?.processes?.includes('grilled_cheese_raw') || obj.name === 'stove_top' || obj.name?.toLowerCase().includes('stove'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Pancakes': {
+    'pancakes': {
         ingredients: ['pancake_mix', 'syrup'],
         processors: [
             {
-                name: 'Stand Mixer',
+                name: 'stand_mixer',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('pancake_mix') || obj.name?.toLowerCase().includes('mixer'))
+                    (obj.config?.processes?.includes('pancake_mix') || obj.name === 'stand_mixer' || obj.name?.toLowerCase().includes('mixer'))
                 )
             },
             {
-                name: 'Stove Top',
+                name: 'stove_top',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('pancake_batter') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                    (obj.config?.processes?.includes('pancake_batter') || obj.name === 'stove_top' || obj.name?.toLowerCase().includes('stove'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Cheese Omelette': {
+    'cheese_omelette': {
         ingredients: ['egg', 'cheese_slice'],
         processors: [
             {
-                name: 'Stand Mixer',
+                name: 'stand_mixer',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('egg') || obj.name?.toLowerCase().includes('mixer'))
+                    (obj.config?.processes?.includes('egg') || obj.name === 'stand_mixer' || obj.name?.toLowerCase().includes('mixer'))
                 )
             },
             {
-                name: 'Stove Top',
+                name: 'stove_top',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('omelette_mix') || obj.name?.toLowerCase().includes('stove') || obj.name?.toLowerCase().includes('grill') || obj.name?.toLowerCase().includes('griddle'))
+                    (obj.config?.processes?.includes('omelette_mix') || obj.name === 'stove_top' || obj.name?.toLowerCase().includes('stove'))
                 )
             }
         ],
         containers: ['plate']
     },
-    'Fruit & Yogurt Bowl': {
+    'fruit_yogurt_bowl': {
         ingredients: ['banana', 'strawberry', 'yogurt', 'granola'],
         processors: [
             {
-                name: 'Cutting Board',
+                name: 'cutting_board',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('banana') || obj.config?.processes?.includes('strawberry') || obj.name?.toLowerCase().includes('cutting'))
+                    (obj.config?.processes?.includes('banana') || obj.config?.processes?.includes('strawberry') || obj.name === 'cutting_board' || obj.name?.toLowerCase().includes('cutting'))
                 )
             }
         ],
         containers: ['bowl']
     },
-    'Smoothie': {
+    'smoothie': {
         ingredients: ['banana', 'strawberry', 'milk'],
         processors: [
             {
-                name: 'Cutting Board',
+                name: 'cutting_board',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('banana') || obj.config?.processes?.includes('strawberry') || obj.name?.toLowerCase().includes('cutting'))
+                    (obj.config?.processes?.includes('banana') || obj.config?.processes?.includes('strawberry') || obj.name === 'cutting_board' || obj.name?.toLowerCase().includes('cutting'))
                 )
             },
             {
-                name: 'Blender',
+                name: 'blender',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.outputItem === 'smoothie_ready' || obj.name?.toLowerCase().includes('blender'))
+                    (obj.config?.outputItem === 'smoothie_ready' || obj.name === 'blender' || obj.name?.toLowerCase().includes('blender'))
                 )
             }
         ],
         containers: ['cup']
     },
-    'Pizza Margherita': {
+    'pizza_margherita': {
         ingredients: ['pizza_dough', 'tomato_sauce', 'shredded_mozzarella'],
         processors: [
             {
-                name: 'Dough Press',
+                name: 'dough_press',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('pizza_dough') || obj.name?.toLowerCase().includes('press'))
+                    (obj.config?.processes?.includes('pizza_dough') || obj.name === 'dough_press' || obj.name?.toLowerCase().includes('press'))
                 )
             },
             {
-                name: 'Pizza Oven',
+                name: 'pizza_oven',
                 check: (objects) => objects.some(obj =>
                     obj.type === 'processor' &&
-                    (obj.config?.processes?.includes('pizza_margherita_raw') || obj.name?.toLowerCase().includes('oven'))
+                    (obj.config?.processes?.includes('pizza_margherita_raw') || obj.name === 'pizza_oven' || obj.name?.toLowerCase().includes('oven'))
                 )
             }
         ],
@@ -671,7 +686,7 @@ export class LevelEditor {
     }
 
     loadActiveLanguage() {
-        const savedString = localStorage.getItem('pixelKitchenSaveData');
+        const savedString = localStorage.getItem('pixelKitchenSim.save');
         if (savedString) {
             try {
                 const data = JSON.parse(savedString);
@@ -688,9 +703,6 @@ export class LevelEditor {
         const lang = this.lang || 'en';
         if (EDITOR_TRANSLATIONS[lang] && EDITOR_TRANSLATIONS[lang][key]) {
             return EDITOR_TRANSLATIONS[lang][key];
-        }
-        if (FRIENDLY_NAMES[key]) {
-            return this.translateText(FRIENDLY_NAMES[key]);
         }
         const transVal = getTrans(key, lang);
         if (transVal !== key) return transVal;
@@ -745,6 +757,9 @@ export class LevelEditor {
 
         const maxOrdersLabel = document.querySelector('label[for="meta-max-orders"]');
         if (maxOrdersLabel) maxOrdersLabel.textContent = this.translateText('lbl_max_orders');
+
+        const timeMultiplierLabel = document.querySelector('label[for="meta-time-multiplier"]');
+        if (timeMultiplierLabel) timeMultiplierLabel.textContent = this.translateText('lbl_time_multiplier');
 
         const star1Label = document.querySelector('label[for="meta-star1"]');
         if (star1Label) star1Label.textContent = this.translateText('lbl_star1');
@@ -803,20 +818,31 @@ export class LevelEditor {
 
         // 6. Refresh meals tag selectors
         this._populateMealsGrid();
+
+        // 7. Refresh current library contents to update item titles
+        const activeTab = document.querySelector('.tab-btn.active');
+        if (activeTab) {
+            this._renderLibrary(activeTab.dataset.category);
+        } else {
+            this._renderLibrary('all');
+        }
     }
 
     _populateMealsGrid() {
         const mealsGrid = document.getElementById('meta-meals-grid');
         if (mealsGrid) {
             mealsGrid.innerHTML = '';
+            const mult = this.currentLevelData?.orderTimeMultiplier || 1.0;
             Object.keys(RECIPES).forEach(r => {
                 const tag = document.createElement('div');
                 tag.className = 'meal-tag';
                 tag.dataset.value = r;
 
                 const translatedMealName = this.translateText(r);
+                const details = getRecipeDetails(r, mult);
+                const timeText = details ? ` (${details.timeLimit}s)` : '';
 
-                tag.innerHTML = `<span class="checkbox-box"></span><span class="meal-name">${translatedMealName}</span>`;
+                tag.innerHTML = `<span class="checkbox-box"></span><span class="meal-name">${translatedMealName}${timeText}</span>`;
 
                 const isSelected = this.currentLevelData?.availableMeals?.includes(r) || false;
                 if (isSelected) {
@@ -852,6 +878,8 @@ export class LevelEditor {
         document.getElementById('meta-duration').value = d.duration || 180;
         document.getElementById('meta-delay').value = d.newOrderDelay || 15;
         document.getElementById('meta-max-orders').value = d.maxActiveOrders || 2;
+        const timeMultEl = document.getElementById('meta-time-multiplier');
+        if (timeMultEl) timeMultEl.value = d.orderTimeMultiplier ?? 1.0;
         document.getElementById('meta-star1').value = d.starThresholds ? d.starThresholds[0] : 100;
         document.getElementById('meta-star2').value = d.starThresholds ? d.starThresholds[1] : 200;
         document.getElementById('meta-star3').value = d.starThresholds ? d.starThresholds[2] : 300;
@@ -870,6 +898,10 @@ export class LevelEditor {
         d.duration = parseInt(document.getElementById('meta-duration').value) || 180;
         d.newOrderDelay = parseInt(document.getElementById('meta-delay').value) || 15;
         d.maxActiveOrders = parseInt(document.getElementById('meta-max-orders').value) || 2;
+        const timeMultEl = document.getElementById('meta-time-multiplier');
+        if (timeMultEl) {
+            d.orderTimeMultiplier = parseFloat(timeMultEl.value) || 1.0;
+        }
         d.starThresholds = [
             parseInt(document.getElementById('meta-star1').value) || 100,
             parseInt(document.getElementById('meta-star2').value) || 200,
@@ -1506,10 +1538,10 @@ export class LevelEditor {
         }
 
         missingItemsMap.forEach((recipesSet, itemKey) => {
-            const friendlyName = FRIENDLY_NAMES[itemKey] || itemKey;
+            const friendlyName = getFriendlyRequirementName(itemKey, this.lang || 'en');
             const recipesList = Array.from(recipesSet).map(r => this.translateText(r)).join(', ');
             warnings.push({
-                desc: this.translateText(friendlyName),
+                desc: friendlyName,
                 recipes: recipesList
             });
         });
@@ -1645,6 +1677,7 @@ export class LevelEditor {
         data.duration = Math.max(30, Number(data.duration) || 180);
         data.newOrderDelay = Math.max(1, Number(data.newOrderDelay) || 15);
         data.maxActiveOrders = Math.max(1, Math.floor(Number(data.maxActiveOrders) || 2));
+        data.orderTimeMultiplier = Math.max(0.1, Number(data.orderTimeMultiplier) || 1.0);
         data.starThresholds = Array.isArray(data.starThresholds) ? data.starThresholds.map(Number).filter(Number.isFinite) : [100, 200, 300];
         data.availableMeals = Array.isArray(data.availableMeals) ? data.availableMeals : [];
         data.layout = this._collectLayout();

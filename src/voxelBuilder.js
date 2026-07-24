@@ -951,6 +951,26 @@ function addSandwichHalf(vb, dx, dy, dz, isHalf2, isBLT, isCooked) {
 // --- ITEMS (Physical objects in hand/world) ---
 
 export function createItemMesh(type, contents = [], mealName = null) {
+    // Map snake_case to Title Case if needed for backwards compatibility
+    const legacyMapping = {
+        'french_fries': 'French Fries',
+        'salad': 'Salad',
+        'hamburger': 'Hamburger',
+        'cheeseburger_combo': 'Cheeseburger Combo',
+        'onion_rings': 'Onion Rings',
+        'chicken_tenders_fries': 'Chicken Tenders & Fries',
+        'blt_sandwich': 'BLT Sandwich',
+        'grilled_cheese_sandwich': 'Grilled Cheese Sandwich',
+        'pancakes': 'Pancakes',
+        'cheese_omelette': 'Cheese Omelette',
+        'fruit_yogurt_bowl': 'Fruit & Yogurt Bowl',
+        'smoothie': 'Smoothie',
+        'pizza_margherita': 'Pizza Margherita'
+    };
+    if (legacyMapping[type]) {
+        type = legacyMapping[type];
+    }
+
     const vb = new VoxelBuilder();
     
     if (type === 'plate') {

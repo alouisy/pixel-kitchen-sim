@@ -1,31 +1,30 @@
-// src/LevelManager.js
 import { getRecipeDetails } from './gameData.js'; // Keep recipe helper
+import { normalizeLevelData } from './utils/legacyMigration.js';
+import { getTrans } from './i18nData.js';
 
 export class LevelManager {
-    constructor(uiManager, saveManager, levelDatabaseRef) { // Accept levelDatabase reference
+    constructor(uiManager, saveManager, levelDatabase = []) {
         this.uiManager = uiManager;
         this.saveManager = saveManager;
-        this.levels = levelDatabaseRef; // Store reference to the fetched data
+        this.levelDatabase = levelDatabase;
 
         this.currentLevelIndex = -1;
-        this.currentLevelData = null; // This will hold the specific level object from the database
-
-        // Level parameters (will be set in loadLevel)
-        this.availableMeals = [];
-        this.maxActiveOrders = 1;
-        this.newOrderDelay = 15;
-        this.newOrderTimer = 0;
-
-        // Active state
-        this.activeOrders = new Map(); // Map: orderId -> orderData { id, mealName, timer, baseScore, penalty }
-        this.nextOrderId = 0; // Simple counter for unique IDs per level load
-
-        this.levelTimer = 0;
+        this.currentLevelData = null;
         this.currentScore = 0;
+        this.levelTimer = 0;
         this.isLevelRunning = false;
 
-        this.onLevelEnd = null;
+        this.activeOrders = new Map();
+        this.nextOrderId = 0;
+        this.newOrderTimer = 0;
+        this.newOrderDelay = 15;
+        this.maxActiveOrders = 1;
+        this.availableMeals = [];
+
+        this.onOrderAdded = null;
+        this.onOrderRemoved = null;
         this.onGameEnd = null;
+        this.onLevelEnd = null;
     }
 
     // Accepts the specific levelData object for the level being loaded
@@ -39,7 +38,7 @@ export class LevelManager {
 
         // Reset internal state
         this.currentLevelIndex = levelIndex;
-        this.currentLevelData = levelData; // Store the specific level object
+        this.currentLevelData = normalizeLevelData(levelData); // Silently normalize legacy level keys
         this.currentScore = 0;
         this.levelTimer = this.currentLevelData.duration;
         this.isLevelRunning = true;
@@ -47,12 +46,17 @@ export class LevelManager {
         this.nextOrderId = 0;
 
         // Load parameters from the passed levelData
+        const diff = this.saveManager?.getSetting('difficulty') || 'beginner';
+        let delayFactor = 1.0;
+        if (diff === 'beginner') delayFactor = 1.25;
+        else if (diff === 'expert') delayFactor = 0.80;
+
         this.availableMeals = this.currentLevelData.availableMeals || [];
         this.maxActiveOrders = this.currentLevelData.maxActiveOrders || 1;
-        this.newOrderDelay = this.currentLevelData.newOrderDelay || 15;
+        this.newOrderDelay = (this.currentLevelData.newOrderDelay || 15) * delayFactor;
         this.newOrderTimer = 0; // Reset delay timer
 
-        console.log(`Loading Level ${this.currentLevelData.levelId}: ${this.currentLevelData.name}`);
+        console.log(`Loading Level ${this.currentLevelData.levelId}: ${this.currentLevelData.name} (Difficulty: ${diff})`);
         
         this.uiManager.updateScore(this.currentScore);
         this.uiManager.updateLevelTimer(this.levelTimer);
@@ -75,7 +79,16 @@ export class LevelManager {
 
         const randomIndex = Math.floor(Math.random() * this.availableMeals.length);
         const mealName = this.availableMeals[randomIndex];
-        const recipeDetails = getRecipeDetails(mealName);
+
+        const diff = this.saveManager?.getSetting('difficulty') || 'beginner';
+        let diffTimeFactor = 1.0;
+        if (diff === 'beginner') diffTimeFactor = 1.30;
+        else if (diff === 'expert') diffTimeFactor = 0.75;
+
+        const baseMultiplier = this.currentLevelData?.orderTimeMultiplier ?? 1.0;
+        const finalTimeMultiplier = baseMultiplier * diffTimeFactor;
+
+        const recipeDetails = getRecipeDetails(mealName, finalTimeMultiplier);
 
         if (!recipeDetails) {
             console.error(`Could not find recipe details for "${mealName}"`);
@@ -85,13 +98,14 @@ export class LevelManager {
         const orderId = `order-${this.currentLevelIndex}-${this.nextOrderId++}`;
         const newOrder = {
             id: orderId, mealName: mealName, timer: recipeDetails.timeLimit,
+            maxTime: recipeDetails.timeLimit,
             baseScore: recipeDetails.baseScore, penalty: recipeDetails.penalty
         };
 
         this.activeOrders.set(orderId, newOrder);
         // Pass timeLimit as maxTime for progress bar calculation
         this.uiManager.addOrderCard(orderId, mealName, newOrder.timer);
-        console.log(`Generated new order: ${mealName} (ID: ${orderId})`);
+        console.log(`Generated new order: ${mealName} (ID: ${orderId}, Time: ${newOrder.timer}s, Diff: ${diff})`);
 
         // Reset the cooldown timer for the *next* potential order
         this.newOrderTimer = this.newOrderDelay;
@@ -133,21 +147,36 @@ export class LevelManager {
         if (!completedOrderId) { // No matching active order found
             console.warn(`Attempted to complete invalid order: ${servedMealName}.`);
             if (this.activeOrders.size > 0) { // Penalize only if other orders were active
-                let penalty = 25; this.currentScore -= penalty;
+                let penalty = 30; this.currentScore -= penalty;
                 this.currentScore = Math.max(0, this.currentScore);
                 this.uiManager.updateScore(this.currentScore);
-                this.uiManager.showTemporaryMessage('Wrong / No Order!');
-            } else { this.uiManager.showTemporaryMessage('Wrong / No Order!'); }
+                this.uiManager.showTemporaryMessage('wrong_order');
+            } else { this.uiManager.showTemporaryMessage('wrong_order'); }
             return false;
         }
 
-        // Success
-        let scoreGained = completedOrderData.baseScore;
-        let timeBonus = Math.min(20, Math.floor(Math.max(0, completedOrderData.timer) / 2));
-        scoreGained += timeBonus;
+        // Success - Overcooked-style dynamic speed bonus
+        let baseScore = completedOrderData.baseScore;
+        let maxTime = completedOrderData.maxTime || completedOrderData.timer || 60;
+        let remainingTime = Math.max(0, completedOrderData.timer);
+        let timeRatio = Math.min(1.0, remainingTime / maxTime);
+
+        // Speed tip bonus: up to +50% of base score for fast delivery
+        let timeBonus = Math.round(baseScore * 0.5 * timeRatio);
+        let scoreGained = baseScore + timeBonus;
+
         this.currentScore += scoreGained;
         this.uiManager.updateScore(this.currentScore);
-        this.uiManager.showTemporaryMessage(`+${scoreGained} Points!`, 1500);
+
+        const lang = this.uiManager.currentLanguage || 'en';
+        const ptsText = getTrans('pts', lang) || 'pts';
+        const speedText = getTrans('speed_bonus', lang) || 'Speed Bonus';
+
+        let msg = `+${scoreGained} ${ptsText}!`;
+        if (timeBonus > 0) {
+            msg += ` (+${timeBonus} ${speedText})`;
+        }
+        this.uiManager.showTemporaryMessage(msg, 2500);
 
         this.activeOrders.delete(completedOrderId); // Remove from map
         this.uiManager.removeOrderCard(completedOrderId); // Remove from UI
@@ -160,7 +189,9 @@ export class LevelManager {
         if (!orderData) return; // Already removed
 
         console.log(`Order ${orderData.mealName} (ID: ${orderId}) FAILED (Timeout).`);
-        this.uiManager.showTemporaryMessage(`Order Failed! -${orderData.penalty}`, 2000);
+        const lang = this.uiManager.currentLanguage || 'en';
+        const failPattern = getTrans('order_failed', lang) || 'Order Failed! -{penalty}';
+        this.uiManager.showTemporaryMessage(failPattern.replace('{penalty}', orderData.penalty), 2000);
         this.currentScore -= orderData.penalty;
         this.currentScore = Math.max(0, this.currentScore);
         this.uiManager.updateScore(this.currentScore);

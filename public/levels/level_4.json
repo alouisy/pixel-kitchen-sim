@@ -11,19 +11,20 @@
   "duration": 180,
   "newOrderDelay": 15,
   "maxActiveOrders": 2,
+  "orderTimeMultiplier": 0.9,
   "starThresholds": [
-    250,
-    450,
-    700
+    350,
+    750,
+    1200
   ],
   "availableMeals": [
-    "Salad",
-    "Fruit & Yogurt Bowl",
-    "Smoothie"
+    "salad",
+    "fruit_yogurt_bowl",
+    "smoothie"
   ],
   "layout": [
     {
-      "name": "Wall Back",
+      "name": "wall_back",
       "type": "wall",
       "position": {
         "x": 0,
@@ -35,7 +36,7 @@
       }
     },
     {
-      "name": "Wall Left",
+      "name": "wall_left",
       "type": "wall",
       "position": {
         "x": -4,
@@ -48,7 +49,7 @@
       }
     },
     {
-      "name": "Wall Right",
+      "name": "wall_right",
       "type": "wall",
       "position": {
         "x": 4,
@@ -61,7 +62,7 @@
       }
     },
     {
-      "name": "Wall Front Left",
+      "name": "wall_front_left",
       "type": "wall",
       "position": {
         "x": -2.75,
@@ -73,7 +74,7 @@
       }
     },
     {
-      "name": "Wall Front Right",
+      "name": "wall_front_right",
       "type": "wall",
       "position": {
         "x": 2.75,
@@ -85,7 +86,7 @@
       }
     },
     {
-      "name": "Counter Corner",
+      "name": "counter_corner",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -93,7 +94,7 @@
       }
     },
     {
-      "name": "Counter Corner",
+      "name": "counter_corner",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -101,7 +102,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2,
@@ -109,7 +110,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -1.5,
@@ -117,7 +118,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -1,
@@ -125,7 +126,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -0.5,
@@ -133,7 +134,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 0,
@@ -141,7 +142,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 0.5,
@@ -149,7 +150,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 1,
@@ -157,7 +158,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 1.5,
@@ -165,7 +166,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2,
@@ -173,7 +174,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -181,7 +182,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -189,7 +190,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -197,7 +198,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -205,7 +206,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -213,7 +214,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -221,7 +222,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -229,7 +230,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -237,7 +238,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -245,7 +246,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -253,7 +254,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -261,7 +262,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -269,7 +270,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -277,7 +278,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -285,7 +286,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -293,7 +294,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -301,7 +302,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -309,7 +310,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -317,7 +318,7 @@
       }
     },
     {
-      "name": "Milk Carton",
+      "name": "milk_carton",
       "type": "ingredient_source",
       "position": {
         "x": -2.5,
@@ -333,7 +334,7 @@
       }
     },
     {
-      "name": "Yogurt Pot",
+      "name": "yogurt_pot",
       "type": "ingredient_source",
       "position": {
         "x": -2.5,
@@ -349,7 +350,7 @@
       }
     },
     {
-      "name": "Granola Jar",
+      "name": "granola_jar",
       "type": "ingredient_source",
       "position": {
         "x": -2.5,
@@ -365,7 +366,7 @@
       }
     },
     {
-      "name": "Lettuce Bin",
+      "name": "lettuce_bin",
       "type": "ingredient_source",
       "position": {
         "x": 2.5,
@@ -381,7 +382,7 @@
       }
     },
     {
-      "name": "Banana Crate",
+      "name": "banana_crate",
       "type": "ingredient_source",
       "position": {
         "x": -1.5,
@@ -396,7 +397,7 @@
       }
     },
     {
-      "name": "Strawberry Box",
+      "name": "strawberry_box",
       "type": "ingredient_source",
       "position": {
         "x": -0.5,
@@ -438,7 +439,7 @@
       }
     },
     {
-      "name": "Cutting Board",
+      "name": "cutting_board",
       "type": "processor",
       "position": {
         "x": 1.5,
@@ -464,7 +465,7 @@
       }
     },
     {
-      "name": "Tomato Bin",
+      "name": "tomato_bin",
       "type": "ingredient_source",
       "position": {
         "x": 2.5,
@@ -480,7 +481,7 @@
       }
     },
     {
-      "name": "Bowl Stack",
+      "name": "bowl_stack",
       "type": "item_source",
       "position": {
         "x": 2.5,
@@ -496,7 +497,7 @@
       }
     },
     {
-      "name": "Cup Stack",
+      "name": "cup_stack",
       "type": "item_source",
       "position": {
         "x": 2.5,
@@ -512,7 +513,7 @@
       }
     },
     {
-      "name": "Plate Stack",
+      "name": "plate_stack",
       "type": "item_source",
       "position": {
         "x": 2.5,
@@ -528,7 +529,7 @@
       }
     },
     {
-      "name": "Trash Bin",
+      "name": "trash_bin",
       "type": "trash",
       "position": {
         "x": -2.5,
@@ -541,7 +542,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -1,
@@ -549,7 +550,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 1,
@@ -615,7 +616,7 @@
       }
     },
     {
-      "name": "Serving Pass",
+      "name": "serving_pass",
       "type": "serving",
       "position": {
         "x": -1,
@@ -623,7 +624,7 @@
       }
     },
     {
-      "name": "Serving Pass",
+      "name": "serving_pass",
       "type": "serving",
       "position": {
         "x": 1,
@@ -631,7 +632,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -1,
@@ -639,7 +640,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 1,
@@ -647,7 +648,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 1,
@@ -655,7 +656,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -1,
@@ -663,7 +664,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 0,
@@ -671,7 +672,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 0,
@@ -679,7 +680,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -1,
@@ -687,7 +688,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 0,
@@ -695,7 +696,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 0,
@@ -703,7 +704,7 @@
       }
     },
     {
-      "name": "Cutting Board",
+      "name": "cutting_board",
       "type": "processor",
       "position": {
         "x": -1,
@@ -736,7 +737,7 @@
       }
     },
     {
-      "name": "Serving Pass",
+      "name": "serving_pass",
       "type": "serving",
       "position": {
         "x": 0.5,
@@ -744,7 +745,7 @@
       }
     },
     {
-      "name": "Serving Pass",
+      "name": "serving_pass",
       "type": "serving",
       "position": {
         "x": 0,
@@ -752,7 +753,7 @@
       }
     },
     {
-      "name": "Serving Pass",
+      "name": "serving_pass",
       "type": "serving",
       "position": {
         "x": -0.5,
@@ -845,7 +846,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 1,

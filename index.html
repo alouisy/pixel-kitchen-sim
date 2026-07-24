@@ -29,6 +29,7 @@
         </div>
         <div class="menu-container">
             <button id="play-button" class="menu-button" data-action="play">Play</button>
+            <button id="how-to-play-button" class="menu-button" data-action="how-to-play">How to Play ❓</button>
             <button id="leaderboard-button" class="menu-button" data-action="leaderboard">Leaderboard</button>
             <button id="editor-button" class="menu-button" data-action="editor-hub">Level Editor</button>
             <div id="editor-lock-message" style="display: none; font-size: 11px; color: #ff9800; font-family: monospace; margin-top: -5px; margin-bottom: 10px; text-align: center;">🔒 Complete 5 levels to unlock</div>
@@ -42,6 +43,72 @@
             </div>
         </div>
         <p id="main-menu-hint" class="menu-hint">Navigate: Arrows/Stick | Select: Enter/[X]/[A]</p>
+    </div>
+
+    <!-- Onboarding / How to Play Modal -->
+    <div id="onboarding-screen" class="overlay menu-screen">
+        <h1 id="onboarding-title">How to Play</h1>
+        <div class="menu-container onboarding-box">
+            <p id="onboarding-subtitle" class="onboarding-subtitle">Prepare dishes, complete orders, and earn stars!</p>
+            
+            <!-- 4 Step Concept Cards -->
+            <div class="onboarding-grid">
+                <div class="onboarding-card">
+                    <div class="onboarding-card-header">
+                        <span class="card-step-num">1</span>
+                        <h4 id="ob-step1-title">Watch Orders</h4>
+                    </div>
+                    <p id="ob-step1-desc">Customer orders appear at top HUD with timer bars.</p>
+                </div>
+
+                <div class="onboarding-card">
+                    <div class="onboarding-card-header">
+                        <span class="card-step-num">2</span>
+                        <h4 id="ob-step2-title">Prep & Cook</h4>
+                    </div>
+                    <p id="ob-step2-desc">Take ingredients, chop at boards, fry, grill or mix at appliances.</p>
+                </div>
+
+                <div class="onboarding-card">
+                    <div class="onboarding-card-header">
+                        <span class="card-step-num">3</span>
+                        <h4 id="ob-step3-title">Assemble</h4>
+                    </div>
+                    <p id="ob-step3-desc">Place prepared ingredients onto plates, bowls or cups.</p>
+                </div>
+
+                <div class="onboarding-card">
+                    <div class="onboarding-card-header">
+                        <span class="card-step-num">4</span>
+                        <h4 id="ob-step4-title">Serve & Score</h4>
+                    </div>
+                    <p id="ob-step4-desc">Deliver completed dishes to the serving pass counter!</p>
+                </div>
+            </div>
+
+            <!-- Hardware & Device Compatibility Section -->
+            <div class="onboarding-controls-section">
+                <h3 id="ob-controls-title">Supported Controls & Hardware</h3>
+                <div class="device-controls-grid">
+                    <div class="device-card">
+                        <div class="device-header">⌨️🖱️ <span id="ob-ctrl-keyboard-title">Keyboard & Mouse</span></div>
+                        <p id="ob-ctrl-keyboard-desc">WASD to Move • Mouse to Look • E/Left-Click to Interact • I for Recipes • Esc/P to Pause</p>
+                    </div>
+
+                    <div class="device-card">
+                        <div class="device-header">🎮 <span id="ob-ctrl-gamepad-title">Gamepad / Controller</span></div>
+                        <p id="ob-ctrl-gamepad-desc">Full native support! Left Stick to Move • Right Stick to Look • A/X to Interact • Y/△ for Recipes • Start to Pause</p>
+                    </div>
+
+                    <div class="device-card">
+                        <div class="device-header">📱 <span id="ob-ctrl-touch-title">Mobile Touch</span></div>
+                        <p id="ob-ctrl-touch-desc">Virtual joystick to move, drag screen to look, touch buttons for action.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="onboarding-dismiss-btn" class="menu-button" data-action="dismiss-onboarding">Got It, Let's Cook!</button>
+        </div>
     </div>
 
     <!-- Nickname Screen -->
@@ -123,6 +190,14 @@
                         <button class="menu-button lang-button" data-lang="en" data-action="set-language">English</button>
                         <button class="menu-button lang-button" data-lang="fr" data-action="set-language">Français</button>
                         <button class="menu-button lang-button" data-lang="es" data-action="set-language">Español</button>
+                    </div>
+                </div>
+                <div class="setting-group" id="difficulty-setting-group">
+                    <label id="difficulty-setting-label" for="difficulty-options">Difficulty:</label>
+                    <div id="difficulty-options" class="button-group">
+                        <button class="menu-button small difficulty-btn active" data-diff="beginner" data-action="set-difficulty">Beginner</button>
+                        <button class="menu-button small difficulty-btn" data-diff="standard" data-action="set-difficulty">Standard</button>
+                        <button class="menu-button small difficulty-btn" data-diff="expert" data-action="set-difficulty">Expert</button>
                     </div>
                 </div>
                 <div class="setting-group">
@@ -315,12 +390,12 @@
     <div id="game-hud" style="display: none;">
         <div id="order-list"></div>
         <div id="game-timer-container">
-            Level Time: <span id="level-timer-display">0:00</span>
+            <span id="level-time-label">Level Time:</span> <span id="level-timer-display">0:00</span>
         </div>
         <div id="fps-display">FPS: <span id="fps-value">--</span></div>
         <div id="bottom-hud">
-            Holding: <span id="holding-display">Nothing</span> |
-            Score: <span id="score-display">0</span> |
+            <span id="holding-label">Holding:</span> <span id="holding-display">Nothing</span> |
+            <span id="score-label">Score:</span> <span id="score-display">0</span> |
             <span id="gamepad-status"></span>
         </div>
         <div id="crosshair"></div>
@@ -375,6 +450,10 @@
                 <div class="meta-field">
                     <label for="meta-max-orders">Max Active Orders:</label>
                     <input type="number" id="meta-max-orders">
+                </div>
+                <div class="meta-field">
+                    <label for="meta-time-multiplier">Time Multiplier:</label>
+                    <input type="number" id="meta-time-multiplier" step="0.1" min="0.5" max="3.0" value="1.0">
                 </div>
             </div>
             

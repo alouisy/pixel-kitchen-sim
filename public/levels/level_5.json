@@ -11,20 +11,21 @@
   "duration": 240,
   "newOrderDelay": 15,
   "maxActiveOrders": 3,
+  "orderTimeMultiplier": 0.85,
   "starThresholds": [
-    400,
-    700,
-    1000
+    500,
+    1000,
+    1600
   ],
   "availableMeals": [
-    "Hamburger",
-    "BLT Sandwich",
-    "Smoothie",
-    "Pizza Margherita"
+    "hamburger",
+    "blt_sandwich",
+    "smoothie",
+    "pizza_margherita"
   ],
   "layout": [
     {
-      "name": "Wall Back",
+      "name": "wall_back",
       "type": "wall",
       "position": {
         "x": 0,
@@ -36,7 +37,7 @@
       }
     },
     {
-      "name": "Wall Left",
+      "name": "wall_left",
       "type": "wall",
       "position": {
         "x": -4,
@@ -49,7 +50,7 @@
       }
     },
     {
-      "name": "Wall Right",
+      "name": "wall_right",
       "type": "wall",
       "position": {
         "x": 4,
@@ -62,7 +63,7 @@
       }
     },
     {
-      "name": "Wall Front Left",
+      "name": "wall_front_left",
       "type": "wall",
       "position": {
         "x": -2.75,
@@ -74,7 +75,7 @@
       }
     },
     {
-      "name": "Wall Front Right",
+      "name": "wall_front_right",
       "type": "wall",
       "position": {
         "x": 2.75,
@@ -86,7 +87,7 @@
       }
     },
     {
-      "name": "Serving Pass",
+      "name": "serving_pass",
       "type": "serving",
       "position": {
         "x": -0.5,
@@ -95,7 +96,7 @@
       "rotation": 3.14
     },
     {
-      "name": "Serving Pass",
+      "name": "serving_pass",
       "type": "serving",
       "position": {
         "x": 0,
@@ -104,7 +105,7 @@
       "rotation": 3.14
     },
     {
-      "name": "Serving Pass",
+      "name": "serving_pass",
       "type": "serving",
       "position": {
         "x": 0.5,
@@ -113,7 +114,7 @@
       "rotation": 3.14
     },
     {
-      "name": "Counter Corner",
+      "name": "counter_corner",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -121,7 +122,7 @@
       }
     },
     {
-      "name": "Counter Corner",
+      "name": "counter_corner",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -129,7 +130,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3,
@@ -137,7 +138,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2.5,
@@ -145,7 +146,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2,
@@ -153,7 +154,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -1.5,
@@ -161,7 +162,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -1,
@@ -169,7 +170,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -0.5,
@@ -177,7 +178,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 0,
@@ -185,7 +186,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 0.5,
@@ -193,7 +194,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 1,
@@ -201,7 +202,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 1.5,
@@ -209,7 +210,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2,
@@ -217,7 +218,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2.5,
@@ -225,7 +226,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3,
@@ -233,7 +234,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -242,7 +243,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -251,7 +252,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -260,7 +261,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -269,7 +270,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -278,7 +279,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -287,7 +288,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -296,7 +297,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -305,7 +306,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -314,7 +315,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -323,7 +324,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -332,7 +333,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -3.5,
@@ -341,7 +342,7 @@
       "rotation": -4.71
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -350,7 +351,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -359,7 +360,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -368,7 +369,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -377,7 +378,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -386,7 +387,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -395,7 +396,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -404,7 +405,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -413,7 +414,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -422,7 +423,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -431,7 +432,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -440,7 +441,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 3.5,
@@ -449,7 +450,7 @@
       "rotation": -1.57
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -1.5,
@@ -457,7 +458,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -1,
@@ -465,7 +466,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": -2,
@@ -474,7 +475,7 @@
       "rotation": -6.28
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 1,
@@ -482,7 +483,7 @@
       }
     },
     {
-      "name": "Counter",
+      "name": "counter",
       "type": "counter",
       "position": {
         "x": 2,
@@ -490,7 +491,7 @@
       }
     },
     {
-      "name": "Pizza Oven",
+      "name": "pizza_oven",
       "type": "processor",
       "position": {
         "x": -3.5,
@@ -512,7 +513,7 @@
       }
     },
     {
-      "name": "Dough Press",
+      "name": "dough_press",
       "type": "processor",
       "position": {
         "x": -3.5,
@@ -565,7 +566,7 @@
       }
     },
     {
-      "name": "Mozzarella Bin",
+      "name": "mozzarella_bin",
       "type": "ingredient_source",
       "position": {
         "x": -3.5,
@@ -581,7 +582,7 @@
       }
     },
     {
-      "name": "Stove Top",
+      "name": "stove_top",
       "type": "processor",
       "position": {
         "x": -1.5,
@@ -606,7 +607,7 @@
       }
     },
     {
-      "name": "Stove Top",
+      "name": "stove_top",
       "type": "processor",
       "position": {
         "x": -0.5,
@@ -631,7 +632,7 @@
       }
     },
     {
-      "name": "Bread Rack",
+      "name": "bread_rack",
       "type": "ingredient_source",
       "position": {
         "x": -3,
@@ -646,7 +647,7 @@
       }
     },
     {
-      "name": "Toaster",
+      "name": "toaster",
       "type": "processor",
       "position": {
         "x": -2.5,
@@ -667,7 +668,7 @@
       }
     },
     {
-      "name": "Bacon Pack",
+      "name": "bacon_pack",
       "type": "ingredient_source",
       "position": {
         "x": 0,
@@ -682,7 +683,7 @@
       }
     },
     {
-      "name": "Patty Box",
+      "name": "patty_box",
       "type": "ingredient_source",
       "position": {
         "x": 0.5,
@@ -697,7 +698,7 @@
       }
     },
     {
-      "name": "Bun Rack",
+      "name": "bun_rack",
       "type": "ingredient_source",
       "position": {
         "x": 1.5,
@@ -712,7 +713,7 @@
       }
     },
     {
-      "name": "Cheese Fridge",
+      "name": "cheese_fridge",
       "type": "ingredient_source",
       "position": {
         "x": 2.5,
@@ -755,7 +756,7 @@
       }
     },
     {
-      "name": "Milk Carton",
+      "name": "milk_carton",
       "type": "ingredient_source",
       "position": {
         "x": 3.5,
@@ -771,7 +772,7 @@
       }
     },
     {
-      "name": "Banana Crate",
+      "name": "banana_crate",
       "type": "ingredient_source",
       "position": {
         "x": 3.5,
@@ -787,7 +788,7 @@
       }
     },
     {
-      "name": "Strawberry Box",
+      "name": "strawberry_box",
       "type": "ingredient_source",
       "position": {
         "x": 3.5,
@@ -803,7 +804,7 @@
       }
     },
     {
-      "name": "Cup Stack",
+      "name": "cup_stack",
       "type": "item_source",
       "position": {
         "x": 3.5,
@@ -819,7 +820,7 @@
       }
     },
     {
-      "name": "Cutting Board",
+      "name": "cutting_board",
       "type": "processor",
       "position": {
         "x": 1.5,
@@ -845,7 +846,7 @@
       }
     },
     {
-      "name": "Tomato Bin",
+      "name": "tomato_bin",
       "type": "ingredient_source",
       "position": {
         "x": 2,
@@ -860,7 +861,7 @@
       }
     },
     {
-      "name": "Lettuce Bin",
+      "name": "lettuce_bin",
       "type": "ingredient_source",
       "position": {
         "x": 1,
@@ -875,7 +876,7 @@
       }
     },
     {
-      "name": "Plate Stack",
+      "name": "plate_stack",
       "type": "item_source",
       "position": {
         "x": 3.5,
@@ -891,7 +892,7 @@
       }
     },
     {
-      "name": "Trash Bin",
+      "name": "trash_bin",
       "type": "trash",
       "position": {
         "x": -3.5,
@@ -904,7 +905,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -1.5,
@@ -912,7 +913,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 2,
@@ -990,7 +991,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -1.5,
@@ -998,7 +999,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -2,
@@ -1006,7 +1007,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -2,
@@ -1014,7 +1015,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 1.5,
@@ -1022,7 +1023,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 1.5,
@@ -1030,7 +1031,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 2,
@@ -1038,7 +1039,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 2,
@@ -1046,7 +1047,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 2,
@@ -1054,7 +1055,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 1.5,
@@ -1062,7 +1063,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": 1.5,
@@ -1070,7 +1071,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -2,
@@ -1078,7 +1079,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -1.5,
@@ -1086,7 +1087,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -1.5,
@@ -1094,7 +1095,7 @@
       }
     },
     {
-      "name": "Table",
+      "name": "table",
       "type": "table",
       "position": {
         "x": -2,
@@ -1168,7 +1169,7 @@
       }
     },
     {
-      "name": "Cutting Board",
+      "name": "cutting_board",
       "type": "processor",
       "position": {
         "x": -3.5,
@@ -1201,7 +1202,7 @@
       }
     },
     {
-      "name": "Cutting Board",
+      "name": "cutting_board",
       "type": "processor",
       "position": {
         "x": 3.5,
@@ -1234,7 +1235,7 @@
       }
     },
     {
-      "name": "Serving Pass",
+      "name": "serving_pass",
       "type": "serving",
       "position": {
         "x": 1,
@@ -1242,7 +1243,7 @@
       }
     },
     {
-      "name": "Serving Pass",
+      "name": "serving_pass",
       "type": "serving",
       "position": {
         "x": -1,
@@ -1250,7 +1251,7 @@
       }
     },
     {
-      "name": "Counter (Wood)",
+      "name": "counter_wood",
       "type": "counter",
       "position": {
         "x": 1.5,
@@ -1258,7 +1259,7 @@
       }
     },
     {
-      "name": "Cutting Board",
+      "name": "cutting_board",
       "type": "processor",
       "position": {
         "x": -1.5,

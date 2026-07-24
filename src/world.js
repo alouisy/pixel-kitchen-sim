@@ -435,7 +435,7 @@ export function buildKitchen(scene, levelLayout, theme) {
             object3D.position.set(x, 0, z);
             object3D.userData.grid.originX = x - (GRID_UNIT/2);
             object3D.userData.grid.originZ = z - (GRID_UNIT/2);
-            if (def.type === STATION_TYPES.SERVING) object3D.attach(createLabel(scene, "SERVE", object3D.position, 1.5));
+            if (def.type === STATION_TYPES.SERVING) object3D.attach(createLabel(scene, "serve_label", object3D.position, 1.5));
 
         } else if (def.type === STATION_TYPES.TABLE) {
             const neighbors = {

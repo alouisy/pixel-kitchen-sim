@@ -50,10 +50,10 @@ for (const entry of roadmap.slice(0, 5)) {
 }
 
 const level3 = await readJson('public/levels/level_3.json');
-assert(level3.layout.some(item => item.name === 'Cheese Fridge'), 'Level 3 requires a Cheese Fridge for Cheese Omelette.');
+assert(level3.layout.some(item => item.name === 'cheese_fridge'), 'Level 3 requires a Cheese Fridge for Cheese Omelette.');
 
 const level5 = await readJson('public/levels/level_5.json');
-for (const requiredObject of ['Bread Rack', 'Toaster', 'Bacon Pack']) {
+for (const requiredObject of ['bread_rack', 'toaster', 'bacon_pack']) {
     assert(level5.layout.some(item => item.name === requiredObject), `Level 5 is missing ${requiredObject}, required for BLT Sandwich.`);
 }
 

@@ -185,4 +185,15 @@ export class Player {
 
     getPosition() { return this.cameraObject.position; }
     setScene(scene) { this.scene = scene; }
+
+    resetPosition(x = 0, y = PLAYER_HEIGHT, z = 2.5) {
+        this.forceDropItem();
+        this.velocity.set(0, 0, 0);
+        this.cameraObject.position.set(x, y, z);
+        this.cameraObject.rotation.set(0, 0, 0);
+        if (this.controls && this.controls._pointerLockControls) {
+            const plc = this.controls._pointerLockControls.getObject();
+            if (plc) plc.rotation.set(0, 0, 0);
+        }
+    }
 }
