@@ -402,7 +402,7 @@ export class UIManager {
                 const stepPill = document.createElement('div');
                 stepPill.className = `recipe-step-pill ${step.type}`;
 
-                const iconKey = step.station || step.item;
+                const iconKey = (step.type === 'container' || step.type === 'source') ? (step.item || step.station) : (step.station || step.item);
                 const iconSrc = getVoxelThumbnail(iconKey);
 
                 if (iconSrc) {

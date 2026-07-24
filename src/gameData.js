@@ -243,15 +243,15 @@ export const RECIPES = {
             ],
             fr: [
                 "Prendre Poulet Cru (Source)",
-                "Utiliser Planche -> Lanières Poulet Crues",
+                "Utiliser Planche -> Aiguillettes Poulet Crues",
                 "Prendre Panure (Source)",
-                "Utiliser Station Panure avec Lanières -> Lanières Panées",
-                "Utiliser Friteuse -> Lanières Cuites",
+                "Utiliser Station Panure avec Aiguillettes -> Aiguillettes Panées",
+                "Utiliser Friteuse -> Tenders Cuits",
                 "Prendre Patate (Bac)",
                 "Utiliser Planche -> Frites Crues",
                 "Utiliser Friteuse -> Frites Cuites",
                 "Prendre Assiette (Pile)",
-                "Combiner Assiette + Lanières Cuites + Frites Cuites (Assemblage)",
+                "Combiner Assiette + Tenders Cuits + Frites Cuites (Assemblage)",
                 "Servir (Comptoir)"
             ],
             es: [
@@ -347,10 +347,10 @@ export const RECIPES = {
             fr: [
                 "Prendre Tranche Pain (Source)",
                 "Prendre Tranche Fromage (Frigo)",
-                "Combiner Pain + Fromage (Assemblage) -> Sandwich Cru",
-                "Utiliser Plaque -> Sandwich Grillé Cuit",
+                "Combiner Pain + Fromage (Assemblage) -> Sandwich au Fromage Cru",
+                "Utiliser Plaque -> Sandwich au Fromage Cuit",
                 "Prendre Assiette (Pile)",
-                "Combiner Assiette + Sandwich Grillé Cuit (Assemblage)",
+                "Combiner Assiette + Sandwich au Fromage Cuit (Assemblage)",
                 "Servir (Comptoir)"
             ],
             es: [
@@ -629,10 +629,10 @@ export function getRecipeDetails(mealName, orderTimeMultiplier = 1.0) {
 
     // Standard timing: 10 seconds per weight unit at 1.0x multiplier
     const calculatedTimeLimit = Math.max(30, Math.round(weight * 10 * multiplier));
-    
+
     // Base score: 12 points per weight unit
     const calculatedBaseScore = Math.max(30, Math.round(weight * 12));
-    
+
     // Penalty on order failure (timeout): 50% of dish base score
     const calculatedPenalty = Math.round(calculatedBaseScore * 0.5);
 

@@ -47,13 +47,9 @@ export class LevelManager {
 
         // Load parameters from the passed levelData
         const diff = this.saveManager?.getSetting('difficulty') || 'beginner';
-        let delayFactor = 1.0;
-        if (diff === 'beginner') delayFactor = 1.25;
-        else if (diff === 'expert') delayFactor = 0.80;
 
         this.availableMeals = this.currentLevelData.availableMeals || [];
         this.maxActiveOrders = this.currentLevelData.maxActiveOrders || 1;
-        this.newOrderDelay = (this.currentLevelData.newOrderDelay || 15) * delayFactor;
         this.newOrderTimer = 0; // Reset delay timer
 
         console.log(`Loading Level ${this.currentLevelData.levelId}: ${this.currentLevelData.name} (Difficulty: ${diff})`);
@@ -66,10 +62,59 @@ export class LevelManager {
         for (let i = 0; i < this.maxActiveOrders; i++) {
             this.generateNewOrder();
         }
-        // Start the cooldown timer after initial generation
-        this.newOrderTimer = this.newOrderDelay;
+        // Start the cooldown timer for subsequent orders
+        this.newOrderTimer = this.calculateNextOrderDelay();
 
         return true; // Indicate success
+    }
+
+    calculateNextOrderDelay() {
+        const diff = this.saveManager?.getSetting('difficulty') || 'beginner';
+        
+        // 1. Difficulty Multiplier
+        let diffFactor = 1.0;
+        if (diff === 'beginner') diffFactor = 1.25;
+        else if (diff === 'expert') diffFactor = 0.75;
+
+        // 2. Recipe Complexity Factor (average prep time across available meals)
+        let totalPrepTime = 0;
+        let mealCount = 0;
+        if (this.availableMeals && this.availableMeals.length > 0) {
+            for (const meal of this.availableMeals) {
+                const details = getRecipeDetails(meal, 1.0);
+                if (details) {
+                    totalPrepTime += (details.timeLimit || 30);
+                    mealCount++;
+                }
+            }
+        }
+        const avgTime = mealCount > 0 ? (totalPrepTime / mealCount) : 30;
+        
+        // Base delay scales with meal complexity (e.g. 18s fries -> ~5.4s base, 40s BLT -> ~12s base)
+        let baseDelay = Math.max(4, Math.min(15, avgTime * 0.3));
+
+        // Honor explicit custom newOrderDelay from level data if specified
+        if (this.currentLevelData && typeof this.currentLevelData.newOrderDelay === 'number' && this.currentLevelData.newOrderDelay > 0) {
+            baseDelay = this.currentLevelData.newOrderDelay;
+        }
+
+        // 3. Active Order Count & Rush Jitter
+        const currentActive = this.activeOrders.size;
+        let loadFactor = 1.0;
+
+        if (currentActive === 1 && this.maxActiveOrders > 1) {
+            // "Rush hour" burst: 35% chance that the 2nd order comes rapidly (~2-3s)
+            loadFactor = Math.random() < 0.35 ? 0.35 : 0.75;
+        } else if (currentActive > 1) {
+            // As active orders pile up, slightly increase delay to maintain playability
+            loadFactor = 1.0 + (currentActive / this.maxActiveOrders) * 0.3;
+        }
+
+        // 4. Random Organic Jitter (±20%) so orders don't feel like a rigid metronome
+        const jitter = 0.8 + Math.random() * 0.4;
+
+        const calculatedDelay = baseDelay * diffFactor * loadFactor * jitter;
+        return Math.max(1.5, Math.min(25, calculatedDelay));
     }
 
     generateNewOrder() {
@@ -108,7 +153,7 @@ export class LevelManager {
         console.log(`Generated new order: ${mealName} (ID: ${orderId}, Time: ${newOrder.timer}s, Diff: ${diff})`);
 
         // Reset the cooldown timer for the *next* potential order
-        this.newOrderTimer = this.newOrderDelay;
+        this.newOrderTimer = this.calculateNextOrderDelay();
     }
 
 
@@ -130,9 +175,16 @@ export class LevelManager {
         failedOrderIds.forEach(orderId => this.failOrder(orderId)); // Process failures
 
         // 3. Check if New Order Should Be Generated
-        this.newOrderTimer -= delta;
-        if (this.activeOrders.size < this.maxActiveOrders && this.newOrderTimer <= 0) {
-            this.generateNewOrder();
+        if (this.isLevelRunning) {
+            if (this.activeOrders.size === 0) {
+                // Instantly generate a new order when zero active orders remain!
+                this.generateNewOrder();
+            } else {
+                this.newOrderTimer -= delta;
+                if (this.activeOrders.size < this.maxActiveOrders && this.newOrderTimer <= 0) {
+                    this.generateNewOrder();
+                }
+            }
         }
     }
 
@@ -181,6 +233,17 @@ export class LevelManager {
         this.activeOrders.delete(completedOrderId); // Remove from map
         this.uiManager.removeOrderCard(completedOrderId); // Remove from UI
 
+        // Dynamic Order Spawning:
+        if (this.isLevelRunning) {
+            if (this.activeOrders.size === 0) {
+                // Instantly spawn a new order when zero active orders remain!
+                this.generateNewOrder();
+            } else if (this.activeOrders.size < this.maxActiveOrders) {
+                // Fast completion bonus: shorten the timer for the next background order
+                this.newOrderTimer = Math.min(this.newOrderTimer, this.calculateNextOrderDelay() * 0.5);
+            }
+        }
+
         return true;
     }
 
@@ -198,6 +261,11 @@ export class LevelManager {
 
         this.activeOrders.delete(orderId); // Remove from map
         this.uiManager.removeOrderCard(orderId); // Remove from UI
+
+        // Dynamic Order Spawning:
+        if (this.isLevelRunning && this.activeOrders.size === 0) {
+            this.generateNewOrder();
+        }
     }
 
     endLevel() {

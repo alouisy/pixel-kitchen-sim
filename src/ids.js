@@ -48,6 +48,67 @@ export const STATION = Object.freeze({
     COATING_MIX:      'coating_mix_src'
 });
 
+// Utensils & Containers (Assiette, Bol, Gobelet, etc.)
+export const UTENSIL = Object.freeze({
+    PLATE:            'plate',
+    BOWL:             'bowl',
+    CUP:              'cup',
+    PIZZA_BASE:       'pizza_base',
+    BREAD_SLICE:      'bread_slice'
+});
+
+// Ingredients & Processed Items
+export const INGREDIENT = Object.freeze({
+    POTATO:                  'potato',
+    RAW_FRIES:               'raw_fries',
+    COOKED_FRIES:            'cooked_fries',
+    PIZZA_DOUGH:             'pizza_dough',
+    SHREDDED_MOZZARELLA:     'shredded_mozzarella',
+    TOMATO_SAUCE:            'tomato_sauce',
+    RAW_CHICKEN:             'raw_chicken',
+    RAW_CHICKEN_STRIPS:      'raw_chicken_strips',
+    COATED_CHICKEN_STRIPS:   'coated_chicken_strips',
+    COOKED_CHICKEN_TENDERS:  'cooked_chicken_tenders',
+    RAW_BACON:               'raw_bacon',
+    COOKED_BACON:            'cooked_bacon',
+    TOASTED_BREAD:           'toasted_bread',
+    EGG:                     'egg',
+    MILK:                    'milk',
+    YOGURT:                  'yogurt',
+    GRANOLA:                 'granola',
+    SYRUP:                   'syrup',
+    PANCAKE_MIX:             'pancake_mix',
+    PANCAKE_BATTER:          'pancake_batter',
+    OMELETTE_MIX:            'omelette_mix',
+    COOKED_OMELETTE:         'cooked_omelette',
+    COOKED_PANCAKES:         'cooked_pancakes',
+    RAW_ONION_RINGS:         'raw_onion_rings',
+    ONION_RINGS_RAW:         'onion_rings_raw',
+    ONION_RINGS_COATED:      'onion_rings_coated',
+    COOKED_ONION_RINGS:      'cooked_onion_rings',
+    RAW_ONION:               'raw_onion',
+    ONION:                   'onion',
+    SLICED_ONION:            'sliced_onion',
+    BANANA:                  'banana',
+    SLICED_BANANA:           'sliced_banana',
+    STRAWBERRY:              'strawberry',
+    SLICED_STRAWBERRY:       'sliced_strawberry',
+    SMOOTHIE_READY:          'smoothie_ready',
+    GRILLED_CHEESE_COOKED:   'grilled_cheese_cooked',
+    GRILLED_CHEESE_RAW:      'grilled_cheese_raw',
+    PIZZA_MARGHERITA_RAW:    'pizza_margherita_raw',
+    COOKED_PIZZA_MARGHERITA: 'cooked_pizza_margherita',
+    COATING_MIX:             'coating_mix',
+    BUN:                     'bun',
+    PATTY:                   'patty',
+    COOKED_PATTY:            'cooked_patty',
+    CHEESE_SLICE:            'cheese_slice',
+    LETTUCE:                 'lettuce',
+    CHOPPED_LETTUCE:         'chopped_lettuce',
+    TOMATO:                  'tomato',
+    CHOPPED_TOMATO:          'chopped_tomato'
+});
+
 // Meal / Recipe IDs (clés de RECIPES)
 export const MEAL = Object.freeze({
     FRENCH_FRIES:            'french_fries',
