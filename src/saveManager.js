@@ -25,7 +25,7 @@ function defaultSave() {
         customLevels: [],
         settings: {
             language: 'en',
-            showLabels: true,
+            showLabels: false,
             audioEnabled: true,
             difficulty: 'beginner'
         },

@@ -1,6 +1,6 @@
 // src/utils/legacyMigration.js
 
-const LEGACY_NAME_MAPPINGS = {
+export const LEGACY_NAME_MAPPINGS = {
     // Stations & Catalog Items
     "Potato Bin": "potato_bin",
     "PotatoBin": "potato_bin",
@@ -37,6 +37,7 @@ const LEGACY_NAME_MAPPINGS = {
     "PancakeMix": "pancake_mix_src",
     "Stand Mixer": "stand_mixer",
     "StandMixer": "stand_mixer",
+    "robotMixer": "stand_mixer",
     "Syrup Bottle": "syrup_bottle",
     "SyrupBottle": "syrup_bottle",
     "Egg Carton": "egg_carton",
@@ -52,10 +53,12 @@ const LEGACY_NAME_MAPPINGS = {
     "CupStack": "cup_stack",
     "Pizza Dough": "pizza_dough_src",
     "PizzaDough": "pizza_dough_src",
+    "Pizza Dough Source": "pizza_dough_src",
     "Dough Press": "dough_press",
     "DoughPress": "dough_press",
     "Tomato Sauce": "tomato_sauce_src",
     "TomatoSauce": "tomato_sauce_src",
+    "Tomato Sauce Source": "tomato_sauce_src",
     "Mozzarella Bin": "mozzarella_bin",
     "MozzarellaBin": "mozzarella_bin",
     "Pizza Oven": "pizza_oven",

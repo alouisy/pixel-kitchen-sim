@@ -208,8 +208,8 @@ function initializeGameComponents() {
     setWorldLanguage(savedLang); // Set for World builder
 
     const savedLabels = saveManager.getSetting('showLabels'); // Could be true, false, or undefined
-    // If undefined, default to true (handled by getSetting in previous file, but safe here)
-    const showLabels = savedLabels !== false;
+    // If undefined, default to false (labels are hidden by default)
+    const showLabels = savedLabels === true;
     toggleLabels(showLabels);
     uiManager.setLabelToggleState(showLabels);
 

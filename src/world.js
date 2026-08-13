@@ -11,6 +11,7 @@ import {
     createExhaustHoodMesh, createPlantMesh, createKitchenLampMesh, createCoatingStationMesh
 } from './voxelBuilder.js';
 import { getTrans } from './i18nData.js';
+import { LEGACY_NAME_MAPPINGS } from './utils/legacyMigration.js';
 import { createItem, updatePlateVisuals } from './items.js';
 import { RECIPES } from './gameData.js';
 
@@ -107,26 +108,67 @@ export function resizeWall(wallObject, width, depth) {
     // Ensure object name reflects resize if it helps debugging, or keep generic
 }
 
+const LABEL_SCALE = 0.0035;
+const LABEL_STATION_Y = MODULE_HEIGHT + 0.55; // Floating height above stations
+const LABEL_SERVE_Y = 1.5; // Floating height above serving counters
+
+// Stations that get a floating label. Counters/tables/walls/decoration stay muted.
+const LABEL_STATION_TYPES = [
+    STATION_TYPES.SERVING,
+    STATION_TYPES.INGREDIENT_SOURCE,
+    STATION_TYPES.ITEM_SOURCE,
+    STATION_TYPES.PROCESSOR,
+    STATION_TYPES.TRASH
+];
+
 function createLabel(scene, text, position, yOffset = LABEL_Y_OFFSET) {
     const translatedText = getTrans(text, currentLang);
 
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
-    context.font = "Bold 40px 'Courier New'";
+    // System font (no external font loaded, so the UI keeps its original look).
+    context.font = "Bold 14px 'Courier New', monospace";
     const metrics = context.measureText(translatedText);
-    canvas.width = metrics.width + 20;
-    canvas.height = 50;
-    context.font = "Bold 40px 'Courier New'";
-    context.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    const padX = 10;
+    const padY = 7;
+    canvas.width = Math.ceil(metrics.width) + padX * 2;
+    canvas.height = 18 + padY * 2;
+    context.font = "Bold 14px 'Courier New', monospace";
+
+    // Rounded backdrop (small radius, pixel-ish)
+    const radius = 4;
+    context.fillStyle = 'rgba(18, 18, 28, 0.85)';
+    context.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(radius, 0);
+    context.lineTo(canvas.width - radius, 0);
+    context.quadraticCurveTo(canvas.width, 0, canvas.width, radius);
+    context.lineTo(canvas.width, canvas.height - radius);
+    context.quadraticCurveTo(canvas.width, canvas.height, canvas.width - radius, canvas.height);
+    context.lineTo(radius, canvas.height);
+    context.quadraticCurveTo(0, canvas.height, 0, canvas.height - radius);
+    context.lineTo(0, radius);
+    context.quadraticCurveTo(0, 0, radius, 0);
+    context.closePath();
+    context.fill();
+    context.stroke();
+
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillStyle = '#FFD700';
+    // Gold accent for the service counter, white for the rest
+    const isServe = text === 'serve_label';
+    context.fillStyle = isServe ? '#FFE082' : '#FFFFFF';
+    context.strokeStyle = '#000000';
+    context.lineWidth = 3;
+    context.strokeText(translatedText, canvas.width / 2, canvas.height / 2);
     context.fillText(translatedText, canvas.width / 2, canvas.height / 2);
+
     const tex = new THREE.CanvasTexture(canvas);
-    tex.minFilter = THREE.NearestFilter;
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false }));
-    sprite.scale.set(canvas.width * 0.005, canvas.height * 0.005, 1);
+    sprite.scale.set(canvas.width * LABEL_SCALE, canvas.height * LABEL_SCALE, 1);
     sprite.position.copy(position);
     sprite.position.y += yOffset;
     sprite.renderOrder = 999;
@@ -364,6 +406,57 @@ export function clearKitchen(scene) {
     }
 }
 
+// Groups adjacent stations of the same type/name into runs so each run gets a
+// single label (centered on the run) instead of one label per station.
+function groupLabelStations(levelLayout) {
+    const candidates = levelLayout.filter(def =>
+        def && LABEL_STATION_TYPES.includes(def.type) && def.name
+    ).map(def => ({
+        ...def,
+        name: LEGACY_NAME_MAPPINGS[def.name] || def.name
+    }));
+
+    const groups = new Map();
+    candidates.forEach(def => {
+        const key = `${def.type}|${def.name}`;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(def);
+    });
+
+    const runs = [];
+    groups.forEach(defs => {
+        const remaining = [...defs];
+        while (remaining.length) {
+            const run = [remaining.pop()];
+            // Grow the run by absorbing any remaining station adjacent to the current run
+            let grew = true;
+            while (grew) {
+                grew = false;
+                for (let i = remaining.length - 1; i >= 0; i--) {
+                    const candidate = remaining[i];
+                    const adjacent = run.some(placed =>
+                        (Math.abs(placed.position.x - candidate.position.x) < 0.1 &&
+                         Math.abs(placed.position.z - candidate.position.z - GRID_UNIT) < 0.1) ||
+                        (Math.abs(placed.position.x - candidate.position.x) < 0.1 &&
+                         Math.abs(placed.position.z - candidate.position.z + GRID_UNIT) < 0.1) ||
+                        (Math.abs(placed.position.x - candidate.position.x - GRID_UNIT) < 0.1 &&
+                         Math.abs(placed.position.z - candidate.position.z) < 0.1) ||
+                        (Math.abs(placed.position.x - candidate.position.x + GRID_UNIT) < 0.1 &&
+                         Math.abs(placed.position.z - candidate.position.z) < 0.1)
+                    );
+                    if (adjacent) {
+                        run.push(candidate);
+                        remaining.splice(i, 1);
+                        grew = true;
+                    }
+                }
+            }
+            runs.push(run);
+        }
+    });
+    return runs;
+}
+
 export function buildKitchen(scene, levelLayout, theme) {
     clearKitchen(scene);
     const newStations = [];
@@ -435,7 +528,6 @@ export function buildKitchen(scene, levelLayout, theme) {
             object3D.position.set(x, 0, z);
             object3D.userData.grid.originX = x - (GRID_UNIT/2);
             object3D.userData.grid.originZ = z - (GRID_UNIT/2);
-            if (def.type === STATION_TYPES.SERVING) object3D.attach(createLabel(scene, "serve_label", object3D.position, 1.5));
 
         } else if (def.type === STATION_TYPES.TABLE) {
             const neighbors = {
@@ -495,9 +587,6 @@ export function buildKitchen(scene, levelLayout, theme) {
                 object3D.position.set(x, MODULE_HEIGHT, z);
             }
             
-            if (def.type !== STATION_TYPES.WALL && def.type !== 'decoration') {
-                object3D.add(createLabel(scene, def.name, new THREE.Vector3(0,0.5,0), 0));
-            }
             if (object3D.userData.grid) {
                 object3D.userData.grid.originX = x - (GRID_UNIT/2);
                 object3D.userData.grid.originZ = z - (GRID_UNIT/2);
@@ -536,6 +625,21 @@ export function buildKitchen(scene, levelLayout, theme) {
                 grid.occupy(col, row, 1, 1, item);
             }
         }
+    });
+
+    // Grouped floating labels: one per contiguous run of identical stations.
+    groupLabelStations(levelLayout).forEach(run => {
+        const first = run[0];
+        const isServe = first.type === STATION_TYPES.SERVING;
+        const text = isServe ? 'serve_label' : first.name;
+        const cx = run.reduce((sum, d) => sum + d.position.x, 0) / run.length;
+        const cz = run.reduce((sum, d) => sum + d.position.z, 0) / run.length;
+        createLabel(
+            scene,
+            text,
+            new THREE.Vector3(cx, isServe ? LABEL_SERVE_Y : LABEL_STATION_Y, cz),
+            0
+        );
     });
 
     return { stations: newStations, stationInteractables: newStationInteractables, floorMesh: currentFloor };
