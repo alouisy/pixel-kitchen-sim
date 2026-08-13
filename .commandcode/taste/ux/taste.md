@@ -1,0 +1,10 @@
+# UX & Visual Design
+
+- Prefers optional in-game visual clutter (e.g., floating station labels) to be hidden by default, with players opting in via settings; the default experience on first launch should look clean, not busy. Confidence: 0.85
+- Prefers in-world UI elements (labels/tags) to be small, compact, non-overlapping, and visually polished — oversized or overlapping elements make the game look buggy. Confidence: 0.85
+- Prefers a single label per contiguous run of identical serving counters instead of one repeated label per counter (e.g., not "service, service, service, service"); individual functional stations (e.g., fryers) may keep per-station labels. Confidence: 0.9
+- Wants all user-facing text (labels, station names) properly translated in every supported language — no raw identifiers or untranslated keys visible to players. Confidence: 0.8
+- Dislikes unrequested changes to the game's established visual identity (e.g., swapping the font to "Press Start 2P"), especially when they break existing UI (language/difficulty buttons overflowing their frames); expects such changes to be reverted rather than kept, and prefers conservative, targeted edits over global restyling. Confidence: 0.9
+- If a styling experiment cannot be scoped strictly to its intended elements (e.g., a label-only pixel font that ends up applied to the whole document's UI — main menu, options), prefers abandoning the experiment entirely and applying a simple, safe adjustment (e.g., slightly smaller labels with the system font) over further fix iterations. Confidence: 0.8
+- Open to new visual styles for in-game elements (explicitly liked the compact pixel-font labels) as long as the change is scoped to those elements only — e.g., font loaded via JS FontFace for the 3D canvas labels, never applied globally via CSS — and the menus/options UI is left untouched. Confidence: 0.85
+- Treats overflow-free, responsive UI as a hard constraint: any font or styling change that makes UI elements (language/difficulty buttons, menus) overflow their frames is unacceptable ("t'assurer que le responsif tout ça que n'y ait pas d'overflow"). Confidence: 0.8

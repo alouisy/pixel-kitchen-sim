@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(node --input-type=module -e  import { LEGACY_NAME_MAPPINGS } from './src/utils/legacyMigration.js'; console.log('robotMixer ->', LEGACY_NAME_MAPPINGS['robotMixer']); console.log('Pizza Dough Source ->', LEGACY_NAME_MAPPINGS['Pizza Dough Source']);  2 >& 1)",
+      "Shell(npm:*)",
+      "Shell(grep:*)",
+      "Shell(lsof:*)",
+      "Shell(curl -s -o /dev/null -w %{http_code} http://localhost:5173/)",
+      "Shell(echo:*)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

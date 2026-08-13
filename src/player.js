@@ -70,7 +70,7 @@ export class Player {
         const objects = getKitchenObjects ? getKitchenObjects() : [];
         const px = this.cameraObject.position.x;
         const pz = this.cameraObject.position.z;
-        const playerRadius = 0.3; // Player thickness radius
+        const playerRadius = 0.18; // Player thickness radius (reduced from 0.3 to allow easier movement through tight spaces)
 
         for (const obj of objects) {
             const type = obj.userData?.stationType;
