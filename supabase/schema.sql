@@ -80,4 +80,53 @@ from public.custom_levels cl
 left join public.level_ratings lr on cl.id = lr.level_id
 group by cl.id, cl.player_token, cl.nickname, cl.name, cl.description, cl.difficulty, cl.data, cl.created_at, cl.updated_at;
 
+-- V1 leaderboard aggregation views (run this file again in the Supabase SQL editor after pulling).
+
+-- Best score per player per level. leaderboard_entries is unique on (level_key, player_token),
+-- so this keeps the single stored row; the order by still defines "best" if that constraint changes.
+create or replace view public.leaderboard_best_per_level with (security_invoker = true) as
+select distinct on (player_token, level_key)
+    player_token,
+    level_key,
+    nickname,
+    score,
+    stars,
+    updated_at
+from public.leaderboard_entries
+order by player_token, level_key, score desc, stars desc, updated_at desc;
+
+-- Global totals over official levels only (level:<number>, matching the roadmap).
+create or replace view public.leaderboard_totals_official with (security_invoker = true) as
+select
+    player_token,
+    (array_agg(nickname order by updated_at desc))[1] as nickname,
+    sum(score) as score,
+    sum(stars) as stars,
+    max(updated_at) as updated_at
+from public.leaderboard_best_per_level
+where level_key ~ '^level:[0-9]+$'
+group by player_token;
+
+-- Global totals over official levels plus community levels that still exist in custom_levels.
+-- The uuid cast is guarded by CASE so non-custom keys never reach it.
+create or replace view public.leaderboard_totals_community with (security_invoker = true) as
+select
+    b.player_token,
+    (array_agg(b.nickname order by b.updated_at desc))[1] as nickname,
+    sum(b.score) as score,
+    sum(b.stars) as stars,
+    max(b.updated_at) as updated_at
+from public.leaderboard_best_per_level b
+left join public.custom_levels cl
+    on cl.id = case
+        when b.level_key ~ '^custom:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+            then substring(b.level_key from 8)::uuid
+    end
+where b.level_key ~ '^level:[0-9]+$'
+   or cl.id is not null
+group by b.player_token;
+
+-- Views are read only by Netlify Functions using the secret key.
+revoke all on public.leaderboard_best_per_level, public.leaderboard_totals_official, public.leaderboard_totals_community from anon, authenticated;
+
 

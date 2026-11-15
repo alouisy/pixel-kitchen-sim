@@ -1,7 +1,14 @@
+import roadmap from '../../public/levels/game_roadmap.json' with { type: 'json' };
+
 const JSON_HEADERS = {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-store'
 };
+
+export const OFFICIAL_LEVEL_KEYS = roadmap.map(entry => `level:${entry.levelId}`);
+
+// Maps each official level key to its level file name (e.g. 'level:1' -> 'level_1.json').
+export const OFFICIAL_LEVEL_FILES = Object.fromEntries(roadmap.map(entry => [`level:${entry.levelId}`, entry.filename]));
 
 export function json(statusCode, body) {
     return new Response(JSON.stringify(body), { status: statusCode, headers: JSON_HEADERS });
@@ -17,7 +24,7 @@ export function isValidPlayerToken(value) {
 
 export function getAllowedLevelKeys() {
     const configured = process.env.ALLOWED_LEVEL_KEYS;
-    return new Set((configured ? configured.split(',') : ['level:1', 'level:2', 'level:3', 'level:4', 'level:5'])
+    return new Set((configured ? configured.split(',') : OFFICIAL_LEVEL_KEYS)
         .map(key => key.trim())
         .filter(Boolean));
 }

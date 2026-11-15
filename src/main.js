@@ -848,12 +848,19 @@ function handleMenuAction(eventOrAction) {
             break;
         }
         case 'resume': resumeGame(); break;
-        case 'next-level':
-            const currentLevelIdx = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
+        case 'next-level': {
+            let currentLevelIdx = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
+            if (isNaN(currentLevelIdx) || currentLevelIdx < 0) {
+                currentLevelIdx = 4;
+            }
             const nextLevelIndex = currentLevelIdx + 1;
-            if (!isNaN(currentLevelIdx) && nextLevelIndex < officialLevelDatabase.length && saveManager.isLevelUnlocked(nextLevelIndex)) prepareStartLevel(nextLevelIndex);
-            else actionTaken = false;
+            if (!isNaN(currentLevelIdx) && nextLevelIndex < officialLevelDatabase.length && saveManager.isLevelUnlocked(nextLevelIndex)) {
+                prepareStartLevel(nextLevelIndex);
+            } else {
+                actionTaken = false;
+            }
             break;
+        }
         case 'restart-level':
             const levelToRestart = parseInt(uiManager.levelEndScreen.dataset.levelIndex, 10);
             if (levelToRestart === -999) {

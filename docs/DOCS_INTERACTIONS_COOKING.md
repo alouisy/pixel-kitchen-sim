@@ -1,3 +1,5 @@
+> **Legacy V1 document.** Parts of it no longer match the code. The V2 design lives in [docs/v2/](./v2/README.md).
+
 # Interactions & Cooking Systems
 
 ## 1. Interaction Model (`InteractionManager.js`)

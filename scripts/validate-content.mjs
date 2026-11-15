@@ -18,7 +18,7 @@ const roadmap = await readJson('public/levels/game_roadmap.json');
 assert(Array.isArray(roadmap), 'public/levels/game_roadmap.json must be an array.');
 assert(roadmap.length >= 5, 'The first public release requires at least five official levels.');
 
-for (const entry of roadmap.slice(0, 5)) {
+for (const entry of roadmap) {
     assert(Number.isInteger(entry.levelId), `Roadmap entry has an invalid levelId: ${JSON.stringify(entry)}.`);
     assert(typeof entry.filename === 'string' && entry.filename.endsWith('.json'), `Level ${entry.levelId} has no JSON filename.`);
     if (!entry.filename) continue;
@@ -62,5 +62,5 @@ if (errors.length) {
     errors.forEach(error => console.error(`- ${error}`));
     process.exitCode = 1;
 } else {
-    console.log(`Content validation passed for ${roadmap.slice(0, 5).length} public levels.`);
+    console.log(`Content validation passed for all ${roadmap.length} official levels.`);
 }

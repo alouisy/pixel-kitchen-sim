@@ -1,3 +1,5 @@
+> **Legacy V1 document.** Parts of it no longer match the code. The V2 design lives in [docs/v2/](./v2/README.md).
+
 # Gameplay Loop & Progression
 
 ## 1. The Core Loop

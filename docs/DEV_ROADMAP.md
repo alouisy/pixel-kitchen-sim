@@ -1,3 +1,5 @@
+> **Legacy V1 document.** Parts of it no longer match the code. The V2 design lives in [docs/v2/](./v2/README.md).
+
 # 🗺️ Pixel Kitchen Simulator - Version 2.0 Roadmap
 
 This document outlines the definitive development path for Version 2.0.

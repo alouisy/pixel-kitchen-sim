@@ -1,0 +1,581 @@
+{
+  "levelId": 10,
+  "name": "The Grand Master Kitchen",
+  "theme": {
+    "floorColor1": "#212121",
+    "floorColor2": "#FFD700",
+    "borderColor": "#B8860B",
+    "counterStyle": "industrial",
+    "wallColor": "#37474F"
+  },
+  "duration": 240,
+  "newOrderDelay": 12,
+  "maxActiveOrders": 3,
+  "orderTimeMultiplier": 1.0,
+  "starThresholds": [
+    700,
+    1400,
+    2100
+  ],
+  "availableMeals": [
+    "cheeseburger_combo",
+    "pizza_margherita",
+    "pancakes",
+    "chicken_tenders_fries"
+  ],
+  "layout": [
+    {
+      "name": "wall_back",
+      "type": "wall",
+      "position": {
+        "x": 0,
+        "z": -4
+      },
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_left",
+      "type": "wall",
+      "position": {
+        "x": -4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_right",
+      "type": "wall",
+      "position": {
+        "x": 4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_front_left",
+      "type": "wall",
+      "position": {
+        "x": -2.75,
+        "z": 4
+      },
+      "size": {
+        "width": 2.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_front_right",
+      "type": "wall",
+      "position": {
+        "x": 2.75,
+        "z": 4
+      },
+      "size": {
+        "width": 2.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "serving_pass",
+      "type": "serving",
+      "position": {
+        "x": -0.5,
+        "z": 4
+      },
+      "rotation": 3.14
+    },
+    {
+      "name": "serving_pass",
+      "type": "serving",
+      "position": {
+        "x": 0,
+        "z": 4
+      },
+      "rotation": 3.14
+    },
+    {
+      "name": "serving_pass",
+      "type": "serving",
+      "position": {
+        "x": 0.5,
+        "z": 4
+      },
+      "rotation": 3.14
+    },
+    {
+      "name": "counter_corner",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -2.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 2.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter_corner",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 3.5
+      }
+    },
+    {
+      "name": "table",
+      "type": "table",
+      "position": {
+        "x": -0.5,
+        "z": 0
+      }
+    },
+    {
+      "name": "table",
+      "type": "table",
+      "position": {
+        "x": 0.5,
+        "z": 0
+      }
+    },
+    {
+      "name": "dough_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      },
+      "config": {
+        "ingredient": "pizza_dough"
+      }
+    },
+    {
+      "name": "dough_press",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      },
+      "config": {
+        "processes": [
+          "pizza_dough"
+        ],
+        "result": {
+          "pizza_dough": "pizza_base"
+        },
+        "processingTime": 2000
+      }
+    },
+    {
+      "name": "sauce_can",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -1.5
+      },
+      "config": {
+        "ingredient": "tomato_sauce"
+      }
+    },
+    {
+      "name": "cheese_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      },
+      "config": {
+        "ingredient": "shredded_mozzarella"
+      }
+    },
+    {
+      "name": "pizza_oven",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": 0.5
+      },
+      "config": {
+        "processes": [
+          "pizza_margherita_raw"
+        ],
+        "result": {
+          "pizza_margherita_raw": "cooked_pizza_margherita"
+        },
+        "processingTime": 3500
+      }
+    },
+    {
+      "name": "stand_mixer",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": 1.5
+      },
+      "config": {
+        "processes": [
+          "pancake_mix"
+        ],
+        "result": {
+          "pancake_mix": "pancake_batter"
+        },
+        "processingTime": 2500
+      }
+    },
+    {
+      "name": "pancake_mix_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": 2.5
+      },
+      "config": {
+        "ingredient": "pancake_mix"
+      }
+    },
+    {
+      "name": "trash_bin",
+      "type": "trash",
+      "position": {
+        "x": -3.5,
+        "z": 3.5
+      }
+    },
+    {
+      "name": "stove_top",
+      "type": "processor",
+      "position": {
+        "x": -2.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "patty",
+          "pancake_batter"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "pancake_batter": "cooked_pancakes"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "stove_top",
+      "type": "processor",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "patty",
+          "pancake_batter"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "pancake_batter": "cooked_pancakes"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "deep_fryer",
+      "type": "processor",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "raw_fries",
+          "coated_chicken_strips"
+        ],
+        "result": {
+          "raw_fries": "cooked_fries",
+          "coated_chicken_strips": "cooked_chicken_tenders"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "cutting_board",
+      "type": "processor",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "potato",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "potato_bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      },
+      "config": {
+        "ingredient": "potato"
+      }
+    },
+    {
+      "name": "chicken_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": 2.5,
+        "z": -3.5
+      },
+      "config": {
+        "ingredient": "raw_chicken"
+      }
+    },
+    {
+      "name": "coating_station",
+      "type": "processor",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "raw_chicken_strips"
+        ],
+        "result": {
+          "raw_chicken_strips": "coated_chicken_strips"
+        },
+        "processingTime": 2000
+      }
+    },
+    {
+      "name": "syrup_bottle",
+      "type": "ingredient_source",
+      "position": {
+        "x": 3.5,
+        "z": -2.5
+      },
+      "config": {
+        "ingredient": "syrup"
+      }
+    },
+    {
+      "name": "patty_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": 3.5,
+        "z": -1.5
+      },
+      "config": {
+        "ingredient": "patty"
+      }
+    },
+    {
+      "name": "cheddar_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      },
+      "config": {
+        "ingredient": "cheese_slice"
+      }
+    },
+    {
+      "name": "bun_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": 3.5,
+        "z": 0.5
+      },
+      "config": {
+        "ingredient": "bun"
+      }
+    },
+    {
+      "name": "plate_stack",
+      "type": "item_source",
+      "position": {
+        "x": 3.5,
+        "z": 1.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    }
+  ]
+}

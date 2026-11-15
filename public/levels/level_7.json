@@ -1,0 +1,539 @@
+{
+  "levelId": 7,
+  "name": "Diner & Melt Station",
+  "theme": {
+    "floorColor1": "#B71C1C",
+    "floorColor2": "#ECEFF1",
+    "borderColor": "#7F0000",
+    "counterStyle": "diner",
+    "wallColor": "#FFCDD2"
+  },
+  "duration": 210,
+  "newOrderDelay": 13,
+  "maxActiveOrders": 3,
+  "orderTimeMultiplier": 1.0,
+  "starThresholds": [
+    500,
+    1000,
+    1500
+  ],
+  "availableMeals": [
+    "grilled_cheese_sandwich",
+    "blt_sandwich",
+    "hamburger",
+    "onion_rings"
+  ],
+  "layout": [
+    {
+      "name": "wall_back",
+      "type": "wall",
+      "position": {
+        "x": 0,
+        "z": -4
+      },
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_left",
+      "type": "wall",
+      "position": {
+        "x": -4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_right",
+      "type": "wall",
+      "position": {
+        "x": 4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_front_left",
+      "type": "wall",
+      "position": {
+        "x": -2.75,
+        "z": 4
+      },
+      "size": {
+        "width": 2.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_front_right",
+      "type": "wall",
+      "position": {
+        "x": 2.75,
+        "z": 4
+      },
+      "size": {
+        "width": 2.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "serving_pass",
+      "type": "serving",
+      "position": {
+        "x": -0.5,
+        "z": 4
+      },
+      "rotation": 3.14
+    },
+    {
+      "name": "serving_pass",
+      "type": "serving",
+      "position": {
+        "x": 0,
+        "z": 4
+      },
+      "rotation": 3.14
+    },
+    {
+      "name": "serving_pass",
+      "type": "serving",
+      "position": {
+        "x": 0.5,
+        "z": 4
+      },
+      "rotation": 3.14
+    },
+    {
+      "name": "counter_corner",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -2.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 2.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter_corner",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 3.5
+      }
+    },
+    {
+      "name": "table",
+      "type": "table",
+      "position": {
+        "x": -0.5,
+        "z": 0
+      }
+    },
+    {
+      "name": "table",
+      "type": "table",
+      "position": {
+        "x": 0.5,
+        "z": 0
+      }
+    },
+    {
+      "name": "bread_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      },
+      "config": {
+        "ingredient": "bread_slice"
+      }
+    },
+    {
+      "name": "cheese_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      },
+      "config": {
+        "ingredient": "cheese_slice"
+      }
+    },
+    {
+      "name": "patty_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -1.5
+      },
+      "config": {
+        "ingredient": "patty"
+      }
+    },
+    {
+      "name": "bacon_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      },
+      "config": {
+        "ingredient": "raw_bacon"
+      }
+    },
+    {
+      "name": "bun_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": 0.5
+      },
+      "config": {
+        "ingredient": "bun"
+      }
+    },
+    {
+      "name": "onion_bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": 1.5
+      },
+      "config": {
+        "ingredient": "onion"
+      }
+    },
+    {
+      "name": "coating_station",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": 2.5
+      },
+      "config": {
+        "processes": [
+          "onion_rings_raw",
+          "raw_onion_rings"
+        ],
+        "result": {
+          "onion_rings_raw": "onion_rings_coated",
+          "raw_onion_rings": "onion_rings_coated"
+        },
+        "processingTime": 2000
+      }
+    },
+    {
+      "name": "trash_bin",
+      "type": "trash",
+      "position": {
+        "x": -3.5,
+        "z": 3.5
+      }
+    },
+    {
+      "name": "toaster",
+      "type": "processor",
+      "position": {
+        "x": -2.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "bread_slice"
+        ],
+        "result": {
+          "bread_slice": "toasted_bread"
+        },
+        "processingTime": 2500
+      }
+    },
+    {
+      "name": "stove_top",
+      "type": "processor",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "patty",
+          "raw_bacon",
+          "grilled_cheese_raw"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "raw_bacon": "cooked_bacon",
+          "grilled_cheese_raw": "grilled_cheese_cooked"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "stove_top",
+      "type": "processor",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "patty",
+          "raw_bacon",
+          "grilled_cheese_raw"
+        ],
+        "result": {
+          "patty": "cooked_patty",
+          "raw_bacon": "cooked_bacon",
+          "grilled_cheese_raw": "grilled_cheese_cooked"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "deep_fryer",
+      "type": "processor",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "onion_rings_coated"
+        ],
+        "result": {
+          "onion_rings_coated": "cooked_onion_rings"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "cutting_board",
+      "type": "processor",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "tomato",
+          "lettuce",
+          "onion"
+        ],
+        "result": {
+          "tomato": "chopped_tomato",
+          "lettuce": "chopped_lettuce",
+          "onion": "onion_rings_raw"
+        }
+      }
+    },
+    {
+      "name": "tomato_bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      },
+      "config": {
+        "ingredient": "tomato"
+      }
+    },
+    {
+      "name": "lettuce_bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": 3.5,
+        "z": -2.5
+      },
+      "config": {
+        "ingredient": "lettuce"
+      }
+    },
+    {
+      "name": "plate_stack",
+      "type": "item_source",
+      "position": {
+        "x": 3.5,
+        "z": -1.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "exhaust_hood",
+      "type": "decoration",
+      "position": {
+        "x": -1.0,
+        "z": -3.5
+      }
+    }
+  ]
+}
