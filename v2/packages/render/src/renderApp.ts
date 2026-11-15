@@ -40,6 +40,7 @@ export class RenderApp {
   private alpha = 0;
   /** Added to the followed chef position to get the camera focus (lets a scene look past/over the chef). */
   readonly cameraFocusOffset = { x: 0, y: 0, z: 0 };
+  private shakeAmount = 0;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -79,6 +80,11 @@ export class RenderApp {
     this.alpha = alpha;
   }
 
+  /** Screen shake: camera jitter of up to `amount` metres, decaying within about half a second. */
+  shake(amount: number): void {
+    this.shakeAmount = Math.max(this.shakeAmount, amount);
+  }
+
   setChefOpacity(slot: number, opacity: number): void {
     this.chefs[slot]?.setOpacity(opacity);
   }
@@ -97,6 +103,12 @@ export class RenderApp {
       const p = first.group.position;
       this.cameraRig.update({ x: p.x + o.x, y: p.y + o.y, z: p.z + o.z }, dt);
     }
+    if (this.shakeAmount > 0.002) {
+      const cam = this.cameraRig.camera;
+      cam.position.x += (Math.random() - 0.5) * 2 * this.shakeAmount;
+      cam.position.y += (Math.random() - 0.5) * 2 * this.shakeAmount;
+      this.shakeAmount *= Math.exp(-4 * dt);
+    } else this.shakeAmount = 0;
     this.renderer.render(this.scene, this.cameraRig.camera);
   }
 

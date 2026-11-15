@@ -4,12 +4,14 @@ export interface SplitResult {
   /** Created body ids per group, in creation order. */
   groups: number[][];
   crumbs: number;
+  /** World food-voxel centroid of each crumb component (same order they were found). */
+  crumbAt: Array<[number, number, number]>;
 }
 
 /**
  * Shared by cut and carve. `group[i]` is the group label (0..groupCount-1) of cell i (ignored for empty cells).
  * For each group in order, 6-connected components are found by iterative flood fill (seeds in increasing linear
- * index), components under 2 cells become crumbs, the rest become tight-bounding-box bodies.
+ * index), components under `minCells` (default 2) become crumbs, the rest become tight-bounding-box bodies.
  * Does NOT remove the source body from the store.
  */
 export function splitComponents(
@@ -17,6 +19,8 @@ export function splitComponents(
   src: FoodBody,
   group: Uint8Array,
   groupCount: number,
+  /** Components with fewer cells than this become crumbs (removed). Default 2. */
+  minCells = 2,
 ): SplitResult {
   const [dx, dy, dz] = src.dims;
   const n = src.material.length;
@@ -28,6 +32,7 @@ export function splitComponents(
   const comp = new Int32Array(n);
   const groups: number[][] = [];
   let crumbs = 0;
+  const crumbAt: Array<[number, number, number]> = [];
 
   for (let g = 0; g < groupCount; g++) {
     const made: number[] = [];
@@ -100,8 +105,13 @@ export function splitComponents(
           }
         }
       }
-      if (cn < 2) {
+      if (cn < minCells) {
         crumbs += cn;
+        crumbAt.push([
+          src.origin[0] + (minX + maxX + 1) / 2,
+          src.origin[1] + (minY + maxY + 1) / 2,
+          src.origin[2] + (minZ + maxZ + 1) / 2,
+        ]);
         continue;
       }
       const ndims: Vec3 = [maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1];
@@ -126,6 +136,6 @@ export function splitComponents(
       made.push(nb.id);
     }
   }
-  return { groups, crumbs };
+  return { groups, crumbs, crumbAt };
 }
 

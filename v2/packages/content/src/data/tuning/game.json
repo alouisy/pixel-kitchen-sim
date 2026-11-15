@@ -1,0 +1,18 @@
+{
+  "serviceSeconds": 180,
+  "stars": [300, 600, 900],
+  "belly": {
+    "start": 70,
+    "drainPerSecond": 0.45,
+    "bandContent": 60,
+    "bandPeckish": 30,
+    "bandHungry": 10,
+    "maxRefill": 30,
+    "cellsPerBelly": 8
+  },
+  "patience": 3,
+  "mood": { "expire": -15, "perfect": 12, "great": 6, "okay": 0, "yuck": -10, "hangry": -10 },
+  "timeBonusCap": 30,
+  "cutting": { "minCutCells": 48, "crumbCells": 24, "cooldownSeconds": 0.35 },
+  "tutorial": { "doneSeconds": 3 }
+}

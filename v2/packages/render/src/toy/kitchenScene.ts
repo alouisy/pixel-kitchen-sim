@@ -1,7 +1,6 @@
 import {
   AdditiveBlending,
   BoxGeometry,
-  CylinderGeometry,
   Group,
   Mesh,
   MeshBasicMaterial,
@@ -20,7 +19,6 @@ export interface KitchenDesc {
   voxelSize: number;
   table: { x0: number; z0: number; w: number; d: number; top: number };
   rock: { x0: number; z0: number; w: number; d: number; y0: number; top: number };
-  plate: { cx: number; cz: number; r: number; y: number };
   pads: ReadonlyArray<{ x: number; z: number; size: number; color: number }>;
   /** Material ramp indices used for the static voxel volumes. */
   woodMaterial: number;
@@ -61,7 +59,7 @@ function rockVolume(d: KitchenDesc): MeshInput {
 }
 
 /**
- * Static toy kitchen props: voxel table + hot rock (meshed once, baked AO), flat ingredient pads, the tasting plate and
+ * Static toy kitchen props: voxel table + hot rock (meshed once, baked AO), flat ingredient pads and
  * a warm light over the rock that brightens as things cook on it.
  */
 export class KitchenScene {
@@ -87,22 +85,6 @@ export class KitchenScene {
       mat.receiveShadow = true;
       this.group.add(mat);
     }
-    const pl = desc.plate;
-    const plate = new Mesh(
-      new CylinderGeometry(pl.r * vs, pl.r * vs * 0.92, 0.02, 32),
-      new MeshStandardMaterial({ color: 0xf4efe6, roughness: 0.35 }),
-    );
-    plate.position.set((pl.cx + 0.5) * vs, pl.y * vs + 0.01, (pl.cz + 0.5) * vs);
-    plate.receiveShadow = plate.castShadow = true;
-    this.group.add(plate);
-    const rim = new Mesh(
-      new CylinderGeometry(pl.r * vs * 0.78, pl.r * vs * 0.78, 0.024, 32),
-      new MeshStandardMaterial({ color: 0xe3dccf, roughness: 0.4 }),
-    );
-    rim.position.copy(plate.position);
-    rim.position.y += 0.002;
-    this.group.add(rim);
-
     const cx = (r.x0 + r.w / 2) * vs;
     const cz = (r.z0 + r.d / 2) * vs;
     this.ember = new Mesh(

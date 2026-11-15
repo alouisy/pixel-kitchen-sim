@@ -43,7 +43,7 @@ describe('cutBody', () => {
     const store = new FoodStore();
     const b = box(store, [4, 4, 4]);
     const r = cutBody(store, b, { n: [1, 0, 0], d: 100 });
-    expect(r).toEqual({ removedId: -1, created: [], crumbs: 0 });
+    expect(r).toEqual({ removedId: -1, created: [], crumbs: 0, crumbAt: [] });
     expect(store.get(b.id)).toBe(b);
   });
 

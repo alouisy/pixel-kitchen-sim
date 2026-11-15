@@ -1,10 +1,10 @@
 {
   "id": "ch1_seared_mushroom",
   "prompt": "craving.seared_mushroom",
-  "window": 90,
+  "window": 50,
   "requirements": [
-    { "axis": "flavor.umami", "min": 0.45, "weight": 1.0 },
-    { "axis": "doneness.perfect", "min": 0.5, "weight": 1.0 }
+    { "axis": "flavor.umami", "min": 0.52, "weight": 1.0 },
+    { "axis": "doneness.perfect", "min": 0.5, "weight": 2.0 }
   ],
   "bonuses": [],
   "minVolume": 2

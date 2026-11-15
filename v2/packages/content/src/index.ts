@@ -3,3 +3,5 @@ export { materials } from './data/materials/index.js';
 export { materialById, materialByIndex } from './loaders.js';
 export { CravingSchema, CRAVING_AXES, type Craving, type CravingAxis } from './schemas/craving.js';
 export { cravings } from './data/cravings/index.js';
+export { GameTuningSchema, type GameTuning } from './schemas/tuning.js';
+export { gameTuning } from './data/tuning/index.js';

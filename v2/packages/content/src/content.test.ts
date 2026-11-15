@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MaterialSchema, materials } from './index.js';
+import { GameTuningSchema, MaterialSchema, gameTuning, materials } from './index.js';
 
 describe('materials', () => {
   it('all bundled materials pass the schema with unique ids and indices', () => {
@@ -13,5 +13,16 @@ describe('materials', () => {
     expect(
       MaterialSchema.safeParse({ ...materials[0], thermal: { ...materials[0]!.thermal, perfect: [0.8, 0.5] } }).success,
     ).toBe(false);
+  });
+});
+
+describe('game tuning', () => {
+  it('loads with ascending star thresholds and the briefed numbers', () => {
+    expect(GameTuningSchema.safeParse(gameTuning).success).toBe(true);
+    expect(gameTuning.stars).toEqual([300, 600, 900]);
+    expect(gameTuning.serviceSeconds).toBe(180);
+    expect(gameTuning.patience).toBe(3);
+    expect(gameTuning.cutting).toMatchObject({ minCutCells: 48, crumbCells: 24, cooldownSeconds: 0.35 });
+    expect(GameTuningSchema.safeParse({ ...gameTuning, stars: [1, 2] }).success).toBe(false);
   });
 });

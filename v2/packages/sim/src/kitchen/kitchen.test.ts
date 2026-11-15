@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  BTN_GRAB, BTN_SWAP, BTN_TILT, BTN_TOOL, FoodStore, PADS, ROCK, SimWorld, TABLE,
+  BTN_AUTOAIM, BTN_GRAB, BTN_SWAP, BTN_TILT, BTN_TOOL, FoodStore, MOUTH_M, PADS, ROCK, SimWorld, TABLE,
   supportHeightAt, restingOriginY, type InputFrame, type SimEvent,
 } from '../index.js';
 
@@ -8,7 +8,7 @@ const TICKS = 1200;
 const ARENA = 3.8;
 
 class Driver {
-  w = new SimWorld({ seed: 7, chefSlots: 1, arenaHalf: ARENA });
+  w = new SimWorld({ seed: 7, chefSlots: 1, arenaHalf: ARENA, phase: 'tutorial' });
   events: SimEvent[] = [];
   seq = 0;
   step(move: [number, number], buttons = 0, aim: [number, number, number] = [0, 0, 0]): void {
@@ -19,7 +19,7 @@ class Driver {
     for (let i = 0; i < n; i++) this.step([0, 0]);
   }
   press(btn: number): void {
-    this.step([0, 0], btn);
+    this.step([0, 0], btn | BTN_AUTOAIM);
     this.step([0, 0], 0);
   }
   pos(): { x: number; z: number } {
@@ -73,9 +73,8 @@ function session(useRock: boolean, snapshotAt?: number): { d: Driver; hash: stri
   d.walkZ(-1.2);
   d.walkX(PADS[0]!.x / 16);
   d.faceNorth();
-  d.press(BTN_GRAB); // spawn mushroom
+  d.press(BTN_GRAB); // spawn the mushroom straight into the hands
   expect(d.w.kitchen.store.size).toBe(1);
-  d.press(BTN_GRAB); // pick up
   expect(d.w.kitchen.held[0]).toBeGreaterThan(0);
   maybeSnap();
   if (useRock) {
@@ -85,7 +84,7 @@ function session(useRock: boolean, snapshotAt?: number): { d: Driver; hash: stri
     expect(d.w.kitchen.held[0]).toBe(-1);
     const b = d.w.kitchen.store.get(1)!;
     expect(d.w.kitchen.onRock(b)).toBe(true);
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 330; i++) {
       d.idle(1);
       maybeSnap();
     }
@@ -97,12 +96,11 @@ function session(useRock: boolean, snapshotAt?: number): { d: Driver; hash: stri
       maybeSnap();
     }
   }
-  d.walkX(26 / 16);
+  d.walkX(MOUTH_M.x);
   d.faceNorth();
   maybeSnap();
-  d.press(BTN_GRAB); // place on plate
+  d.press(BTN_GRAB); // serve to Mossback
   expect(d.w.kitchen.held[0]).toBe(-1);
-  d.press(BTN_GRAB); // taste
   expect(d.dish()).toBeDefined();
   while (d.w.tick < TICKS) {
     d.idle(1);
@@ -136,6 +134,7 @@ describe('Cut & Burn session', () => {
     const b = session(false).d.dish()!;
     expect(a.cravingId).toBe('ch1_seared_mushroom');
     expect(a.score).toBeGreaterThan(b.score);
+    expect(a.tier === 'great' || a.tier === 'perfect').toBe(true);
   });
   it('is deterministic and survives snapshot/restore mid-run', () => {
     const h1 = session(true).hash;
@@ -160,6 +159,7 @@ describe('toy rules', () => {
     d.walkX(PADS[0]!.x / 16);
     d.faceNorth();
     d.press(BTN_GRAB);
+    d.press(BTN_GRAB); // put it down on the table again
     const b = d.w.kitchen.store.get(1)!;
     const aim: [number, number, number] = [b.origin[0] + 4, b.origin[1] + 2, b.origin[2] + 4];
     d.step([0, -127], BTN_TOOL, aim);
@@ -180,6 +180,7 @@ describe('toy rules', () => {
     d.walkX(PADS[0]!.x / 16);
     d.faceNorth();
     d.press(BTN_GRAB);
+    d.press(BTN_GRAB); // put it down on the table again
     d.w.drainFoodDelta();
     d.press(BTN_SWAP);
     const b = d.w.kitchen.store.get(1)!;

@@ -17,7 +17,7 @@ function script(seed: number, ticks: number): InputFrame[] {
 }
 
 function run(seed: number, inputs: InputFrame[], slots = 2): SimWorld {
-  const w = new SimWorld({ seed, chefSlots: slots });
+  const w = new SimWorld({ seed, chefSlots: slots, phase: 'service' });
   for (const f of inputs) w.step([f, inputs[(f.tick * 7) % inputs.length]]);
   return w;
 }
@@ -50,13 +50,13 @@ describe('snapshot', () => {
 
 describe('movement', () => {
   it('reaches ~4.2 m/s after 30 ticks of full right', () => {
-    const w = new SimWorld({ seed: 1, chefSlots: 1 });
+    const w = new SimWorld({ seed: 1, chefSlots: 1, phase: 'service' });
     const f: InputFrame = { tick: 0, move: [127, 0], aim: [0, 0, 0], buttons: 0, analog: { tool: 0 }, seq: 0 };
     for (let i = 0; i < 30; i++) w.step([f]);
     expect(w.readChefVelocity(0).x).toBeCloseTo(4.2, 3);
   });
   it('clamps to the arena', () => {
-    const w = new SimWorld({ seed: 1, chefSlots: 1 });
+    const w = new SimWorld({ seed: 1, chefSlots: 1, phase: 'service' });
     const f: InputFrame = { tick: 0, move: [127, 127], aim: [0, 0, 0], buttons: 0, analog: { tool: 0 }, seq: 0 };
     for (let i = 0; i < 600; i++) w.step([f]);
     const s = w.readChefStates();

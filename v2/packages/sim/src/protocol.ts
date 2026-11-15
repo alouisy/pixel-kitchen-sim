@@ -1,8 +1,12 @@
-import type { HudState, InputFrame, SimEvent } from './types.js';
+import type { GameHud, HudState, InputFrame, SimCommand, SimEvent } from './types.js';
 
 export type MainToWorker =
   | { type: 'init'; seed: number; chefSlots: number; arenaHalf?: number }
   | { type: 'input'; frame: InputFrame }
+  | { type: 'command'; command: SimCommand }
+  | { type: 'pause'; paused: boolean }
+  /** Dev only (client gates it behind ?dev=1): move chef 0 to (x, z) metres. */
+  | { type: 'dev-teleport'; x: number; z: number }
   | { type: 'stop' };
 
 export type WorkerToMain =
@@ -24,7 +28,9 @@ export type WorkerToMain =
       removed: number[];
     }
   /** Chef 0's presentation state; posted when it changes. */
-  | { type: 'hud'; tick: number; hud: HudState };
+  | { type: 'hud'; tick: number; hud: HudState }
+  /** Game flow + HUD numbers; posted every few ticks and on phase changes. */
+  | { type: 'game'; tick: number; game: GameHud };
 
 export interface FoodUpsert {
   id: number;

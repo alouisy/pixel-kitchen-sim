@@ -42,8 +42,3 @@ export class AimPicker {
     return [0, 0, 0];
   }
 }
-
-/** Gamepad aim: 0.6 m in front of the chef at table height. */
-export function padAim(chefX: number, chefZ: number, fx: number, fz: number, topY: number): [number, number, number] {
-  return [toFv(chefX + fx * 0.6), toFv(topY), toFv(chefZ + fz * 0.6)];
-}

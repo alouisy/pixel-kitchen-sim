@@ -1,15 +1,22 @@
-import type { FoodBody, FoodStore } from '../food/index.js';
+import { FLAG_HELD, type FoodBody, type FoodStore } from '../food/index.js';
 
 /*
  * Static test-kitchen layout in integer food voxels (1 fv = 1/16 m). World origin = kitchen centre, y up.
  * All rectangles are half-open cell ranges [x0, x0 + w) etc.
  */
 export const FV_PER_M = 16;
-export const KITCHEN_HALF_M = 4; // 8 x 8 m floor
+export const KITCHEN_HALF_M = 5; // 10 x 10 m floor (the Giant sits at the far east end)
 
 export const TABLE = { x0: -32, z0: -48, w: 64, d: 16, top: 14 } as const;
 export const ROCK = { x0: 8, z0: -46, w: 12, d: 12, y0: 14, top: 16 } as const;
-export const PLATE = { cx: 26, cz: -41, r: 5, y: 14 } as const;
+
+/** Mossback (metres): body anchor on the floor, and the mouth (serve point) at the front of the head. */
+export const GIANT_M = { x: 3.6, z: -3.0 } as const;
+export const MOUTH_M = { x: 3.6, y: 0.9, z: -1.9 } as const;
+/** Mouth centre in food voxels (xz only). */
+export const MOUTH_FV = { x: MOUTH_M.x * 16, z: MOUTH_M.z * 16 } as const;
+/** Chefs cannot walk into the Giant: blocked for x > GIANT_BLOCK.x0 and z < GIANT_BLOCK.z1 (metres, radius included). */
+export const GIANT_BLOCK = { x0: 2.3, z1: -1.7 } as const;
 
 export const PAD_Z = -41;
 export interface PadDef {
@@ -32,12 +39,17 @@ export const SPAWN_M = { x: 0, z: 0 } as const;
 
 export const MAX_BODIES = 40;
 export const MAX_LIFT_CELLS = 384;
-export const REACH_FV = 22; // 1.4 m
+export const REACH_FV = 25.6; // 1.6 m grab / serve range
+/** cos^2(80 degrees): a target is 'in front' when dot^2 >= COS80_SQ * dist^2 and dot > 0. */
+export const COS80_SQ = 0.0302;
+export const GIANT_REACH_FV = 25.6;
+export const AUTOAIM_RANGE_FV = 32;
+export const MAX_GROUP = 12;
 export const HELD_BOTTOM_Y = 16; // 1.0 m
 export const HELD_AHEAD_FV = 9.6; // 0.6 m
 export const HAND_AHEAD_FV = 4.8; // 0.3 m
 export const HAND_Y = 16;
-export const ROCK_POWER = 32;
+export const ROCK_POWER = 10;
 export const TORCH_POWER = 40;
 export const TORCH_LENGTH = 22;
 export const TORCH_COS_HALF = 0.906;
@@ -64,13 +76,6 @@ export function inRect(x: number, z: number, r: { x0: number; z0: number; w: num
   return x >= r.x0 && x < r.x0 + r.w && z >= r.z0 && z < r.z0 + r.d;
 }
 
-/** Cell-centre inside the plate disc. */
-export function inPlate(x: number, z: number): boolean {
-  const ex = x + 0.5 - PLATE.cx;
-  const ez = z + 0.5 - PLATE.cz;
-  return ex * ex + ez * ez <= PLATE.r * PLATE.r;
-}
-
 /**
  * Height (world fv) a thing placed over column cell (x, z) rests on: max of floor, table top, rock top and the top of any
  * other body's solid column there. Bodies are visited in ascending id order.
@@ -89,6 +94,7 @@ export function supportHeightAt(
   for (const id of store.ids()) {
     if (id === ignoreBodyId) continue;
     const b = store.get(id)!;
+    if (b.flags & FLAG_HELD) continue; // carried bodies float: they do not support anything
     const t = columnTop(b, x - b.origin[0], z - b.origin[2]);
     if (t >= 0 && b.origin[1] + t > h && b.origin[1] + t <= maxY) h = b.origin[1] + t;
   }
@@ -136,4 +142,13 @@ export function overlapsOthers(store: FoodStore, body: FoodBody): boolean {
         }
   }
   return false;
+}
+
+/** True when a point at (dx, dz) from the chef lies within `range` and in the +-80 degree cone around facing (fx, fz). */
+export function inFront(dx: number, dz: number, fx: number, fz: number, range: number): boolean {
+  const d2 = dx * dx + dz * dz;
+  if (d2 > range * range) return false;
+  if (d2 <= 1) return true;
+  const dot = dx * fx + dz * fz;
+  return dot > 0 && dot * dot >= COS80_SQ * d2;
 }

@@ -30,6 +30,23 @@ function fit(v: number, min: number | undefined, max: number | undefined): numbe
   return 1;
 }
 
+/** Surface cells at or above this doneness count as "cooked" when judging the sear. */
+export const COOKED_SURFACE_D = 0.5;
+/** The sear check forgives a doneness this far outside the material's perfect band (the gauge itself does not). */
+export const SEAR_TOLERANCE = 0.05;
+/** A sear covering at least this share of the surface counts as full coverage. */
+export const SEAR_FULL_COVERAGE = 0.15;
+
+/**
+ * 0..1: share of the cooked surface that sits in the material's perfect band, scaled down when only a sliver of the
+ * surface is cooked at all. Raw food scores 0; burnt food scores 0 (its cooked cells are all past the band).
+ */
+function searScore(cookedSurf: number, perfectSurf: number, surfN: number): number {
+  if (cookedSurf === 0 || surfN === 0) return 0;
+  const coverage = Math.min(1, cookedSurf / (SEAR_FULL_COVERAGE * surfN));
+  return (perfectSurf / cookedSurf) * coverage;
+}
+
 export function evaluateDish(bodies: readonly FoodBody[], craving: Craving): DishEvaluation {
   const fl = { sweet: 0, salty: 0, sour: 0, bitter: 0, umami: 0, spicy: 0 };
   const tx = { crunchy: 0, creamy: 0, chewy: 0, juicy: 0 };
@@ -38,7 +55,8 @@ export function evaluateDish(bodies: readonly FoodBody[], craving: Craving): Dis
   let inedible = 0;
   let ashN = 0;
   let tempSum = 0;
-  let perfectN = 0;
+  let cookedSurf = 0;
+  let perfectSurf = 0;
   let charSum = 0;
   let surfN = 0, coreN = 0;
   let surfCrunch = 0, coreCrunch = 0, surfJuicy = 0, coreJuicy = 0, surfD = 0, coreD = 0;
@@ -81,9 +99,13 @@ export function evaluateDish(bodies: readonly FoodBody[], craving: Craving): Dis
       tx.chewy += t.chewy ?? 0;
       tx.juicy += juicy;
       if (body.temp) tempSum += body.temp[i]!;
-      if (d >= m.thermal.perfect[0] && d <= m.thermal.perfect[1]) perfectN++;
       charSum += c;
       if (isSurf) {
+        // Sear coverage is judged on the surface only: the core of a thick piece legitimately stays less cooked.
+        if (d >= COOKED_SURFACE_D) {
+          cookedSurf++;
+          if (d >= m.thermal.perfect[0] - SEAR_TOLERANCE && d <= m.thermal.perfect[1] + SEAR_TOLERANCE) perfectSurf++;
+        }
         surfN++;
         surfCrunch += crunchy;
         surfJuicy += juicy;
@@ -113,7 +135,7 @@ export function evaluateDish(bodies: readonly FoodBody[], craving: Craving): Dis
     'texture.juicy': clamp(tx.juicy / e, 0, 1),
     temp: edibleN ? clamp(tempC / 60, 0, 1) : 0,
     'shape.height': clamp(height / 32, 0, 1),
-    'doneness.perfect': edibleN ? perfectN / edibleN : 0,
+    'doneness.perfect': searScore(cookedSurf, perfectSurf, surfN),
   };
 
   const grossShare = solid ? inedible / solid : 0;
@@ -133,7 +155,7 @@ export function evaluateDish(bodies: readonly FoodBody[], craving: Craving): Dis
     wFit += r.weight * fit(profile[r.axis], r.min, r.max);
   }
   const reqScore = wSum > 0 ? wFit / wSum : 0;
-  let score = 100 * reqScore * (0.6 + 0.4 * quality) * (1 - 0.7 * grossness);
+  let score = 100 * reqScore * (0.7 + 0.3 * quality) * (1 - 0.7 * grossness);
   for (const b of craving.bonuses) if (fit(profile[b.axis], b.min, b.max) === 1) score += b.reward * 100;
 
   const highlights: string[] = [];

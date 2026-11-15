@@ -3,6 +3,34 @@
 Browser co-op voxel cooking game. Design docs: `../docs/v2/`. This directory is self-contained and
 deployed as a separate Netlify site (base dir `v2`, see `netlify.toml`). V1 at the repo root is untouched.
 
+## Comment jouer
+
+**Objectif.** Mossback, un Géant tortue, a faim. Pendant **3 minutes**, prépare ce qu'il demande (la carte en haut à gauche)
+et donne-le-lui dans la bouche avant que son ventre ne se vide : plus le plat est réussi, plus tu marques de points et plus
+son ventre se remplit. S'il passe trop souvent en mode « affamé » (3 cœurs), il part bouder et le service s'arrête.
+Étoiles : 300 / 600 / 900 points. Le meilleur score est gardé dans le navigateur.
+
+**Recette de base.**
+1. Va devant un tapis coloré (le champignon est le premier) et **prends** un ingrédient.
+2. **Pose-le sur la pierre chaude** : une jauge apparaît au-dessus. Beige = cru, **vert = parfait**, orange = trop cuit, noir = brûlé.
+   Un « ding » retentit quand c'est doré à point.
+3. **Reprends-le** (tous les morceaux qui se touchent viennent ensemble) et **sers-le** devant la bouche de Mossback.
+4. Le **couteau** coupe (il faut au moins 48 cellules) ; le **chalumeau** brunit la surface tant que tu le maintiens.
+
+| Action | Manette | Clavier + souris |
+|---|---|---|
+| Bouger | Stick gauche (ou croix) | WASD / ZQSD (position physique) ou flèches |
+| Prendre / Poser / Servir | Ⓐ | Clic gauche (ou Espace / E) |
+| Utiliser l'outil (maintenir) | Ⓧ (ou RT) | Clic droit maintenu |
+| Changer d'outil | Ⓨ | Q |
+| Angle de coupe | RB | R |
+| Passer le tutoriel | Ⓑ maintenu 1 s | Échap maintenu 1 s |
+| Pause | Start | Échap |
+| Son coupé / activé | | M |
+
+L'outil vise tout seul le morceau devant toi (manette, ou souris immobile depuis 2 s) ; avec la souris, le curseur choisit
+la cible. Le tutoriel (5 étapes, sans chrono) se lance au premier « Jouer » ; « Tutoriel » le relance à tout moment.
+
 ## Run
 
 ```
@@ -44,39 +72,27 @@ Unit tests run in Node (V8) only. A cross-browser replay test (Playwright on Chr
 replaying a recorded input log and comparing state hashes) is planned for P1; it is the real guard against
 engine-specific float differences.
 
-## Play the Cut & Burn toy
+## Le jeu : "Le petit-déjeuner de Mossback" (notes de dev)
 
-The P1 toy ([roadmap](../docs/v2/16-production-roadmap.md)): one chef, a Cleaver, a Torch, a hot rock and four ingredients in a
-small test kitchen.
+Premier mini-jeu jouable construit sur le toy Cut & Burn : `title -> tutorial -> service -> results` (machine à états dans
+`packages/sim/src/kitchen/game.ts`, nombres d'équilibrage dans `packages/content/src/data/tuning/game.json`).
 
 ```
 pnpm install
-pnpm dev                      # http://localhost:5173  (add ?debug=1 for the tick/hash/fps overlay)
-# or: pnpm build && pnpm --filter @ga/client preview
+pnpm dev                      # http://localhost:5173  (?debug=1 : overlay tick/hash/fps, ?dev=1 : window.__ga pour les tests)
+# ou : pnpm build && pnpm --filter @ga/client preview
 ```
 
-| Input | Action |
-|---|---|
-| WASD / left stick | move (the chef faces the last pushed direction, in 45 degree steps) |
-| Mouse / (gamepad: 0.6 m ahead) | aim |
-| Left click / RT | use tool: Cleaver cuts on click, Torch burns while held |
-| E or Space / A | grab, place, or interact (spawn from a pad, taste on the plate) |
-| Q / Y | swap Cleaver and Torch |
-| R / X | cut angle: vertical, 45 degrees, flat |
-| H | toggle the help panel (it hides itself after 20 s) |
+- **Sim** : `Game` (phases, ventre/humeur/patience du Géant, envies mélangées par un Prng, tutoriel guidé par événements),
+  `KitchenSim` (prise d'un tas entier de morceaux contigus, service à la bouche de Mossback, auto-visée, règles de coupe :
+  >= 48 cellules pour couper, morceaux < 24 cellules = miettes, délai 0,35 s). Les commandes de phase passent par
+  `SimWorld.command()` (`startTutorial`, `startService`, `toTitle`, `skipTutorial`) ; tout est dans le hash et le snapshot.
+- **Render** : `GiantView` (tortue voxel procédurale), `DoneGauges` (jauge de cuisson 3D), `TutorialMarker` (flèche + contour),
+  `BurstFx` (miettes, étincelles, coeurs), secousse d'écran, caméra à 6 m biaisée de 25 % vers la bouche du Géant.
+- **Client** : `input.ts` (clavier + souris + manette, dernier périphérique utilisé), `hud.ts` (DOM : cartes, menus navigables à
+  la manette), `audio.ts` (synthé WebAudio porté de la V1), `strings.ts` (`t(key)`, FR par défaut, EN si
+  `navigator.language` ne commence pas par `fr`).
+- **Test de fumée** : `?dev=1` expose `window.__ga` (`teleport(x, z)`, `command(c)`, `game()`), jamais actif sans le drapeau.
+- Équilibrage des plats : `packages/sim/src/food/scoreTuning.test.ts` cuit de vrais corps sur la pierre avec `heatStep` et
+  vérifie les paliers (champignon saisi >= 80, cru <= 30, brûlé <= 25...).
 
-How to play: stand at the table, press E near a coloured pad to spawn an ingredient (mushroom, potato, bread rock, pepper),
-press E again to pick it up, carry it to the stone slab and press E to put it down. Drop food on the round plate and press
-E again to taste it against the craving shown top-left; you get a score, a tier and highlight chips, then the next craving.
-Held items cannot be heated; anything over 384 voxels is too heavy to lift; the kitchen holds 40 pieces.
-
-What to look for:
-
-- **Doneness gradient on cut faces.** Cook something on the rock, then cut it (flat or 45 degree cuts show it best) and
-  look at the faces: the cooked-to-raw gradient runs from the heated side to the cold side.
-- **Char.** Leave food on the rock or under the torch long enough and the surface darkens to the charred colour.
-- **Burning bread to ash.** Keep bread rock on the rock or under the torch and it turns to ash cells (grey).
-- **Steam** rises from anything that has just changed doneness; the **rock light** brightens whenever something sits on it.
-
-Determinism: the toy runs entirely in `packages/sim` (`SimWorld` + `kitchen/`); `kitchen/kitchen.test.ts` has the scripted
-1,200-tick session (spawn, carry, cook on the rock, taste) checked for score, repeat-run hash and snapshot/restore hash.

@@ -7,7 +7,7 @@ export interface Vec3Like {
 }
 
 /** "Diorama Follow" defaults (docs/v2/08 §2.1). Critically damped spring, omega = 9. */
-export const DIORAMA = { fov: 42, distance: 7.5, pitchDeg: 48, omega: 9 } as const;
+export const DIORAMA = { fov: 48, distance: 6, pitchDeg: 48, omega: 9 } as const;
 
 export class DioramaCamera {
   readonly camera = new PerspectiveCamera(DIORAMA.fov, 1, 0.1, 200);

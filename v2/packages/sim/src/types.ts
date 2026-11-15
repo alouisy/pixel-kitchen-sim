@@ -13,17 +13,46 @@ export const BTN_GRAB = 1;
 export const BTN_TOOL = 2;
 export const BTN_SWAP = 4;
 export const BTN_TILT = 8;
+/** Level flag: ignore `aim` and let the sim aim the tool at the nearest food in front of the chef. */
+export const BTN_AUTOAIM = 16;
 
 export type ToolKind = 'cleaver' | 'torch';
 export type DishTier = 'perfect' | 'great' | 'okay' | 'yuck';
 
+export type Phase = 'title' | 'tutorial' | 'service' | 'results';
+export type EndReason = 'time' | 'patience';
+/** Commands that change the game phase (applied between ticks, see SimWorld.command). */
+export type SimCommand = 'startTutorial' | 'startService' | 'toTitle' | 'skipTutorial';
+
 export type SimEvent =
   | { kind: 'tick'; tick: number }
-  | { kind: 'DishServed'; slot: number; cravingId: string; score: number; tier: DishTier; highlights: string[] }
+  | {
+      kind: 'DishServed';
+      slot: number;
+      cravingId: string;
+      score: number;
+      tier: DishTier;
+      highlights: string[];
+      /** Points added to the service score (0 in the tutorial). */
+      points: number;
+      timeBonus: number;
+      bellyGain: number;
+    }
   | { kind: 'TooHeavy'; slot: number; bodyId: number }
   | { kind: 'SpawnRefused'; slot: number; reason: 'max_bodies' }
   | { kind: 'ToolSwapped'; slot: number; tool: ToolKind }
-  | { kind: 'PlateEmpty'; slot: number };
+  | { kind: 'TooSmallToCut'; slot: number; bodyId: number }
+  /** A cleaver cut happened at world food-voxel cell (x, y, z); crumbs were removed at `crumbAt`. */
+  | { kind: 'Cut'; slot: number; x: number; y: number; z: number; crumbs: number; crumbAt: Array<[number, number, number]> }
+  | { kind: 'Grabbed'; slot: number; count: number }
+  | { kind: 'Placed'; slot: number }
+  | { kind: 'PhaseChanged'; phase: Phase }
+  | { kind: 'TutorialStep'; step: number }
+  | { kind: 'TutorialDone' }
+  | { kind: 'CravingExpired'; cravingId: string }
+  | { kind: 'CravingChanged'; cravingId: string }
+  | { kind: 'HangryEntered'; patience: number }
+  | { kind: 'ServiceEnded'; reason: EndReason; score: number; served: number };
 
 /** Per-chef presentation state posted by the worker (and read by tests). */
 export interface HudState {
@@ -33,6 +62,53 @@ export interface HudState {
   heldId: number;
   facing: number;
   torchOn: boolean;
+}
+
+export type PromptKind = 'take' | 'place' | 'serve';
+export interface GaugeInfo {
+  id: number;
+  /** Bottom-layer average doneness 0..255. */
+  doneMarker: number;
+  /** Perfect band (0..255) from the material. */
+  perfectLo: number;
+  perfectHi: number;
+  /** Doneness at which charring starts (0..255). */
+  burnAt: number;
+  /** Top-centre of the body in metres. */
+  x: number;
+  y: number;
+  z: number;
+}
+
+/** Everything the DOM HUD needs about the game (posted by the worker ~10 Hz). Positions in metres. */
+export interface GameHud {
+  phase: Phase;
+  /** 0-based tutorial step (0..4), -1 outside the tutorial. */
+  tutorialStep: number;
+  /** Seconds of service left. */
+  timeLeft: number;
+  belly: number;
+  /** 0 content, 1 peckish, 2 hungry, 3 hangry. */
+  band: 0 | 1 | 2 | 3;
+  mood: number;
+  patience: number;
+  cravingId: string;
+  cravingTimeLeft: number;
+  cravingWindow: number;
+  score: number;
+  served: number;
+  bestDishScore: number;
+  bestDishCravingId: string;
+  bestDishTier: DishTier | '';
+  endReason: EndReason | '';
+  stars: 0 | 1 | 2 | 3;
+  /** Tutorial arrow target (metres) or null. */
+  target: { x: number; y: number; z: number; kind: 'pad' | 'rock' | 'mouth' } | null;
+  prompt: { kind: PromptKind; x: number; y: number; z: number } | null;
+  gauges: GaugeInfo[];
+  /** Resolved tool aim in food voxels (mouse aim or auto-aim). */
+  aim: [number, number, number];
+  heldCount: number;
 }
 
 /**

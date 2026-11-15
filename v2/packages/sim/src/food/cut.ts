@@ -11,9 +11,10 @@ export interface CutResult {
   removedId: number;
   created: number[];
   crumbs: number;
+  crumbAt: Array<[number, number, number]>;
 }
 
-export function cutBody(store: FoodStore, body: FoodBody, plane: CutPlane): CutResult {
+export function cutBody(store: FoodStore, body: FoodBody, plane: CutPlane, minCells = 2): CutResult {
   const [dx, dy, dz] = body.dims;
   const [nx, ny, nz] = plane.n;
   const n2 = body.material.length;
@@ -40,10 +41,10 @@ export function cutBody(store: FoodStore, body: FoodBody, plane: CutPlane): CutR
       }
     }
   }
-  if (countA === 0 || countB === 0) return { removedId: -1, created: [], crumbs: 0 };
-  const r = splitComponents(store, body, group, 2);
+  if (countA === 0 || countB === 0) return { removedId: -1, created: [], crumbs: 0, crumbAt: [] };
+  const r = splitComponents(store, body, group, 2, minCells);
   store.remove(body.id);
-  return { removedId: body.id, created: [...r.groups[0]!, ...r.groups[1]!], crumbs: r.crumbs };
+  return { removedId: body.id, created: [...r.groups[0]!, ...r.groups[1]!], crumbs: r.crumbs, crumbAt: r.crumbAt };
 }
 
 const HORIZ: ReadonlyArray<readonly [number, number]> = [
