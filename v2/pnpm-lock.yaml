@@ -32,6 +32,9 @@ importers:
 
   apps/client:
     dependencies:
+      '@ga/content':
+        specifier: workspace:*
+        version: link:../../packages/content
       '@ga/render':
         specifier: workspace:*
         version: link:../../packages/render
@@ -41,7 +44,13 @@ importers:
       '@ga/sim':
         specifier: workspace:*
         version: link:../../packages/sim
+      three:
+        specifier: ^0.187.0
+        version: 0.187.0
     devDependencies:
+      '@types/three':
+        specifier: ^0.187.0
+        version: 0.187.0
       vite:
         specifier: ^8.3.8
         version: 8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)

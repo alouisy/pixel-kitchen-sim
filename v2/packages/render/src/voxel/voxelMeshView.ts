@@ -39,6 +39,26 @@ export class VoxelMeshView {
     mesh.position.set(originVoxels[0] * this.voxelSize, originVoxels[1] * this.voxelSize, originVoxels[2] * this.voxelSize);
   }
 
+  /** Reposition an existing mesh (no-op if its mesh has not arrived yet). */
+  setOrigin(id: number, originVoxels: [number, number, number]): void {
+    this.meshes.get(id)?.position.set(
+      originVoxels[0] * this.voxelSize,
+      originVoxels[1] * this.voxelSize,
+      originVoxels[2] * this.voxelSize,
+    );
+  }
+
+  has(id: number): boolean {
+    return this.meshes.has(id);
+  }
+
+  /** Meshes (for raycasting), skipping `exceptId`. */
+  meshList(exceptId = -1): Mesh[] {
+    const out: Mesh[] = [];
+    for (const [id, m] of this.meshes) if (id !== exceptId) out.push(m);
+    return out;
+  }
+
   remove(id: number): void {
     const mesh = this.meshes.get(id);
     if (!mesh) return;

@@ -16,14 +16,16 @@ let sim: SimWorld | undefined;
 let loop: FixedStepLoop | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
 let lastInput: InputFrame | undefined;
+let lastHudKey = '';
 
 function post(msg: WorkerToMain, transfer: Transferable[] = []): void {
   ctx.postMessage(msg, transfer);
 }
 
-function start(seed: number, chefSlots: number): void {
+function start(seed: number, chefSlots: number, arenaHalf?: number): void {
   stop();
-  sim = new SimWorld({ seed, chefSlots });
+  sim = new SimWorld({ seed, chefSlots, arenaHalf });
+  lastHudKey = '';
   loop = new FixedStepLoop(sim);
   let last = performance.now();
   timer = setInterval(() => {
@@ -41,6 +43,22 @@ function start(seed: number, chefSlots: number): void {
         if (world.tick % HASH_EVERY_N_TICKS === 0) msg.hash = world.stateHash();
         post(msg, [chefs.buffer]);
         if (events.length > 0) post({ type: 'events', events });
+        const delta = world.drainFoodDelta();
+        if (delta.upserts.length > 0 || delta.moves.length > 0 || delta.removed.length > 0) {
+          const transfer: Transferable[] = [];
+          for (const u of delta.upserts) {
+            transfer.push(u.material.buffer);
+            if (u.doneness) transfer.push(u.doneness.buffer);
+            if (u.char) transfer.push(u.char.buffer);
+          }
+          post({ type: 'food', tick: world.tick, ...delta }, transfer);
+        }
+        const hud = world.readHud(0);
+        const key = `${hud.tool}|${hud.tilt}|${hud.cravingId}|${hud.heldId}|${hud.facing}|${hud.torchOn}`;
+        if (key !== lastHudKey) {
+          lastHudKey = key;
+          post({ type: 'hud', tick: world.tick, hud });
+        }
       },
     );
     void alpha; // alpha is recomputed by the main thread from its own receive clock.
@@ -58,7 +76,7 @@ ctx.onmessage = (e: MessageEvent<MainToWorker>) => {
   const msg = e.data;
   switch (msg.type) {
     case 'init':
-      start(msg.seed, msg.chefSlots);
+      start(msg.seed, msg.chefSlots, msg.arenaHalf);
       break;
     case 'input':
       lastInput = msg.frame;

@@ -3,7 +3,7 @@ import {
   Color,
   DirectionalLight,
   HemisphereLight,
-  PCFSoftShadowMap,
+  PCFShadowMap,
   Scene,
   SRGBColorSpace,
   WebGLRenderer,
@@ -18,6 +18,8 @@ function addMeadowLights(scene: Scene): DirectionalLight {
   const sun = new DirectionalLight(0xffe2b0, 2.2);
   sun.position.set(12, 20, 8);
   sun.castShadow = true;
+  sun.shadow.bias = -0.0004;
+  sun.shadow.normalBias = 0.02; // voxel faces are flat and tiny: avoid shadow acne
   sun.shadow.mapSize.set(2048, 2048);
   const cam = sun.shadow.camera;
   cam.left = cam.bottom = -25;
@@ -36,18 +38,23 @@ export class RenderApp {
   private prev: Float32Array<ArrayBufferLike> = new Float32Array(0);
   private curr: Float32Array<ArrayBufferLike> = new Float32Array(0);
   private alpha = 0;
+  /** Added to the followed chef position to get the camera focus (lets a scene look past/over the chef). */
+  readonly cameraFocusOffset = { x: 0, y: 0, z: 0 };
 
-  constructor(private readonly canvas: HTMLCanvasElement) {
+  constructor(
+    private readonly canvas: HTMLCanvasElement,
+    opts: { groundSize?: number; background?: number } = {},
+  ) {
     this.renderer = new WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
     this.renderer.toneMapping = ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.1;
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = PCFSoftShadowMap;
+    this.renderer.shadowMap.type = PCFShadowMap;
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.scene.background = new Color(0xbfe3c9);
+    this.scene.background = new Color(opts.background ?? 0xbfe3c9);
     addMeadowLights(this.scene);
-    this.scene.add(createGround());
+    this.scene.add(createGround(opts.groundSize));
     window.addEventListener('resize', this.resize);
     this.resize();
   }
@@ -72,10 +79,24 @@ export class RenderApp {
     this.alpha = alpha;
   }
 
+  setChefOpacity(slot: number, opacity: number): void {
+    this.chefs[slot]?.setOpacity(opacity);
+  }
+
+  /** Interpolated world position of chef `slot` (valid after setChefStates + render). */
+  chefPosition(slot: number): { x: number; y: number; z: number } {
+    const p = this.chefs[slot]?.group.position;
+    return p ? { x: p.x, y: p.y, z: p.z } : { x: 0, y: 0, z: 0 };
+  }
+
   render(dt: number): void {
     this.chefs.forEach((chef, i) => chef.setInterpolated(this.prev, this.curr, i * 4, this.alpha));
     const first = this.chefs[0];
-    if (first) this.cameraRig.update(first.group.position, dt);
+    if (first) {
+      const o = this.cameraFocusOffset;
+      const p = first.group.position;
+      this.cameraRig.update({ x: p.x + o.x, y: p.y + o.y, z: p.z + o.z }, dt);
+    }
     this.renderer.render(this.scene, this.cameraRig.camera);
   }
 

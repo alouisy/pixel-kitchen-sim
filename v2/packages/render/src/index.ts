@@ -8,3 +8,4 @@ export * from './voxel/foodMaterial.js';
 export * from './voxel/voxelMeshView.js';
 export * from './voxel/mesherPool.js';
 export * from './voxel/demo.js';
+export * from './toy/index.js';

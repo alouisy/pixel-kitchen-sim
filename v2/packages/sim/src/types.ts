@@ -8,7 +8,32 @@ export interface InputFrame {
   seq: number; // u16
 }
 
-export type SimEvent = { kind: 'tick'; tick: number };
+/** InputFrame.buttons bits. GRAB/SWAP/TILT are edge-triggered in the sim; TOOL is level-held. */
+export const BTN_GRAB = 1;
+export const BTN_TOOL = 2;
+export const BTN_SWAP = 4;
+export const BTN_TILT = 8;
+
+export type ToolKind = 'cleaver' | 'torch';
+export type DishTier = 'perfect' | 'great' | 'okay' | 'yuck';
+
+export type SimEvent =
+  | { kind: 'tick'; tick: number }
+  | { kind: 'DishServed'; slot: number; cravingId: string; score: number; tier: DishTier; highlights: string[] }
+  | { kind: 'TooHeavy'; slot: number; bodyId: number }
+  | { kind: 'SpawnRefused'; slot: number; reason: 'max_bodies' }
+  | { kind: 'ToolSwapped'; slot: number; tool: ToolKind }
+  | { kind: 'PlateEmpty'; slot: number };
+
+/** Per-chef presentation state posted by the worker (and read by tests). */
+export interface HudState {
+  tool: ToolKind;
+  tilt: 0 | 1 | 2;
+  cravingId: string;
+  heldId: number;
+  facing: number;
+  torchOn: boolean;
+}
 
 /**
  * Wire layout (little-endian):

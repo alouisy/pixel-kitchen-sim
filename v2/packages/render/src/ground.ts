@@ -1,7 +1,7 @@
 import { CanvasTexture, Mesh, MeshStandardMaterial, NearestFilter, PlaneGeometry, RepeatWrapping, SRGBColorSpace } from 'three';
 
-/** Temporary 40x40 m checker ground, replaced once voxel terrain exists. */
-export function createGround(): Mesh {
+/** Temporary checker ground (default 40x40 m), replaced once voxel terrain exists. 2 m squares. */
+export function createGround(size = 40): Mesh {
   const c = document.createElement('canvas');
   c.width = c.height = 2;
   const g = c.getContext('2d')!;
@@ -14,8 +14,8 @@ export function createGround(): Mesh {
   tex.colorSpace = SRGBColorSpace;
   tex.magFilter = NearestFilter;
   tex.wrapS = tex.wrapT = RepeatWrapping;
-  tex.repeat.set(20, 20); // 2 m squares
-  const mesh = new Mesh(new PlaneGeometry(40, 40), new MeshStandardMaterial({ map: tex }));
+  tex.repeat.set(size / 2, size / 2);
+  const mesh = new Mesh(new PlaneGeometry(size, size), new MeshStandardMaterial({ map: tex }));
   mesh.rotation.x = -Math.PI / 2;
   mesh.receiveShadow = true;
   return mesh;
