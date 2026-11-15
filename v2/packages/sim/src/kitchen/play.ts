@@ -1,5 +1,5 @@
-import { Prng, fsqrt } from '@ga/shared';
-import { cravings } from '@ga/content';
+import { Hasher64, Prng, fsqrt } from '@ga/shared';
+import { cravings, materialByIndex } from '@ga/content';
 import {
   FLAG_HELD,
   FoodStore,
@@ -12,21 +12,37 @@ import {
   type FoodBody,
   type HeatSource,
 } from '../food/index.js';
-import { BTN_GRAB, BTN_SWAP, BTN_TILT, BTN_TOOL, type HudState, type InputFrame, type SimEvent, type ToolKind } from '../types.js';
+import {
+  BTN_GRAB,
+  BTN_SWAP,
+  BTN_TILT,
+  BTN_TOOL,
+  type CookGauge,
+  type GameMode,
+  type HudState,
+  type InputFrame,
+  type InteractHint,
+  type ServeProblemLite,
+  type SimEvent,
+  type ToolKind,
+} from '../types.js';
 import {
   CLEAVER_AIM_RADIUS,
   FV_PER_M,
+  GROUP_GAP_FV,
   HAND_AHEAD_FV,
   HAND_Y,
   HELD_AHEAD_FV,
   HELD_BOTTOM_Y,
   MAX_BODIES,
   MAX_LIFT_CELLS,
+  MIN_CUT_CELLS,
   PADS,
   PLATE,
   REACH_FV,
   ROCK,
   ROCK_POWER,
+  TABLE,
   TORCH_COS_HALF,
   TORCH_LENGTH,
   TORCH_POWER,
@@ -38,6 +54,30 @@ import {
   restingOriginY,
 } from './layout.js';
 import { spawnAtPad } from './spawn.js';
+import { BURNT_AT, COOKED_AT, RECIPES, checkRecipe, cookState, summarize, type ServeProblem } from './recipes.js';
+import { PHASE_OVER, PHASE_PLAYING, PHASE_TITLE, RESTART_LOCK_TICKS, Service } from './service.js';
+
+/** A body carried along with the held one (rush mode piece groups): id + offset from the held body's origin. */
+interface Follower {
+  id: number;
+  off: [number, number, number];
+}
+
+type Target =
+  | { kind: 'body'; id: number; d2: number }
+  | { kind: 'pad'; index: number; d2: number }
+  | { kind: 'plate'; d2: number }
+  | { kind: 'none' };
+
+const matName = (mi: number): string => materialByIndex(mi)?.id ?? 'unknown';
+function majorityMaterial(b: FoodBody): number {
+  const counts = new Map<number, number>();
+  for (const m of b.material) if (m !== 0) counts.set(m, (counts.get(m) ?? 0) + 1);
+  let best = 0;
+  let bestN = 0;
+  for (const [m, n] of [...counts].sort((a, c) => a[0] - c[0])) if (n > bestN) [best, bestN] = [m, n];
+  return best;
+}
 
 const H = 0.7071067811865476;
 /** Facing index 0..7 -> horizontal unit vector (x, z); matches planeFromAim's direction table. */
@@ -85,11 +125,19 @@ export class KitchenSim {
   private readonly dirtyMove = new Set<number>();
   private removedIds: number[] = [];
   private settleDirty = false;
+  mode: GameMode = 'toy';
+  readonly service = new Service();
+  /** Per slot: bodies carried with the held one (rush mode). */
+  followers: Follower[][];
 
   constructor(
     readonly slots: number,
     public rng: Prng,
+    mode: GameMode = 'toy',
   ) {
+    this.mode = mode;
+    this.followers = Array.from({ length: slots }, () => []);
+    if (mode === 'toy') this.service.phase = PHASE_PLAYING;
     this.tool = new Uint8Array(slots);
     this.tilt = new Uint8Array(slots);
     this.facing = new Uint8Array(slots).fill(DEFAULT_FACING);
@@ -103,7 +151,9 @@ export class KitchenSim {
     return cravings[this.cravingIdx % cravings.length]!.id;
   }
 
-  hud(slot: number): HudState {
+  /** cx/cz: chef position in metres (for the contextual hint); omit to skip the hint. */
+  hud(slot: number, cx?: number, cz?: number): HudState {
+    const sv = this.service;
     return {
       tool: this.tool[slot] === 1 ? 'torch' : 'cleaver',
       tilt: this.tilt[slot] as 0 | 1 | 2,
@@ -111,7 +161,118 @@ export class KitchenSim {
       heldId: this.held[slot]!,
       facing: this.facing[slot]!,
       torchOn: this.torchOn[slot] === 1,
+      mode: this.mode,
+      phase: sv.phase,
+      timeLeftS: Math.ceil(sv.timeLeftTicks / 30),
+      score: sv.score,
+      served: sv.served,
+      missed: sv.missed,
+      orders: sv.orders.map((o) => ({
+        uid: o.uid,
+        recipeId: RECIPES[o.recipe]!.id,
+        left: Math.max(0, (o.deadline - sv.t) / (o.deadline - o.born)),
+      })),
+      hint: cx === undefined || cz === undefined ? { kind: 'none' } : this.hint(slot, cx, cz),
+      gauges: this.gauges(),
     };
+  }
+
+  /** Bodies on the rock, with their cooking state (for the HUD gauges). */
+  private gauges(): CookGauge[] {
+    const out: CookGauge[] = [];
+    for (const id of this.store.ids()) {
+      const b = this.store.get(id)!;
+      if (b.flags & FLAG_HELD || !this.onRock(b)) continue;
+      const st = cookState(b);
+      const material = matName(majorityMaterial(b));
+      out.push({
+        id,
+        pos: [b.origin[0] + b.dims[0] / 2, b.origin[1] + b.dims[1], b.origin[2] + b.dims[2] / 2],
+        done: st.done,
+        char: st.char,
+        material,
+        cookedAt: COOKED_AT[material] ?? 0.5,
+        burntAt: BURNT_AT[material] ?? 0.6,
+      });
+    }
+    return out;
+  }
+
+  private hint(slot: number, cx: number, cz: number): InteractHint {
+    const sv = this.service;
+    if (this.mode === 'rush' && sv.phase === PHASE_TITLE) return { kind: 'start' };
+    if (this.mode === 'rush' && sv.phase === PHASE_OVER) return { kind: 'restart', ready: sv.t >= RESTART_LOCK_TICKS };
+    const heldId = this.held[slot]!;
+    if (heldId >= 0) {
+      const b = this.store.get(heldId);
+      if (!b) return { kind: 'none' };
+      const mx = b.origin[0] + b.dims[0] / 2;
+      const mz = b.origin[2] + b.dims[2] / 2;
+      if (inRect(Math.floor(mx), Math.floor(mz), ROCK)) return { kind: 'place', on: 'rock' };
+      const pdx = mx - (PLATE.cx + 0.5);
+      const pdz = mz - (PLATE.cz + 0.5);
+      if (pdx * pdx + pdz * pdz <= (PLATE.r + 2) * (PLATE.r + 2)) return { kind: 'place', on: 'plate' };
+      return { kind: 'place', on: inRect(Math.floor(mx), Math.floor(mz), TABLE) ? 'table' : 'floor' };
+    }
+    const face = this.facing[slot]!;
+    const t = this.target(cx * FV_PER_M, cz * FV_PER_M, FACE_X[face]!, FACE_Z[face]!);
+    switch (t.kind) {
+      case 'body': {
+        const b = this.store.get(t.id)!;
+        if (cellCount(b) > MAX_LIFT_CELLS) return { kind: 'too_heavy' };
+        const group = this.mode === 'rush' ? this.groupOf(b) : [];
+        return { kind: 'grab', material: matName(majorityMaterial(b)), pieces: 1 + group.length };
+      }
+      case 'pad':
+        return { kind: 'spawn', material: PADS[t.index]!.material };
+      case 'plate':
+        return this.mode === 'rush' ? { kind: 'serve' } : { kind: 'taste' };
+      default:
+        return { kind: 'none' };
+    }
+  }
+
+  get isRush(): boolean {
+    return this.mode === 'rush';
+  }
+
+  /** Rush only: serialise service + follower state (appended to the world snapshot). */
+  rushBytes(): Uint8Array {
+    const sv = this.service.toBytes();
+    const f: number[] = [];
+    for (let s = 0; s < this.slots; s++) {
+      f.push(this.followers[s]!.length);
+      for (const x of this.followers[s]!) f.push(x.id, x.off[0], x.off[1], x.off[2]);
+    }
+    const fa = new Int32Array(f);
+    const out = new Uint8Array(4 + sv.length + fa.byteLength);
+    new DataView(out.buffer).setUint32(0, this.mode === 'rush' ? 1 : 0, true);
+    out.set(sv, 4);
+    out.set(new Uint8Array(fa.buffer), 4 + sv.length);
+    return out;
+  }
+
+  restoreRush(bytes: Uint8Array): void {
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    this.mode = dv.getUint32(0, true) === 1 ? 'rush' : 'toy';
+    let o = 4 + this.service.fromBytes(bytes.subarray(4));
+    for (let s = 0; s < this.slots; s++) {
+      const n = dv.getInt32(o, true);
+      o += 4;
+      const list: Follower[] = [];
+      for (let i = 0; i < n; i++, o += 16)
+        list.push({ id: dv.getInt32(o, true), off: [dv.getInt32(o + 4, true), dv.getInt32(o + 8, true), dv.getInt32(o + 12, true)] });
+      this.followers[s] = list;
+    }
+  }
+
+  hashRush(h: Hasher64): void {
+    h.u32(this.mode === 'rush' ? 1 : 0);
+    this.service.hash(h);
+    for (let s = 0; s < this.slots; s++) {
+      h.u32(this.followers[s]!.length);
+      for (const f of this.followers[s]!) h.u32(f.id).i32(f.off[0]).i32(f.off[1]).i32(f.off[2]);
+    }
   }
 
   toolOf(slot: number): ToolKind {
@@ -171,6 +332,12 @@ export class KitchenSim {
     const fx = FACE_X[face]!;
     const fz = FACE_Z[face]!;
 
+    if (this.mode === 'rush' && this.service.phase !== PHASE_PLAYING) {
+      // Title / results screen: the chef can walk around, interact starts a new shift.
+      const sv = this.service;
+      if (pressed & BTN_GRAB && (sv.phase === PHASE_TITLE || sv.t >= RESTART_LOCK_TICKS)) this.startService(events);
+      return;
+    }
     if (pressed & BTN_SWAP) {
       this.tool[slot] = this.tool[slot] === 1 ? 0 : 1;
       events.push({ kind: 'ToolSwapped', slot, tool: this.toolOf(slot) });
@@ -186,7 +353,14 @@ export class KitchenSim {
         const ox = Math.floor(px + fx * HELD_AHEAD_FV - b.dims[0] * 0.5 + 0.5);
         const oz = Math.floor(pz + fz * HELD_AHEAD_FV - b.dims[2] * 0.5 + 0.5);
         this.setOrigin(b, ox, HELD_BOTTOM_Y, oz);
-      } else this.held[slot] = -1;
+        for (const f of this.followers[slot]!) {
+          const fb = this.store.get(f.id);
+          if (fb) this.setOrigin(fb, ox + f.off[0], HELD_BOTTOM_Y + f.off[1], oz + f.off[2]);
+        }
+      } else {
+        this.held[slot] = -1;
+        this.followers[slot] = [];
+      }
     }
 
     // Tools.
@@ -197,7 +371,7 @@ export class KitchenSim {
       const ay = input.aim[1];
       const az = input.aim[2];
       if (this.tool[slot] === 0) {
-        if (pressed & BTN_TOOL) this.cleaverCut(ax, ay, az, face, this.tilt[slot] as 0 | 1 | 2);
+        if (pressed & BTN_TOOL) this.cleaverCut(slot, ax, ay, az, face, this.tilt[slot] as 0 | 1 | 2, events);
       } else {
         const hx = px + fx * HAND_AHEAD_FV;
         const hz = pz + fz * HAND_AHEAD_FV;
@@ -226,8 +400,13 @@ export class KitchenSim {
     }
   }
 
-  /** After all chefs: settle falling bodies, then heat on every `heatEvery`-th tick. */
-  afterChefs(tick: number, heatEvery: number): void {
+  /** After all chefs: advance the rush service, settle falling bodies, then heat on every `heatEvery`-th tick. */
+  afterChefs(tick: number, heatEvery: number, events: SimEvent[] = []): void {
+    if (this.mode === 'rush') {
+      const sv = this.service;
+      const ended = sv.step(this.rng, events);
+      if (ended) events.push({ kind: 'ServiceEnded', score: sv.score, served: sv.served, missed: sv.missed, stars: sv.stars() });
+    }
     if (this.settleDirty) this.settle();
     if (tick % heatEvery !== 0) return;
     const sources: HeatSource[] = [];
@@ -356,17 +535,14 @@ export class KitchenSim {
     }
   }
 
-  private grab(slot: number, px: number, pz: number, fx: number, fz: number, events: SimEvent[]): void {
-    const heldId = this.held[slot]!;
-    if (heldId >= 0) {
-      this.place(slot, heldId, px, pz);
-      return;
-    }
-    // (a) nearest liftable body in front of the chef (bodies resting on the plate are for tasting, not lifting).
-    const onPlate = new Set(this.bodiesOnPlate().map((b) => b.id));
+  /** What interact would hit for a chef at (px, pz) fv facing (fx, fz). Toy order: body, pad, plate; rush: nearest of body/plate, then pad. */
+  private target(px: number, pz: number, fx: number, fz: number): Target {
+    const plateBodies = this.bodiesOnPlate();
+    const onPlate = new Set(plateBodies.map((b) => b.id));
     let bestId = -1;
     let bestD = Infinity;
     const reach2 = REACH_FV * REACH_FV;
+    // (a) nearest liftable body in front of the chef (bodies resting on the plate are for tasting, not lifting).
     for (const id of this.store.ids()) {
       if (onPlate.has(id)) continue;
       const b = this.store.get(id)!;
@@ -392,17 +568,11 @@ export class KitchenSim {
           bestId = id;
         }
     }
-    if (bestId >= 0) {
-      const b = this.store.get(bestId)!;
-      if (cellCount(b) > MAX_LIFT_CELLS) {
-        events.push({ kind: 'TooHeavy', slot, bodyId: bestId });
-        return;
-      }
-      b.flags |= FLAG_HELD;
-      this.held[slot] = bestId;
-      this.settleDirty = true;
-      return;
-    }
+    const pvx = PLATE.cx + 0.5 - px;
+    const pvz = PLATE.cz + 0.5 - pz;
+    const plateD = pvx * pvx + pvz * pvz;
+    if (this.mode === 'rush' && plateBodies.length > 0 && plateD <= reach2 && plateD < bestD) return { kind: 'plate', d2: plateD };
+    if (bestId >= 0) return { kind: 'body', id: bestId, d2: bestD };
     // (b) ingredient pad.
     let padBest = -1;
     let padD = Infinity;
@@ -415,19 +585,129 @@ export class KitchenSim {
         padBest = i;
       }
     }
-    if (padBest >= 0) {
+    if (padBest >= 0) return { kind: 'pad', index: padBest, d2: padD };
+    // (c) tasting / serving plate.
+    if (plateD <= reach2) return { kind: 'plate', d2: plateD };
+    return { kind: 'none' };
+  }
+
+  /** Same-material pieces near `b` (transitively, gap <= GROUP_GAP_FV), not held, not on the plate, within the lift budget. */
+  private groupOf(b: FoodBody): FoodBody[] {
+    const mat = majorityMaterial(b);
+    const onPlate = new Set(this.bodiesOnPlate().map((x) => x.id));
+    const cand = this.store
+      .ids()
+      .map((id) => this.store.get(id)!)
+      .filter((x) => x.id !== b.id && !(x.flags & FLAG_HELD) && !onPlate.has(x.id) && majorityMaterial(x) === mat);
+    const near = (p: FoodBody, q: FoodBody): boolean => {
+      for (let a = 0; a < 3; a++) {
+        const gap = Math.max(p.origin[a]! - (q.origin[a]! + q.dims[a]!), q.origin[a]! - (p.origin[a]! + p.dims[a]!));
+        if (gap > GROUP_GAP_FV) return false;
+      }
+      return true;
+    };
+    let budget = MAX_LIFT_CELLS - cellCount(b);
+    const out: FoodBody[] = [];
+    const frontier = [b];
+    while (frontier.length > 0) {
+      const cur = frontier.shift()!;
+      for (const c of cand) {
+        if (out.includes(c) || !near(cur, c)) continue;
+        const n = cellCount(c);
+        if (n > budget) continue;
+        budget -= n;
+        out.push(c);
+        frontier.push(c);
+      }
+    }
+    return out.sort((p, q) => p.id - q.id);
+  }
+
+  private startService(events: SimEvent[]): void {
+    for (const id of this.store.ids()) this.removeBody(id);
+    for (let s = 0; s < this.slots; s++) {
+      this.held[s] = -1;
+      this.followers[s] = [];
+      this.tool[s] = 0;
+      this.tilt[s] = 0;
+    }
+    this.service.start();
+    events.push({ kind: 'ServiceStarted' });
+  }
+
+  private grab(slot: number, px: number, pz: number, fx: number, fz: number, events: SimEvent[]): void {
+    const heldId = this.held[slot]!;
+    if (heldId >= 0) {
+      this.place(slot, heldId, px, pz);
+      return;
+    }
+    const t = this.target(px, pz, fx, fz);
+    if (t.kind === 'body') {
+      const b = this.store.get(t.id)!;
+      if (cellCount(b) > MAX_LIFT_CELLS) {
+        events.push({ kind: 'TooHeavy', slot, bodyId: t.id });
+        return;
+      }
+      b.flags |= FLAG_HELD;
+      this.held[slot] = t.id;
+      const list: Follower[] = [];
+      if (this.mode === 'rush') {
+        for (const g of this.groupOf(b)) {
+          g.flags |= FLAG_HELD;
+          list.push({ id: g.id, off: [g.origin[0] - b.origin[0], g.origin[1] - b.origin[1], g.origin[2] - b.origin[2]] });
+        }
+      }
+      this.followers[slot] = list;
+      this.settleDirty = true;
+      return;
+    }
+    if (t.kind === 'pad') {
       if (this.store.size >= MAX_BODIES) {
         events.push({ kind: 'SpawnRefused', slot, reason: 'max_bodies' });
         return;
       }
-      const b = spawnAtPad(this.store, padBest, this.rng);
+      const b = spawnAtPad(this.store, t.index, this.rng);
       this.dirtyMesh.add(b.id);
       return;
     }
-    // (c) tasting plate.
-    const pvx = PLATE.cx + 0.5 - px;
-    const pvz = PLATE.cz + 0.5 - pz;
-    if (pvx * pvx + pvz * pvz <= reach2) this.taste(slot, events);
+    if (t.kind === 'plate') {
+      if (this.mode === 'rush') this.serve(slot, events);
+      else this.taste(slot, events);
+    }
+  }
+
+  /** Rush: match the plate against the open orders (oldest first). */
+  private serve(slot: number, events: SimEvent[]): void {
+    const bodies = this.bodiesOnPlate();
+    if (bodies.length === 0) {
+      events.push({ kind: 'PlateEmpty', slot });
+      return;
+    }
+    const sv = this.service;
+    const summary = summarize(bodies);
+    let best: { uid: number; recipeId: string; problems: ServeProblem[] } | undefined;
+    for (const o of sv.orders) {
+      const r = RECIPES[o.recipe]!;
+      const problems = checkRecipe(r, summary);
+      if (problems.length === 0) {
+        for (const b of bodies) this.removeBody(b.id);
+        const { points, tip } = sv.complete(o.uid);
+        events.push({ kind: 'OrderServed', slot, uid: o.uid, recipeId: r.id, points, tip });
+        return;
+      }
+      if (!best || problems.length < best.problems.length) best = { uid: o.uid, recipeId: r.id, problems };
+    }
+    if (!best) {
+      events.push({ kind: 'ServeRejected', slot, recipeId: '', problem: { kind: 'no_order', id: '' }, discarded: false });
+      return;
+    }
+    const p = best.problems[0]!;
+    // Missing ingredients can still be added; anything else (burnt, extra, raw, uncut) cannot be fixed on the plate: bin it.
+    const discard = best.problems.some((x) => x.kind !== 'missing');
+    if (discard) for (const b of bodies) this.removeBody(b.id);
+    const lite: ServeProblemLite =
+      p.kind === 'not_cut' ? { kind: p.kind, id: p.id, pieces: p.pieces, need: p.need } : { kind: p.kind, id: p.id };
+    events.push({ kind: 'ServeRejected', slot, recipeId: best.recipeId, problem: lite, discarded: discard });
   }
 
   private place(slot: number, heldId: number, px: number, pz: number): void {
@@ -440,7 +720,22 @@ export class KitchenSim {
     this.settleDirty = true;
     const hx = b.origin[0];
     const hz = b.origin[2];
-    this.setOrigin(b, hx, restingOriginY(this.store, b), hz);
+    const followers = this.followers[slot]!;
+    this.followers[slot] = [];
+    if (followers.length === 0) this.setOrigin(b, hx, restingOriginY(this.store, b), hz);
+    else {
+      // Lower the whole group, lowest pieces first, each onto whatever is already below it.
+      const group = [b];
+      for (const f of followers) {
+        const fb = this.store.get(f.id);
+        if (!fb) continue;
+        fb.flags &= ~(FLAG_HELD | 1);
+        fb.calm = 0;
+        group.push(fb);
+      }
+      group.sort((p, q) => p.origin[1] - q.origin[1] || p.id - q.id);
+      for (const g of group) this.setOrigin(g, g.origin[0], restingOriginY(this.store, g, true), g.origin[2]);
+    }
     if (overlapsOthers(this.store, b)) {
       // Refuse: drop at the chef's feet instead.
       const fx = Math.floor(px - b.dims[0] * 0.5 + 0.5);
@@ -463,7 +758,7 @@ export class KitchenSim {
     events.push({ kind: 'DishServed', slot, cravingId: craving.id, score: ev.score, tier: ev.tier, highlights: ev.highlights });
   }
 
-  private cleaverCut(ax: number, ay: number, az: number, face: number, tilt: 0 | 1 | 2): void {
+  private cleaverCut(slot: number, ax: number, ay: number, az: number, face: number, tilt: 0 | 1 | 2, events: SimEvent[]): void {
     let bestBody: FoodBody | undefined;
     let bestCell: [number, number, number] = [0, 0, 0];
     let bestD = CLEAVER_AIM_RADIUS * CLEAVER_AIM_RADIUS + 1e-9;
@@ -495,6 +790,10 @@ export class KitchenSim {
           }
     }
     if (!bestBody) return;
+    if (this.mode === 'rush' && cellCount(bestBody) < MIN_CUT_CELLS) {
+      events.push({ kind: 'CutTooSmall', slot });
+      return;
+    }
     const plane = planeFromAim(bestCell, face, tilt);
     const r = cutBody(this.store, bestBody, plane);
     if (r.removedId < 0) return;

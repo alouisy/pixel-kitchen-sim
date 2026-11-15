@@ -6,7 +6,7 @@
  */
 import { FixedStepLoop } from './loop.js';
 import type { MainToWorker, WorkerToMain } from './protocol.js';
-import type { InputFrame } from './types.js';
+import type { GameMode, HudState, InputFrame } from './types.js';
 import { SimWorld } from './world.js';
 
 const ctx = self as unknown as DedicatedWorkerGlobalScope;
@@ -22,9 +22,9 @@ function post(msg: WorkerToMain, transfer: Transferable[] = []): void {
   ctx.postMessage(msg, transfer);
 }
 
-function start(seed: number, chefSlots: number, arenaHalf?: number): void {
+function start(seed: number, chefSlots: number, arenaHalf?: number, mode?: GameMode): void {
   stop();
-  sim = new SimWorld({ seed, chefSlots, arenaHalf });
+  sim = new SimWorld({ seed, chefSlots, arenaHalf, mode });
   lastHudKey = '';
   loop = new FixedStepLoop(sim);
   let last = performance.now();
@@ -54,7 +54,7 @@ function start(seed: number, chefSlots: number, arenaHalf?: number): void {
           post({ type: 'food', tick: world.tick, ...delta }, transfer);
         }
         const hud = world.readHud(0);
-        const key = `${hud.tool}|${hud.tilt}|${hud.cravingId}|${hud.heldId}|${hud.facing}|${hud.torchOn}`;
+        const key = hudKey(hud);
         if (key !== lastHudKey) {
           lastHudKey = key;
           post({ type: 'hud', tick: world.tick, hud });
@@ -63,6 +63,15 @@ function start(seed: number, chefSlots: number, arenaHalf?: number): void {
     );
     void alpha; // alpha is recomputed by the main thread from its own receive clock.
   }, 4);
+}
+
+/** Change key for the HUD post: timers and gauges are quantised so the post rate stays low (a few per second). */
+function hudKey(h: HudState): string {
+  return JSON.stringify([
+    h.tool, h.tilt, h.cravingId, h.heldId, h.facing, h.torchOn, h.phase, h.timeLeftS, h.score, h.served, h.missed, h.hint,
+    h.orders.map((o) => [o.uid, Math.floor(o.left * 60)]),
+    h.gauges.map((g) => [g.id, Math.floor(g.done * 40), Math.floor(g.char * 40), g.pos]),
+  ]);
 }
 
 function stop(): void {
@@ -76,7 +85,7 @@ ctx.onmessage = (e: MessageEvent<MainToWorker>) => {
   const msg = e.data;
   switch (msg.type) {
     case 'init':
-      start(msg.seed, msg.chefSlots, msg.arenaHalf);
+      start(msg.seed, msg.chefSlots, msg.arenaHalf, msg.mode);
       break;
     case 'input':
       lastInput = msg.frame;

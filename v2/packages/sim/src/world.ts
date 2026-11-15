@@ -1,7 +1,7 @@
 import { addComponents, addEntity, createWorld, query } from 'bitecs';
 import { HEAT_EVERY_N_TICKS, Hasher64, Prng, SIM_DT, clamp, fsqrt } from '@ga/shared';
 import { createComponents, type Components } from './components.js';
-import type { HudState, InputFrame, SimEvent } from './types.js';
+import type { GameMode, HudState, InputFrame, SimEvent } from './types.js';
 import { bodyHash } from './food/body.js';
 import { KitchenSim, FACE_YAW, type FoodDeltaData } from './kitchen/play.js';
 import { CHEF_RADIUS_M, SPAWN_M, TABLE, FV_PER_M } from './kitchen/layout.js';
@@ -17,6 +17,8 @@ export interface SimWorldOptions {
   chefSlots: number;
   /** Half extent (m) of the square the chefs are clamped to. Default ARENA_HALF_EXTENT; the toy kitchen uses 3.8. */
   arenaHalf?: number;
+  /** 'toy' (free play, default) or 'rush' (timed service with orders). */
+  mode?: GameMode;
 }
 
 const TABLE_X0_M = TABLE.x0 / FV_PER_M - CHEF_RADIUS_M;
@@ -49,7 +51,7 @@ export class SimWorld {
     this.chefSlots = opts.chefSlots;
     this.prng = new Prng(opts.seed);
     this.arenaHalf = opts.arenaHalf ?? ARENA_HALF_EXTENT;
-    this.kitchen = new KitchenSim(opts.chefSlots, this.prng.split('food'));
+    this.kitchen = new KitchenSim(opts.chefSlots, this.prng.split('food'), opts.mode ?? 'toy');
     const { Transform, Velocity, Chef } = this.comps;
     for (let slot = 0; slot < opts.chefSlots; slot++) {
       const eid = addEntity(this.world);
@@ -107,7 +109,7 @@ export class SimWorld {
       this.kitchen.updateChef(slot, input, Transform.x[eid]!, Transform.z[eid]!, events);
       Transform.yaw[eid] = FACE_YAW[this.kitchen.facing[slot]!]!;
     }
-    this.kitchen.afterChefs(this._tick, HEAT_EVERY_N_TICKS);
+    this.kitchen.afterChefs(this._tick, HEAT_EVERY_N_TICKS, events);
 
     if (this._tick % TICK_EVENT_EVERY === 0) events.push({ kind: 'tick', tick: this._tick });
     return events;
@@ -127,7 +129,8 @@ export class SimWorld {
   }
 
   readHud(slot: number): HudState {
-    return this.kitchen.hud(slot);
+    const eid = this.chefEids[slot]!;
+    return this.kitchen.hud(slot, this.comps.Transform.x[eid]!, this.comps.Transform.z[eid]!);
   }
 
   /** Food changes since the last call (see KitchenSim.drainDelta). */
@@ -153,6 +156,7 @@ export class SimWorld {
     }
     h.u32(k.store.nextId);
     for (const id of k.store.ids()) bodyHash(k.store.get(id)!, h);
+    if (k.isRush) k.hashRush(h);
     const { Transform, Velocity, Chef } = this.comps;
     for (const eid of this.liveChefs()) {
       h.u32(eid).u32(Chef.slot[eid]!);
@@ -187,7 +191,8 @@ export class SimWorld {
     // lastButtons u32), then food store (u32 length + bytes).
     const k = this.kitchen;
     const food = k.store.snapshot();
-    const tail = new Uint8Array(4 + 16 + 4 + this.chefSlots * 12 + 4 + food.length);
+    const rush = k.rushBytes();
+    const tail = new Uint8Array(4 + 16 + 4 + this.chefSlots * 12 + 4 + food.length + rush.length);
     const tv = new DataView(tail.buffer);
     let t = 0;
     tv.setFloat32(t, this.arenaHalf, true);
@@ -209,6 +214,7 @@ export class SimWorld {
     tv.setUint32(t, food.length, true);
     t += 4;
     tail.set(food, t);
+    tail.set(rush, t + food.length);
     const out = new Uint8Array(buf.byteLength + tail.length);
     out.set(new Uint8Array(buf), 0);
     out.set(tail, buf.byteLength);
@@ -258,6 +264,10 @@ export class SimWorld {
     const flen = dv.getUint32(o, true);
     o += 4;
     k.store.restore(bytes.subarray(o, o + flen));
+    if (o + flen < bytes.length) {
+      k.restoreRush(bytes.subarray(o + flen));
+      if (!k.isRush) k.service.phase = 1;
+    }
     k.markAllDirty();
     return sim;
   }

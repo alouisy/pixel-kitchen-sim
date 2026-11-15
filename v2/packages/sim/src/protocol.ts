@@ -1,7 +1,7 @@
-import type { HudState, InputFrame, SimEvent } from './types.js';
+import type { GameMode, HudState, InputFrame, SimEvent } from './types.js';
 
 export type MainToWorker =
-  | { type: 'init'; seed: number; chefSlots: number; arenaHalf?: number }
+  | { type: 'init'; seed: number; chefSlots: number; arenaHalf?: number; mode?: GameMode }
   | { type: 'input'; frame: InputFrame }
   | { type: 'stop' };
 

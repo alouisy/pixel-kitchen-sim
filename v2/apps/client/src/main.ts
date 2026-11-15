@@ -28,12 +28,14 @@ import { Vector3 } from 'three';
 import { AimPicker, padAim } from './aim.js';
 import { Hud } from './hud.js';
 import { mouse, sampleInput, usingGamepad } from './input.js';
-import { EVENT_TEXT } from './strings.js';
+import { WorldLabels } from './labels.js';
+import { EVENT_TEXT, T, ingIcon, ingName, recipeName } from './strings.js';
 
 const FV = 1 / 16;
 const params = new URLSearchParams(location.search);
 const canvas = document.getElementById('game') as HTMLCanvasElement;
-const hud = new Hud(params.get('debug') === '1');
+const mode = params.get('mode') === 'toy' ? 'toy' : 'rush';
+const hud = new Hud(params.get('debug') === '1', mode === 'rush');
 
 const app = new RenderApp(canvas, { groundSize: KITCHEN_HALF_M * 2, background: 0x2b2420 });
 app.renderer.toneMappingExposure = 0.7;
@@ -77,7 +79,16 @@ let curr: Float32Array<ArrayBufferLike> = new Float32Array(0);
 let lastStateAt = performance.now();
 let tick = 0;
 let lastHash = '-';
-let hudState: HudState = { tool: 'cleaver', tilt: 0, cravingId: '', heldId: -1, facing: 6, torchOn: false };
+let hudState: HudState = {
+  tool: 'cleaver', tilt: 0, cravingId: '', heldId: -1, facing: 6, torchOn: false, mode, phase: mode === 'rush' ? 0 : 1,
+  timeLeftS: 0, score: 0, served: 0, missed: 0, orders: [], hint: { kind: 'none' }, gauges: [],
+};
+
+// Station labels so a first-time player can read the kitchen without a tutorial.
+const labels = new WorldLabels();
+for (const p of PADS) labels.add(`${ingIcon(p.material)} ${ingName(p.material)}`, p.x + 0.5, TABLE.top + 10, p.z - 2, 'pad');
+labels.add(T.labels.rock, ROCK.x0 + ROCK.w / 2, ROCK.top + 2, ROCK.z0 - 1, 'station');
+labels.add(T.labels.plate, PLATE.cx + 0.5, PLATE.y + 2, PLATE.cz - PLATE.r - 1, 'station');
 
 worker.onmessage = (e: MessageEvent<WorkerToMain>) => {
   const msg = e.data;
@@ -95,17 +106,23 @@ worker.onmessage = (e: MessageEvent<WorkerToMain>) => {
     case 'hud':
       hudState = msg.hud;
       hud.setHud(msg.hud);
+      labels.setGauges(msg.hud.gauges);
       break;
     case 'events':
       for (const ev of msg.events) {
         if (ev.kind === 'DishServed') hud.showResult(ev.cravingId, ev.score, ev.tier, ev.highlights);
-        else if (ev.kind === 'TooHeavy' || ev.kind === 'SpawnRefused' || ev.kind === 'PlateEmpty') hud.say(EVENT_TEXT[ev.kind]);
+        else if (ev.kind === 'TooHeavy' || ev.kind === 'SpawnRefused' || ev.kind === 'PlateEmpty' || ev.kind === 'CutTooSmall')
+          hud.say(EVENT_TEXT[ev.kind]);
+        else if (ev.kind === 'OrderServed') hud.say(T.servedToast(recipeName(ev.recipeId), ev.points, ev.tip), 'good');
+        else if (ev.kind === 'OrderExpired') hud.say(T.expired(recipeName(ev.recipeId), ev.penalty), 'bad');
+        else if (ev.kind === 'ServeRejected') hud.say(hud.problemText(ev.recipeId, ev.problem), 'bad');
+        else if (ev.kind === 'ServiceEnded') hud.serviceEnded(ev.score, ev.served, ev.missed, ev.stars);
       }
       break;
   }
 };
 
-send({ type: 'init', seed: 1, chefSlots: 1, arenaHalf: KITCHEN_HALF_M - 0.2 });
+send({ type: 'init', seed: (Date.now() >>> 0) || 1, chefSlots: 1, arenaHalf: KITCHEN_HALF_M - 0.2, mode });
 
 const hand = new Vector3();
 const aimM = new Vector3();
@@ -123,6 +140,7 @@ function frame(now: number): void {
 
   const chef = app.chefPosition(0);
   const f = FACING_DIRS[hudState.facing & 7]!;
+  hud.setGamepad(usingGamepad(now));
   if (usingGamepad(now) || !mouse.inside) aim = padAim(chef.x, chef.z, f[0], f[1], TABLE.top * FV);
   else {
     aim = picker.pick(mouse.x, mouse.y, window.innerWidth, window.innerHeight, app.cameraRig.camera, food.meshes(hudState.heldId));
@@ -144,6 +162,7 @@ function frame(now: number): void {
   kitchen.update(dt, food.anyOver(ROCK, hudState.heldId) ? 1 : 0, time);
 
   app.render(dt);
+  labels.update(app.cameraRig.camera, window.innerWidth, window.innerHeight);
 
   debugTimer += dt;
   if (debugTimer > 0.25) {

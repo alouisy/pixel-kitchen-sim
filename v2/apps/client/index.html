@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Giant Appetite - Cut &amp; Burn toy</title>
+    <title>Giant Appetite V2 - Rush demo</title>
     <style>
       html, body { margin: 0; height: 100%; overflow: hidden; background: #1b2a1f; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
       #game { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
@@ -24,6 +24,61 @@
       .hud-help-row { display: flex; gap: 8px; align-items: baseline; font-size: 12px; }
       .hud-help-row kbd { background: rgba(255, 255, 255, 0.16); border-radius: 4px; padding: 0 5px; font: 11px/1.5 monospace; min-width: 64px; text-align: center; }
       .hud-debug { position: fixed; bottom: 6px; left: 8px; margin: 0; font: 12px/1.4 monospace; color: #fff; background: rgba(0, 0, 0, 0.5); padding: 4px 8px; border-radius: 4px; pointer-events: none; white-space: pre; }
+      /* Rush mode */
+      .hud.hud-rush { top: auto; bottom: 12px; left: 12px; }
+      .hud-sub { color: #e9dcc8; }
+      .hud-top { position: fixed; top: 10px; right: 12px; display: flex; gap: 8px; pointer-events: none; }
+      .hud-top > div { background: rgba(20, 16, 14, 0.78); color: #f6efe4; border-radius: 10px; padding: 6px 12px; font-weight: 700; font-size: 18px; }
+      .hud-timer.urgent { color: #ff7b5c; animation: pulse 0.8s ease-in-out infinite alternate; }
+      @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.08); } }
+      .hud-tickets { position: fixed; top: 10px; left: 12px; display: flex; gap: 8px; pointer-events: none; }
+      .ticket { width: 150px; background: #fbf6ec; color: #2b2420; border-radius: 10px; padding: 7px 9px 6px; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); animation: drop 0.35s ease-out; }
+      .ticket.late { animation: shake 0.5s ease-in-out infinite; }
+      @keyframes drop { from { transform: translateY(-30px); opacity: 0; } to { transform: none; opacity: 1; } }
+      @keyframes shake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-2deg); } 75% { transform: rotate(2deg); } }
+      .ticket-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+      .ticket-ings { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 5px; }
+      .ticket-ing { display: flex; flex-direction: column; align-items: center; background: #efe4d1; border-radius: 7px; padding: 2px 5px; min-width: 32px; }
+      .ticket-ing-icon { font-size: 22px; line-height: 1.1; }
+      .ticket-ing-tags { font-size: 10px; min-height: 12px; }
+      .ticket-bar { height: 6px; background: #ddd0bb; border-radius: 3px; overflow: hidden; }
+      .ticket-bar-fill { height: 100%; transition: width 0.3s linear; }
+      .ticket-points { font-size: 10px; color: #7a6a58; text-align: right; margin-top: 2px; }
+      .hud-hint { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; gap: 14px; pointer-events: none; transition: opacity 0.15s; }
+      .hud-hint-item { display: flex; align-items: center; gap: 8px; background: rgba(20, 16, 14, 0.82); color: #fff; border-radius: 999px; padding: 6px 14px 6px 6px; font-size: 16px; font-weight: 600; }
+      .hud-hint-item.dim { opacity: 0.75; font-weight: 500; font-size: 14px; }
+      .hud-hint-item kbd, .screen-go kbd { background: #ffd23f; color: #2b2420; border-radius: 6px; padding: 1px 8px; font: 700 15px/1.5 system-ui, sans-serif; box-shadow: 0 2px 0 #b08d1a; }
+      .hud-toasts { position: fixed; left: 50%; top: 64px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+      .hud-toast { background: rgba(20, 16, 14, 0.85); color: #f6efe4; border-radius: 8px; padding: 7px 14px; font-size: 15px; font-weight: 600; border-left: 4px solid #9a8f80; transition: opacity 0.5s; animation: drop 0.25s ease-out; }
+      .hud-toast.good { border-left-color: #6fd36f; }
+      .hud-toast.bad { border-left-color: #e4572e; }
+      .hud-toast.out { opacity: 0; }
+      .hud-screen { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(20, 14, 10, 0.55); pointer-events: none; }
+      .screen-box { background: #fbf6ec; color: #2b2420; border-radius: 18px; padding: 22px 28px; max-width: 520px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45); text-align: center; }
+      .screen-title { font-size: 34px; font-weight: 900; letter-spacing: -0.02em; }
+      .screen-sub { color: #8a7a66; font-size: 13px; margin-bottom: 10px; }
+      .screen-goal { font-size: 16px; font-weight: 600; margin: 8px 0; }
+      .screen-steps { text-align: left; margin: 10px auto; padding: 0 0 0 22px; font-size: 14px; line-height: 1.7; }
+      .screen-step-icon { display: inline-block; width: 26px; }
+      .screen-menu { background: #efe4d1; border-radius: 10px; padding: 6px 12px; margin: 10px 0; font-size: 13px; text-align: left; }
+      .screen-menu-row { display: flex; justify-content: space-between; gap: 12px; line-height: 1.8; }
+      .screen-menu-name { font-weight: 700; }
+      .screen-tip { color: #6a5a48; font-size: 12px; margin: 6px 0; }
+      .screen-best { color: #8a6a1a; font-weight: 700; margin: 6px 0; }
+      .screen-newbest { color: #d18a00; font-weight: 900; font-size: 20px; margin: 6px 0; animation: pulse 0.6s ease-in-out infinite alternate; }
+      .screen-stars { font-size: 40px; color: #f0b400; letter-spacing: 6px; }
+      .screen-score { font-size: 56px; font-weight: 900; line-height: 1; }
+      .screen-go { margin-top: 14px; font-size: 18px; font-weight: 700; }
+      .world-labels { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+      .world-label { position: absolute; left: 0; top: 0; white-space: nowrap; background: rgba(251, 246, 236, 0.9); color: #2b2420; border-radius: 6px; padding: 1px 6px; font-size: 11px; font-weight: 700; }
+      .world-label.station { background: rgba(20, 16, 14, 0.78); color: #ffd9a8; font-size: 12px; }
+      .gauge { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+      .gauge-bar { position: relative; width: 70px; height: 9px; background: rgba(20, 16, 14, 0.75); border: 2px solid rgba(20, 16, 14, 0.85); border-radius: 5px; overflow: hidden; }
+      .gauge-zone { position: absolute; top: 0; bottom: 0; background: rgba(111, 211, 111, 0.35); }
+      .gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; }
+      .gauge-text { background: rgba(20, 16, 14, 0.78); color: #fff; font-size: 11px; font-weight: 700; border-radius: 5px; padding: 0 5px; }
+      .gauge.ok .gauge-text { background: #3c9a3c; animation: pulse 0.5s ease-in-out infinite alternate; }
+      .gauge.burnt .gauge-text { background: #8a2a1a; }
     </style>
   </head>
   <body>

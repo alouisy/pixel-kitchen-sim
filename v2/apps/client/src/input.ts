@@ -5,8 +5,11 @@ const GAMEPAD_DEADZONE = 0.15; // ported in spirit from V1 src/controls.js
 const MIN_HOLD_MS = 50;
 
 const keys = new Set<string>();
+/** Keys pressed since the last sample: a tap shorter than a frame still registers. */
+const tapped = new Set<string>();
 const heldUntil = new Map<number, number>();
 let mouseDown = false;
+let clickTapped = false;
 export const mouse = { x: 0, y: 0, inside: false, lastMoveAt: 0 };
 let padActiveAt = -1e9;
 
@@ -16,7 +19,8 @@ function latch(bit: number, down: boolean, now: number): void {
 
 window.addEventListener('keydown', (e) => {
   keys.add(e.code);
-  if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
+  if (!e.repeat) tapped.add(e.code);
+  if (e.code === 'Space' || e.code === 'Tab' || e.code.startsWith('Arrow')) e.preventDefault();
 });
 window.addEventListener('keyup', (e) => keys.delete(e.code));
 window.addEventListener('blur', () => {
@@ -24,7 +28,7 @@ window.addEventListener('blur', () => {
   mouseDown = false;
 });
 window.addEventListener('mousedown', (e) => {
-  if (e.button === 0) mouseDown = true;
+  if (e.button === 0) mouseDown = clickTapped = true;
 });
 window.addEventListener('mouseup', (e) => {
   if (e.button === 0) mouseDown = false;
@@ -57,12 +61,17 @@ export function usingGamepad(now: number): boolean {
  * `aim` (food voxels) is supplied by the caller, who owns the camera raycast.
  */
 export function sampleInput(now: number, aim: [number, number, number]): InputFrame {
-  let x = (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0);
-  let y = (keys.has('KeyS') ? 1 : 0) - (keys.has('KeyW') ? 1 : 0);
-  latch(BTN_GRAB, keys.has('KeyE') || keys.has('Space'), now);
-  latch(BTN_SWAP, keys.has('KeyQ'), now);
-  latch(BTN_TILT, keys.has('KeyR'), now);
-  latch(BTN_TOOL, mouseDown, now);
+  const down = (code: string): boolean => keys.has(code) || tapped.has(code);
+  // Physical key codes: KeyW/A/S/D are Z/Q/S/D on an AZERTY keyboard. Arrows work too.
+  let x = (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0);
+  let y = (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) - (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0);
+  latch(BTN_GRAB, down('KeyE') || down('Space') || down('Enter'), now);
+  // Tab swaps tools (KeyQ kept for QWERTY players; on AZERTY that physical key is A, so it never clashes with ZQSD).
+  latch(BTN_SWAP, down('Tab') || down('KeyQ'), now);
+  latch(BTN_TILT, down('KeyR'), now);
+  tapped.clear();
+  latch(BTN_TOOL, mouseDown || clickTapped, now);
+  clickTapped = false;
   const pad = navigator.getGamepads?.().find((p) => p !== null && p !== undefined);
   if (pad) {
     const px = deadzone(pad.axes[0] ?? 0);
@@ -70,9 +79,9 @@ export function sampleInput(now: number, aim: [number, number, number]): InputFr
     x += px;
     y += py;
     const b = (i: number) => (pad.buttons[i]?.value ?? 0) > 0.4 || pad.buttons[i]?.pressed === true;
-    const anyButton = b(0) || b(2) || b(3) || b(7);
+    const anyButton = b(0) || b(2) || b(3) || b(7) || b(9);
     if (px !== 0 || py !== 0 || anyButton) padActiveAt = now;
-    latch(BTN_GRAB, b(0), now);
+    latch(BTN_GRAB, b(0) || b(9), now); // A, or Start on the title/results screens
     latch(BTN_TILT, b(2), now);
     latch(BTN_SWAP, b(3), now);
     latch(BTN_TOOL, b(7), now);

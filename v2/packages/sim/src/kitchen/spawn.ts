@@ -39,6 +39,10 @@ export function spawnAtPad(store: FoodStore, padIndex: number, rng: Prng): FoodB
       body = store.create([10, 6, 6], [pad.x - 5, 0, pad.z - 3]);
       fillBox(body, [0, 0, 0], [9, 5, 5], mat);
       break;
+    case 'cheese':
+      body = store.create([6, 2, 6], [pad.x - 3, 0, pad.z - 3]);
+      fillBox(body, [0, 0, 0], [5, 1, 5], mat);
+      break;
     case 'pepper':
       body = store.create([4, 4, 10], [pad.x - 2, 0, pad.z - 5]);
       fillBox(body, [0, 0, 0], [3, 3, 9], mat);

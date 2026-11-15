@@ -23,7 +23,56 @@ export type SimEvent =
   | { kind: 'TooHeavy'; slot: number; bodyId: number }
   | { kind: 'SpawnRefused'; slot: number; reason: 'max_bodies' }
   | { kind: 'ToolSwapped'; slot: number; tool: ToolKind }
-  | { kind: 'PlateEmpty'; slot: number };
+  | { kind: 'PlateEmpty'; slot: number }
+  // Rush mode
+  | { kind: 'ServiceStarted' }
+  | { kind: 'ServiceEnded'; score: number; served: number; missed: number; stars: number }
+  | { kind: 'OrderAdded'; uid: number; recipeId: string }
+  | { kind: 'OrderExpired'; uid: number; recipeId: string; penalty: number }
+  | { kind: 'OrderServed'; slot: number; uid: number; recipeId: string; points: number; tip: number }
+  | { kind: 'ServeRejected'; slot: number; recipeId: string; problem: ServeProblemLite; discarded: boolean }
+  | { kind: 'CutTooSmall'; slot: number };
+
+/** A serve problem as sent to the client (see kitchen/recipes.ts). */
+export interface ServeProblemLite {
+  kind: 'missing' | 'extra' | 'raw' | 'burnt' | 'not_cut' | 'no_order';
+  id: string;
+  pieces?: number;
+  need?: number;
+}
+
+export type GameMode = 'toy' | 'rush';
+
+/** What pressing interact would do right now (drives the contextual hint). */
+export type InteractHint =
+  | { kind: 'none' }
+  | { kind: 'start' }
+  | { kind: 'restart'; ready: boolean }
+  | { kind: 'spawn'; material: string }
+  | { kind: 'grab'; material: string; pieces: number }
+  | { kind: 'too_heavy' }
+  | { kind: 'place'; on: 'rock' | 'plate' | 'table' | 'floor' }
+  | { kind: 'serve' }
+  | { kind: 'taste' };
+
+export interface OrderHud {
+  uid: number;
+  recipeId: string;
+  /** 0..1 patience left. */
+  left: number;
+}
+
+/** A body cooking on the rock (or on the plate): screen gauge data. Position = top centre in food voxels. */
+export interface CookGauge {
+  id: number;
+  pos: [number, number, number];
+  done: number;
+  char: number;
+  material: string;
+  /** Thresholds used by the serve check (see kitchen/recipes.ts). */
+  cookedAt: number;
+  burntAt: number;
+}
 
 /** Per-chef presentation state posted by the worker (and read by tests). */
 export interface HudState {
@@ -33,6 +82,16 @@ export interface HudState {
   heldId: number;
   facing: number;
   torchOn: boolean;
+  mode: GameMode;
+  /** 0 title, 1 playing, 2 over (rush only; toy is always 1). */
+  phase: number;
+  timeLeftS: number;
+  score: number;
+  served: number;
+  missed: number;
+  orders: OrderHud[];
+  hint: InteractHint;
+  gauges: CookGauge[];
 }
 
 /**

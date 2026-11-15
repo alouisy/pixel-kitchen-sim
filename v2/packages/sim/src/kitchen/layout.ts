@@ -13,7 +13,7 @@ export const PLATE = { cx: 26, cz: -41, r: 5, y: 14 } as const;
 
 export const PAD_Z = -41;
 export interface PadDef {
-  material: 'mushroom' | 'potato' | 'bread_rock' | 'pepper';
+  material: 'mushroom' | 'potato' | 'bread_rock' | 'pepper' | 'cheese';
   x: number;
   z: number;
 }
@@ -22,6 +22,7 @@ export const PADS: readonly PadDef[] = [
   { material: 'potato', x: -20, z: PAD_Z },
   { material: 'bread_rock', x: -12, z: PAD_Z },
   { material: 'pepper', x: -4, z: PAD_Z },
+  { material: 'cheese', x: 3, z: PAD_Z },
 ];
 /** Pad mat size in fv (square, centred on x,z). */
 export const PAD_SIZE = 6;
@@ -32,6 +33,10 @@ export const SPAWN_M = { x: 0, z: 0 } as const;
 
 export const MAX_BODIES = 40;
 export const MAX_LIFT_CELLS = 384;
+/** Rush mode: bodies smaller than this cannot be cut again (stops endless dicing). */
+export const MIN_CUT_CELLS = 24;
+/** Rush mode: same-material pieces within this gap (fv) of the grabbed one are lifted together. */
+export const GROUP_GAP_FV = 2;
 export const REACH_FV = 22; // 1.4 m
 export const HELD_BOTTOM_Y = 16; // 1.0 m
 export const HELD_AHEAD_FV = 9.6; // 0.6 m
