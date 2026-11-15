@@ -1,5 +1,7 @@
 # 09 · Technical Architecture
 
+> **Revision note (2026-11-15).** Unchanged overall. The simulation now models discrete items and stations ([05](./05-interactions-and-cooking.md)) instead of voxel food bodies, which makes it lighter. Up to 6 chef slots. The voxel mesher is used for level dioramas and item models.
+
 **Principles** (they extend the existing project preferences: simple, low-cost, maintainable, Netlify-hosted, no account system):
 
 1. **Simulation is pure data.** No game state in Three.js objects (this is V1's main flaw). The renderer *reads* the simulation; it never owns it.

@@ -1,5 +1,7 @@
 # 07 · Art Direction
 
+> **Revision note (2026-11-15).** The "Edible Diorama" premium-voxel direction is kept as the default and applied to the 10 themed kitchens in [06](./06-level-design.md). A comparison against a more polished cartoon style is scheduled at the end of P2 ([16 §2](./16-production-roadmap.md)). Food is no longer simulated per voxel, but its raw → cooked → charred colour ramp is kept.
+
 **Direction name: "Edible Diorama".** Keep the voxel identity, but move it from *flat-shaded blocks in a white room* to *a hand-made miniature world you want to eat*. Think stop-motion sets, tilt-shift photography of tabletop models, and pastry-shop windows.
 
 ---

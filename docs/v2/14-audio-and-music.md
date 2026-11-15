@@ -1,5 +1,7 @@
 # 14 · Audio and Music
 
+> **Revision note (2026-11-15).** Music adapts to the run's intensity (active tickets, last 30 seconds, streak level) instead of a Giant's mood.
+
 Sound carries half of the "juice" and most of the comedy. V1's procedural WebAudio synth (`audioManager.js`: pop, place, chop noise bursts, fry, ding) is charming and costs nothing to download. V2 keeps it as a layer and builds a full, adaptive soundscape around it.
 
 ---

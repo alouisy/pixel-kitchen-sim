@@ -1,5 +1,7 @@
 # 10 · Multiplayer and Network Synchronization
 
+> **Revision note (2026-11-15).** The model is unchanged (P2P, host-authoritative, prediction, intents, run verification) and now covers **up to 6 players**. Game data stays a star (host uplink ≈ 5 × 20 KB/s ≈ 0.8 Mbps). Voice in a full mesh means 15 links at 6 players (each peer sends 5 Opus streams, under 200 kbps). If that proves too heavy, voice moves to an SFU or the relay plan B. There are no VoxelOps any more, so snapshots carry item and station state deltas, which is lighter. Leaderboards have player-count buckets (Solo, Duo, Squad 3–4, Party 5–6).
+
 **Model:** peer-to-peer WebRTC, **host-authoritative** (the room creator's browser runs the authoritative simulation), with **client-side prediction for your own chef**, **interpolation for everything else**, and **deterministic replication of voxel operations**. Signaling and presence go through Supabase Realtime. There's no game server to pay for.
 
 Targets: 2 players (reference), up to 4. Playable up to 150 ms RTT and 3% packet loss. "Feels local" under 80 ms RTT.

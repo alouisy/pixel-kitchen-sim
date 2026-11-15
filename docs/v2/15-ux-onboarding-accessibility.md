@@ -1,5 +1,7 @@
 # 15 · UX, Onboarding and Accessibility
 
+> **Revision note (2026-11-15).** Onboarding is level-driven: no tutorial screens, contextual prompts, and one card per new mechanic. The French UI is the default for French-speaking browsers. There's an instant one-button restart on results.
+
 ## 1. UX principles
 
 1. **Diegetic first.** Information lives in the world (thought bubbles, food color, steam, the Giant's face). The HUD is for what can't be in the world.

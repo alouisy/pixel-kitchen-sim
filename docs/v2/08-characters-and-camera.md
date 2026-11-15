@@ -1,5 +1,7 @@
 # 08 · Characters and Camera
 
+> **Revision note (2026-11-15).** Still valid: third-person chefs, per-player camera online, shared camera on one screen. Changes: up to **6 players** online and up to 4 on one screen (6 if enough gamepads). The "Big Bite" cinematic becomes a short **results replay** (the best moments of the run) and the level 10 Giant reactions. Tools are gone, so there's no Focus camera for tool aiming.
+
 This answers the open question from the brief: *first-person or third-person? Should partners see each other?*
 
 **Decision: third-person, fully modeled voxel chefs, on a directed "diorama follow" camera, with each online player getting their own camera.** First-person is dropped as a mode, but its best quality (precision) is kept through mouse-aimed tools and a close "Focus" camera for fine work.

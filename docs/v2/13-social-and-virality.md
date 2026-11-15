@@ -1,5 +1,7 @@
 # 13 · Social Features and Virality
 
+> **Revision note (2026-11-15).** The viral loop is refocused on **competition and records**. The key shareable moments are a new personal best or world record, the end-of-run replay, chaotic 6-player runs, and the Daily Rush card. Giant reactions only matter in level 10. Leaderboards are per level × player bucket (Solo, Duo, Squad 3–4, Party 5–6) and verified by server re-simulation.
+
 Virality isn't a feature you bolt on. It's what happens when **(a)** the game produces moments worth showing, **(b)** showing them costs one tap, and **(c)** the people who see them can join in seconds. Giant Appetite is designed around those three conditions.
 
 ```

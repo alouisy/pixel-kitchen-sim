@@ -1,5 +1,7 @@
 # 11 · Voice and Communication
 
+> **Revision note (2026-11-15).** Unchanged, except: the mesh grows to 6 players (proximity voice is suggested by default from 4 players), and pings focus on kitchen calls ("Need plates!", "Fries ready!", "Fire!").
+
 Co-op games live or die by communication. Giant Appetite treats voice as a **gameplay and comedy feature** (mouth flaps, proximity, filters), not just a utility. It also gives non-voice players a full language of pings, quick chat and emotes, so nobody is left out.
 
 ---
