@@ -1,0 +1,344 @@
+[
+ {
+  "id": "potato",
+  "chop": "raw_fries",
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "tomato",
+  "chop": "chopped_tomato",
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "lettuce",
+  "chop": "chopped_lettuce",
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "onion",
+  "chop": "onion_rings_raw",
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "banana",
+  "chop": "sliced_banana",
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "strawberry",
+  "chop": "sliced_strawberry",
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "raw_chicken",
+  "chop": "raw_chicken_strips",
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "patty",
+  "cook": {
+   "station": "stove",
+   "result": "cooked_patty",
+   "time": 6,
+   "burnWindow": 6
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "raw_bacon",
+  "cook": {
+   "station": "stove",
+   "result": "cooked_bacon",
+   "time": 6,
+   "burnWindow": 6
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "bread_slice",
+  "cook": {
+   "station": "toaster",
+   "result": "toasted_bread",
+   "time": 3,
+   "burnWindow": 4
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "egg",
+  "cook": {
+   "station": "mixer",
+   "result": "omelette_mix",
+   "time": 2,
+   "burnWindow": 0
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "pancake_mix",
+  "cook": {
+   "station": "mixer",
+   "result": "pancake_batter",
+   "time": 2,
+   "burnWindow": 0
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "pizza_dough",
+  "cook": {
+   "station": "press",
+   "result": "pizza_base",
+   "time": 2,
+   "burnWindow": 0
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "raw_fries",
+  "cook": {
+   "station": "fryer",
+   "result": "cooked_fries",
+   "time": 5,
+   "burnWindow": 6
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "onion_rings_raw",
+  "cook": {
+   "station": "coating",
+   "result": "onion_rings_coated",
+   "time": 2,
+   "burnWindow": 0
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "onion_rings_coated",
+  "cook": {
+   "station": "fryer",
+   "result": "cooked_onion_rings",
+   "time": 5,
+   "burnWindow": 6
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "raw_chicken_strips",
+  "cook": {
+   "station": "coating",
+   "result": "coated_chicken_strips",
+   "time": 2,
+   "burnWindow": 0
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "coated_chicken_strips",
+  "cook": {
+   "station": "fryer",
+   "result": "cooked_chicken_tenders",
+   "time": 5,
+   "burnWindow": 6
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "omelette_mix",
+  "cook": {
+   "station": "stove",
+   "result": "cooked_omelette",
+   "time": 6,
+   "burnWindow": 6
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "pancake_batter",
+  "cook": {
+   "station": "stove",
+   "result": "cooked_pancakes",
+   "time": 6,
+   "burnWindow": 6
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "grilled_cheese_raw",
+  "cook": {
+   "station": "stove",
+   "result": "grilled_cheese_cooked",
+   "time": 6,
+   "burnWindow": 6
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "pizza_base",
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "pizza_margherita_raw",
+  "cook": {
+   "station": "oven",
+   "result": "cooked_pizza_margherita",
+   "time": 12,
+   "burnWindow": 8
+  },
+  "component": false,
+  "container": false
+ },
+ {
+  "id": "cooked_fries",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "cooked_patty",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "cooked_bacon",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "toasted_bread",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "cooked_onion_rings",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "cooked_chicken_tenders",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "cooked_omelette",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "cooked_pancakes",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "grilled_cheese_cooked",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "cooked_pizza_margherita",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "chopped_tomato",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "chopped_lettuce",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "sliced_banana",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "sliced_strawberry",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "bun",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "cheese_slice",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "syrup",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "milk",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "yogurt",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "granola",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "smoothie_ready",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "shredded_mozzarella",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "tomato_sauce",
+  "component": true,
+  "container": false
+ },
+ {
+  "id": "plate",
+  "container": true,
+  "component": false
+ },
+ {
+  "id": "bowl",
+  "container": true,
+  "component": false
+ },
+ {
+  "id": "cup",
+  "container": true,
+  "component": false
+ }
+]

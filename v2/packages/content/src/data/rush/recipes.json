@@ -1,0 +1,159 @@
+[
+ {
+  "id": "french_fries",
+  "container": "plate",
+  "components": [
+   "cooked_fries"
+  ],
+  "baseScore": 100,
+  "ticketTime": 48,
+  "penalty": 50,
+  "family": "fries"
+ },
+ {
+  "id": "salad",
+  "container": "plate",
+  "components": [
+   "chopped_lettuce",
+   "chopped_tomato"
+  ],
+  "baseScore": 110,
+  "ticketTime": 60,
+  "penalty": 50,
+  "family": "salad"
+ },
+ {
+  "id": "hamburger",
+  "container": "plate",
+  "components": [
+   "bun",
+   "cooked_patty"
+  ],
+  "baseScore": 130,
+  "ticketTime": 70,
+  "penalty": 50,
+  "family": "burger"
+ },
+ {
+  "id": "cheeseburger_combo",
+  "container": "plate",
+  "components": [
+   "bun",
+   "cheese_slice",
+   "cooked_fries",
+   "cooked_patty"
+  ],
+  "baseScore": 160,
+  "ticketTime": 90,
+  "penalty": 50,
+  "family": "burger"
+ },
+ {
+  "id": "onion_rings",
+  "container": "plate",
+  "components": [
+   "cooked_onion_rings"
+  ],
+  "baseScore": 110,
+  "ticketTime": 56,
+  "penalty": 50,
+  "family": "fries"
+ },
+ {
+  "id": "chicken_tenders_fries",
+  "container": "plate",
+  "components": [
+   "cooked_chicken_tenders",
+   "cooked_fries"
+  ],
+  "baseScore": 150,
+  "ticketTime": 84,
+  "penalty": 50,
+  "family": "fries"
+ },
+ {
+  "id": "blt_sandwich",
+  "container": "plate",
+  "components": [
+   "chopped_lettuce",
+   "chopped_tomato",
+   "cooked_bacon",
+   "toasted_bread"
+  ],
+  "baseScore": 150,
+  "ticketTime": 84,
+  "penalty": 50,
+  "family": "sandwich"
+ },
+ {
+  "id": "grilled_cheese_sandwich",
+  "container": "plate",
+  "components": [
+   "grilled_cheese_cooked"
+  ],
+  "baseScore": 110,
+  "ticketTime": 60,
+  "penalty": 50,
+  "family": "sandwich"
+ },
+ {
+  "id": "pancakes",
+  "container": "plate",
+  "components": [
+   "cooked_pancakes",
+   "syrup"
+  ],
+  "baseScore": 120,
+  "ticketTime": 84,
+  "penalty": 50,
+  "family": "breakfast"
+ },
+ {
+  "id": "cheese_omelette",
+  "container": "plate",
+  "components": [
+   "cheese_slice",
+   "cooked_omelette"
+  ],
+  "baseScore": 110,
+  "ticketTime": 64,
+  "penalty": 50,
+  "family": "breakfast"
+ },
+ {
+  "id": "fruit_yogurt_bowl",
+  "container": "bowl",
+  "components": [
+   "granola",
+   "sliced_banana",
+   "sliced_strawberry",
+   "yogurt"
+  ],
+  "baseScore": 110,
+  "ticketTime": 50,
+  "penalty": 50,
+  "family": "breakfast"
+ },
+ {
+  "id": "smoothie",
+  "container": "cup",
+  "components": [
+   "smoothie_ready"
+  ],
+  "baseScore": 100,
+  "ticketTime": 42,
+  "penalty": 50,
+  "family": "breakfast"
+ },
+ {
+  "id": "pizza_margherita",
+  "container": "plate",
+  "components": [
+   "cooked_pizza_margherita"
+  ],
+  "baseScore": 180,
+  "ticketTime": 105,
+  "penalty": 50,
+  "family": "pizza"
+ }
+]

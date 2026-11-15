@@ -31,9 +31,13 @@ for (const c of cravings) {
   if (!r.success) errors.push(`tuning: ${r.error.message}`);
 }
 
+import { rushCrossCheck, rushItems, rushLevels, rushRecipes } from './data/rush/index.js';
+errors.push(...rushCrossCheck());
+
 if (errors.length > 0) {
   for (const e of errors) console.error(`ERROR ${e}`);
   process.exit(1);
 }
 console.log(`content OK: ${materials.length} materials (${materials.map((m) => m.id).join(', ')})`);
 console.log(`content OK: ${cravings.length} cravings (${cravings.map((c) => c.id).join(', ')})`);
+console.log(`content OK: ${rushItems.length} items, ${rushRecipes.length} recipes, ${rushLevels.length} level(s) (${rushLevels.map((l) => l.level.id).join(', ')})`);

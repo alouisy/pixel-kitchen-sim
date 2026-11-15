@@ -1,0 +1,62 @@
+[
+ {
+  "id": "crate",
+  "kind": "dispenser"
+ },
+ {
+  "id": "plates",
+  "kind": "dispenser"
+ },
+ {
+  "id": "counter",
+  "kind": "counter"
+ },
+ {
+  "id": "board",
+  "kind": "processor",
+  "process": "chop"
+ },
+ {
+  "id": "fryer",
+  "kind": "processor",
+  "process": "auto"
+ },
+ {
+  "id": "stove",
+  "kind": "processor",
+  "process": "auto"
+ },
+ {
+  "id": "toaster",
+  "kind": "processor",
+  "process": "auto"
+ },
+ {
+  "id": "oven",
+  "kind": "processor",
+  "process": "auto"
+ },
+ {
+  "id": "coating",
+  "kind": "processor",
+  "process": "auto"
+ },
+ {
+  "id": "mixer",
+  "kind": "processor",
+  "process": "auto"
+ },
+ {
+  "id": "press",
+  "kind": "processor",
+  "process": "auto"
+ },
+ {
+  "id": "bin",
+  "kind": "bin"
+ },
+ {
+  "id": "pass",
+  "kind": "pass"
+ }
+]

@@ -26,3 +26,15 @@ describe('game tuning', () => {
     expect(GameTuningSchema.safeParse({ ...gameTuning, stars: [1, 2] }).success).toBe(false);
   });
 });
+
+describe('rush content', () => {
+  it('parses and cross-references', async () => {
+    const m = await import('./index.js');
+    expect(m.rushCrossCheck()).toEqual([]);
+    expect(m.rushRecipes.length).toBe(13);
+    expect(m.rushRecipeById.get('french_fries')?.components).toEqual(['cooked_fries']);
+    const l1 = m.rushLevelById('l01_kiosque')!;
+    expect(l1.level.durationSeconds).toBe(180);
+    expect(l1.layout.stations.filter((s) => s.def === 'fryer').length).toBe(3);
+  });
+});
