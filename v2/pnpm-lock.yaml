@@ -73,6 +73,9 @@ importers:
 
   packages/sim:
     dependencies:
+      '@ga/content':
+        specifier: workspace:*
+        version: link:../content
       '@ga/shared':
         specifier: workspace:*
         version: link:../shared

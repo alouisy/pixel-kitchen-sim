@@ -1,4 +1,6 @@
 import { MaterialSchema } from './schemas/material.js';
+import { CravingSchema } from './schemas/craving.js';
+import { cravings } from './data/cravings/index.js';
 import { materials } from './data/materials/index.js';
 
 const errors: string[] = [];
@@ -14,8 +16,17 @@ for (const m of materials) {
   indices.add(m.index);
 }
 
+const cravingIds = new Set<string>();
+for (const c of cravings) {
+  const r = CravingSchema.safeParse(c);
+  if (!r.success) errors.push(`craving ${c.id}: ${r.error.message}`);
+  if (cravingIds.has(c.id)) errors.push(`duplicate craving id: ${c.id}`);
+  cravingIds.add(c.id);
+}
+
 if (errors.length > 0) {
   for (const e of errors) console.error(`ERROR ${e}`);
   process.exit(1);
 }
 console.log(`content OK: ${materials.length} materials (${materials.map((m) => m.id).join(', ')})`);
+console.log(`content OK: ${cravings.length} cravings (${cravings.map((c) => c.id).join(', ')})`);

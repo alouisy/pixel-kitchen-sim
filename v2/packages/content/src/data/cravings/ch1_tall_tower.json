@@ -1,0 +1,11 @@
+{
+  "id": "ch1_tall_tower",
+  "prompt": "craving.tall_tower",
+  "window": 120,
+  "requirements": [
+    { "axis": "shape.height", "min": 0.8, "weight": 1.0 },
+    { "axis": "flavor.umami", "min": 0.3, "weight": 0.8 }
+  ],
+  "bonuses": [],
+  "minVolume": 6
+}

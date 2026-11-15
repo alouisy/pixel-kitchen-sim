@@ -1,0 +1,13 @@
+{
+  "id": "ch1_crunchy_hot",
+  "prompt": "craving.crunchy_hot",
+  "window": 75,
+  "requirements": [
+    { "axis": "texture.crunchy", "min": 0.5, "weight": 1.0 },
+    { "axis": "temp", "min": 0.6, "weight": 0.8 }
+  ],
+  "bonuses": [
+    { "axis": "shape.height", "min": 0.8, "reward": 0.15, "hint": "tall" }
+  ],
+  "minVolume": 8
+}
