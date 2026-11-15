@@ -454,7 +454,12 @@ if (dev) {
     },
     intro: () => openIntro(),
     title: () => openTitle(),
-    results: () => view && openResults(view),
+    results: (score = 0) => {
+      if (!view) return;
+      const th = view.starThresholds;
+      const stars = score >= th[2] ? 3 : score >= th[1] ? 2 : score >= th[0] ? 1 : 0;
+      openResults({ ...view, score, stars: stars as 0 | 1 | 2 | 3, served: 11, expired: 1 });
+    },
     pause: (p: boolean) => setPaused(p),
   };
 }

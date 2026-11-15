@@ -26,11 +26,11 @@ void main() {
   float fres = pow(1.0 - clamp(view.y, 0.0, 1.0), 3.0);
   vec3 base = mix(uDeep, uShallow, clamp(0.5 + vWave * 0.25, 0.0, 1.0));
   // Cheap moving glints.
-  float g = sin(vWorld.x * 3.1 + uTime * 1.7) * sin(vWorld.z * 2.7 - uTime * 1.3);
-  float glint = smoothstep(0.82, 1.0, g) * 0.35;
+  float g = sin(vWorld.x * 7.1 + uTime * 1.7 + sin(vWorld.z * 1.3)) * sin(vWorld.z * 6.3 - uTime * 1.3);
+  float glint = smoothstep(0.93, 1.0, g) * 0.22;
   vec3 col = mix(base, uSky, fres * 0.75) + glint;
   float dist = length(cameraPosition - vWorld);
-  float f = smoothstep(26.0, 80.0, dist);
+  float f = smoothstep(42.0, 120.0, dist);
   col = mix(col, uFog, f);
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>

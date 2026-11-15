@@ -135,7 +135,7 @@ export class HarbourScene {
       this.glows.push(glow);
     }
     // Guide arrow.
-    const cone = new Mesh(new ConeGeometry(0.22, 0.45, 4), new MeshStandardMaterial({ color: 0xffd23f, emissive: 0x6a4a00 }));
+    const cone = new Mesh(new ConeGeometry(0.34, 0.7, 4), new MeshStandardMaterial({ color: 0xffd23f, emissive: 0xa07000 }));
     cone.rotation.x = Math.PI;
     this.arrow.add(cone);
     this.arrow.visible = false;

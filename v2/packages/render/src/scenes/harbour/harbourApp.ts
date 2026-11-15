@@ -37,7 +37,7 @@ export class HarbourApp {
     this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.scene.background = new Color(SKY);
-    this.scene.fog = new Fog(SKY, 26, 80);
+    this.scene.fog = new Fog(SKY, 42, 120);
     // Warm sunny afternoon: sky-blue hemisphere over a sand bounce.
     this.scene.add(new HemisphereLight(0xaedcff, 0xe6cf9c, 1.15));
     const sun = new DirectionalLight(0xffe0ad, 2.6);
@@ -85,11 +85,11 @@ export class HarbourApp {
     } else {
       const lean = chefCentroid ?? { x: 0, z: 0 };
       const tx = lean.x * 0.12;
-      const tz = 0.8 + lean.z * 0.1;
+      const tz = 0.4 + lean.z * 0.1;
       const k = 1 - Math.exp(-4 * dt);
       this.focus.x += (tx - this.focus.x) * k;
       this.focus.z += (tz - this.focus.z) * k;
-      const need = Math.max(14.5, 7.4 / (tanV * this.aspect));
+      const need = Math.max(15, 5.6 / (tanV * this.aspect));
       const pitch = (54 * Math.PI) / 180;
       cam.position.set(this.focus.x, need * Math.sin(pitch), this.focus.z + need * Math.cos(pitch));
       this.look.set(this.focus.x, 0.2, this.focus.z - 0.2);
