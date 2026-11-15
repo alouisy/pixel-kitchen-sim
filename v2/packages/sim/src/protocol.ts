@@ -1,3 +1,4 @@
+import type { RushEvent, RushInput, RushView } from './rush/types.js';
 import type { GameHud, HudState, InputFrame, SimCommand, SimEvent } from './types.js';
 
 export type MainToWorker =
@@ -7,9 +8,13 @@ export type MainToWorker =
   | { type: 'pause'; paused: boolean }
   /** Dev only (client gates it behind ?dev=1): move chef 0 to (x, z) metres. */
   | { type: 'dev-teleport'; x: number; z: number }
+  /** Rush mode (level 1): start a run. */
+  | { type: 'rush-init'; seed: number; players: number; levelId: string; /** Dev only: idle ticks to run before the first view. */ ff?: number }
+  | { type: 'rush-input'; frames: RushInput[] }
   | { type: 'stop' };
 
 export type WorkerToMain =
+  | { type: 'rush'; view: RushView; events: RushEvent[]; hash?: string }
   | {
       type: 'state';
       tick: number;

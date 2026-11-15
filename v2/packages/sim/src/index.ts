@@ -5,3 +5,4 @@ export * from './world.js';
 export * from './loop.js';
 export * from './food/index.js';
 export * from './kitchen/index.js';
+export * from './rush/index.js';

@@ -1,19 +1,135 @@
 {
-  "cell": 0.5,
-  "bounds": { "x0": -4, "x1": 4, "z0": -2.5, "z1": 2.5 },
-  "stations": [
-    { "id": "crate_potato", "def": "crate", "x": -3.5, "z": -2, "w": 1, "d": 1, "dispenses": "potato" },
-    { "id": "board_2", "def": "board", "x": -2.5, "z": -2, "w": 1, "d": 1, "optional": "squad" },
-    { "id": "board_1", "def": "board", "x": -1.5, "z": -2, "w": 1, "d": 1 },
-    { "id": "fryer_3", "def": "fryer", "x": -0.5, "z": -2, "w": 1, "d": 1, "optional": "squad" },
-    { "id": "fryer_1", "def": "fryer", "x": 0.5, "z": -2, "w": 1, "d": 1 },
-    { "id": "fryer_2", "def": "fryer", "x": 1.5, "z": -2, "w": 1, "d": 1 },
-    { "id": "plates", "def": "plates", "x": 2.5, "z": -2, "w": 1, "d": 1, "dispenses": "plate" },
-    { "id": "bin", "def": "bin", "x": 3.5, "z": -2, "w": 1, "d": 1 },
-    { "id": "counter_e1", "def": "counter", "x": 3.5, "z": -1, "w": 1, "d": 1 },
-    { "id": "pass", "def": "pass", "x": 3.5, "z": 0, "w": 1, "d": 1 },
-    { "id": "counter_e2", "def": "counter", "x": 3.5, "z": 1, "w": 1, "d": 1 }
+ "cell": 0.5,
+ "bounds": {
+  "x0": -4,
+  "x1": 4,
+  "z0": -2.5,
+  "z1": 2.5
+ },
+ "stations": [
+  {
+   "id": "crate_potato",
+   "def": "crate",
+   "x": -3.5,
+   "z": -2,
+   "w": 1,
+   "d": 1,
+   "dispenses": "potato"
+  },
+  {
+   "id": "board_2",
+   "def": "board",
+   "x": -2.5,
+   "z": -2,
+   "w": 1,
+   "d": 1,
+   "optional": "squad"
+  },
+  {
+   "id": "board_1",
+   "def": "board",
+   "x": -1.5,
+   "z": -2,
+   "w": 1,
+   "d": 1
+  },
+  {
+   "id": "fryer_3",
+   "def": "fryer",
+   "x": -0.5,
+   "z": -2,
+   "w": 1,
+   "d": 1,
+   "optional": "squad"
+  },
+  {
+   "id": "fryer_1",
+   "def": "fryer",
+   "x": 0.5,
+   "z": -2,
+   "w": 1,
+   "d": 1
+  },
+  {
+   "id": "fryer_2",
+   "def": "fryer",
+   "x": 1.5,
+   "z": -2,
+   "w": 1,
+   "d": 1
+  },
+  {
+   "id": "plates",
+   "def": "plates",
+   "x": 2.5,
+   "z": -2,
+   "w": 1,
+   "d": 1,
+   "dispenses": "plate"
+  },
+  {
+   "id": "bin",
+   "def": "bin",
+   "x": 3.5,
+   "z": -2,
+   "w": 1,
+   "d": 1
+  },
+  {
+   "id": "counter_e1",
+   "def": "counter",
+   "x": 3.5,
+   "z": 0,
+   "w": 1,
+   "d": 1
+  },
+  {
+   "id": "pass",
+   "def": "pass",
+   "x": 3.5,
+   "z": 1,
+   "w": 1,
+   "d": 1
+  },
+  {
+   "id": "counter_e2",
+   "def": "counter",
+   "x": 3.5,
+   "z": 2,
+   "w": 1,
+   "d": 1
+  }
+ ],
+ "spawns": [
+  [
+   -1,
+   0.5
   ],
-  "spawns": [[-1, 0.5], [0, 0.5], [-2, 0.5], [1, 0.5]],
-  "queue": [[5.2, 0], [6.4, 0.5], [7.5, -0.1]]
+  [
+   0,
+   0.5
+  ],
+  [
+   -2,
+   0.5
+  ],
+  [
+   1,
+   0.5
+  ]
+ ],
+ "queue": [
+  [
+   5.8,
+   1
+  ],
+  [
+   6.9,
+   1.7
+  ],
+  [
+   8.0,
+   0.8
+  ]
+ ]
 }

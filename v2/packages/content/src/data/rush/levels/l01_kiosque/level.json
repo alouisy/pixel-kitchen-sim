@@ -3,7 +3,9 @@
   "nameKey": "level.l01.name",
   "durationSeconds": 180,
   "countdownSeconds": 3,
-  "recipes": ["french_fries"],
+  "recipes": [
+    "french_fries"
+  ],
   "secondTicketAfterSeconds": 25,
   "pacing": {
     "minDelaySeconds": 1.5,
@@ -16,22 +18,87 @@
     "baseMaxSeconds": 15
   },
   "buckets": {
-    "solo": { "players": [1, 1], "rate": 0.55, "maxActive": 2, "ticketTimeMul": 1.25 },
-    "duo": { "players": [2, 2], "rate": 1.0, "maxActive": 2, "ticketTimeMul": 1.0 },
-    "squad": { "players": [3, 4], "rate": 1.6, "maxActive": 3, "ticketTimeMul": 0.95 },
-    "party": { "players": [5, 6], "rate": 2.2, "maxActive": 4, "ticketTimeMul": 0.9 }
+    "solo": {
+      "players": [
+        1,
+        1
+      ],
+      "rate": 0.55,
+      "maxActive": 2,
+      "ticketTimeMul": 1.25
+    },
+    "duo": {
+      "players": [
+        2,
+        2
+      ],
+      "rate": 1.0,
+      "maxActive": 2,
+      "ticketTimeMul": 1.0
+    },
+    "squad": {
+      "players": [
+        3,
+        4
+      ],
+      "rate": 1.6,
+      "maxActive": 3,
+      "ticketTimeMul": 0.95
+    },
+    "party": {
+      "players": [
+        5,
+        6
+      ],
+      "rate": 2.2,
+      "maxActive": 4,
+      "ticketTimeMul": 0.9
+    }
   },
   "scoring": {
     "speedBonusCap": 30,
-    "streakSteps": [[0, 1000], [3, 1250], [6, 1500], [10, 2000]],
+    "streakSteps": [
+      [
+        0,
+        1000
+      ],
+      [
+        3,
+        1250
+      ],
+      [
+        6,
+        1500
+      ],
+      [
+        10,
+        2000
+      ]
+    ],
     "expiredPenalty": 50,
     "wrongPenalty": 20
   },
   "stars": {
-    "solo": [100, 200, 300],
-    "duo": [200, 400, 600],
-    "squad": [300, 600, 900],
-    "party": [400, 800, 1200]
+    "solo": [
+      740,
+      1350,
+      1850
+    ],
+    "duo": [
+      1200,
+      2200,
+      3000
+    ],
+    "squad": [
+      1800,
+      3300,
+      4500
+    ],
+    "party": [
+      2400,
+      4400,
+      6000
+    ]
   },
   "tuning": {
     "chopSeconds": 1.6,

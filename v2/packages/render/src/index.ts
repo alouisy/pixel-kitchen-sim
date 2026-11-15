@@ -9,3 +9,4 @@ export * from './voxel/voxelMeshView.js';
 export * from './voxel/mesherPool.js';
 export * from './voxel/demo.js';
 export * from './toy/index.js';
+export * from './scenes/harbour/index.js';

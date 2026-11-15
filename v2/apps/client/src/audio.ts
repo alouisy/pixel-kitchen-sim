@@ -2,7 +2,7 @@
  * Procedural WebAudio synth, ported from V1 (src/audioManager.js): oscillators and noise only, no audio files.
  * The AudioContext is created on the first user input (autoplay policy). Master volume 0.3.
  */
-export type Sound = 'pop' | 'place' | 'chop' | 'ding' | 'error' | 'happy' | 'sad' | 'tick' | 'hiss';
+export type Sound = 'pop' | 'place' | 'chop' | 'ding' | 'error' | 'happy' | 'sad' | 'tick' | 'hiss' | 'gull' | 'bell';
 
 export class AudioManager {
   private ctx: AudioContext | null = null;
@@ -11,6 +11,9 @@ export class AudioManager {
   private sizzleGain: GainNode | null = null;
   private sizzleCount = 0;
   private muted = false;
+  private ambience = false;
+  private ambienceGain: GainNode | null = null;
+  private gullTimer = 0;
   readonly volume = 0.3;
 
   get isMuted(): boolean {
@@ -30,6 +33,7 @@ export class AudioManager {
       this.startSizzle();
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume();
+    if (this.ambience) this.setAmbience(true);
   }
 
   setMuted(m: boolean): void {
@@ -67,6 +71,46 @@ export class AudioManager {
     filter.connect(this.sizzleGain);
     this.sizzleGain.connect(this.master!);
     src.start();
+  }
+
+  /** Quiet seaside ambience: procedural waves (filtered noise with a slow swell) and an occasional gull. */
+  setAmbience(on: boolean): void {
+    this.ambience = on;
+    if (!this.ctx || !this.master) return;
+    if (on && !this.ambienceGain) {
+      const ctx = this.ctx;
+      const src = ctx.createBufferSource();
+      src.buffer = this.noise;
+      src.loop = true;
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 650;
+      const g = ctx.createGain();
+      g.gain.value = 0.05;
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = 0.11;
+      const lg = ctx.createGain();
+      lg.gain.value = 0.035;
+      lfo.connect(lg);
+      lg.connect(g.gain);
+      lfo.start();
+      src.connect(lp);
+      lp.connect(g);
+      g.connect(this.master);
+      src.start();
+      this.ambienceGain = g;
+    }
+    if (this.ambienceGain) this.ambienceGain.gain.setTargetAtTime(on ? 0.05 : 0, this.ctx.currentTime, 0.3);
+  }
+
+  /** Call every frame with dt seconds: schedules the occasional gull. */
+  tickAmbience(dt: number): void {
+    if (!this.ambience) return;
+    this.gullTimer -= dt;
+    if (this.gullTimer <= 0) {
+      this.gullTimer = 9 + Math.random() * 14;
+      this.play('gull');
+    }
   }
 
   /** Number of foods sizzling on the rock (0 = silence). */
@@ -142,6 +186,24 @@ export class AudioManager {
         this.note(196, t, 0.28, 'sawtooth', 0.18, 170);
         this.note(155.56, t + 0.3, 0.55, 'sawtooth', 0.18, 110);
         break;
+      case 'bell': {
+        this.note(1568, t, 0.5, 'triangle', 0.3);
+        this.note(2093, t + 0.02, 0.6, 'sine', 0.2);
+        break;
+      }
+      case 'gull': {
+        for (const [d, f0, f1] of [[0, 1700, 2500], [0.22, 2300, 1500]] as const) {
+          const { osc, gain } = this.voice('sine');
+          osc.frequency.setValueAtTime(f0, t + d);
+          osc.frequency.linearRampToValueAtTime(f1, t + d + 0.2);
+          gain.gain.setValueAtTime(0.0001, t + d);
+          gain.gain.exponentialRampToValueAtTime(0.05, t + d + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + d + 0.22);
+          osc.start(t + d);
+          osc.stop(t + d + 0.25);
+        }
+        break;
+      }
       case 'tick': {
         const { osc, gain } = this.voice('square');
         osc.frequency.setValueAtTime(1500, t);

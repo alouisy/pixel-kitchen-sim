@@ -83,6 +83,52 @@ const fr = {
   'results.time': "Le service est terminé !",
   'results.patience': 'Mossback est parti bouder…',
   'results.stars': '{n} étoiles',
+
+  'rt.title': 'Pixel Kitchen',
+  'rt.subtitle': 'Choisis ton service',
+  'card.l1.name': 'Niveau 1 · Le Kiosque du Port',
+  'card.l1.sub': 'Frites, tickets et mer bleue',
+  'card.demo.name': 'Mini-démo · Le petit-déjeuner de Mossback',
+  'card.demo.sub': 'La démo avec le Géant affamé',
+  'card.best': 'Record : {n}',
+  'btn.menu': 'Menu',
+  'level.l01.name': 'Le Kiosque du Port',
+  'intro.goal': 'Sers un maximum de frites avant la fin du temps !',
+  'intro.join': 'Ⓐ sur une manette pour rejoindre',
+  'intro.joinKb': 'Clavier : Espace ou Entrée',
+  'intro.players': '{n} cuisinier(s)',
+  'intro.slot': 'Cuisinier {n}',
+  'intro.go': 'Appuie pour commencer',
+  'go.text': "C'est parti !",
+  'hud.streak': 'Série ×{m}',
+  'hud.mult': '×{m}',
+  'verb.take': 'Prendre',
+  'verb.place': 'Poser',
+  'verb.add': 'Ajouter',
+  'verb.scoop': 'Servir dans l’assiette',
+  'verb.serve': 'Servir',
+  'verb.trash': 'Jeter',
+  'verb.chop': 'Couper',
+  'verb.dash': 'Dash',
+  'hint.hurry': 'Vite !',
+  'recipe.french_fries': 'Frites',
+  'toast.wrong': 'Mauvais plat ! −{n}',
+  'toast.late': 'Ticket expiré ! −{n}',
+  'toast.burnt': 'Brûlé ! À la poubelle',
+  'toast.refused': 'Impossible ici',
+  'res.title': 'Service terminé',
+  'res.served': 'Plats servis',
+  'res.expired': 'Tickets expirés',
+  'res.next': 'Prochaine étoile : {n}',
+  'res.max': 'Trois étoiles !',
+  'res.bucket.solo': 'Solo',
+  'res.bucket.duo': 'Duo',
+  'res.bucket.squad': 'Équipe',
+  'res.bucket.party': 'Fête',
+  'help.chop': 'Couper (maintenir)',
+  'help.dash': 'Dash',
+  'help.walk': 'Clic : aller et agir',
+  'pause.hint': 'Start / Échap : pause',
 } as const;
 
 export type StringKey = keyof typeof fr;
@@ -169,6 +215,52 @@ const en: Record<StringKey, string> = {
   'results.time': 'The service is over!',
   'results.patience': 'Mossback went off to sulk…',
   'results.stars': '{n} stars',
+
+  'rt.title': 'Pixel Kitchen',
+  'rt.subtitle': 'Pick your service',
+  'card.l1.name': 'Level 1 · The Harbour Kiosk',
+  'card.l1.sub': 'Fries, tickets and blue sea',
+  'card.demo.name': "Mini demo · Mossback's Breakfast",
+  'card.demo.sub': 'The demo with the hungry Giant',
+  'card.best': 'Best: {n}',
+  'btn.menu': 'Menu',
+  'level.l01.name': 'The Harbour Kiosk',
+  'intro.goal': 'Serve as many fries as you can before time runs out!',
+  'intro.join': 'Ⓐ on a controller to join',
+  'intro.joinKb': 'Keyboard: Space or Enter',
+  'intro.players': '{n} chef(s)',
+  'intro.slot': 'Chef {n}',
+  'intro.go': 'Press to start',
+  'go.text': "Let's go!",
+  'hud.streak': 'Streak ×{m}',
+  'hud.mult': '×{m}',
+  'verb.take': 'Take',
+  'verb.place': 'Place',
+  'verb.add': 'Add',
+  'verb.scoop': 'Scoop onto plate',
+  'verb.serve': 'Serve',
+  'verb.trash': 'Bin it',
+  'verb.chop': 'Chop',
+  'verb.dash': 'Dash',
+  'hint.hurry': 'Hurry!',
+  'recipe.french_fries': 'Fries',
+  'toast.wrong': 'Wrong dish! −{n}',
+  'toast.late': 'Ticket expired! −{n}',
+  'toast.burnt': 'Burnt! Into the bin',
+  'toast.refused': 'Not possible here',
+  'res.title': 'Service over',
+  'res.served': 'Dishes served',
+  'res.expired': 'Tickets expired',
+  'res.next': 'Next star: {n}',
+  'res.max': 'Three stars!',
+  'res.bucket.solo': 'Solo',
+  'res.bucket.duo': 'Duo',
+  'res.bucket.squad': 'Squad',
+  'res.bucket.party': 'Party',
+  'help.chop': 'Chop (hold)',
+  'help.dash': 'Dash',
+  'help.walk': 'Click: walk and act',
+  'pause.hint': 'Start / Esc: pause',
 };
 
 const dicts: Record<Lang, Record<StringKey, string>> = { fr, en };
@@ -199,9 +291,9 @@ export const TIER_COLOR: Record<string, string> = {
 };
 
 export type Device = 'gamepad' | 'keyboard';
-export type Action = 'grab' | 'tool' | 'swap' | 'tilt' | 'skip' | 'pause' | 'move';
+export type Action = 'grab' | 'tool' | 'swap' | 'tilt' | 'skip' | 'pause' | 'move' | 'dash';
 
-const PAD_GLYPH: Record<Action, string> = { grab: 'Ⓐ', tool: 'Ⓧ', swap: 'Ⓨ', tilt: 'RB', skip: 'Ⓑ', pause: 'Start', move: 'Stick' };
+const PAD_GLYPH: Record<Action, string> = { grab: 'Ⓐ', tool: 'Ⓧ', swap: 'Ⓨ', tilt: 'RB', skip: 'Ⓑ', pause: 'Start', move: 'Stick', dash: 'Ⓑ' };
 const keyLabels = { KeyQ: 'Q', KeyR: 'R' };
 
 /** Layout-aware letters for the Q and R keys (AZERTY prints them elsewhere); falls back to the QWERTY letters. */
@@ -233,5 +325,7 @@ export function glyph(action: Action, device: Device): string {
       return esc;
     case 'move':
       return 'WASD / ↑↓←→';
+    case 'dash':
+      return lang === 'fr' ? 'Maj' : 'Shift';
   }
 }
