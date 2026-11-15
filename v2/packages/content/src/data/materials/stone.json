@@ -1,0 +1,9 @@
+{
+  "id": "stone", "index": 7,
+  "flavor": {},
+  "texture": {},
+  "thermal": { "conductivity": 48, "cookStart": 400, "perfect": [0.5, 0.9], "charStart": 1 },
+  "flammability": 0, "density": 2.4,
+  "colors": { "raw": "#8a8a85", "cooked": "#8a8a85", "charred": "#4a4a47" },
+  "cutSfx": "hard", "edible": false, "harvestable": false
+}

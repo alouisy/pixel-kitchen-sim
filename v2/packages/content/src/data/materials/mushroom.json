@@ -1,0 +1,9 @@
+{
+  "id": "mushroom", "index": 1,
+  "flavor": { "umami": 0.5, "sweet": 0.05 },
+  "texture": { "chewy": 0.4, "juicy": 0.5 },
+  "thermal": { "conductivity": 18, "cookStart": 55, "perfect": [0.55, 0.8], "charStart": 0.92 },
+  "flammability": 0.1, "density": 0.6,
+  "colors": { "raw": "#c9a27e", "cooked": "#8a5a3c", "charred": "#2b1d18" },
+  "cutSfx": "soft", "edible": true, "harvestable": true
+}

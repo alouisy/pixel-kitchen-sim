@@ -1,0 +1,19 @@
+{
+  "name": "@ga/client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ga/render": "workspace:*",
+    "@ga/shared": "workspace:*",
+    "@ga/sim": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^8.3.8"
+  }
+}

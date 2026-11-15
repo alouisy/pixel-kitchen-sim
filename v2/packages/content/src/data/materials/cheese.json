@@ -1,0 +1,9 @@
+{
+  "id": "cheese", "index": 3,
+  "flavor": { "salty": 0.4, "umami": 0.35 },
+  "texture": { "creamy": 0.7, "chewy": 0.2 },
+  "thermal": { "conductivity": 14, "cookStart": 40, "perfect": [0.4, 0.7], "charStart": 0.9 },
+  "flammability": 0.15, "density": 0.9,
+  "colors": { "raw": "#f4d35e", "cooked": "#e8a33d", "charred": "#3a2515" },
+  "cutSfx": "squishy", "edible": true, "harvestable": true
+}

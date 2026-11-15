@@ -1,0 +1,10 @@
+# Separate Netlify site; its base directory is v2.
+[build]
+  command = "pnpm install && pnpm build"
+  publish = "apps/client/dist"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
