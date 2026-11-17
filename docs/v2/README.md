@@ -15,6 +15,9 @@
 - **Premium voxel look** (lighting, soft shadows, dioramas), to be confirmed against a cartoon alternative after the first level.
 - Giants survive only as an optional theme (the level 10 customer) if they make the game more fun.
 
+## Implementation spec (for coding agents)
+The **[implementation spec](./spec/00-README.md)** in `docs/v2/spec/` is the reference every coding agent follows: architecture, simulation, content, rendering and art, client/UI/input/audio, multiplayer, backend and records, the 10 levels, testing, and an ordered backlog of 134 tickets ([10-backlog](./spec/10-backlog.md)). Agents start with [`v2/AGENTS.md`](../../v2/AGENTS.md). Where the spec and these design docs differ, the spec wins.
+
 ## Documents
 
 | # | Document | Status |
