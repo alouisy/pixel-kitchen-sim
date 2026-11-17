@@ -1,7 +1,7 @@
 # 06 · Multiplayer (online co-op, couch mix, netcode)
 
 > **Summary.** Up to 6 chefs online over WebRTC data channels in a star around the host, plus up to 4 local chefs per browser. Netcode model: **host-sequenced deterministic lockstep** (the host decides, per tick, the one confirmed input set; every peer runs the same `RushSim` on that stream, and nobody ever waits for a slow peer except that peer itself). Signaling goes through Supabase Realtime, rooms use 4-letter codes (`/r/ABCD`), desyncs are caught by the sim state hash once per second and healed by replaying the input log.
-> Everything here is new work. Today the repo has only the single-player rush worker (`v2/packages/sim/src/worker.ts`) and no network code.
+> Everything here is new work. Today the repo has only the single-player rush worker (`v2/packages/sim/src/worker.ts`) and no network code. Names follow [01](./01-architecture.md) and [02](./02-simulation.md): `RunConfig`, `RunLog`, `RunResult`, `SIM_VERSION`, `contentHash`, `RushInput` (5 bytes), the worker messages of 01 §8.1, `@ga/records`, `verifyRun`, `.pkr` (`PKR1`).
 
 ## Table of contents
 1. [Netcode decision](#1-netcode-decision)
@@ -33,15 +33,15 @@
 
 Justification (10 lines):
 1. `RushSim` is already deterministic (xoshiro PRNG, no `Math.random`, `stateHash()` exists). A deterministic sim makes input replication far cheaper and simpler than state replication.
-2. State sync + prediction needs `serialize/restore` of the whole sim plus a rollback re-sim of the local chef. Neither exists, and the state (items, stations, tickets, path arrays) is large. Lockstep needs neither.
-3. The same input log is the replay file for server verification ([07 §6](./07-backend-and-records.md#6-run-submission-and-server-re-verification)). One format, one codec, one test suite.
+2. State sync + prediction needs a per-tick state stream plus a rollback re-sim of the local chef. 02 §17.3 provides `snapshot()/restore()` (JSON, tens of KB), which is fine for occasional catch-up but too heavy to stream at 20 Hz. Lockstep streams only inputs and uses snapshots rarely.
+3. The same input log is the replay file for server verification ([07 §6](./07-backend-and-records.md#6-run-submission-and-server-re-verification)). One input codec (`encodeRushInput`, 02 §4.4), one test suite.
 4. Classic lockstep stalls everyone when one peer is slow. Here the **host sequences**: it builds tick N from whatever inputs have arrived, repeats a chef's last input if nothing arrived, and **never waits**. A lagging peer only delays itself (its inputs apply late, its screen buffers).
 5. No fixed "input delay" is added on top of the network: client input is applied when it reaches the host. Latency felt by a client chef = RTT + playout buffer (about 3 ticks). On 40 ms RTT that is about 180 ms, acceptable for a cooking game with no aiming. The host's own chefs have about 1 tick latency.
-6. Late join, reconnect, desync repair and host migration are all "fast-forward from the input log" (a 3-minute run is about 5,500 ticks, re-simulated in well under 2 s). No snapshots.
-7. Bandwidth is tiny: about 3 KB/s per client down, 1 KB/s up. Host uplink with 5 clients is about 15 KB/s.
+6. Late join, reconnect and host migration use **snapshot + log tail** (`RushSim.snapshot()/restore()`, 02 §17.3, then re-simulate the few frames since). **Fallback and desync repair: replay the whole input log** from tick 0 (about 5,500 ticks, well under 2 s). Both paths are deterministic.
+7. Bandwidth is tiny: about 2.5 KB/s per client down, 1 KB/s up. Host uplink with 5 clients is about 12 KB/s.
 8. The cost: the sim must stay bit-exact on every browser (rules in [01](./01-architecture.md) and [02](./02-simulation.md)). The hash check in §14 makes violations visible within 1 s.
 9. Rejected alternative A: lockstep with fixed input delay and all-peer waiting. One bad connection freezes 5 players. Rejected.
-10. Rejected alternative B: host-authoritative state sync + client prediction. Better local-chef feel, but needs snapshot/rollback infrastructure that costs more than the whole rest of this doc and fits a cooking game worse.
+10. Rejected alternative B: host-authoritative state sync + client prediction. Better local-chef feel, but needs per-tick snapshots, rollback and float-state reconciliation, which costs more than the rest of this doc and fits a cooking game worse.
 
 **Authority:** the host owns *ordering* only. All peers (host included) run the identical sim; the host's hash is the reference in a dispute.
 
@@ -68,6 +68,8 @@ export const NET_CONST = {
   PING_INTERVAL_MS: 500,
   HASH_EVERY_TICKS: 30,          // 1 report per second
   HASH_RING: 600,                // host keeps this many own hashes
+  SNAPSHOT_EVERY_TICKS: 150,     // each peer keeps a rolling snapshot every 5 s (migration), last 2 kept
+  SNAPSHOT_KEEP: 2,
   STALL_BANNER_MS: 500,          // show "waiting for network" after this long without frames
   PEER_TIMEOUT_MS: 3000,         // no sim-channel packet for this long = peer considered gone
   RECONNECT_GRACE_MS: 120_000,
@@ -92,7 +94,7 @@ v2/packages/net/
     index.ts
     constants.ts          NET_CONST (§2)
     protocol.ts           all wire TS types (§8)
-    codec.ts              binary + JSON encode/decode (§8)
+    codec.ts              binary + JSON encode/decode (§8); local 5-byte RushInput read/write (identical layout to 02 §4.4)
     transport.ts          Transport interface + MemoryTransport
     simnet.ts             SimulatedNetwork (latency/jitter/loss) (§17)
     signaling.ts          Signaling interface + SupabaseSignaling + LocalSignaling (§5)
@@ -100,7 +102,7 @@ v2/packages/net/
     inputQueue.ts         HostInputQueue (§9.2)
     sequencer.ts          HostSequencer (§9.3)
     playout.ts            PlayoutBuffer (§9.4)
-    log.ts                ConfirmedLog (§9.5)
+    log.ts                ConfirmedLog + frame-body RLE for log transfer (§9.5)
     hashcheck.ts          HashChecker (§14)
     room.ts               RoomState reducer, lobby logic (§11)
     session.ts            HostSession and ClientSession: glue (§12)
@@ -108,9 +110,9 @@ v2/packages/net/
   test/                   vitest, uses MemoryTransport + SimulatedNetwork
 ```
 
-Allowed imports: `@ga/net` may import `@ga/shared`, and **types only** from `@ga/sim` (`RushInput`) and `@ga/content` (`BucketId`). It must not import `three`, DOM render code, or `bitecs`. `webrtc.ts`, `signaling.ts` (Supabase part) and `voice.ts` use browser APIs; the rest is pure TS and runs under Node in vitest.
+Allowed imports (01 §3 matrix): `@ga/net` may import `@ga/shared`, and **types only** from `@ga/sim` (`RushInput`, `RunConfig`, `RunResult`) and `@ga/content` (`BucketId`). It must **not** import `@ga/records`, `three`, DOM render code or `bitecs`. So `codec.ts` has its own 5-byte `RushInput` reader/writer with exactly the layout of 02 §4.4 (`wire.test.ts`, a test file, imports `encodeRushInput` from `@ga/sim` and asserts byte equality), and `log.ts` has its own per-slot RLE with exactly the body layout of the `.pkr` file in 02 §4.6 (the test asserts equality with the `@ga/records` body). `webrtc.ts`, `signaling.ts` (Supabase part) and `voice.ts` use browser APIs; the rest is pure TS and runs under Node in vitest.
 
-The replay codec lives in the **sim** package, not net (the server needs it without WebRTC): `v2/packages/sim/src/rush/replay.ts` (see [07 §6.2](./07-backend-and-records.md#62-replay-container-format)). `@ga/net/log.ts` imports it as `import { encodeReplayBody, decodeReplayBody } from '@ga/sim/verify'`.
+The replay file (`.pkr`), `verifyRun` and `SIM_VERSION` checks live in `@ga/records` and `@ga/sim`; the client (which may import everything) builds the `.pkr` from the `RunLog` it gets with `rush-log-request` ([07 §6](./07-backend-and-records.md#6-run-submission-and-server-re-verification)).
 
 Client glue lives in `v2/apps/client/src/net/` (screens call `HostSession`/`ClientSession`; see [05](./05-client-ui-input-audio.md)).
 
@@ -172,7 +174,7 @@ Broadcast events (all payloads JSON). `to` addresses one peer; receivers ignore 
 ```ts
 export type SignalMsg =
   | { event: 'join-request'; from: string; to: string /* host peerId */; nickname: string; playerId: string | null;
-      localPlayers: number; buildId: string; protocol: number }
+      localPlayers: number; simVersion: number; protocol: number }
   | { event: 'join-accept';  from: string; to: string; rejoinSecret: string }   // host -> joiner, then joiner offers
   | { event: 'join-reject';  from: string; to: string; reason: RejectReason }
   | { event: 'sdp';  from: string; to: string; kind: 'offer' | 'answer'; sdp: string; purpose: 'game' | 'voice' }
@@ -288,21 +290,19 @@ import type { BucketId } from '@ga/content';
 /** Index 0..5 of a chef in the sim (`RushSim.chefs[slot]`). */
 export type Slot = number;
 
-/** Wire form of one chef's input for one tick. 7 bytes. */
-export interface InputSample {
-  mx: number;       // i8 -127..127   (RushInput.move[0])
-  my: number;       // i8             (RushInput.move[1])
-  buttons: number;  // u8  bit0 A (grab/drop/serve), bit1 X (action, held), bit2 B (dash), bit3 T (throw), bits4-7 reserved = 0
-  click: number;    // i16 station index or -1 (RushInput.click)
-  clickSeq: number; // u8  wrapping counter (RushInput.clickSeq & 0xff)
-  flags: number;    // u8  bit0 = clickKind (kept for the current V1-style sim; see §19). 0 otherwise
-}
-export const INPUT_SAMPLE_BYTES = 7;
+/**
+ * One chef's input for one tick is exactly `RushInput` (02 §4.1), 5 bytes on the wire (02 §4.4):
+ * [move[0]:i8][move[1]:i8][buttons:u8 (bits 0..3: A, X, B, T)][click:u8, 255 = -1][clickSeq:u8].
+ * There is no `clickKind` (click-to-walk is removed, owner decision 5): a mouse click is an interact on `click`
+ * that the sim only acts on when the station is in reach, and the client maps right-mouse-hold to the X bit.
+ * `net` re-implements the 5-byte layout locally (no runtime import of sim) and must stay byte-identical.
+ */
+export const INPUT_BYTES = 5;                       // same value as @ga/sim INPUT_BYTES
+export function writeInput(i: RushInput, out: Uint8Array, offset: number): void;
+export function readInput(src: Uint8Array, offset: number): RushInput;
+export const IDLE_INPUT: RushInput;                 // { move:[0,0], buttons:0, click:-1, clickSeq:0 } (== idleRushInput())
 ```
-Conversion helpers (in `codec.ts`): `toSample(i: RushInput): InputSample` and `fromSample(s: InputSample): RushInput` (`move: [s.mx, s.my]`, `clickKind: (s.flags & 1) as 0|1`). `RB_A=1, RB_X=2, RB_B=4` already exist in `rush/types.ts`; add `RB_T = 8` there when the throw button lands ([02](./02-simulation.md)).
-
-Sample byte layout: `[mx:i8][my:i8][buttons:u8][click:i16][clickSeq:u8][flags:u8]`.
-`clickSeq` wraps at 256. The sim only compares `clickSeq` for inequality, and a click needs at least a 1-tick gap, so wrapping is safe. The decoder reconstructs `RushInput.clickSeq` as the u8 value; the sim must treat `clickSeq` as `u8` equality (it already uses `!==`).
+`clickSeq` is a u8 and the sim treats it as u8 equality, so wrapping is safe. `step` sanitizes everything it receives (02 §4.2), and the net decoder additionally rejects `click` values above 254 other than 255.
 
 ### 8.2 Binary messages on `sim` (unreliable)
 
@@ -320,26 +320,26 @@ u8[] slotIds              (slotCount bytes)
 u32  ackTick              (client has received and applied-or-queued every frame with tick < ackTick)
 u16  firstSeq             (seq of the oldest sample-tick in this packet; seq is per peer, +1 per sample-tick, wraps)
 u8   sampleCount          (1..4)
-then sampleCount groups, oldest first; each group = slotCount x 7 B InputSample in slotIds order
+then sampleCount groups, oldest first; each group = slotCount x 5 B RushInput in slotIds order
 ```
 ```ts
-export interface InputBatch { slotIds: Slot[]; ackTick: number; firstSeq: number; samples: InputSample[][] /* [sampleTick][slotIndex] */ }
+export interface InputBatch { slotIds: Slot[]; ackTick: number; firstSeq: number; samples: RushInput[][] /* [sampleTick][slotIndex] */ }
 ```
-Size with 3 local chefs and 4 samples: 1+1+3+4+2+1 + 4*3*7 = 96 B, at 30 Hz = 2.9 KB/s. With 1 chef: 1+1+1+4+2+1+28 = 38 B = 1.1 KB/s.
+Size with 3 local chefs and 4 samples: 1+1+3+4+2+1 + 4*3*5 = 72 B, at 30 Hz = 2.2 KB/s. With 1 chef: 1+1+1+4+2+1+20 = 30 B = 0.9 KB/s.
 
 **Frames** (host -> client), one per host tick per client at most:
 ```
 u8   type = 2
 u32  firstTick            (tick number of the first frame in the packet)
 u8   count                (1..FRAMES_MAX_PER_PACKET)
-frame[0]: FULL  -> for every slot 0..N-1 in order: 7 B InputSample   (N = RunStart.players)
-frame[i>0]: u8 changedMask (bit s set = slot s differs from the same slot in frame i-1), then 7 B per set bit, ascending slot
+frame[0]: FULL  -> for every slot 0..N-1 in order: 5 B RushInput   (N = runStart.config.players)
+frame[i>0]: u8 changedMask (bit s set = slot s differs from the same slot in frame i-1), then 5 B per set bit, ascending slot
 ```
 ```ts
-export interface FramesPacket { firstTick: number; frames: InputSample[][] /* [frameIdx][slot], fully expanded */ }
+export interface FramesPacket { firstTick: number; frames: RushInput[][] /* [frameIdx][slot], fully expanded */ }
 ```
-The first frame of every packet is **full** so a lost earlier packet never breaks decoding. The host sends each client all frames from `max(client.ackTick, host.tick - FRAMES_MAX_PER_PACKET + 1)` to the newest confirmed tick, every tick. Under no loss at 100 ms RTT this is about 4 frames per packet. Typical size: 4 frames x (1 + ~3 changed x 7) plus the full first frame (~42 B) = about 130 B x 30 Hz = 3.9 KB/s per client. Host uplink at 5 clients is about 20 KB/s.
-If `ackTick` is more than 24 ticks behind, the host stops sending `Frames` to that peer and uses reliable catch-up instead (`LogChunk`, §14.3) until the peer's `ackTick` is within 4 ticks of live.
+The first frame of every packet is **full** so a lost earlier packet never breaks decoding. The host sends each client all frames from `max(client.ackTick, host.tick - FRAMES_MAX_PER_PACKET + 1)` to the newest confirmed tick, every tick. Under no loss at 100 ms RTT this is about 4 frames per packet. Typical size: the full first frame (6 x 5 = 30 B) plus 3 delta frames of 1 + ~3 x 5 = 16 B = about 78 B x 30 Hz = 2.3 KB/s per client. Host uplink at 5 clients is about 12 KB/s.
+If `ackTick` is more than 24 ticks behind, the host stops sending `Frames` to that peer and uses reliable catch-up instead (`catchupChunk`, §14.3) until the peer's `ackTick` is within 4 ticks of live.
 
 **Ping / Pong** (every 500 ms, client -> host -> client):
 ```
@@ -370,7 +370,8 @@ export interface PeerInfo {
 }
 export interface ChefLook { hat: number; color: number }   // u8 ids from the chef catalog ([04])
 
-export type Difficulty = 'meal' | 'feast';   // from docs/v2/12-progression.md
+/** 02 §15.3. Only `meal` and `feast` are ranked ([07 §1](./07-backend-and-records.md#1-principles-and-names)). */
+export type Difficulty = 'snack' | 'meal' | 'feast';
 
 export interface RoomState {
   code: string;
@@ -389,15 +390,15 @@ export type SlotAssign = { slot: Slot; peerId: string; look: ChefLook; nickname:
 
 // ---- client -> host
 export type ClientCtl =
-  | { t: 'hello'; protocol: number; buildId: string; nickname: string; playerId: string | null;
-      localPlayers: number; looks: ChefLook[]; rejoinSecret: string | null }
+  | { t: 'hello'; protocol: number; simVersion: number; nickname: string; playerId: string | null;
+      localPlayers: number; looks: ChefLook[]; rejoinSecret: string | null; ackTick?: number /* migration, §12.7 */ }
   | { t: 'ready'; ready: boolean }
   | { t: 'setLocal'; localPlayers: number; looks: ChefLook[] }   // lobby only
   | { t: 'setNick'; nickname: string }
   | { t: 'chat'; text: string }
   | { t: 'loaded'; runId: string }
   | { t: 'hash'; runId: string; tick: number; hash: string }       // hash = RushSim.stateHash(), 16 hex chars
-  | { t: 'logRequest'; runId: string; fromTick: number }
+  | { t: 'catchupRequest'; runId: string }                      // client is far behind: ask for snapshot + tail (§14.3)
   | { t: 'leave' };
 
 // ---- host -> client(s)
@@ -406,18 +407,18 @@ export type HostCtl =
   | { t: 'reject'; reason: RejectReason }
   | { t: 'room'; room: RoomState }                // full state on every change
   | { t: 'chat'; from: string; text: string }
-  | { t: 'runStart'; runId: string; levelId: string; difficulty: Difficulty; seed: number; players: number;
-      slots: SlotAssign[]; buildId: string; contentHash: string; startsInMs: number }
+  | { t: 'runStart'; runId: string; config: RunConfig; slots: SlotAssign[]; startsInMs: number }
   | { t: 'runGo'; runId: string }                  // barrier released, frames start flowing from tick 0
-  | { t: 'runEnd'; runId: string; ticks: number; final: FinalClaim }
-  | { t: 'resync'; runId: string; reason: 'desync' | 'catchup' | 'reconnect'; toTick: number; chunks: number }
-  | { t: 'logChunk'; runId: string; index: number; of: number; b64: string }   // <= 8 KB raw per chunk
+  | { t: 'runEnd'; runId: string; ticks: number; result: RunResult }
+  /** Catch-up announcement. `mode: 'snapshot'`: body = snapshot bytes, then the frame tail [snapshotTick, toTick). `mode: 'log'`: body = frames [0, toTick). */
+  | { t: 'resync'; runId: string; reason: 'desync' | 'catchup' | 'reconnect' | 'lateJoin';
+      mode: 'snapshot' | 'log'; snapshotTick: number; toTick: number; snapshotBytes: number; chunks: number }
+  | { t: 'catchupChunk'; runId: string; index: number; of: number; b64: string }   // <= 8 KB raw per chunk
   | { t: 'kick'; reason: 'host' | 'desync' | 'timeout' }
   | { t: 'hostChange'; epoch: number; hostPeerId: string };
 
-export interface FinalClaim { score: number; stars: 0 | 1 | 2 | 3; served: number; expired: number; wrong: number; hash: string }
 ```
-`buildId` = the sim build constant `SIM_BUILD_ID` exported from `@ga/sim/verify` (a string, bumped manually when sim behaviour changes; also equals the "rules version" in [07](./07-backend-and-records.md#2-supabase-schema)). `contentHash` = `Hasher64` over the canonical JSON of the level and recipe tables, exported as `contentHashFor(levelId)` from `@ga/sim/verify`.
+`RunConfig` is the type of 01 §7.6 / 02 §4.5: `{ simVersion, contentHash, levelId, players, seed, difficulty?, assist? }`. The host builds it (`simVersion = SIM_VERSION`, `contentHash = contentHash(levelId)` from `@ga/content`); a peer whose own `SIM_VERSION` or `contentHash` differs replies with a version error (§11.3 step 3). `RunResult` is the sim's result type (01 §7.6; it may carry optional per-slot counters, see [07 §6.2](./07-backend-and-records.md#62-replay-container-format)). `config.assist` (5's "extended patience", ticket time x1.25) is chosen by the **host** in the lobby (toggle "Extended patience"); guests see a badge, and an assisted run is flagged and **not ranked** ([07 §9.6](./07-backend-and-records.md#96-assisted-and-unranked-runs)). `difficulty: 'snack'` is also unranked.
 
 `seed` is a u32 chosen by the host with `crypto.getRandomValues` (this is the only place randomness is allowed; it happens outside the sim).
 
@@ -437,28 +438,28 @@ Every inbound message is validated before use: type tag known, ranges (`localPla
 | Stored | full `ConfirmedLog` | full `ConfirmedLog` (as received) |
 
 ### 9.2 `HostInputQueue` (one per slot)
-Holds `InputSample`s received from the owning peer, in `seq` order.
+Holds `RushInput`s received from the owning peer, in `seq` order.
 - `push(seq, samples)`: dedupe by `seq` using a u16 wrap-aware compare; ignore seq <= lastAcceptedSeq. A gap (lost packets that redundancy did not cover) is filled by repeating the previous sample (no edges).
-- `pop(): InputSample`:
-  1. If the queue is empty: return `last` (repeat; if no input ever arrived, `IDLE = { mx:0,my:0,buttons:0,click:-1,clickSeq:last.clickSeq,flags:0 }`).
+- `pop(): RushInput`:
+  1. If the queue is empty: return `last` (repeat; if no input ever arrived, `IDLE_INPUT` with `clickSeq` copied from `last`).
   2. If depth > `HOST_QUEUE_MAX` (3): pop **two**, merge (rule below), return the merge. This is how the queue catches up after a burst or clock drift.
   3. Else pop one.
   `last` is updated to the returned sample.
-- **Merge(a, b)** (a older, b newer): `mx,my = b`; `buttons = (a.buttons & (A|B|T)) | b.buttons` (edge-triggered buttons are not lost; held X follows `b`... because `|` could keep X set from `a`, clear X explicitly: `buttons &= ~X_BIT; buttons |= b.buttons & X_BIT`); `click, clickSeq, flags = b`'s unless `b.clickSeq === a.clickSeq`, in which case also `b`'s (same).
+- **Merge(a, b)** (a older, b newer): `move = b.move`; `buttons = (a.buttons & (RB_A | RB_B | RB_T)) | b.buttons` (edge-triggered buttons are not lost), then X (level-held) follows `b`: `buttons = (buttons & ~RB_X) | (b.buttons & RB_X)`; `click, clickSeq` = `b`'s (if both ticks held a click, the older one is dropped; accepted).
 - Samples from a peer that has left or whose slot is unassigned are never queued; `pop()` returns `IDLE`.
 
 ### 9.3 `HostSequencer`
 ```ts
 export interface SequencerDeps {
   now(): number;                                  // performance.now
-  onFrame(tick: number, frame: InputSample[]): void; // -> sim worker, log, network
+  onFrame(tick: number, frame: RushInput[]): void; // -> sim worker, log, network
 }
 export class HostSequencer {
   constructor(private slotsCount: number, private deps: SequencerDeps) {}
   tick = 0;                  // next tick to confirm
   /** Called on every ticker beat (30 Hz, from the ticker worker, §10.3). */
   beat(): void {
-    const frame: InputSample[] = [];
+    const frame: RushInput[] = [];
     for (let s = 0; s < this.slotsCount; s++) frame.push(this.queues[s]!.pop());   // local slots push before beat
     this.deps.onFrame(this.tick, frame);
     this.tick++;
@@ -469,7 +470,7 @@ Exact order inside one host beat:
 1. Local chefs sample their devices and push into their `HostInputQueue`s (same code path as a remote peer, `seq` from a local counter).
 2. `beat()` pops one sample per slot -> `frame`.
 3. `frame` appended to `ConfirmedLog`.
-4. `frame` sent to the host's own sim worker (`rush-advance`, §10).
+4. `frame` sent to the host's own sim worker (`rush-advance { steps: [frame] }`, §10.1).
 5. For each connected client: build and send the `Frames` packet.
 6. If `tick % HASH_EVERY_TICKS === 0` after applying: record host hash (comes back from the worker, §10.2) into the ring.
 7. If `phase` becomes `ended`: stop beats, send `runEnd` (§15).
@@ -482,13 +483,13 @@ The client receives `FramesPacket`s, stores frames by tick, and releases them to
 export class PlayoutBuffer {
   nextTick = 0;                       // next tick to hand to the sim
   targetDepth = NET_CONST.PLAYOUT_DEFAULT_TICKS;   // B
-  private frames = new Map<number, InputSample[]>();
+  private frames = new Map<number, RushInput[]>();
   private acc = 0;
   private started = false;
   ack(): number { return this.contiguousEnd; }     // ackTick: every tick < ack is stored
   receive(p: FramesPacket, arrivalMs: number): void { /* store, update jitter, advance contiguousEnd */ }
   /** Call every main-thread frame or ticker beat; returns the frames to simulate now (0..maxCatchup). */
-  pull(nowMs: number): { tick: number; frame: InputSample[] }[] { /* rules below */ }
+  pull(nowMs: number): { tick: number; frame: RushInput[] }[] { /* rules below */ }
 }
 ```
 `pull` rules (all numbers `Default (tunable)`):
@@ -503,16 +504,20 @@ export class PlayoutBuffer {
 `ackTick` for `InputBatch` = `contiguousEnd`. Frames before `nextTick` are deleted.
 
 ### 9.5 `ConfirmedLog`
-Per-run, in memory on every peer:
+Per-run, in memory on every peer. Frames are stored packed (5 bytes per slot per tick) in a growable `Uint8Array`:
 ```ts
 export class ConfirmedLog {
-  readonly frames: InputSample[][] = [];       // index = tick
-  append(tick: number, frame: InputSample[]): void   // tick must equal frames.length, else throw
-  toReplayBody(): Uint8Array                          // encodeReplayBody(frames, players) from @ga/sim/verify
-  static fromReplayBody(body: Uint8Array, players: number): ConfirmedLog
+  constructor(readonly players: number);
+  get length(): number;                                  // ticks stored
+  append(tick: number, frame: RushInput[]): void;        // tick must equal length, else throw
+  frames(from: number, to: number): RushInput[][];       // [t][slot], for rush-advance
+  truncate(toTick: number): void;                        // migration (§12.7)
+  /** Per-slot run-length body, byte-identical to the body of a .pkr file (02 §4.6): per slot u32 recordCount + { u16 runLen, 5 B input }. */
+  encodeBody(from: number, to: number): Uint8Array;
+  static decodeBody(body: Uint8Array, players: number, ticks: number): RushInput[][];
 }
 ```
-A client appends in `pull` order (contiguous by construction). Memory: 5,500 ticks x 6 x 7 B = 231 KB worst case uncompressed. Fine.
+A client appends in `pull` order (contiguous by construction). Memory: 5,500 ticks x 6 x 5 B = 165 KB worst case. At the end of the run the client still takes the authoritative `RunLog` from its worker (`rush-log-request`) for the `.pkr` ([07 §6.1](./07-backend-and-records.md#61-client-flow-all-peers-see-06-15)); the `ConfirmedLog` is for the network and must equal it (asserted in tests).
 
 ### 9.6 Tick sync and clocks
 - There is **no wall-clock sync between peers**. Ticks are the shared clock. A client's sim tick `c` always satisfies `c <= hostConfirmedTick`.

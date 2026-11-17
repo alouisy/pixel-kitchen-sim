@@ -75,7 +75,7 @@ const secs = (s: number): number => Math.round(s * SIM_HZ);
 | Fire spread interval | 120 ticks (4 s) | `hazards.spreadSeconds` |
 | Blend | 120 ticks (4 s) | `Default (tunable)`, `tuning.blendSeconds` |
 | Blender clear | 15 ticks held X | constant |
-| Throw | speed 0.4 m/tick, range 6 m, aim cone `dot >= 0.82`, cooldown 15 ticks, catch radius 0.6 m | section 9 |
+| Throw | speed 0.4 m/tick, range `tuning.throwRange` 5.0 m (`Default (tunable)`), aim cone `dot >= 0.82`, cooldown 15 ticks, catch radius 0.6 m | section 9 |
 | Floor item | pickup radius 0.8 m, despawn after 600 ticks | section 9 |
 | Chef shove | 6 ticks at 3 m/s | section 8.5 |
 
@@ -253,7 +253,7 @@ export function decodeRushInput(s: Uint8Array, o: number): RushInput {
 Decoded `move` of -128 is clamped to -127 by `sanitize`. Round trip is the identity for all valid inputs (property test).
 
 ### 4.5 `RunLog` (in memory; `01 §7.6`)
-`RunLog = { config: RunConfig; frames: RushInput[][] }`, `frames[t][slot]` = the input applied by the step that makes `tick = t + 1`. `RunConfig = { simVersion, contentHash, levelId, players, seed }`. Optional extension fields (ignored by older readers): `difficulty: 'snack' | 'meal' | 'feast'` (default `'meal'`, see 15.3).
+`RunLog = { config: RunConfig; frames: RushInput[][] }`, `frames[t][slot]` = the input applied by the step that makes `tick = t + 1`. `RunConfig = { simVersion, contentHash, levelId, players, seed }`. Optional extension fields (ignored by older readers): `difficulty: 'snack' | 'meal' | 'feast'` (default `'meal'`, see 15.3) and `assist: boolean` (default false; the extended-patience setting: ticket time x1.25, the run is unranked, `05`, `07`).
 
 ### 4.6 Binary replay file (`.pkr`, produced and parsed by `@ga/records`)
 
@@ -507,10 +507,10 @@ Each tick, for each chef with `RB_X` held: determine the single action available
 
 ### 8.1 Targeting (`findTarget`, exists)
 For each station in index order: `p = clamp(chef, box)`; `d = dist(chef, p)`; skip if `d > reach (1.1)`; `dot = d > 1e-6 ? ((p-chef)/d) . (fx, fz) : 1`; skip if `dot < -0.1 && d > 0.1`; `score = d + (1 - dot) * 0.6`. The lowest score wins; ties go to the lower station index (strict `<`). Target (Target addition): if the chef holds the extinguisher, a station with `fire > 0` gets `score -= 2` so it wins. A click-selected target overrides (7.1 step 5) for that tick only.
-Reach check for clicks: `distToBox(chef.x, chef.z, box) <= reach`.
+Reach check for clicks: `distToBox(chef.x, chef.z, box) <= reach`. The same geometry is exported as `stationInReach(chef: { x: number; z: number }, box: Box, reach: number): boolean` from `@ga/sim` (pure, shared by `findTarget` and the client mouse handler, `05 §6`).
 
 ### 8.2 Movement (exists)
-- Input vector `(mx, mz)`; target velocity `(mx*walkSpeed, mz*walkSpeed)`; `approach` each axis by `maxDelta = walkSpeed * dt / 0.08` per tick (`dt = 1/30`). While dashing: velocity = `dashDir * dashSpeed` and `dashLeft--`. While shoved: velocity = `shoveDir * 3.0` (dash start and shove cannot overlap: a shoved chef ignores B).
+- Input vector `(mx, mz)`; target velocity `(mx*walkSpeed*k, mz*walkSpeed*k)` with `k = hooks.speedMulQ8(ctx, x, z) / 256` (default 1; the accel ramp uses the unscaled `walkSpeed`); `approach` each axis by `maxDelta = walkSpeed * dt / 0.08` per tick (`dt = 1/30`). While dashing: velocity = `dashDir * dashSpeed` and `dashLeft--`. While shoved: velocity = `shoveDir * 3.0` (dash start and shove cannot overlap: a shoved chef ignores B).
 - Position update: `moveChef(slot, x + vx*dt, z + vz*dt)`.
 - Facing: when stick length > 0.2 and not dashing: `(fx, fz) = (mx, mz) / len`. Initial facing `(0, -1)`.
 - During `countdown` chefs can move and interact (except serving). During `ended` inputs are idle.
@@ -518,6 +518,7 @@ Reach check for clicks: `distToBox(chef.x, chef.z, box) <= reach`.
 ### 8.3 Collision (exists, expanded)
 `moveChef` in order:
 1. X axis: `x = clamp(nx, b.x0 + r, b.x1 - r)`, `z = old z`; for each station box in index order, `pushOutOfBox(x, z, r, box)` (circle vs AABB; centre-inside leaves by the nearest side). Then Z axis the same with the new x. Axis-separated, so chefs slide along counters.
+1b. Static colliders: for each `layout.colliders[i]` (not interactable, never enabled/disabled) the `WalkGrid` marks its cells blocked once at construction; the circle is pushed out of the box like a station box, in array order after the stations. Thrown items skip colliders with `flyOver`.
 2. Twist blockers: for each `layout.blockers[i]` that `hooks.isBlocked(ctx, centre)` reports active, push out like a station box. A chef standing inside a blocker when it activates is pushed out by the hook (16.2), not by collision.
 3. Chef vs chef: for each other chef j in slot order, if `dist < 2r` push the mover to exactly `2r` away from j (degenerate overlap: `x += 2r`).
 4. Clamp to bounds and re-push out of stations.
@@ -539,7 +540,7 @@ Enabled when `level.mechanics.throw` is true (level 3+). T is ignored otherwise.
 ### 9.1 Launch
 Preconditions: `pressed & RB_T`, chef holds an item, `throwCd === 0`, not dashing. Effects: `throwCd = 15`; the held item leaves the hand (holder `air`), `Threw`.
 Aim (no trig; uses dot products with the facing unit vector `f`):
-1. Candidates in the cone: `dot((p - chef)/d, f) >= 0.82` and `d <= 6`.
+1. Candidates in the cone: `dot((p - chef)/d, f) >= 0.82` and `d <= tuning.throwRange` (5.0 m).
 2. Priority 1: other chefs (slot order) in the cone; nearest wins, ties lower slot. Destination = that chef's position now.
 3. Priority 2: stations that would accept the item now (`accepts` and empty socket, or a `pass` when the item is a non-dirty container, or a `bin`) in the cone; nearest centre wins, ties lower index. Destination = station centre; `destStation = index`.
 4. Else: destination = `chef + f * 3.0`, flat landing, clamped to bounds.
@@ -631,10 +632,10 @@ Binding details:
 ## 13. Tickets and pacing
 
 ### 13.1 Ticket
-`TicketRt { id, recipe, left, total, dishes, done }`, `total = secs(recipe.ticketTime * bucket.ticketTimeMul * diffTime)` (15.3), `left = total` at spawn. Ids from `nextTicketId++` (starts at 1). Each playing tick (step 8) every ticket does `left--`; at `left <= 0` it expires (13.5).
+`TicketRt { id, recipe, left, total, dishes, done }`, `total = secs(recipe.ticketTime * level.ticketTimeBase * bucket.ticketTimeMul * diffTime)` (15.3), `left = total` at spawn. Ids from `nextTicketId++` (starts at 1). Each playing tick (step 8) every ticket does `left--`; at `left <= 0` it expires (13.5).
 
 ### 13.2 Recipe choice at spawn
-`recipe = recipes[pacingRng.int(0, recipes.length - 1)]` over `level.recipes` in file order, uniform. (V1 does the same with `Math.random`.) Exactly one PRNG draw. Feast levels: see 16.4.
+If `level.openingTickets` is set and `spawned < openingTickets.length`, the recipe is `openingTickets[spawned]` and **no PRNG draw is made**. Otherwise `recipe = recipes[pacingRng.int(0, recipes.length - 1)]` over `level.recipes` in file order, uniform. (V1 does the same with `Math.random`.) Exactly one PRNG draw. Feast levels: see 16.4.
 
 ### 13.3 Spawn schedule (exact, exists)
 State: `spawned`, `openingDone`, `nextSpawnTick` (in `playTick` units), `playTick`.
@@ -699,7 +700,7 @@ Authoring rule for new levels (used in `03 §9` and `08`): run the bots (`09 §5
 |---|---|---|
 | `rate` | `buckets[b].rate` | divides the base delay between tickets (`13.4`) |
 | `maxActive` | `buckets[b].maxActive` | cap of simultaneous tickets and burst rule |
-| `ticketTimeMul` | `buckets[b].ticketTimeMul` | multiplies `recipe.ticketTime` |
+| `ticketTimeMul` | `buckets[b].ticketTimeMul` | multiplies `recipe.ticketTime` (after `level.ticketTimeBase`, default 1; `RunConfig.assist` multiplies by a further 1.25) |
 | optional stations | `layout.stations[].optional` | enabled when `bucketRank(bucket) >= bucketRank(optional)` with rank solo=duo=0, squad=1, party=2 |
 | stars | `stars[b]` | thresholds |
 | spawns | `layout.spawns[slot]` | 6 spawn points |
@@ -725,6 +726,8 @@ export interface TwistHooks {
   onTickEnd?(ctx: SimCtx, events: RushEvent[]): void;     // step 9 (H2)
   isBlocked?(ctx: SimCtx, x: number, z: number): boolean; // used by collision
   stationUsable?(ctx: SimCtx, stationIndex: number): boolean;
+  speedMulQ8?(ctx: SimCtx, x: number, z: number): number;  // Q8, 256 = 1.0, default 256; chef walk speed = walkSpeed * q / 256 (exact in f64)
+  dashAllowed?(ctx: SimCtx, x: number, z: number): boolean; // default true; a dash start is refused and a running dash ends where false
   view(ctx: SimCtx): TwistView;
   hash(h: Hasher64): void;
   save(): Int32Array;
@@ -738,6 +741,7 @@ Read: `ctx.level.twist.params`, `ctx.layout`, `ctx.tick`, `ctx.playTick`, statio
 Write (only through these helpers in `items.ts` / `chef.ts`, never by raw field writes that skip events):
 - `ctx.pushChefOut(slot, blockerIndex)`: moves a chef to the nearest point outside a blocker box (deterministic nearest-side rule of `pushOutOfBox`).
 - `ctx.setBlockerActive(i, bool)` (state lives in the hook's `Int32Array`; `isBlocked` reads it).
+- `ctx.ejectChefs(box, stunTicks)`: moves every chef whose circle overlaps `box` to the nearest free cell centre outside it, in slot order (tie-break smaller z, then smaller x), keeps the held item, sets the stun and emits `ChefEjected`.
 - `ctx.destroyItem(id)`, `ctx.moveItemToSocket(id, stationIndex)`, `ctx.emit(event)`.
 - Its own PRNG `ctx.rng.twist`.
 A hook must **not** change score, streak, tickets, timers, the pacing PRNG, or spawn items out of nowhere (planter/crate behavior belongs to stations). The ticket generator hook for feast tickets is the one exception (16.4).
@@ -783,6 +787,11 @@ export class RushSim {
   // test/dev helpers (exist): giveItem, putItem, placeChef, stationIndex
   result(): RunResult;                                     // target: valid in phase 'ended'
 }
+/** Pure helper, also used by the client for mouse reach checks (05). */
+export function stationInReach(chef: { x: number; z: number }, box: Box, reach: number): boolean;
+
+/** Optional per-slot counters carried by RunResult (01 §7.6); the results screen (05) hides its per-seat table when absent. */
+export interface SlotResult { slot: number; served: number; wrong: number; thrown: number }
 ```
 `step` is the only mutator. `view()` copies; calling it any number of times between ticks never changes later behavior (tested).
 
@@ -856,7 +865,7 @@ Read from the code at commit state of branch `claude/project-thread-662hnf`. Eac
 - `recipe.penalty` is never read (13.5): the expiry penalty is `level.scoring.expiredPenalty`.
 - Content gaps that make recipes unbuildable today: `grilled_cheese_raw`, `pizza_margherita_raw` and `smoothie_ready` have no producer (no assembly, no blender); `03 §5` adds them.
 - `layout.spawns` has 4 entries for 6 possible players (validated rule: at least 6).
-- `RushView.firstOrder` is the only onboarding signal; it must remain (`05`).
+- `RushView.firstOrder` is the only onboarding signal; it must remain (`05`). `level.guide` (`03 §2.5`) is pure level data read by the client; the sim never reads it.
 
 ## 20. Acceptance tests
 

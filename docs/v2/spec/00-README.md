@@ -81,7 +81,7 @@ These win over every other document. Full text in `_authoring-brief.md`; short f
 6. **Instant accessibility:** no tutorial screens. Each level teaches its one new mechanic through design, contextual prompts and a guide arrow on the first order.
 7. **Aesthetic reference = the level 1 demo** (`v2/packages/render/src/scenes/harbour/`, screenshots in `v2/docs/p2/`). Go further: a better chef, better stations and assets. **Art style is open (voxel or smooth stylized 3D)**: the render layer sits behind an asset abstraction. Voxel is the current default.
 8. **French UI by default**, English supported, all strings through the strings table.
-9. **Determinism is non-negotiable:** fixed 30 Hz sim in a Web Worker, integer or Q8 state, shared xoshiro128** PRNG, no `Math.random` or float trig in sim or shared, a state hash.
+9. **Determinism is non-negotiable:** fixed 30 Hz sim in a Web Worker, integer or Q8 state, shared xoshiro128** PRNG, no `Math.random` or float trig in sim or shared, a state hash. One stated exception to "integer or Q8": chef kinematics (`x z vx vz fx fz`) stay f64, using only `+ - * /`, `sqrt` and `floor` (`01 §5`).
 10. **Known bugs of the level 1 build** are in the backlog: the first cutting board and the first fryer do not work (root cause found: `spec/09 §15`), the bin does not accept burnt items.
 11. **Hosting:** Netlify. No accounts or OAuth: identity is a nickname, a token and recovery codes (as V1). Supabase free tier backend.
 

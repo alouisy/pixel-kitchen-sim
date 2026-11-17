@@ -130,6 +130,11 @@ Target additions to `LevelSchema` (all optional with the default shown; `01 §7.
 | `dishes` | `{ mode: 'infinite'\|'cycle'; returnDelaySeconds: number; stock: { plate?: int; bowl?: int; cup?: int } }` | `{ mode: 'infinite', returnDelaySeconds: 8, stock: {} }` | dish cycle (`02 §11`) |
 | `hazards` | `{ fire?: { igniteAfterBurntSeconds: number; spreadSeconds: number } }` | `{}` | fire parameters; required when `mechanics.fire` |
 | `feast` | `{ every: int>=2; dishes: int 2..4; bonus: int>=0 }` | absent | feast tickets; required when `mechanics.feast` |
+| `ticketTimeBase` | number > 0 | 1 | multiplier on every `recipe.ticketTime` before the bucket `ticketTimeMul` (`08 §2.2`) |
+| `openingTickets` | `id[]` (each in `recipes`) | absent | forces the recipes of the first tickets; later tickets use the pacing PRNG (`02 §13.2`) |
+| `tuning.throwRange` | number > 0 | 5.0 (`Default (tunable)`) | throw range in metres (`02 §9`) |
+| `guide` | `{ always?: boolean; steps: GuideRule[]; until?: Array<{ event: string }> }` | absent (guide = first order only) | guide arrow rules for levels 2-10 (`05 §7`); `GuideRule` is defined in `05` |
+| `mechanics.throw` | boolean | false | also read by the client (`05`) to send `RB_T` and show the Throw chip |
 
 ### 2.6 `LayoutStationSchema` (exists) -> `LayoutStation`
 
@@ -156,6 +161,7 @@ Target additions to `LevelSchema` (all optional with the default shown; `01 §7.
 | `queue` | `[x, z][]` | customer positions (render only), first = at the pass |
 | `zones` (target) | `Array<{ id, box }>` | zone boxes for multi-zone levels |
 | `blockers` (target) | `Array<{ id, box, group?: int }>` | hook-controlled no-go boxes (`02 §16`) |
+| `colliders` (target) | `Array<{ id, x, z, w, d, flyOver: boolean }>` | static solid obstacles (box centre + size, metres); blocked in the `WalkGrid` at construction; thrown items fly over when `flyOver` (`08 §2.3`) |
 
 `box` = `{ x0, x1, z0, z1 }`.
 
@@ -415,7 +421,7 @@ File: `.../<levelId>/layout.json`. Parsed by `LayoutSchema`. Coordinates: metres
   "order": 1,
   "mechanics": { "throw": false, "wash": false, "fire": false, "harvest": false, "feast": false },
   "twist": { "kind": "none", "params": {} },
-  "camera": { "position": [0, 9, 8], "target": [0, 0, 0], "fov": 38, "lean": 0.2 },   // use the harbour values from render
+  "camera": { "position": [0, 12.14, 9.22], "target": [0, 0.2, 0.2], "fov": 38, "lean": 0.12 },   // harbour values, same as 04 (code: lean 0.12 on x, 0.1 on z)
   "unlock": { "requires": null, "minStars": 0 },
   "dishes": { "mode": "infinite", "returnDelaySeconds": 8, "stock": {} }
 }
@@ -439,11 +445,11 @@ File: `.../<levelId>/layout.json`. Parsed by `LayoutSchema`. Coordinates: metres
     { "id": "pass",         "def": "pass",   "x":  3.5, "z":  1, "w": 1, "d": 1 },                         // 9  the serving window
     { "id": "counter_e2",   "def": "counter","x":  3.5, "z":  2, "w": 1, "d": 1 }                          // 10
   ],
-  "spawns": [[-1, 0.5], [0, 0.5], [-2, 0.5], [1, 0.5]],           // 4 today; must grow to >= 6 (rule 7)
+  "spawns": [[-1, 0.5], [0, 0.5], [-2, 0.5], [1, 0.5]],           // 4 today; target 6 (add [2, 0.5], [-3, 0.5]; rule 7)
   "queue": [[5.8, 1], [6.9, 1.7], [8.0, 0.8]]                     // customers in line beyond the pass (render only)
 }
 ```
-Target edit of this file (ticket in `10`): add two spawns (`[2, 0.5]`, `[-3, 0.5]`), add `"order"`, `"mechanics"`, `"twist"`, `"camera"` to `level.json`, and reorder nothing (indices are part of the golden hash).
+Target edit of this file (`08 §3.3`, `§3.11`): add two spawns (`[2, 0.5]`, `[-3, 0.5]`; at least 6 are required), and **fix bug B1 by reordering the stations**: the base `board_1` (x = -2.5) and `fryer_1` (-0.5), `fryer_2` (0.5) come first, `board_2` (-1.5) and `fryer_3` (1.5) stay `optional: squad`, and `counter_e1`/`counter_e2` become `board_3`/`pass_2` (`optional: party`); base stations always precede optional ones in file order. The reorder changes station indices, so the level 1 golden hash is re-baselined once (with the click-to-walk removal, `08 §3.11` item 1; `09 §6.2`). Add `"order"`, `"mechanics"`, `"twist"`, `"camera"` to `level.json` (`08 §3.11` item 5).
 
 ## 10. Validation rules
 

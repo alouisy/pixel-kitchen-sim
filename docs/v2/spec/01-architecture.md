@@ -330,12 +330,17 @@ Goal: levels 2-10 are content work plus a bounded set of reusable mechanics, nev
 | `twist` | `{ kind: TwistKind; params: Record<string, number> }` | the signature mechanic and its integer parameters (seconds are converted to ticks by the hook) | `{ kind: 'none', params: {} }` |
 | `camera` | `CameraSpec` | fixed camera per level (section 10.5) | harbour values |
 | `unlock` | `{ requires: string \| null; minStars: 0..3 }` | campaign gating (UI only, `05`) | `{ requires: null, minStars: 0 }` |
+| `ticketTimeBase` | number | multiplier on every `recipe.ticketTime` of the level, before the bucket `ticketTimeMul` (`08 §2.2`) | 1 |
+| `openingTickets` | `string[]` (optional) | recipe ids forced for the first tickets; later tickets use the pacing PRNG | absent |
+| `guide` | optional | first-order guide arrow data (`03`) | absent |
 
 `TwistKind = 'none' | 'split_counter' | 'tide' | 'dumbwaiter' | 'low_bridges' | 'crowd_lane' | 'gangway_tunnels' | 'sprinklers' | 'conveyor'` (levels 1,2 -> `none`; 3 -> `split_counter`; 4 -> `tide`; 5 -> `dumbwaiter`; 6 -> `low_bridges`; 7 -> `crowd_lane`; 8 -> `gangway_tunnels`; 9 -> `sprinklers`; 10 -> `conveyor`; see `design/06 §3`, `08`).
 
-`StationDef.kind` grows to: `counter | dispenser | processor | bin | pass | sink | planter | dumbwaiter | conveyor` (target; each new kind arrives with the level that needs it). `LayoutStation` gains optional `rot` (0, 90, 180, 270, render only), `zone` (string, for multi-zone levels), `props` (free numeric params for the twist, integers).
+`StationDef.kind` grows to: `counter | dispenser | processor | bin | pass | sink | planter | dumbwaiter | conveyor | extinguisher | return` (target; each new kind arrives with the level that needs it). The blender is not a kind: it is a `processor` with `process: 'multi'` (`02 §6.6`). `08` also needs the defs `sink` (kind `sink`), `rack` (the dirty rack, kind `counter`, receives returned dirty containers) and `planter` (kind `planter`); `03` defines them. `LayoutStation` gains optional `rot` (0, 90, 180, 270, render only), `zone` (string, for multi-zone levels), `props` (free numeric params for the twist, integers).
 
-`Layout` gains `zones?: Array<{ id: string; box: Box }>` and `blockers?: Array<{ id: string; box: Box }>` (hook-controlled no-go areas, 7.4).
+`Layout` gains `zones?: Array<{ id: string; box: Box }>`, `blockers?: Array<{ id: string; box: Box }>` (hook-controlled dynamic no-go areas, 7.4) and `colliders?: Array<{ id: string; x: number; z: number; w: number; d: number; flyOver: boolean }>` (static solid obstacles, marked blocked in the `WalkGrid` once at construction; thrown items pass over when `flyOver`).
+
+The `tuning` block gains `throwRange` (metres, `Default (tunable)` 5.0), used by `02 §9`.
 
 ### 7.4 Station behavior and twist hooks (sim)
 
@@ -389,6 +394,10 @@ export interface TwistHooks {
   isBlocked?(ctx: SimCtx, x: number, z: number): boolean;
   /** Whether a station may be used now (e.g. sink while the tide is in). Pure function of hook state. */
   stationUsable?(ctx: SimCtx, stationIndex: number): boolean;
+  /** Q8 multiplier (256 = 1.0) on a chef's walk speed at (x, z). Pure function of hook state. Default 256. */
+  speedMulQ8?(ctx: SimCtx, x: number, z: number): number;
+  /** Whether Dash may start or continue at (x, z). Default true. */
+  dashAllowed?(ctx: SimCtx, x: number, z: number): boolean;
   /** Telegraph for HUD/render: what is about to happen, in ticks. Part of RushView.twist. */
   view(ctx: SimCtx): TwistView;
   hash(h: Hasher64): void;
@@ -408,7 +417,7 @@ Rules for hooks:
 5. The hook for `none` is a no-op and is used by levels 1 and 2.
 6. Hooks never branch on level id. Level-specific numbers are `twist.params` entries (documented per level in `08`).
 
-**`SimCtx`** is the object passed to behaviors and hooks: `{ level, layout, bucket, players, tick, playTick, rng: { pacing: Prng; twist: Prng }, state: RushState, items: ItemStore, stations: StationRt[], chefs: ChefRt[], tickets: TicketStore, emit(e: RushEvent): void }`. It is internal to `@ga/sim` (not exported from the package index).
+**`SimCtx`** is the object passed to behaviors and hooks: `{ level, layout, bucket, players, tick, playTick, rng: { pacing: Prng; twist: Prng }, state: RushState, items: ItemStore, stations: StationRt[], chefs: ChefRt[], tickets: TicketStore, emit(e: RushEvent): void, ejectChefs(box: Box, stunTicks: number): void }`. `ejectChefs` moves every chef overlapping `box` to the nearest free cell centre outside it (slot order; tie-break smaller z, then smaller x), keeps the held item, stuns it and emits `ChefEjected`. It is internal to `@ga/sim` (not exported from the package index).
 
 ### 7.5 Target tick order (outline; `02` expands it and may not reorder it)
 
@@ -419,14 +428,14 @@ Rules for hooks:
  4. chefs in slot order: targeting, buttons (A grab/drop/serve, X action held, T throw, B dash), mouse click-in-reach, movement + collision (uses twist.isBlocked)
  5. separateChefs
  6. projectiles (thrown items fly, land, or are lost)
- 7. stations in index order: STATION_BEHAVIORS[kind].update (cook, burn, fire spread, wash progress, planter regrow, conveyor advance, dumbwaiter)
+ 7. playTick++ (first thing in the playing part, as today), then stations in index order: STATION_BEHAVIORS[kind].update (cook, burn, fire spread, wash progress, planter regrow, conveyor advance, dumbwaiter)
  8. tickets: spawn (PRNG 'pacing'), expire, feast completion
  9. H2: twist.onTickEnd
-10. playTick++, timeLeft--, end check (TimeUp)
+10. timeLeft--, end check (TimeUp)
 11. return events
 ```
 
-Today's step order (6.3) maps onto it with steps 3, 6, 9 empty. Moving `playTick++`/`timeLeft--` to step 10 must not change level 1 behavior: the golden hash gate catches an off-by-one.
+Today's step order (6.3) maps onto it with steps 3, 6, 9 empty. `playTick++` stays at the start of step 7 (as `02 §12` implements it) so level 1 keeps its hash; only `timeLeft--` and the end check sit at step 10. The golden hash gate catches an off-by-one.
 
 ### 7.6 Run configuration, content hash, version
 
@@ -438,8 +447,10 @@ export interface RunConfig {
   levelId: string;
   players: number;         // 1..6, total slots (local + remote)
   seed: number;            // u32
+  difficulty?: 'snack' | 'meal' | 'feast';   // default 'meal' (`02 §15.3`)
+  assist?: boolean;        // default false: extended patience (ticket time x1.25), run is unranked (`05`, `07`)
 }
-export interface RunResult { levelId: string; bucket: BucketId; score: number; stars: 0 | 1 | 2 | 3; served: number; expired: number; wrong: number; ticks: number; hash: string; }
+export interface RunResult { levelId: string; bucket: BucketId; score: number; stars: 0 | 1 | 2 | 3; served: number; expired: number; wrong: number; ticks: number; hash: string; perSlot?: SlotResult[]; }   // perSlot optional (`02 §17.1`)
 export interface RunLog { config: RunConfig; frames: RushInput[][] }   // frames[t][slot], applied at tick t+1
 ```
 
@@ -739,18 +750,29 @@ export interface ItemVisual extends Visual {
   set(item: ItemLike): void;
 }
 
-export interface StationVisualState { enabled: boolean; active: boolean; highlight: 0 | 1 | 2; item: ItemLike | null }
+export interface StationVisualState {
+  enabled: boolean; active: boolean; highlight: 0 | 1 | 2; item: ItemLike | null;
+  // 04-ext (optional, `04 §` interface additions)
+  fire?: 0 | 1 | 2; warn?: boolean; hasExtinguisher?: boolean; mix?: string[]; stock?: number /* -1 infinite */;
+  dirty?: number; growLeft?: number; bump?: number /* 0..1 */; lidOpen?: boolean;
+}
 export interface StationVisual extends Visual {
   set(s: StationVisualState, time: number): void;
   /** Anchor points in world space for HUD and VFX: 'top' (item socket), 'ring' (progress ring), 'front' (prompt). */
   anchor(name: 'top' | 'ring' | 'front'): Vec3Like;
 }
 
-export interface ChefLook { slot: number; color: number; hat: number; name?: string }
+export interface ChefLook {
+  slot: number; color: number; hat: number; name?: string;
+  skin?: number; emblem?: number;                // 04-ext (optional)
+}
 export interface ChefPose {
   /** 0..1 walk speed fraction; `phase` advances while walking. */
   walk: number; phase: number; chopping: boolean; dashing: boolean; carrying: boolean;
   throwT: number /* 0..1 over the throw animation, 0 = none */; happy: number; hurt: number;
+  // 04-ext (optional)
+  washing?: boolean; extinguishing?: boolean; flickT?: number; chopClock?: number;
+  held?: 'none' | 'light' | 'plate' | 'extinguisher'; speed?: number;
 }
 export interface ChefVisual extends Visual {
   setLook(look: ChefLook): void;
@@ -763,6 +785,9 @@ export type CustomerKind = 'adult' | 'child' | 'elder' | 'giant';
 export interface CustomerVisual extends Visual {
   setMood(mood: 'waiting' | 'impatient' | 'happy' | 'angry'): void;
   update(dt: number, time: number): void;
+  // 04-ext (optional)
+  setFacing?(yaw: number): void; setWalk?(speed: number): void; celebrate?(): void;
+  setPatience?(frac: number): void; setOrder?(recipeId: string | null): void;
 }
 
 export interface PropVisual extends Visual { update?(dt: number, time: number): void }
@@ -850,10 +875,14 @@ export interface CameraSpec {
   position: [number, number, number];    // meters
   target: [number, number, number];
   fov: number;                           // degrees (harbour: 38)
-  /** Fraction (0..0.2) the focus leans toward the chef centroid. Harbour today: 0.2. Default 0.1. */
+  /** Fraction (0..0.2) the focus leans toward the chef centroid, per axis. Harbour (as built): 0.12 on x, 0.1 on z. Scalar default 0.1 (applies to both axes). */
   lean: number;
   /** Multi-zone levels only: framings the camera eases between, chosen by centroid zone. */
   zones?: Array<{ zone: string; position: [number, number, number]; target: [number, number, number]; fov: number }>;
+  // 04-ext (optional, defined in `04`)
+  frame?: { x0: number; x1: number; z0: number; z1: number };   // rectangle that must stay visible
+  minDistance?: number; maxDistance?: number;                    // defaults 15 / 40
+  portrait?: { pitchDeg: number; margin: number; centerY: number };
 }
 ```
 
@@ -955,7 +984,7 @@ Rules:
 These names are final. Other docs reuse them verbatim. Owner doc in parentheses; a name marked **(exists)** is already in the code.
 
 **Sim and content types**
-- `RushSim` (exists), `RushOptions` (exists), `RushInput` (exists, reshaped 7.8), `RushEvent` (exists, extended), `RushView` (exists), `RushItem`, `ItemView`, `ChefView`, `StationView`, `TicketView` (exist), `RushPhase`, `Verb`, `RefuseReason` (exist), `RB_A`, `RB_X`, `RB_B` (exist), `RB_T` (new), `idleRushInput` (exists), `bucketForPlayers`, `streakMultiplier` (exist), `CHEF_RADIUS` (exists), `MAX_RUSH_PLAYERS`, `MAX_LOCAL_SEATS`
+- `RushSim` (exists), `RushOptions` (exists), `stationInReach` (new, pure helper), `SlotResult`, `RushInput` (exists, reshaped 7.8), `RushEvent` (exists, extended), `RushView` (exists), `RushItem`, `ItemView`, `ChefView`, `StationView`, `TicketView` (exist), `RushPhase`, `Verb`, `RefuseReason` (exist), `RB_A`, `RB_X`, `RB_B` (exist), `RB_T` (new), `idleRushInput` (exists), `bucketForPlayers`, `streakMultiplier` (exist), `CHEF_RADIUS` (exists), `MAX_RUSH_PLAYERS`, `MAX_LOCAL_SEATS`
 - `RunConfig`, `RunResult`, `RunLog`, `SIM_VERSION`, `contentHash` (7.6)
 - `TwistKind`, `TwistHooks`, `TwistView`, `TWIST_HOOKS`, `StationBehavior`, `STATION_BEHAVIORS`, `SimCtx`, `RushState` (7.4)
 - `encodeRushInput`, `decodeRushInput`, `INPUT_BYTES` (9.4)

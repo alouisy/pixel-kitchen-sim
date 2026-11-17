@@ -92,7 +92,7 @@ These numbers are what the levels below are tuned against. If `02` changes them,
 | Chop | hold Action 1.6 s (48 ticks) | `02` |
 | Cook times | per `items.json` (fries 5 s, patty 6 s, pizza 12 s, ...), burn window per item, `burnWarnSeconds` 2 | `03` |
 | Wash | hold Action 2 s (60 ticks) per container; dirty container returns to the rack 240 ticks (8 s) after a serve | `02` |
-| Fire (from level 6) | a burnt item left on a processor ignites it after 240 ticks; fire spreads to the 4 adjacent stations every 120 ticks; extinguished by holding Action for 60 ticks within reach | `02` |
+| Fire (from level 6) | a burnt item left on a processor ignites it after 240 ticks; fire spreads to the 4 adjacent stations every 120 ticks; extinguished by holding Action (X) for 45 ticks while holding the extinguisher item and targeting the station | `02` |
 | Throw (from level 3) | button `RB_T`; range `tuning.throwRange` = **5.0 m** (Default tunable), flight 12 ticks, lands on the first station in the aim cone with a free socket, else the item is lost | `02` |
 | Harvest (level 9) | planter rules in §11.4 | this file |
 | Tick order | `01 §7.5`; twist hooks run at H1 (before chefs) and H2 (after tickets) | `01` |
@@ -402,7 +402,7 @@ Total scripted guidance covers the first order only. No tutorial screen. Inputs 
 ### 3.11 Required changes (backlog items, in order)
 1. **Remove click-to-walk** (owner decision 5). In `v2/apps/client/src/rush/rushInput.ts` remove `mouseClick` walking, `startWalk`, `RushInput.click/clickSeq/clickKind` as walk commands and `WALK_TIMEOUT_TICKS`; in `v2/packages/sim/src/rush/sim.ts` remove `walkTarget`, `walkKind`, `path`, `walkTicks`, `stuck` on `ChefRt` and the path-following code, keep `sticky` only if still needed for chop. A mouse left click becomes an **interact request on the station under the cursor, honoured only if the chef is within reach of that station** (`inReach`); otherwise the sim emits `Refused { reason: 'too_far' }` and the HUD shows a small "Trop loin" hint at the station. Right click does nothing. Remove the hint line "Clic : aller et agir" from the HUD. The golden hash for level 1 changes once (the input frame shape changes); re-baseline it in the same ticket.
 2. **Base-station order fix** (3.3 table) and **render disabled optionals as counters** (1.4.2): `HarbourScene` must read the effective `StationView.def`.
-3. **Bin accepts burnt items.** Required behaviour: holding a burnt item (or a container with burnt contents) and pressing A on the bin always trashes it (`Trashed` event), whatever the state. Reading `sim.ts`, the bin branch already accepts any held item, so the defect is upstream. Procedure for the implementer: (a) add the sim test `bin_accepts_burnt_item` (chef holds a `burnt` fries item, adjacent to the bin, press A, expect `Trashed` and empty hand); (b) if it passes, the cause is in the client path (A edge latching in `rushInput.ts`, or the prompt/verb table in `rushHud.ts` hiding the action while the held item is burnt, or `findTarget` choosing the wrong station: the bin sits next to `plates` and the facing bias `dot < -0.1` can discard it); fix there; (c) also verify that picking up a burnt item from a fryer works (`take`) and that serving a burnt item gives `WrongDish` and not a crash.
+3. **Bin accepts burnt items.** Required behaviour: holding a burnt item (or a container with burnt contents) and pressing A on the bin always trashes it (`Trashed` event), whatever the state. Reading `sim.ts`, the bin branch already accepts any held item, so the defect is upstream. Procedure for the implementer: (a) add the sim test `bin_accepts_burnt_item` (chef holds a `burnt` fries item, adjacent to the bin, press A, expect `Trashed` and empty hand); (b) if it passes, the bug is not reproduced in the sim and the cause is one of the three probable ones of `02 §19` B3, in order: (1) targeting at the seam: the bin shares the edge x = 3 with `plates`, ties go to the lower index, so A hits the dispenser (`hands_full`); (2) UX trap: with a plate in hand the burnt item in the fryer is refused and the bin only empties the plate, so the burnt item stays; (3) mouse picking: `pickStation` resolves to a neighbour of the low bin model. Fix as `02 §19` B3 says; (c) also verify that picking up a burnt item from a fryer works (`take`) and that serving a burnt item gives `WrongDish` and not a crash.
 4. Party extras (`board_3`, `pass_2`) and the 2 extra spawns.
 5. Level 1 `level.json` gains the additions of 2.2 with defaults: `order: 1`, `ticketTimeBase: 1`, `twist: none`, `lighting: 'harbour_noon'`, `musicMood: 'harbour_breeze'`, `camera` from the camera block in 3.8.
 
@@ -1186,7 +1186,7 @@ Spawn points (all on the lower deck, outside the zone):
 | `onion_rings` (110, 56 s) | plate | `cooked_onion_rings` | onion -> board (chop) -> `onion_rings_raw` -> **coating** (2 s) -> `onion_rings_coated` -> fryer (5 s, burn 6 s) |
 | `chicken_tenders_fries` (150, 84 s) | plate | `cooked_chicken_tenders`, `cooked_fries` | chicken -> board -> `raw_chicken_strips` -> coating -> `coated_chicken_strips` -> fryer; plus fries |
 
-New mechanics: (1) the **coating station** (2 s auto, no burn); (2) **fire**: a burnt item left on a processor for 240 ticks (8 s) ignites the station; fire spreads to adjacent stations every 120 ticks (4 s); a chef **holds Action 60 ticks** facing a burning station within reach to extinguish it; a burning station is unusable and a chef standing adjacent takes no damage (no health). The fire is a routing problem, not a punishment (a station out of order for several seconds).
+New mechanics: (1) the **coating station** (2 s auto, no burn); (2) **fire**: a burnt item left on a processor for 240 ticks (8 s) ignites the station; fire spreads to adjacent stations every 120 ticks (4 s); a chef carrying the **extinguisher** item **holds Action 45 ticks** while targeting a burning station to put it out (02 §10.4); a burning station is unusable and a chef standing adjacent takes no damage (no health). The fire is a routing problem, not a punishment (a station out of order for several seconds).
 
 ### 8.5 Twist: low bridges (`kind: 'low_bridges'`)
 **State** (`Int32Array`): `[phase, ticksInPhase, impactsDone]`. `phase`: 0 CLEAR, 1 WARN, 2 LOCK. Params: `firstImpactTick` 1500, `periodTicks` 1200, `warnTicks` 150 (5 s), `lockTicks` 120 (4 s), `stunTicks` 24 (0.8 s).
@@ -1261,7 +1261,7 @@ The first bridge is at 50 s, so a first-time player never meets the lock in the 
 - A chef standing in the zone at LOCK start is ejected exactly once, keeps the held item, and is stunned 24 ticks.
 - `BridgeApproaching` fires at playTick 1350, 2550, 3750, 4950 (150 ticks before `BridgeLock`).
 - During LOCK `stationUsable(fryer_1) === false` and `fryer_1`'s item timer still advances.
-- Extinguishing a burning fryer takes 60 ticks of held Action.
+- Extinguishing a burning fryer takes 45 ticks of held Action with the extinguisher item.
 
 ---
 
