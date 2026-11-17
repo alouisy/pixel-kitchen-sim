@@ -42,9 +42,10 @@ export class OnlineServices {
     }
 
     async deleteCustomLevel(id, token) {
-        const params = new URLSearchParams({ id, playerToken: token });
+        const params = new URLSearchParams({ id });
         const response = await fetch(`${this.baseUrl}/levels?${params}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { 'X-Player-Token': token }
         });
         return parseResponse(response);
     }

@@ -1,11 +1,32 @@
-import { isAllowedLevelKey, isValidPlayerToken, json, readJson, sanitizeNickname, supabaseRequest } from './_supabase.mjs';
+import { OFFICIAL_LEVEL_FILES, isAllowedLevelKey, isValidPlayerToken, json, readJson, sanitizeNickname, supabaseRequest } from './_supabase.mjs';
 
 const MAX_SCORE = 50000;
+const levelRulesCache = new Map();
 
 function toSafeInt(value, minimum, maximum) {
     const number = Number(value);
     if (!Number.isFinite(number)) return null;
     return Math.max(minimum, Math.min(maximum, Math.floor(number)));
+}
+
+// Loads duration and star thresholds for an official level (level:N) from its level file.
+// Returns null when the key has no level file in the roadmap.
+async function loadOfficialLevelRules(levelKey) {
+    if (levelRulesCache.has(levelKey)) return levelRulesCache.get(levelKey);
+    const filename = Object.hasOwn(OFFICIAL_LEVEL_FILES, levelKey) ? OFFICIAL_LEVEL_FILES[levelKey] : null;
+    if (!filename) return null;
+
+    const { default: level } = await import(`../../public/levels/${filename}`, { with: { type: 'json' } });
+    if (!Array.isArray(level.starThresholds) || level.starThresholds.length !== 3) {
+        throw new Error(`Level file ${filename} has invalid starThresholds.`);
+    }
+    const rules = {
+        duration: Number(level.duration) || 0,
+        starThresholds: level.starThresholds,
+        maxPlausible: Math.ceil(level.starThresholds[2] * 2.5)
+    };
+    levelRulesCache.set(levelKey, rules);
+    return rules;
 }
 
 export default async function handler(request) {
@@ -20,118 +41,17 @@ export default async function handler(request) {
 
         try {
             if (isGlobal) {
+                // Totals are aggregated in SQL (see leaderboard_totals_* views in schema.sql).
                 const showCommunity = scope === 'global:community';
-                
-                // Fetch leaderboard entries (we fetch a reasonable amount to support in-memory aggregation)
-                const queryParams = new URLSearchParams({
-                    select: 'player_token,nickname,level_key,score,stars,updated_at',
-                    limit: '2000'
+                const view = showCommunity ? 'leaderboard_totals_community' : 'leaderboard_totals_official';
+
+                const query = new URLSearchParams({
+                    select: 'nickname,score,stars,updated_at',
+                    order: 'score.desc,stars.desc,updated_at.asc',
+                    limit: String(limit)
                 });
-                if (!showCommunity) {
-                    queryParams.set('level_key', 'in.(level:1,level:2,level:3,level:4,level:5)');
-                }
-                
-                const entries = await supabaseRequest(`leaderboard_entries?${queryParams}`);
-                
-                // If showing community levels, fetch currently active levels to filter out deleted level scores
-                let activeCustomIds = null;
-                if (showCommunity) {
-                    try {
-                        const customQuery = new URLSearchParams({
-                            select: 'id',
-                            limit: '2000'
-                        });
-                        const customLevels = await supabaseRequest(`custom_levels?${customQuery}`);
-                        activeCustomIds = new Set((customLevels || []).map(c => String(c.id)));
-                    } catch (err) {
-                        console.error('Failed to fetch active custom levels for leaderboard filter:', err);
-                    }
-                }
-
-                // Group entries by player_token to sum scores
-                const players = {};
-                for (const entry of entries) {
-                    const token = entry.player_token;
-                    if (!token) continue;
-
-                    // Filter out custom levels that are no longer active
-                    if (entry.level_key.startsWith('custom:')) {
-                        const customId = entry.level_key.substring(7);
-                        if (activeCustomIds && !activeCustomIds.has(customId)) {
-                            continue;
-                        }
-                    }
-
-                    if (!players[token]) {
-                        players[token] = {
-                            nickname: entry.nickname,
-                            score: 0,
-                            stars: 0,
-                            updated_at: entry.updated_at,
-                            scoresByLevel: {}
-                        };
-                    }
-
-                    // Keep the latest nickname and update timestamp
-                    if (new Date(entry.updated_at) > new Date(players[token].updated_at)) {
-                        players[token].nickname = entry.nickname;
-                        players[token].updated_at = entry.updated_at;
-                    }
-
-                    // Store unique scores per level (take best if duplicates exist)
-                    const existingLvl = players[token].scoresByLevel[entry.level_key];
-                    if (!existingLvl || entry.score > existingLvl.score || (entry.score === existingLvl.score && entry.stars > existingLvl.stars)) {
-                        players[token].scoresByLevel[entry.level_key] = {
-                            score: entry.score,
-                            stars: entry.stars,
-                            updated_at: entry.updated_at
-                        };
-                    }
-                }
-
-                // Calculate totals for each player
-                const results = [];
-                const officialKeys = ['level:1', 'level:2', 'level:3', 'level:4', 'level:5'];
-
-                for (const token in players) {
-                    const player = players[token];
-                    let totalScore = 0;
-                    let totalStars = 0;
-                    let latestUpdated = new Date(0);
-                    let hasPlayedAny = false;
-
-                    for (const levelKey in player.scoresByLevel) {
-                        const isOfficial = officialKeys.includes(levelKey);
-                        const isCommunity = levelKey.startsWith('custom:');
-
-                        if (isOfficial || (showCommunity && isCommunity)) {
-                            const val = player.scoresByLevel[levelKey];
-                            totalScore += val.score;
-                            totalStars += val.stars;
-                            const dt = new Date(val.updated_at);
-                            if (dt > latestUpdated) latestUpdated = dt;
-                            hasPlayedAny = true;
-                        }
-                    }
-
-                    if (hasPlayedAny) {
-                        results.push({
-                            nickname: player.nickname,
-                            score: totalScore,
-                            stars: totalStars,
-                            updated_at: latestUpdated.getTime() > 0 ? latestUpdated.toISOString() : player.updated_at
-                        });
-                    }
-                }
-
-                // Sort results by score desc, stars desc, updated_at asc
-                results.sort((a, b) => {
-                    if (b.score !== a.score) return b.score - a.score;
-                    if (b.stars !== a.stars) return b.stars - a.stars;
-                    return new Date(a.updated_at) - new Date(b.updated_at);
-                });
-
-                return json(200, { entries: results.slice(0, limit) });
+                const entries = await supabaseRequest(`${view}?${query}`);
+                return json(200, { entries: entries || [] });
             } else {
                 // Return single level leaderboard
                 const query = new URLSearchParams({
@@ -163,14 +83,32 @@ export default async function handler(request) {
     }
 
     try {
+        // Plausibility checks apply to official levels only; custom levels keep the global MAX_SCORE cap.
+        const isOfficialKey = levelKey.startsWith('level:');
+        const rules = isOfficialKey ? await loadOfficialLevelRules(levelKey) : null;
+        if (isOfficialKey && !rules) return json(400, { error: 'Invalid score submission.' });
+
+        if (rules) {
+            if (score > rules.maxPlausible) return json(400, { error: 'Implausible score.' });
+            const expectedStars = rules.starThresholds.filter(threshold => score >= threshold).length;
+            if (stars > expectedStars) return json(400, { error: 'Implausible score.' });
+        }
+
         const filter = new URLSearchParams({
-            select: 'id,score,stars',
+            select: 'id,score,stars,updated_at',
             level_key: `eq.${levelKey}`,
             player_token: `eq.${playerToken}`,
             limit: '1'
         });
         const existingRows = await supabaseRequest(`leaderboard_entries?${filter}`);
         const existing = existingRows[0];
+
+        // Rate limit: one submission per level duration, measured from the last accepted update.
+        if (existing && rules && rules.duration > 0) {
+            const secondsSinceUpdate = (Date.now() - Date.parse(existing.updated_at)) / 1000;
+            if (secondsSinceUpdate < rules.duration) return json(429, { error: 'Too many submissions.' });
+        }
+
         const isBetter = !existing || score > existing.score || (score === existing.score && stars > existing.stars);
 
         if (!isBetter) return json(200, { accepted: false, entry: existing });

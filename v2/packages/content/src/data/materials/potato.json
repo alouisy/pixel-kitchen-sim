@@ -1,0 +1,9 @@
+{
+  "id": "potato", "index": 5,
+  "flavor": { "sweet": 0.1, "umami": 0.1 },
+  "texture": { "creamy": 0.3, "chewy": 0.2, "crunchy": 0.2 },
+  "thermal": { "conductivity": 16, "cookStart": 65, "perfect": [0.6, 0.85], "charStart": 0.93 },
+  "flammability": 0.1, "density": 0.8,
+  "colors": { "raw": "#c8a46a", "cooked": "#e3c27a", "charred": "#2e2015" },
+  "cutSfx": "soft", "edible": true, "harvestable": true
+}

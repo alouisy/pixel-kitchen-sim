@@ -2,7 +2,18 @@
 
 export const DATA_TRANSLATIONS = {
     en: {
-        // Meals
+        // Level Names
+        "Fry Cook Training": "Fry Cook Training",
+        "Burger & Fries": "Burger & Fries",
+        "Breakfast Shift": "Breakfast Shift",
+        "Smoothie Cafe": "Smoothie Cafe",
+        "Pizza & Diner": "Pizza & Diner",
+        "The Crispy Fryhouse": "The Crispy Fryhouse",
+        "Diner & Melt Station": "Diner & Melt Station",
+        "Grand Brunch Cafe": "Grand Brunch Cafe",
+        "Trattoria & Pizzeria": "Trattoria & Pizzeria",
+        "The Grand Master Kitchen": "The Grand Master Kitchen",
+
         "french_fries": "French Fries",
         "salad": "Salad",
         "hamburger": "Hamburger",
@@ -208,6 +219,18 @@ export const DATA_TRANSLATIONS = {
         "nothing": "Nothing"
     },
     fr: {
+        // Level Names
+        "Fry Cook Training": "Apprenti Friture",
+        "Burger & Fries": "Burger & Frites",
+        "Breakfast Shift": "Service Petit-Déjeuner",
+        "Smoothie Cafe": "Café Smoothies",
+        "Pizza & Diner": "Pizza & Diner",
+        "The Crispy Fryhouse": "La Maison Croustillante",
+        "Diner & Melt Station": "Diner & Station Fondue",
+        "Grand Brunch Cafe": "Grand Brunch Café",
+        "Trattoria & Pizzeria": "Trattoria & Pizzeria",
+        "The Grand Master Kitchen": "La Cuisine du Grand Chef",
+
         // Meals
         "french_fries": "Frites",
         "salad": "Salade",
@@ -414,6 +437,18 @@ export const DATA_TRANSLATIONS = {
         "nothing": "Rien"
     },
     es: {
+        // Level Names
+        "Fry Cook Training": "Entrenamiento de Fritura",
+        "Burger & Fries": "Hamburguesa y Patatas",
+        "Breakfast Shift": "Turno de Desayuno",
+        "Smoothie Cafe": "Café de Batidos",
+        "Pizza & Diner": "Pizzería y Diner",
+        "The Crispy Fryhouse": "La Casa del Crujiente",
+        "Diner & Melt Station": "Diner y Rincón Fundido",
+        "Grand Brunch Cafe": "Café Gran Brunch",
+        "Trattoria & Pizzeria": "Trattoria y Pizzería",
+        "The Grand Master Kitchen": "La Gran Cocina Maestra",
+
         // Meals
         "french_fries": "Patatas Fritas",
         "salad": "Ensalada",

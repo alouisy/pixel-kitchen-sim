@@ -135,7 +135,9 @@ export default async function handler(request) {
 
     if (request.method === 'DELETE') {
         const id = url.searchParams.get('id');
-        const playerToken = url.searchParams.get('playerToken');
+        // Token is sent in the X-Player-Token header so it stays out of URLs and logs.
+        // TODO: remove query fallback after one release
+        const playerToken = request.headers.get('x-player-token') || url.searchParams.get('playerToken');
 
         if (!id || !playerToken || !isValidPlayerToken(playerToken)) {
             return json(400, { error: 'Invalid delete request parameters.' });

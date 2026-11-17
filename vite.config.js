@@ -5,6 +5,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: true
+    // Set SOURCEMAP=true to emit source maps (off in production to avoid publishing a 3 MB .map).
+    sourcemap: process.env.SOURCEMAP === 'true'
   }
 });

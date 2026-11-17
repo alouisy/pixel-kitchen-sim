@@ -1,0 +1,1266 @@
+[
+  {
+    "name": "trash_bin",
+    "category": "stations",
+    "file": "stations/trash_bin.vox",
+    "size": [
+      12,
+      14,
+      12
+    ],
+    "voxelCount": 1312,
+    "warnings": []
+  },
+  {
+    "name": "fryer",
+    "category": "stations",
+    "file": "stations/fryer.vox",
+    "size": [
+      14,
+      14,
+      15
+    ],
+    "voxelCount": 1944,
+    "warnings": []
+  },
+  {
+    "name": "cutting_board",
+    "category": "stations",
+    "file": "stations/cutting_board.vox",
+    "size": [
+      12,
+      12,
+      2
+    ],
+    "voxelCount": 288,
+    "warnings": []
+  },
+  {
+    "name": "stove",
+    "category": "stations",
+    "file": "stations/stove.vox",
+    "size": [
+      14,
+      15,
+      3
+    ],
+    "voxelCount": 592,
+    "warnings": []
+  },
+  {
+    "name": "sink",
+    "category": "stations",
+    "file": "stations/sink.vox",
+    "size": [
+      14,
+      14,
+      12
+    ],
+    "voxelCount": 1034,
+    "warnings": []
+  },
+  {
+    "name": "toaster",
+    "category": "stations",
+    "file": "stations/toaster.vox",
+    "size": [
+      12,
+      10,
+      7
+    ],
+    "voxelCount": 712,
+    "warnings": []
+  },
+  {
+    "name": "mixer",
+    "category": "stations",
+    "file": "stations/mixer.vox",
+    "size": [
+      8,
+      8,
+      13
+    ],
+    "voxelCount": 370,
+    "warnings": []
+  },
+  {
+    "name": "blender",
+    "category": "stations",
+    "file": "stations/blender.vox",
+    "size": [
+      6,
+      6,
+      13
+    ],
+    "voxelCount": 308,
+    "warnings": []
+  },
+  {
+    "name": "dough_press",
+    "category": "stations",
+    "file": "stations/dough_press.vox",
+    "size": [
+      12,
+      12,
+      14
+    ],
+    "voxelCount": 546,
+    "warnings": []
+  },
+  {
+    "name": "pizza_oven",
+    "category": "stations",
+    "file": "stations/pizza_oven.vox",
+    "size": [
+      14,
+      14,
+      16
+    ],
+    "voxelCount": 1980,
+    "warnings": []
+  },
+  {
+    "name": "plate_stack",
+    "category": "stations",
+    "file": "stations/plate_stack.vox",
+    "size": [
+      12,
+      12,
+      12
+    ],
+    "voxelCount": 864,
+    "warnings": []
+  },
+  {
+    "name": "cup_stack",
+    "category": "stations",
+    "file": "stations/cup_stack.vox",
+    "size": [
+      8,
+      6,
+      12
+    ],
+    "voxelCount": 270,
+    "warnings": []
+  },
+  {
+    "name": "bowl_stack",
+    "category": "stations",
+    "file": "stations/bowl_stack.vox",
+    "size": [
+      10,
+      10,
+      10
+    ],
+    "voxelCount": 572,
+    "warnings": []
+  },
+  {
+    "name": "exhaust_hood",
+    "category": "stations",
+    "file": "stations/exhaust_hood.vox",
+    "size": [
+      16,
+      16,
+      16
+    ],
+    "voxelCount": 2848,
+    "warnings": []
+  },
+  {
+    "name": "plant",
+    "category": "stations",
+    "file": "stations/plant.vox",
+    "size": [
+      10,
+      10,
+      16
+    ],
+    "voxelCount": 684,
+    "warnings": []
+  },
+  {
+    "name": "kitchen_lamp",
+    "category": "stations",
+    "file": "stations/kitchen_lamp.vox",
+    "size": [
+      6,
+      6,
+      15
+    ],
+    "voxelCount": 244,
+    "warnings": []
+  },
+  {
+    "name": "coating_station",
+    "category": "stations",
+    "file": "stations/coating_station.vox",
+    "size": [
+      12,
+      12,
+      5
+    ],
+    "voxelCount": 632,
+    "warnings": []
+  },
+  {
+    "name": "table",
+    "category": "stations",
+    "file": "stations/table.vox",
+    "size": [
+      16,
+      16,
+      29
+    ],
+    "voxelCount": 1304,
+    "warnings": [
+      "scaled node supersampled"
+    ]
+  },
+  {
+    "name": "ingredient_bin_potato",
+    "category": "stations",
+    "file": "stations/ingredient_bin_potato.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_tomato",
+    "category": "stations",
+    "file": "stations/ingredient_bin_tomato.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_lettuce",
+    "category": "stations",
+    "file": "stations/ingredient_bin_lettuce.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_onion",
+    "category": "stations",
+    "file": "stations/ingredient_bin_onion.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_banana",
+    "category": "stations",
+    "file": "stations/ingredient_bin_banana.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_strawberry",
+    "category": "stations",
+    "file": "stations/ingredient_bin_strawberry.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_bun",
+    "category": "stations",
+    "file": "stations/ingredient_bin_bun.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_bread_slice",
+    "category": "stations",
+    "file": "stations/ingredient_bin_bread_slice.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_patty",
+    "category": "stations",
+    "file": "stations/ingredient_bin_patty.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_raw_chicken",
+    "category": "stations",
+    "file": "stations/ingredient_bin_raw_chicken.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_raw_bacon",
+    "category": "stations",
+    "file": "stations/ingredient_bin_raw_bacon.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_cheese_slice",
+    "category": "stations",
+    "file": "stations/ingredient_bin_cheese_slice.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_shredded_mozzarella",
+    "category": "stations",
+    "file": "stations/ingredient_bin_shredded_mozzarella.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_pizza_dough",
+    "category": "stations",
+    "file": "stations/ingredient_bin_pizza_dough.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_egg",
+    "category": "stations",
+    "file": "stations/ingredient_bin_egg.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_milk",
+    "category": "stations",
+    "file": "stations/ingredient_bin_milk.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_yogurt",
+    "category": "stations",
+    "file": "stations/ingredient_bin_yogurt.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_pancake_mix",
+    "category": "stations",
+    "file": "stations/ingredient_bin_pancake_mix.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_tomato_sauce",
+    "category": "stations",
+    "file": "stations/ingredient_bin_tomato_sauce.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_syrup",
+    "category": "stations",
+    "file": "stations/ingredient_bin_syrup.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_granola",
+    "category": "stations",
+    "file": "stations/ingredient_bin_granola.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "ingredient_bin_coating_mix",
+    "category": "stations",
+    "file": "stations/ingredient_bin_coating_mix.vox",
+    "size": [
+      16,
+      16,
+      1
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "banana",
+    "category": "items",
+    "file": "items/banana.vox",
+    "size": [
+      12,
+      4,
+      6
+    ],
+    "voxelCount": 91,
+    "warnings": []
+  },
+  {
+    "name": "bowl",
+    "category": "items",
+    "file": "items/bowl.vox",
+    "size": [
+      10,
+      10,
+      4
+    ],
+    "voxelCount": 164,
+    "warnings": []
+  },
+  {
+    "name": "bread_slice",
+    "category": "items",
+    "file": "items/bread_slice.vox",
+    "size": [
+      10,
+      10,
+      2
+    ],
+    "voxelCount": 172,
+    "warnings": []
+  },
+  {
+    "name": "bun",
+    "category": "items",
+    "file": "items/bun.vox",
+    "size": [
+      10,
+      10,
+      5
+    ],
+    "voxelCount": 288,
+    "warnings": []
+  },
+  {
+    "name": "cheese_slice",
+    "category": "items",
+    "file": "items/cheese_slice.vox",
+    "size": [
+      10,
+      10,
+      2
+    ],
+    "voxelCount": 101,
+    "warnings": []
+  },
+  {
+    "name": "chopped_lettuce",
+    "category": "items",
+    "file": "items/chopped_lettuce.vox",
+    "size": [
+      10,
+      10,
+      2
+    ],
+    "voxelCount": 73,
+    "warnings": []
+  },
+  {
+    "name": "chopped_tomato",
+    "category": "items",
+    "file": "items/chopped_tomato.vox",
+    "size": [
+      11,
+      11,
+      2
+    ],
+    "voxelCount": 128,
+    "warnings": []
+  },
+  {
+    "name": "coated_chicken_strips",
+    "category": "items",
+    "file": "items/coated_chicken_strips.vox",
+    "size": [
+      9,
+      10,
+      4
+    ],
+    "voxelCount": 210,
+    "warnings": []
+  },
+  {
+    "name": "coating_mix",
+    "category": "items",
+    "file": "items/coating_mix.vox",
+    "size": [
+      6,
+      9,
+      9
+    ],
+    "voxelCount": 396,
+    "warnings": []
+  },
+  {
+    "name": "cooked_bacon",
+    "category": "items",
+    "file": "items/cooked_bacon.vox",
+    "size": [
+      12,
+      7,
+      2
+    ],
+    "voxelCount": 144,
+    "warnings": []
+  },
+  {
+    "name": "cooked_chicken_tenders",
+    "category": "items",
+    "file": "items/cooked_chicken_tenders.vox",
+    "size": [
+      9,
+      10,
+      4
+    ],
+    "voxelCount": 210,
+    "warnings": []
+  },
+  {
+    "name": "cooked_fries",
+    "category": "items",
+    "file": "items/cooked_fries.vox",
+    "size": [
+      5,
+      5,
+      5
+    ],
+    "voxelCount": 60,
+    "warnings": []
+  },
+  {
+    "name": "cooked_omelette",
+    "category": "items",
+    "file": "items/cooked_omelette.vox",
+    "size": [
+      10,
+      6,
+      3
+    ],
+    "voxelCount": 180,
+    "warnings": []
+  },
+  {
+    "name": "cooked_onion_rings",
+    "category": "items",
+    "file": "items/cooked_onion_rings.vox",
+    "size": [
+      12,
+      10,
+      2
+    ],
+    "voxelCount": 56,
+    "warnings": []
+  },
+  {
+    "name": "cooked_pancakes",
+    "category": "items",
+    "file": "items/cooked_pancakes.vox",
+    "size": [
+      8,
+      8,
+      3
+    ],
+    "voxelCount": 156,
+    "warnings": []
+  },
+  {
+    "name": "cooked_patty",
+    "category": "items",
+    "file": "items/cooked_patty.vox",
+    "size": [
+      10,
+      10,
+      2
+    ],
+    "voxelCount": 152,
+    "warnings": []
+  },
+  {
+    "name": "cooked_pizza_margherita",
+    "category": "items",
+    "file": "items/cooked_pizza_margherita.vox",
+    "size": [
+      12,
+      12,
+      4
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "cup",
+    "category": "items",
+    "file": "items/cup.vox",
+    "size": [
+      8,
+      6,
+      6
+    ],
+    "voxelCount": 122,
+    "warnings": []
+  },
+  {
+    "name": "egg",
+    "category": "items",
+    "file": "items/egg.vox",
+    "size": [
+      6,
+      6,
+      8
+    ],
+    "voxelCount": 200,
+    "warnings": []
+  },
+  {
+    "name": "granola",
+    "category": "items",
+    "file": "items/granola.vox",
+    "size": [
+      6,
+      6,
+      8
+    ],
+    "voxelCount": 288,
+    "warnings": []
+  },
+  {
+    "name": "grilled_cheese_cooked",
+    "category": "items",
+    "file": "items/grilled_cheese_cooked.vox",
+    "size": [
+      12,
+      12,
+      6
+    ],
+    "voxelCount": 520,
+    "warnings": []
+  },
+  {
+    "name": "grilled_cheese_raw",
+    "category": "items",
+    "file": "items/grilled_cheese_raw.vox",
+    "size": [
+      12,
+      12,
+      6
+    ],
+    "voxelCount": 518,
+    "warnings": []
+  },
+  {
+    "name": "lettuce",
+    "category": "items",
+    "file": "items/lettuce.vox",
+    "size": [
+      8,
+      8,
+      8
+    ],
+    "voxelCount": 360,
+    "warnings": []
+  },
+  {
+    "name": "milk",
+    "category": "items",
+    "file": "items/milk.vox",
+    "size": [
+      6,
+      6,
+      9
+    ],
+    "voxelCount": 288,
+    "warnings": []
+  },
+  {
+    "name": "omelette_mix",
+    "category": "items",
+    "file": "items/omelette_mix.vox",
+    "size": [
+      8,
+      8,
+      3
+    ],
+    "voxelCount": 192,
+    "warnings": []
+  },
+  {
+    "name": "onion",
+    "category": "items",
+    "file": "items/onion.vox",
+    "size": [
+      8,
+      8,
+      10
+    ],
+    "voxelCount": 266,
+    "warnings": []
+  },
+  {
+    "name": "onion_rings_coated",
+    "category": "items",
+    "file": "items/onion_rings_coated.vox",
+    "size": [
+      12,
+      10,
+      2
+    ],
+    "voxelCount": 56,
+    "warnings": []
+  },
+  {
+    "name": "onion_rings_raw",
+    "category": "items",
+    "file": "items/onion_rings_raw.vox",
+    "size": [
+      12,
+      10,
+      2
+    ],
+    "voxelCount": 56,
+    "warnings": []
+  },
+  {
+    "name": "pancake_batter",
+    "category": "items",
+    "file": "items/pancake_batter.vox",
+    "size": [
+      10,
+      10,
+      4
+    ],
+    "voxelCount": 280,
+    "warnings": []
+  },
+  {
+    "name": "pancake_mix",
+    "category": "items",
+    "file": "items/pancake_mix.vox",
+    "size": [
+      8,
+      9,
+      8
+    ],
+    "voxelCount": 520,
+    "warnings": []
+  },
+  {
+    "name": "patty",
+    "category": "items",
+    "file": "items/patty.vox",
+    "size": [
+      10,
+      10,
+      2
+    ],
+    "voxelCount": 152,
+    "warnings": []
+  },
+  {
+    "name": "pizza_base",
+    "category": "items",
+    "file": "items/pizza_base.vox",
+    "size": [
+      10,
+      10,
+      2
+    ],
+    "voxelCount": 108,
+    "warnings": []
+  },
+  {
+    "name": "pizza_dough",
+    "category": "items",
+    "file": "items/pizza_dough.vox",
+    "size": [
+      8,
+      8,
+      7
+    ],
+    "voxelCount": 268,
+    "warnings": []
+  },
+  {
+    "name": "pizza_margherita_raw",
+    "category": "items",
+    "file": "items/pizza_margherita_raw.vox",
+    "size": [
+      10,
+      10,
+      3
+    ],
+    "voxelCount": 185,
+    "warnings": []
+  },
+  {
+    "name": "plate",
+    "category": "items",
+    "file": "items/plate.vox",
+    "size": [
+      12,
+      12,
+      2
+    ],
+    "voxelCount": 144,
+    "warnings": []
+  },
+  {
+    "name": "potato",
+    "category": "items",
+    "file": "items/potato.vox",
+    "size": [
+      8,
+      10,
+      6
+    ],
+    "voxelCount": 352,
+    "warnings": []
+  },
+  {
+    "name": "raw_bacon",
+    "category": "items",
+    "file": "items/raw_bacon.vox",
+    "size": [
+      12,
+      7,
+      2
+    ],
+    "voxelCount": 144,
+    "warnings": []
+  },
+  {
+    "name": "raw_chicken",
+    "category": "items",
+    "file": "items/raw_chicken.vox",
+    "size": [
+      8,
+      8,
+      3
+    ],
+    "voxelCount": 144,
+    "warnings": []
+  },
+  {
+    "name": "raw_chicken_strips",
+    "category": "items",
+    "file": "items/raw_chicken_strips.vox",
+    "size": [
+      9,
+      10,
+      2
+    ],
+    "voxelCount": 140,
+    "warnings": []
+  },
+  {
+    "name": "raw_fries",
+    "category": "items",
+    "file": "items/raw_fries.vox",
+    "size": [
+      5,
+      5,
+      5
+    ],
+    "voxelCount": 60,
+    "warnings": []
+  },
+  {
+    "name": "shredded_mozzarella",
+    "category": "items",
+    "file": "items/shredded_mozzarella.vox",
+    "size": [
+      8,
+      8,
+      1
+    ],
+    "voxelCount": 60,
+    "warnings": []
+  },
+  {
+    "name": "sliced_banana",
+    "category": "items",
+    "file": "items/sliced_banana.vox",
+    "size": [
+      12,
+      10,
+      1
+    ],
+    "voxelCount": 39,
+    "warnings": []
+  },
+  {
+    "name": "sliced_strawberry",
+    "category": "items",
+    "file": "items/sliced_strawberry.vox",
+    "size": [
+      11,
+      8,
+      2
+    ],
+    "voxelCount": 100,
+    "warnings": []
+  },
+  {
+    "name": "smoothie_ready",
+    "category": "items",
+    "file": "items/smoothie_ready.vox",
+    "size": [
+      6,
+      6,
+      12
+    ],
+    "voxelCount": 185,
+    "warnings": []
+  },
+  {
+    "name": "strawberry",
+    "category": "items",
+    "file": "items/strawberry.vox",
+    "size": [
+      8,
+      8,
+      8
+    ],
+    "voxelCount": 212,
+    "warnings": []
+  },
+  {
+    "name": "syrup",
+    "category": "items",
+    "file": "items/syrup.vox",
+    "size": [
+      7,
+      6,
+      9
+    ],
+    "voxelCount": 234,
+    "warnings": []
+  },
+  {
+    "name": "toasted_bread",
+    "category": "items",
+    "file": "items/toasted_bread.vox",
+    "size": [
+      10,
+      10,
+      2
+    ],
+    "voxelCount": 172,
+    "warnings": []
+  },
+  {
+    "name": "tomato",
+    "category": "items",
+    "file": "items/tomato.vox",
+    "size": [
+      8,
+      8,
+      8
+    ],
+    "voxelCount": 294,
+    "warnings": []
+  },
+  {
+    "name": "tomato_sauce",
+    "category": "items",
+    "file": "items/tomato_sauce.vox",
+    "size": [
+      8,
+      8,
+      6
+    ],
+    "voxelCount": 384,
+    "warnings": []
+  },
+  {
+    "name": "yogurt",
+    "category": "items",
+    "file": "items/yogurt.vox",
+    "size": [
+      8,
+      8,
+      6
+    ],
+    "voxelCount": 256,
+    "warnings": []
+  },
+  {
+    "name": "french_fries",
+    "category": "meals",
+    "file": "meals/french_fries.vox",
+    "size": [
+      7,
+      6,
+      6
+    ],
+    "voxelCount": 117,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "salad",
+    "category": "meals",
+    "file": "meals/salad.vox",
+    "size": [
+      9,
+      8,
+      4
+    ],
+    "voxelCount": 166,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "hamburger",
+    "category": "meals",
+    "file": "meals/hamburger.vox",
+    "size": [
+      10,
+      10,
+      7
+    ],
+    "voxelCount": 440,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "cheeseburger_combo",
+    "category": "meals",
+    "file": "meals/cheeseburger_combo.vox",
+    "size": [
+      14,
+      10,
+      8
+    ],
+    "voxelCount": 591,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "onion_rings",
+    "category": "meals",
+    "file": "meals/onion_rings.vox",
+    "size": [
+      13,
+      12,
+      5
+    ],
+    "voxelCount": 239,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "chicken_tenders_fries",
+    "category": "meals",
+    "file": "meals/chicken_tenders_fries.vox",
+    "size": [
+      12,
+      11,
+      5
+    ],
+    "voxelCount": 355,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "blt_sandwich",
+    "category": "meals",
+    "file": "meals/blt_sandwich.vox",
+    "size": [
+      15,
+      15,
+      13
+    ],
+    "voxelCount": 653,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "grilled_cheese_sandwich",
+    "category": "meals",
+    "file": "meals/grilled_cheese_sandwich.vox",
+    "size": [
+      12,
+      12,
+      6
+    ],
+    "voxelCount": 520,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "pancakes",
+    "category": "meals",
+    "file": "meals/pancakes.vox",
+    "size": [
+      10,
+      10,
+      8
+    ],
+    "voxelCount": 393,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "cheese_omelette",
+    "category": "meals",
+    "file": "meals/cheese_omelette.vox",
+    "size": [
+      12,
+      7,
+      4
+    ],
+    "voxelCount": 263,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "fruit_yogurt_bowl",
+    "category": "meals",
+    "file": "meals/fruit_yogurt_bowl.vox",
+    "size": [
+      10,
+      10,
+      5
+    ],
+    "voxelCount": 295,
+    "warnings": [
+      "container=bowl; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "smoothie",
+    "category": "meals",
+    "file": "meals/smoothie.vox",
+    "size": [
+      6,
+      6,
+      12
+    ],
+    "voxelCount": 185,
+    "warnings": [
+      "container=cup; V1 ignores contents arg, rendered via meal id"
+    ]
+  },
+  {
+    "name": "pizza_margherita",
+    "category": "meals",
+    "file": "meals/pizza_margherita.vox",
+    "size": [
+      12,
+      12,
+      4
+    ],
+    "voxelCount": 256,
+    "warnings": [
+      "container=plate; V1 ignores contents arg, rendered via meal id"
+    ]
+  }
+]

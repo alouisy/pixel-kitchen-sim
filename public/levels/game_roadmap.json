@@ -23,5 +23,30 @@
     "levelId": 5,
     "name": "Pizza & Diner",
     "filename": "level_5.json"
+  },
+  {
+    "levelId": 6,
+    "name": "The Crispy Fryhouse",
+    "filename": "level_6.json"
+  },
+  {
+    "levelId": 7,
+    "name": "Diner & Melt Station",
+    "filename": "level_7.json"
+  },
+  {
+    "levelId": 8,
+    "name": "Grand Brunch Cafe",
+    "filename": "level_8.json"
+  },
+  {
+    "levelId": 9,
+    "name": "Trattoria & Pizzeria",
+    "filename": "level_9.json"
+  },
+  {
+    "levelId": 10,
+    "name": "The Grand Master Kitchen",
+    "filename": "level_10.json"
   }
 ]

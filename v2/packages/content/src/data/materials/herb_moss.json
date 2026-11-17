@@ -1,0 +1,9 @@
+{
+  "id": "herb_moss", "index": 6,
+  "flavor": { "bitter": 0.3, "sour": 0.15, "umami": 0.1 },
+  "texture": { "juicy": 0.2, "chewy": 0.3 },
+  "thermal": { "conductivity": 8, "cookStart": 50, "perfect": [0.3, 0.55], "charStart": 0.7 },
+  "flammability": 0.6, "density": 0.2,
+  "colors": { "raw": "#5f9e4a", "cooked": "#3f7a35", "charred": "#1c2616" },
+  "cutSfx": "squishy", "edible": true, "harvestable": true
+}

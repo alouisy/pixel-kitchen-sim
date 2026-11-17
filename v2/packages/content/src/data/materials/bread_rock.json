@@ -1,0 +1,9 @@
+{
+  "id": "bread_rock", "index": 2,
+  "flavor": { "sweet": 0.1, "salty": 0.05 },
+  "texture": { "crunchy": 0.6, "chewy": 0.3 },
+  "thermal": { "conductivity": 10, "cookStart": 70, "perfect": [0.5, 0.75], "charStart": 0.85 },
+  "flammability": 0.45, "density": 0.35,
+  "colors": { "raw": "#d9b779", "cooked": "#a8672e", "charred": "#2a1b12" },
+  "cutSfx": "crisp", "edible": true, "harvestable": true
+}

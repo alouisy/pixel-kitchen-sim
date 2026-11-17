@@ -1,0 +1,112 @@
+{
+  "id": "l01_kiosque",
+  "nameKey": "level.l01.name",
+  "durationSeconds": 180,
+  "countdownSeconds": 3,
+  "recipes": [
+    "french_fries"
+  ],
+  "secondTicketAfterSeconds": 25,
+  "pacing": {
+    "minDelaySeconds": 1.5,
+    "maxDelaySeconds": 25,
+    "burstChance": 35,
+    "burstFactor": 0.35,
+    "calmFactor": 0.75,
+    "baseFromTicketTime": 0.3,
+    "baseMinSeconds": 4,
+    "baseMaxSeconds": 15
+  },
+  "buckets": {
+    "solo": {
+      "players": [
+        1,
+        1
+      ],
+      "rate": 0.55,
+      "maxActive": 2,
+      "ticketTimeMul": 1.25
+    },
+    "duo": {
+      "players": [
+        2,
+        2
+      ],
+      "rate": 1.0,
+      "maxActive": 2,
+      "ticketTimeMul": 1.0
+    },
+    "squad": {
+      "players": [
+        3,
+        4
+      ],
+      "rate": 1.6,
+      "maxActive": 3,
+      "ticketTimeMul": 0.95
+    },
+    "party": {
+      "players": [
+        5,
+        6
+      ],
+      "rate": 2.2,
+      "maxActive": 4,
+      "ticketTimeMul": 0.9
+    }
+  },
+  "scoring": {
+    "speedBonusCap": 30,
+    "streakSteps": [
+      [
+        0,
+        1000
+      ],
+      [
+        3,
+        1250
+      ],
+      [
+        6,
+        1500
+      ],
+      [
+        10,
+        2000
+      ]
+    ],
+    "expiredPenalty": 50,
+    "wrongPenalty": 20
+  },
+  "stars": {
+    "solo": [
+      740,
+      1350,
+      1850
+    ],
+    "duo": [
+      1200,
+      2200,
+      3000
+    ],
+    "squad": [
+      1800,
+      3300,
+      4500
+    ],
+    "party": [
+      2400,
+      4400,
+      6000
+    ]
+  },
+  "tuning": {
+    "chopSeconds": 1.6,
+    "walkSpeed": 4.0,
+    "dashSpeed": 9.5,
+    "dashTicks": 7,
+    "dashCooldownSeconds": 0.6,
+    "reach": 1.1,
+    "burnWarnSeconds": 2
+  }
+}

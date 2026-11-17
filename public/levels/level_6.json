@@ -1,0 +1,490 @@
+{
+  "levelId": 6,
+  "name": "The Crispy Fryhouse",
+  "theme": {
+    "floorColor1": "#3E2723",
+    "floorColor2": "#D7CCC8",
+    "borderColor": "#5D4037",
+    "counterStyle": "industrial",
+    "wallColor": "#8D6E63"
+  },
+  "duration": 210,
+  "newOrderDelay": 14,
+  "maxActiveOrders": 2,
+  "orderTimeMultiplier": 1.0,
+  "starThresholds": [
+    400,
+    850,
+    1350
+  ],
+  "availableMeals": [
+    "onion_rings",
+    "chicken_tenders_fries",
+    "french_fries"
+  ],
+  "layout": [
+    {
+      "name": "wall_back",
+      "type": "wall",
+      "position": {
+        "x": 0,
+        "z": -4
+      },
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_left",
+      "type": "wall",
+      "position": {
+        "x": -4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_right",
+      "type": "wall",
+      "position": {
+        "x": 4,
+        "z": 0
+      },
+      "rotation": -1.57,
+      "size": {
+        "width": 8.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_front_left",
+      "type": "wall",
+      "position": {
+        "x": -2.75,
+        "z": 4
+      },
+      "size": {
+        "width": 2.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "wall_front_right",
+      "type": "wall",
+      "position": {
+        "x": 2.75,
+        "z": 4
+      },
+      "size": {
+        "width": 2.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "name": "serving_pass",
+      "type": "serving",
+      "position": {
+        "x": -0.5,
+        "z": 4
+      },
+      "rotation": 3.14
+    },
+    {
+      "name": "serving_pass",
+      "type": "serving",
+      "position": {
+        "x": 0,
+        "z": 4
+      },
+      "rotation": 3.14
+    },
+    {
+      "name": "serving_pass",
+      "type": "serving",
+      "position": {
+        "x": 0.5,
+        "z": 4
+      },
+      "rotation": 3.14
+    },
+    {
+      "name": "counter_corner",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -3.5,
+        "z": 3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -2.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 0.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 1.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 2.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter_corner",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": -0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 0.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 1.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 2.5
+      }
+    },
+    {
+      "name": "counter",
+      "type": "counter",
+      "position": {
+        "x": 3.5,
+        "z": 3.5
+      }
+    },
+    {
+      "name": "table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": -0.5
+      }
+    },
+    {
+      "name": "table",
+      "type": "table",
+      "position": {
+        "x": 0,
+        "z": 0.5
+      }
+    },
+    {
+      "name": "potato_bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -3.5
+      },
+      "config": {
+        "ingredient": "potato"
+      }
+    },
+    {
+      "name": "onion_bin",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -2.5
+      },
+      "config": {
+        "ingredient": "onion"
+      }
+    },
+    {
+      "name": "chicken_box",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": -1.5
+      },
+      "config": {
+        "ingredient": "raw_chicken"
+      }
+    },
+    {
+      "name": "cutting_board",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": -0.5
+      },
+      "config": {
+        "processes": [
+          "potato",
+          "onion",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "onion": "onion_rings_raw",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "cutting_board",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": 0.5
+      },
+      "config": {
+        "processes": [
+          "potato",
+          "onion",
+          "raw_chicken"
+        ],
+        "result": {
+          "potato": "raw_fries",
+          "onion": "onion_rings_raw",
+          "raw_chicken": "raw_chicken_strips"
+        }
+      }
+    },
+    {
+      "name": "coating_station",
+      "type": "processor",
+      "position": {
+        "x": -3.5,
+        "z": 1.5
+      },
+      "config": {
+        "processes": [
+          "raw_chicken_strips",
+          "onion_rings_raw",
+          "raw_onion_rings"
+        ],
+        "result": {
+          "raw_chicken_strips": "coated_chicken_strips",
+          "onion_rings_raw": "onion_rings_coated",
+          "raw_onion_rings": "onion_rings_coated"
+        },
+        "processingTime": 2000
+      }
+    },
+    {
+      "name": "coating_mix_src",
+      "type": "ingredient_source",
+      "position": {
+        "x": -3.5,
+        "z": 2.5
+      },
+      "config": {
+        "ingredient": "coating_mix"
+      }
+    },
+    {
+      "name": "trash_bin",
+      "type": "trash",
+      "position": {
+        "x": -3.5,
+        "z": 3.5
+      }
+    },
+    {
+      "name": "deep_fryer",
+      "type": "processor",
+      "position": {
+        "x": -1.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "raw_fries",
+          "onion_rings_coated",
+          "coated_chicken_strips"
+        ],
+        "result": {
+          "raw_fries": "cooked_fries",
+          "onion_rings_coated": "cooked_onion_rings",
+          "coated_chicken_strips": "cooked_chicken_tenders"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "deep_fryer",
+      "type": "processor",
+      "position": {
+        "x": -0.5,
+        "z": -3.5
+      },
+      "config": {
+        "processes": [
+          "raw_fries",
+          "onion_rings_coated",
+          "coated_chicken_strips"
+        ],
+        "result": {
+          "raw_fries": "cooked_fries",
+          "onion_rings_coated": "cooked_onion_rings",
+          "coated_chicken_strips": "cooked_chicken_tenders"
+        },
+        "processingTime": 3000
+      }
+    },
+    {
+      "name": "exhaust_hood",
+      "type": "decoration",
+      "position": {
+        "x": -1.0,
+        "z": -3.5
+      }
+    },
+    {
+      "name": "plate_stack",
+      "type": "item_source",
+      "position": {
+        "x": 3.5,
+        "z": -1.5
+      },
+      "config": {
+        "item": "plate"
+      }
+    },
+    {
+      "name": "potted_plant",
+      "type": "decoration",
+      "position": {
+        "x": 3.5,
+        "z": 3.5
+      }
+    }
+  ]
+}
