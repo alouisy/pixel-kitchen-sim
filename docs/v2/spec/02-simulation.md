@@ -271,7 +271,7 @@ offset  size  content
 - The sum of `runLen` of every slot equals `header.ticks`.
 - `checkpoints`: `[tick, hash]` every 150 ticks (5 s) for desync debugging; verification only needs `finalHash`.
 - Size estimate: idle slots compress to a few records; a 6-player 180 s run is under 40 KB before gzip.
-- `verifyRun(log, claim)` re-simulates `ticks` steps from `config` and compares `hash()` and `score`; check `simVersion` and `contentHash` first.
+- `verifyRun(log, claim, opts?)` (async, returns `Promise<VerifyResult>`, see 07 §6) re-simulates `ticks` steps from `config` and compares `hash()` and `score`; check `simVersion` and `contentHash` first.
 
 ## 5. Items and the item state machine
 

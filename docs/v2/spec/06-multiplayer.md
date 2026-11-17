@@ -532,28 +532,30 @@ Render interpolation is unchanged from the single-player client: it draws the la
 
 ## 10. Sim worker integration
 
-The existing `worker.ts` owns a wall-clock timer for single-player (`startRush`). Online play needs a second mode where the **caller supplies the ticks**. Add to `v2/packages/sim/src/protocol.ts`:
+The sim worker protocol of [01 §8.1](./01-architecture.md) already has the **driven clock**: the caller supplies the ticks. Online play uses it and adds **no new message types**. This doc fixes how the net layer uses them.
 
-### 10.1 New messages
+### 10.1 Messages used (names from 01 §8.1)
 ```ts
-// MainToWorker additions
-| { type: 'rush-net-init'; seed: number; players: number; levelId: string; difficulty?: 'meal' | 'feast' }
-| { type: 'rush-advance'; frames: RushInput[][] }       // each frame = one RushInput per slot, in tick order
-| { type: 'rush-snapshot-request' }                      // reserved, unused in V2.0
-
-// WorkerToMain additions
-| { type: 'rush-net'; view: RushView; events: RushEvent[]; ticksRun: number;
-    hashes: Array<{ tick: number; hash: string }>; ended: boolean }
+// MainToWorker
+{ type: 'rush-init'; config: RunConfig; clock: 'driven' }          // online and replay playback; offline play uses clock 'realtime'
+{ type: 'rush-advance'; steps: RushInput[][] }                      // steps[t][slot], run exactly steps.length ticks
+{ type: 'rush-snapshot-request'; reqId: number }                    // -> rush-snapshot { reqId, tick, snapshot }   (RushSim.snapshot(), 02 §17.3)
+{ type: 'rush-restore'; snapshot: Uint8Array; tick: number }        // RushSim.restore(); the worker was rush-init'ed with the same RunConfig
+{ type: 'rush-log-request'; reqId: number }                         // -> rush-log { reqId, log: RunLog } (end of run, desync debugging)
+// WorkerToMain
+{ type: 'rush-ready'; simVersion: number; contentHash: string }     // reply to rush-init; mismatch with runStart.config => versionMismatch (§11.3)
+{ type: 'rush'; view: RushView; events: RushEvent[]; hash?: string } // after every rush-advance batch; hash present when view.tick % 30 === 0
+{ type: 'rush-snapshot'; reqId: number; tick: number; snapshot: Uint8Array }
+{ type: 'rush-error'; code: 'unknown_level' | 'content_mismatch' | 'bad_snapshot' | 'bad_input'; message: string }
 ```
-Behaviour in `worker.ts`:
-- `rush-net-init`: `stop()`, construct `RushSim({ seed, players, level: rushLevelById(levelId), difficulty })`, **no timer**, post an initial `rush-net` (tick 0 view, `ticksRun: 0`).
-- `rush-advance`: for each frame call `rush.step(frame)`. Collect events. After each step where `rush.tick % 30 === 0`, push `{ tick: rush.tick, hash: rush.stateHash() }`. After the whole batch post one `rush-net` message. A batch may hold up to 600 frames (fast-forward). Fast-forward batches post the view and **drop events** (`events: []`) when `frames.length > 6`... except `TimeUp`, which is always kept so the end of run is never lost.
-- The tick-after convention: `hashes[].tick` is `rush.tick` **after** the step (so tick 30 means 30 steps done). The same convention applies to `HashReport.tick` (§14).
-
-`rush-net` mode contains no clock reads; the determinism lint rule keeps passing.
+Rules for the net layer:
+1. **Batching and hashes.** The `rush` reply carries one `hash`, at the end of the batch, only when the sim tick is a multiple of 30. So the net layer **splits every batch so that a tick that is a multiple of 30 is always the last step of its `rush-advance`** (host: one step per beat, so this is automatic; clients and fast-forward: split at multiples of 30). The reported `HashReport.tick` is `view.tick` **after** the step (tick 30 = 30 steps done).
+2. Fast-forward batches (catch-up, resync, reconnect) may hold up to 300 steps per message to keep the worker responsive. The client UI **ignores the `events` of any batch with more than 6 steps**, except `TimeUp`, so no sound burst plays (the events still happened in the sim).
+3. Initial state: after `rush-init` the worker posts the tick-0 `rush` view. `rush-ready` is awaited before the peer sends `loaded`.
+4. The worker never reads a clock in `driven` mode; the determinism lint rule keeps passing.
 
 ### 10.2 Hash timing
-Host and client both get hashes from the worker, so the hash includes everything `stateHash()` hashes today (tick, phase, RNG state, score, chefs, stations' sockets, items, tickets). Spec [02](./02-simulation.md) guarantees that `stateHash()` covers all mutable state; if 02 adds state, 02 must extend the hash in the same change.
+Host and client both get hashes from the worker (`hash` field of `rush`), a 16 lowercase-hex `RushSim.stateHash()` ([02 §17](./02-simulation.md)). It must cover all mutable state (02 §17.3 lists the same state as `snapshot()`); if 02 adds state, 02 extends the hash and the snapshot in the same change. Snapshot round trip is checked by the net tests (`restore(snapshot())` then N steps equals N steps).
 
 ### 10.3 Ticker (host only)
 Web page timers throttle in hidden tabs. The host's confirm beat comes from a dedicated worker `v2/apps/client/src/net/ticker.worker.ts` which is allowed to read `performance.now()` (add it to the determinism lint exemption next to `worker.ts`):
@@ -571,10 +573,10 @@ function tick() {
 }
 ```
 The host shows a persistent banner `strings.net.keepVisible` when `document.hidden` (a hidden host tab may still be throttled by the browser; clients just see buffering).
-Clients use `requestAnimationFrame` plus a 25 ms `setInterval` fallback to call `playout.pull()`, because they can tolerate throttling (they catch up with the 1.5x rule and 4 frames per pull; a long hidden period triggers `resync` with `reason: 'catchup'`, §14.3).
+Clients use `requestAnimationFrame` plus a 25 ms `setInterval` fallback to call `playout.pull()`, because they can tolerate throttling (they catch up with the 1.5x rule and 4 frames per pull; a long hidden period triggers `catchupRequest`, §14.3).
 
 ### 10.4 Local singleplayer path
-Single-player and local-couch-only games keep using `rush-init` / `rush-input` unchanged (their own timer). Do not route offline play through the net layer. Both paths share `RushSim` and are covered by the same determinism tests.
+Single-player and local-couch-only games use `rush-init` with `clock: 'realtime'` and `rush-input` (01 §8.1; the worker's own timer). Do not route offline play through the net layer. Both paths share `RushSim` and are covered by the same determinism tests.
 
 ---
 
@@ -587,21 +589,21 @@ lobby --(host presses Start, all ready)--> starting --(barrier done)--> running 
 
 ### 11.1 Lobby screen (content for [05](./05-client-ui-input-audio.md))
 - Roster: one card per peer with nickname, chef preview (`ChefLook`), ready check, RTT dot, local-player badge (`x2`).
-- Host-only controls: **level picker** (the 10 levels, [08](./08-levels.md)), **difficulty** (Meal/Feast), **Start**, kick (x on a card), "Make host" is not offered (no manual migration in V2.0).
+- Host-only controls: **level picker** (the 10 levels, [08](./08-levels.md)), **difficulty** (Snack/Meal/Feast; Snack and the **Extended patience** toggle (`RunConfig.assist`) make the run unranked and show an "unranked" badge to everyone), **Start**, kick (x on a card), "Make host" is not offered (no manual migration in V2.0).
 - Guest controls: Ready toggle, look picker, "Add local player" (`+`, up to 4 total per peer, limited by room capacity), Leave.
 - Invite panel: the code `ABCD` in large letters, the link, a Copy button, a Share button.
 - Chat: one-line text input, 140 chars, last 50 messages. No profanity filter in V2.0 beyond the nickname filter in [07 §4.2](./07-backend-and-records.md#42-nickname-rules).
 
 ### 11.2 Rules
-1. The host picks `levelId` and `difficulty`. Any of the 10 levels can be picked in a room; levels the guest has not unlocked are playable (guest pass, records still count). Changing level or difficulty resets all guests' `ready` to false (the host's is implicit).
+1. The host picks `levelId`, `difficulty` and `assist`. Any of the 10 levels can be picked in a room; levels the guest has not unlocked are playable (guest pass, records still count). Changing level or difficulty resets all guests' `ready` to false (the host's is implicit).
 2. **Start** is enabled when `connected peers >= 1`, every non-host, non-spectator peer is `ready`, and total chefs `1..6`. If a peer is not ready the host sees "Waiting for Sam"; pressing Start while holding Shift is not a thing: the host can instead press **Start anyway** after 10 s of waiting, which moves unready peers to spectators for this run.
 3. Chef count in the run = sum of `localPlayers` of ready peers. The bucket (Solo/Duo/Squad/Party) follows from it via `bucketForPlayers` ([02](./02-simulation.md)); the lobby shows the bucket name.
 4. Slot assignment (host, at Start): sort peers by join order (host first); give each peer consecutive slots equal to its `localPlayers`. Example: host 2 local, B 1, C 3 -> slots 0-1 host, 2 B, 3-5 C.
 
 ### 11.3 Start sequence (numbered, exact)
-1. Host validates and sets `room.phase = 'starting'`, picks `seed` (u32 random), `runId` (uuid v4), computes `slots`, `contentHash`.
+1. Host validates and sets `room.phase = 'starting'`, picks `seed` (u32 random), `runId` (uuid v4), computes `slots` and the `RunConfig` (`simVersion`, `contentHash`, `levelId`, `players`, `seed`, `difficulty`, `assist`).
 2. Host sends `runStart { ..., startsInMs: 0 }` to all, then broadcasts `room`.
-3. Every peer (host too) creates the sim worker with `rush-net-init`, loads render assets, and replies `loaded { runId }`. A peer whose `buildId` or `contentHash` differs from the host's replies `loaded` never: it sends `leave` and shows `strings.net.versionMismatch` with a Reload button (this can only occur if a deploy happened mid-session).
+3. Every peer (host too) creates the sim worker with `rush-init { config, clock: 'driven' }`, loads render assets, waits for `rush-ready`, and replies `loaded { runId }`. A peer whose `rush-ready.simVersion` or `contentHash` differs from `config` (or gets `rush-error content_mismatch`) never replies `loaded`: it sends `leave` and shows `strings.net.versionMismatch` with a Reload button (this can only occur if a deploy happened mid-session).
 4. Barrier: the host waits until all peers sent `loaded` or `LOAD_BARRIER_MS` (20 s) elapsed. Peers that did not load stay in the run (their slots idle until they catch up via `Frames`; they are shown as `connected: true, loading`).
 5. Host sends `runGo { runId }`, sets `phase = 'running'`, starts the ticker, and tick 0 is confirmed at the next beat. The sim's own 3-second countdown phase is part of ticks 0..89 (`countdownSeconds: 3`), so every peer shows "3, 2, 1, Go" from the sim events.
 6. Clients start `PlayoutBuffer` on the first `Frames` packet; they show "Get ready" until playout starts (about 100..250 ms of buffering).
@@ -617,7 +619,7 @@ lobby --(host presses Start, all ready)--> starting --(barrier done)--> running 
 1. Joiner calls `POST /api/rooms/ABCD/join` with its token (or without, for a guest): response `{ jwt, hostPlayerId, iceServers }` or error `room_not_found` (404) / `room_expired` (410).
 2. Joiner connects `SupabaseSignaling` and tracks presence. It waits up to 3 s for a presence entry with `isHost: true`; if none, show `strings.net.hostAbsent` and retry every 2 s up to 10 times.
 3. Joiner sends `join-request` to the host's `peerId`.
-4. Host checks: protocol equal, `buildId` equal, total chefs + `localPlayers` <= 6, not banned, phase. Reply `join-accept { rejoinSecret }` (random 16 bytes hex, stored in `HostSession.rejoin[peerId]`) or `join-reject { reason }`.
+4. Host checks: protocol equal, `simVersion` equal to `SIM_VERSION`, total chefs + `localPlayers` <= 6, not banned, phase. Reply `join-accept { rejoinSecret }` (random 16 bytes hex, stored in `HostSession.rejoin[peerId]`) or `join-reject { reason }`.
 5. On accept, the joiner creates the `RTCPeerConnection` (§7), creates both negotiated channels, makes an offer, sends `sdp`. Host answers. ICE via `ice` events.
 6. When `ctl` opens, joiner sends `hello`. Host replies `welcome { peerId, rejoinSecret, room }` and broadcasts `room`.
 7. Typical total time 1.5..4 s. The joiner's `rejoinSecret` is stored in `sessionStorage['pk2.rejoin.ABCD']`.
@@ -631,18 +633,18 @@ Detection on the host: `RTCPeerConnection.connectionState` `failed`, the `ctl` c
 ### 12.4 Reconnect
 1. The client's `RTCPeerConnection` failed or its tab reloaded. It still has `rejoinSecret` (sessionStorage) and the room code (in the URL or `localStorage['pk2.lastRoom']` with timestamp < 2 h).
 2. It runs §12.1 steps 1..5 but its `join-request` is followed on `ctl` by `hello { rejoinSecret }`.
-3. The host matches `rejoinSecret` to the old `PeerInfo` (the secret must match exactly), restores its slots, and sends `welcome` then `resync { reason: 'reconnect', toTick: H, chunks }` + `logChunk`s (§14.3).
-4. The client rebuilds its sim from the log (`rush-net-init` then `rush-advance` with all frames up to `H`), then continues with live `Frames`. Total typically 1..3 s.
+3. The host matches `rejoinSecret` to the old `PeerInfo` (the secret must match exactly), restores its slots, and sends `welcome` then a catch-up bundle (`resync { reason: 'reconnect', ... }` + `catchupChunk`s, snapshot + tail, §14.3).
+4. The client restores the snapshot (`rush-init` then `rush-restore`), advances the tail frames up to `H`, then continues with live `Frames`. If `restore` fails (`rush-error bad_snapshot`) it falls back to full log replay (§14.3). Total typically 0.5..2 s.
 5. After the grace expires, the slots stay idle for the rest of the run and the peer can only spectate (it may rejoin as spectator).
 
 ### 12.5 Late join (new peer while `phase = 'running'`)
-A run's player count is fixed at construction, so a new peer **cannot get a chef** mid-run. It is accepted as a **spectator** (`PeerInfo.spectator = true`, no slots), receives the log (`resync` + `logChunk`) and live `Frames`, and watches. It becomes a normal player at the next lobby. The host decides nothing: the same handshake applies, and the room shows "Sam is watching". Spectators do not count toward `MAX_CHEFS` but toward a cap of 12 peers total, spectators use `ctl` and `sim` the same way and send no `InputBatch`. (`NET_CONST.MAX_PEERS` counts player peers only; the 12 cap is `MAX_PEERS_INCLUDING_SPECTATORS = 12` in constants.)
+A run's player count is fixed at construction, so a new peer **cannot get a chef** mid-run. It is accepted as a **spectator** (`PeerInfo.spectator = true`, no slots), receives a catch-up bundle (`resync { reason: 'lateJoin' }`, snapshot + tail, §14.3) and live `Frames`, and watches. It becomes a normal player at the next lobby. The host decides nothing: the same handshake applies, and the room shows "Sam is watching". Spectators do not count toward `MAX_CHEFS` but toward a cap of 12 peers total, spectators use `ctl` and `sim` the same way and send no `InputBatch`. (`NET_CONST.MAX_PEERS` counts player peers only; the 12 cap is `MAX_PEERS_INCLUDING_SPECTATORS = 12` in constants.)
 
 ### 12.6 Kick and ban
 Host `kick { peerId }` sends `kick { reason: 'host' }`; the peer's `rejoinSecret` is revoked and its `playerId` is blocked from re-joining this room for its lifetime. No cross-room ban in V2.0.
 
 ### 12.7 Host leaves: host migration (specified behaviour)
-Because every peer holds the full `ConfirmedLog`, a new host can resume the stream without a snapshot.
+Because every peer holds the full `ConfirmedLog` and a rolling snapshot, a new host can resume the stream without a host snapshot. Every peer takes a snapshot of its own sim every `SNAPSHOT_EVERY_TICKS` (150) applied ticks (`rush-snapshot-request`, keeps the last `SNAPSHOT_KEEP` = 2, with the tick it belongs to); the host takes none unless a catch-up needs one.
 
 **Successor:** `RoomState.successorPeerId` = first connected non-host, non-spectator peer by join order. Recomputed and broadcast on each roster change.
 
@@ -655,10 +657,10 @@ Because every peer holds the full `ConfirmedLog`, a new host can resume the stre
 4. Each other survivor opens a new `RTCPeerConnection` to the new host (offer to it, §5.3) and sends `hello { rejoinSecret: <its old secret> }`... the new host does not know old secrets, so for a migration the new host accepts any survivor whose `playerId`/`peerId` appears in its last `RoomState` copy. (Every peer received `RoomState` broadcasts, so it has the roster.)
 5. When a survivor connects, the new host compares ticks: let `Tc` = the survivor's `ackTick` carried in `hello` (add field `ackTick?: number`; clients put their `contiguousEnd` there).
    - If `Tc <= T`: the survivor is behind or equal. The new host just starts sending `Frames` from `Tc` (catch-up path if more than 24 behind).
-   - If `Tc > T`: the survivor saw frames the new host did not. The survivor **truncates its log to T** and **rebuilds its sim from the log** (`rush-net-init` + `rush-advance` with frames 0..T-1). Deterministic, about 1..2 s. Frames between `T` and `Tc` that only that survivor saw are discarded: the new host's log is the truth.
+   - If `Tc > T`: the survivor saw frames the new host did not. The survivor **truncates its log to T** and **rewinds its sim to T**: it restores its newest own snapshot with `snapshotTick <= T` (`rush-init` + `rush-restore`) and advances its log frames up to T; if it has no such snapshot (or `restore` fails) it replays the whole log `0..T-1` (the fallback, 1..2 s). Deterministic. Frames between `T` and `Tc` that only that survivor saw are discarded: the new host's log is the truth.
 6. When every survivor connected (or 8 s passed; stragglers join as reconnecting), the new host broadcasts `hostChange { epoch, hostPeerId }`, starts the ticker at tick `T`, and the run continues. The old host's chefs are idle (the old host may rejoin as a normal client within the grace).
 7. If no successor exists (the host was the only peer, or all other peers are spectators) the run ends and every peer sees `strings.net.roomClosed`.
-8. The run remains valid for the leaderboard: the replay is the new host's log. The `final` claim comes from the sim as usual. A migration is recorded in the replay header as `migrations: number` (informational).
+8. The run remains valid for the leaderboard: the replay is the new host's log. The `final` claim comes from the sim as usual. A migration is not recorded in the `.pkr` (its header is fixed by 02 §4.6); the log is the same as if the new host had sequenced from the start.
 
 Phase 1 behaviour before migration is implemented: **host leaves = the run is aborted and everyone returns to the title screen** with `strings.net.roomClosed`. Migration is step M in §18.
 
@@ -667,8 +669,8 @@ Phase 1 behaviour before migration is implemented: **host leaves = the run is ab
 ## 13. Mixed couch and online players
 
 - A **peer** is one browser tab. It owns 1..4 **local chefs** (couch players, each with a gamepad or the keyboard, per [05](./05-client-ui-input-audio.md)). Total chefs across all peers is at most 6.
-- Chef identity is the **slot**. `SlotAssign.slot` is the index in `RushSim.chefs`; the peer sends one `InputSample` per owned slot per tick.
-- The input mapping (device -> local player index 0..3) is purely client side. The peer builds `RushInput` per local player, converts to `InputSample`, and tags with the slot id from `RunStart.slots`.
+- Chef identity is the **slot**. `SlotAssign.slot` is the index in `RushSim.chefs`; the peer sends one `RushInput` per owned slot per tick.
+- The input mapping (device -> local player index 0..3) is purely client side. The peer builds one `RushInput` per local player and tags it with the slot id from `runStart.slots`.
 - Host with local chefs: the host's local slots go through the same `HostInputQueue` path (§9.3 step 1).
 - Examples: "2 PCs with 3 players each" = host peer (slots 0-2) + client peer (slots 3-5); the bucket is Party. "1 PC with 4 couch players + 2 remote friends" = host (0-3), B (4), C (5).
 - Couch join/leave **during a run** is not supported (player count is fixed). In the lobby, a peer changes its count with `setLocal` until the room is at capacity.
@@ -680,32 +682,40 @@ Phase 1 behaviour before migration is implemented: **host leaves = the run is ab
 ## 14. Desync detection and recovery
 
 ### 14.1 Detection
-- Every `HASH_EVERY_TICKS` (30) ticks, the worker returns `{ tick, hash }` (§10.1). Each client sends `ctl` `hash { runId, tick, hash }` for each tick that is a multiple of 30. The host sends nothing: it compares.
+- Every `HASH_EVERY_TICKS` (30) ticks, the worker's `rush` reply carries `hash` (§10.1). Each client sends `ctl` `hash { runId, tick, hash }` for each tick that is a multiple of 30. The host sends nothing: it compares.
 - `HashChecker` on the host keeps its own `Map<tick, hash>` ring (`HASH_RING` = 600 entries = 20 s). On `hash` from a client: if the tick is in the ring and the hashes differ: **desync(peer, tick)**. If the tick is older than the ring: ignore (the peer is lagging terribly and will be caught up by the catch-up path anyway).
 - Clients being behind the host is normal: they report tick 30 when the host is at tick 150; the ring handles it.
 
 ### 14.2 Reaction (host)
-1. Log `desync` telemetry (`{ runId, peerId, tick, buildId, ua }`, fed to the opt-out telemetry of [09](./09-testing-and-quality.md)).
-2. Mark the peer `resyncing` and send `resync { reason: 'desync', toTick: H, chunks }`, then `logChunk`s, where `H` = host's current confirmed tick.
+1. Log `desync` telemetry (`{ runId, peerId, tick, simVersion, ua }`, fed to the opt-out telemetry of [09](./09-testing-and-quality.md)).
+2. Mark the peer `resyncing` and send `resync { reason: 'desync', mode: 'log', snapshotTick: 0, toTick: H, ... }`, then `catchupChunk`s, where `H` = host's current confirmed tick. **Desync repair always uses `mode: 'log'` (full input-log replay)**, never a snapshot: a snapshot of the host would hide a divergence that the log replay can expose (the peer re-derives the state from inputs only, which is also what the server verifier does).
 3. A peer that desyncs **twice in 60 s** is moved to **spectator** for the rest of the run: its slots go idle, it shows `strings.net.desyncSpectate`. This stops a single browser with a bug from thrashing.
 4. If **two or more** distinct peers desync within 5 s of each other the host assumes *its own* state is suspect: it logs `host_suspect` telemetry, still treats itself as truth, and continues (documented limitation; a hash disagreement between several clients and the host is a test failure to fix, not a runtime condition to resolve).
 
-### 14.3 Log transfer (used by desync, reconnect, catch-up, late join)
-- Host builds `body = ConfirmedLog.toReplayBody()` for ticks `[0, H)` (full log; the log is small: about 20..40 KB deflated for a 5,500-tick 6-chef run).
-- Split into raw 8 KB chunks, base64-encode each into `logChunk { index, of, b64 }`, send over `ctl` (reliable, ordered).
-- Client: on `resync`, **stop playout**, reset `PlayoutBuffer.nextTick = 0`, `rush-net-init` (same seed/level/players as `runStart`), reassemble chunks, `decodeReplayBody`, `rush-advance` with all frames in batches of 300 frames (to keep the worker responsive), set `PlayoutBuffer.nextTick = H`, resume. Frames for ticks >= H arrive on `sim` as normal (the host keeps sending `Frames` from `H` during the transfer; the client buffers them).
-- While transferring, the host skips `Frames` for that peer for ticks < H only if the peer's `ackTick` is < `H - 24`; otherwise it keeps sending.
-- Expected duration: transfer 40 KB over a reliable channel is under 1 s; re-sim 5,500 ticks takes about 0.3..1.5 s (the 02 sim budget is under 0.3 ms per tick). A 2 s spinner `strings.net.resyncing` covers it.
-- `catchup` is triggered by the client itself (`logRequest`) when its playout buffer is more than 90 ticks (3 s) behind the host (a hidden tab, a long freeze).
+### 14.3 Catch-up transfer (desync, reconnect, late join, catch-up)
+Two modes, chosen by the host per `resync`:
+
+| Mode | Used for | Body | Client work |
+|---|---|---|---|
+| `snapshot` | `reconnect`, `lateJoin`, `catchup` | `RushSim.snapshot()` bytes of the host (taken with `rush-snapshot-request` at tick `snapshotTick`), then the frame tail `[snapshotTick, toTick)` as `ConfirmedLog.encodeBody` | `rush-init` (same `RunConfig`), `rush-restore { snapshot, tick: snapshotTick }`, `rush-advance` the tail, set playout to `toTick` |
+| `log` | `desync` (always), and the **fallback** of `snapshot` whenever the client answers `rush-error bad_snapshot`, the snapshot is rejected, or the host has no snapshot | all frames `[0, toTick)` as `ConfirmedLog.encodeBody(0, toTick)` | `rush-init`, `rush-advance` all frames in batches of 300 (split at multiples of 30), set playout to `toTick` |
+
+Steps (both modes):
+1. Host decides `toTick = H` (its current confirmed tick) and, for `snapshot` mode, asks its worker for a snapshot; the reply says at which tick it was taken (`snapshotTick <= H`; the host's worker runs at the frontier, so the tail is a handful of frames). The tail is read from the host's `ConfirmedLog`.
+2. Host sends `resync { runId, reason, mode, snapshotTick, toTick, snapshotBytes, chunks }`, then `catchupChunk { index, of, b64 }` over `ctl` (reliable, ordered, 8 KB raw per chunk). Body = `snapshot bytes (snapshotBytes long)` followed by the encoded frames.
+3. Client: **stop playout**, reassemble, rebuild per the table, reset `PlayoutBuffer.nextTick = toTick`, resume. Frames for ticks >= `toTick` arrive on `sim` as normal (the host keeps sending `Frames` from `toTick` during the transfer; the client buffers them). The host skips `Frames` for that peer for ticks < `toTick` only if its `ackTick` is `< toTick - 24`.
+4. Sizes (`Default (tunable)` estimates, measure in tests): snapshot JSON about 20..80 KB (02 §17.3), frame tail under 2 KB, full log body about 20..40 KB for a 5,500-tick 6-chef run. Transfer well under 1 s on a reliable channel; `restore` is instant; a full-log replay takes 0.3..1.5 s (02 sim budget under 0.3 ms per tick). A spinner `strings.net.resyncing` covers it.
+5. `catchup` is triggered by the client itself (`catchupRequest`) when its playout buffer is more than 90 ticks (3 s) behind the host (a hidden tab, a long freeze).
+6. The snapshot is the **host's** state, so a client that restores it is by construction equal to the host at `snapshotTick`; the next hash report (within 1 s) proves it.
 
 ---
 
 ## 15. Run end and record submission hand-off
 
-1. The sim posts `TimeUp` (phase `ended`). The host stops the ticker after confirming that tick and sends `runEnd { runId, ticks, final }`, where `final` is read from the host's `RushView` (`score, stars, served, expired, wrong`) plus `RushSim.stateHash()`.
-2. Each client compares its own final state to `final` (hash equality). Mismatch: treat as desync (§14.2) once.
-3. Each peer, **independently**, builds the replay container ([07 §6.2](./07-backend-and-records.md#62-replay-container-format)) from its own log and submits it with `POST /api/runs` using its own token ([07 §3.4](./07-backend-and-records.md#34-runs)). The server dedupes identical replays by hash (`v2_runs.replay_hash` unique) and attaches each submitter as a participant. This means the host cannot silently omit teammates, and a guest without a token simply does not submit.
-4. The `runToken` for submission comes from `POST /api/runs/start`, which **each peer** calls when `runGo` arrives (best effort, fire and forget; if it fails the run is unranked, never blocking play).
+1. The sim posts `TimeUp` (phase `ended`). The host stops the ticker after confirming that tick and sends `runEnd { runId, ticks, result }`, where `result` is the host sim's `RunResult` (01 §7.6; it includes `hash`).
+2. Each client compares its own `RunResult` to `result` (hash and score equality). Mismatch: treat as desync (§14.2) once.
+3. Each peer, **independently**, takes its `RunLog` from its worker (`rush-log-request`), builds the `.pkr` file (`encodePkr`, `@ga/records`, [07 §6.2](./07-backend-and-records.md#62-replay-container-format)) and submits it with `POST /api/runs` using its own token ([07 §3.4](./07-backend-and-records.md#34-runs)). The server dedupes identical replays by `replay_key` (`v2_runs.replay_key` unique) and attaches each submitter as a participant. This means the host cannot silently omit teammates, and a guest without a token simply does not submit.
+4. The `runToken` for submission comes from `POST /api/runs/start`, which **each peer** calls when `runGo` arrives (best effort, fire and forget; if it fails the run is unranked, never blocking play). Runs with `config.assist === true` or `difficulty === 'snack'` skip this call and the submission entirely (unranked, [07 §9.6](./07-backend-and-records.md#96-assisted-and-unranked-runs)).
 5. Results screen shows "Verifying..." then "Verified, rank #N" or "Not verified" from `GET /api/runs/:id`.
 
 ---
@@ -754,12 +764,13 @@ It uses `Prng` from `@ga/shared` (seeded) for jitter and loss, so a failing test
 | File | What it asserts |
 |---|---|
 | `codec.test.ts` | Round-trip of every message; `InputBatch` and `Frames` exact byte sizes from §8.2; first frame full; truncated packets rejected |
+| `wire.test.ts` | `writeInput` is byte-identical to `@ga/sim` `encodeRushInput` for 10^5 random inputs; `ConfirmedLog.encodeBody` equals the `@ga/records` `.pkr` body for the same frames |
 | `inputQueue.test.ts` | seq dedupe, gap fill, merge rule keeps A/B edges, depth cap |
 | `playout.test.ts` | Start threshold, rates 0.9/1.0/1.5, stall detection, B adaptation under synthetic jitter |
 | `lockstep.test.ts` | 6 virtual peers with random bot inputs (reuse `rush/bot.ts` style), 180 s run, **all hashes equal** at every 30th tick on: ideal link; 60 ms +/- 20 jitter; 120 ms +/- 40 and 3% loss; 200 ms and 8% loss; asserts no peer ever blocks another (host tick count unaffected by a 2 s blackout of one peer) |
-| `resync.test.ts` | Force a desync (mutate one peer's sim state), expect detection within 30 ticks + RTT and recovery to equal hashes within 3 virtual seconds; double desync -> spectator |
-| `reconnect.test.ts` | Disconnect a peer 10 s, reconnect with `rejoinSecret`, catches up, same hash |
-| `migration.test.ts` | Kill the host at tick 1,000 with peers at different `ackTick`s; successor takes over; all survivors reach the same final hash; replay verifies with `verifyReplay` |
+| `resync.test.ts` | Force a desync (mutate one peer's sim state), expect detection within 30 ticks + RTT and recovery (full-log replay) to equal hashes within 3 virtual seconds; double desync -> spectator; `snapshot` mode and its `bad_snapshot` fallback to `log` mode |
+| `reconnect.test.ts` | Disconnect a peer 10 s, reconnect with `rejoinSecret`, catches up via snapshot + tail, same hash; same with the snapshot corrupted (falls back to log) |
+| `migration.test.ts` | Kill the host at tick 1,000 with peers at different `ackTick`s; successor takes over; all survivors reach the same final hash; replay verifies with `verifyRun` (`@ga/records`); a survivor ahead of the new host rewinds via its rolling snapshot, and again with snapshots disabled (full-log fallback) |
 | `mixed.test.ts` | 2 peers x 3 local chefs; slot mapping and input routing |
 
 All suites run under `pnpm test` (vitest root config) and finish in under 60 s total.
@@ -784,11 +795,11 @@ Each step is shippable and tested before the next. Steps map to backlog tickets 
 | Step | Work | Done when |
 |---|---|---|
 | N1 | `@ga/net` skeleton, `constants.ts`, `protocol.ts`, `codec.ts` + `codec.test.ts` | Codec tests green |
-| N2 | `@ga/sim/verify` replay body codec and `SIM_BUILD_ID`, `contentHashFor` ([07 §6](./07-backend-and-records.md#6-run-submission-and-server-re-verification)) | Replay round-trip and a recorded bot run re-simulates to the same hash |
-| N3 | `rush-net-init` / `rush-advance` in the sim worker | A test feeds frames to the worker and gets the same hash as the in-process `RushSim` |
+| N2 | Prerequisites from other docs: `RunConfig`, `SIM_VERSION`, `contentHash`, `RushSim.snapshot()/restore()`, the 5-byte codec ([01 §7.6](./01-architecture.md), [02 §4.4, §17.3](./02-simulation.md)), and `@ga/records` `.pkr` + `verifyRun` ([07 B1-B2](./07-backend-and-records.md#14-implementation-order)) | `restore(snapshot())` + N steps equals N steps; a recorded bot run verifies |
+| N3 | Worker driven clock (`rush-init clock:'driven'`, `rush-advance`, `rush-snapshot-request`, `rush-restore`, 01 §8.1) wired in the net layer | A test feeds frames to the worker and gets the same hash as the in-process `RushSim` |
 | N4 | `HostInputQueue`, `HostSequencer`, `PlayoutBuffer`, `ConfirmedLog` with `MemoryTransport` | `inputQueue` and `playout` tests green |
 | N5 | `SimulatedNetwork` and `lockstep.test.ts` | 6 peers, 3 profiles, hashes equal |
-| N6 | `HashChecker`, log transfer, `resync.test.ts`, `reconnect.test.ts` | Tests green |
+| N6 | `HashChecker`, catch-up transfer (snapshot + log modes), `resync.test.ts`, `reconnect.test.ts` | Tests green |
 | N7 | `webrtc.ts` + `LocalSignaling` + harness page | Harness n=2 plays a bot run, all hashes equal in a real browser |
 | N8 | Server: rooms, JWT, TURN functions ([07 §3](./07-backend-and-records.md#3-netlify-functions)), Realtime policies, `SupabaseSignaling` | Two real browsers on two machines join `/r/ABCD` |
 | N9 | Lobby UI, ready-up, level/difficulty choice, runStart barrier, results hand-off ([05](./05-client-ui-input-audio.md)) | Full flow from title to results with 3 players, one with 2 couch chefs |
@@ -806,14 +817,15 @@ Each step is shippable and tested before the next. Steps map to backlog tickets 
 | Area | Current (repo, 2026-11-17) | Target (this doc) |
 |---|---|---|
 | Net code | None. No `@ga/net`, no WebRTC, no signaling, no Supabase client in `v2/` | Package and files in §3 |
-| Sim worker | `worker.ts` `startRush` runs a wall-clock `setInterval` (8 ms) with `acc >= SIM_DT_MS`, up to 5 steps; inputs via `rush-input` (`RushInput[]`, one per chef, latest wins); hash every 30 ticks via `rush.stateHash()` posted with the view | Add `rush-net-init` + `rush-advance` (§10); keep the existing path for offline |
-| Input type | `RushInput { move:[i8,i8], buttons, click, clickSeq, clickKind }` with `RB_A/X/B`; click-to-walk exists (`clickKind 0/1`) | Wire form `InputSample` (§8.1). Owner decision 5: click-to-walk is removed; `clickKind` stays on the wire (`flags` bit0) until [02](./02-simulation.md) deletes it, then the bit stays reserved. Add `RB_T` (throw) when level 3 lands |
+| Sim worker | `worker.ts` `startRush` runs a wall-clock `setInterval` (8 ms) with `acc >= SIM_DT_MS`, up to 5 steps; inputs via `rush-input` (`RushInput[]`, one per chef, latest wins); hash every 30 ticks via `rush.stateHash()` posted with the view; init is `rush-init {seed, players, levelId, ff}` | 01 §8.1 protocol: `rush-init {config: RunConfig, clock}`, `rush-advance`, snapshot/restore, log (§10). Offline keeps `clock: 'realtime'` |
+| Input type | `RushInput { move:[i8,i8], buttons, click, clickSeq, clickKind }` with `RB_A/X/B`; click-to-walk exists (`clickKind 0/1`) | `RushInput` of 02 §4.1 (no `clickKind`, `RB_T` added), 5 bytes on the wire (02 §4.4, §8.1 here). Removal of click-to-walk is delivered by the sim tickets before net work starts |
 | Hash | `RushSim.stateHash()` hashes tick, phase, RNG state, score/streak/served/expired/wrong/timeLeft, spawn counters, all chef fields (as `f64`), station sockets, items, tickets | Same function is the lockstep checksum. Chef position uses `f64` (not Q8). Cross-browser safe as long as only `+ - * /` and `sqrt` are used (no `Math.sin/cos/pow` in sim); lint rule exists |
 | Brief says "integer or Q8 state" | `ChefRt` uses `f64` | [02](./02-simulation.md) decides whether to convert; the net layer works with either, provided the determinism test in §17.2 passes on Chrome, Firefox and Safari |
-| Seed | `Prng(seed).split('rush')` | Host-chosen u32 in `runStart.seed` |
+| Seed | `Prng(seed).split('rush')` | Host-chosen u32 in `runStart.config.seed` |
 | Players | `RushOptions.players`, bucket via `bucketForPlayers` | Same, 1..6 |
-| Difficulty | Not in `RushOptions` | `RushOptions.difficulty?: 'meal' \| 'feast'` added by [02](./02-simulation.md); net just carries it |
+| Difficulty, assist | Not in `RushOptions` | `RushOptions.difficulty?: 'snack' \| 'meal' \| 'feast'` (02 §15.3) and `RunConfig.assist` (05, [07 §9.6](./07-backend-and-records.md#96-assisted-and-unranked-runs)); net just carries them in `runStart.config` |
 | Backend | V1 Netlify functions only | [07](./07-backend-and-records.md) |
+| Snapshot | none | `RushSim.snapshot()/restore()` (02 §17.3, target) used for catch-up and migration; log replay is the fallback and the desync repair |
 | Design docs | `docs/v2/10` describes host-authoritative state sync with prediction, voxel ops, snapshots | **Superseded by this doc**: lockstep. Reusable from 10: topology, STUN/TURN, rooms, reconnect grace, voice mesh, test ideas |
 
 ---
@@ -827,4 +839,4 @@ Each step is shippable and tested before the next. Steps map to backlog tickets 
 5. A tampered client (state mutated in devtools) is detected within 1.1 s plus RTT and repaired or moved to spectator as specified.
 6. Joining via `/r/ABCD` on a second device reaches the lobby in under 5 s on a normal network (TURN not needed) and in under 12 s through TURN.
 7. A 2 PCs x 3 chefs room finishes a run and the run verifies on the server ([07 §6](./07-backend-and-records.md#6-run-submission-and-server-re-verification)).
-8. Bandwidth, measured in the harness for 6 chefs: host uplink <= 25 KB/s total, client uplink <= 3 KB/s (3 local chefs) or <= 1.5 KB/s (1 chef).
+8. Bandwidth, measured in the harness for 6 chefs: host uplink <= 20 KB/s total, client uplink <= 3 KB/s (3 local chefs) or <= 1.5 KB/s (1 chef).

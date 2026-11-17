@@ -28,7 +28,7 @@
 3. **No accounts, no OAuth, no email.** Identity = `playerId` (uuid), `token` (secret), `recoveryCode` (secret), `friendCode` (public), nickname.
 4. **Everything is idempotent** where a retry is plausible (submit, friend add).
 5. Names reused from other docs (do not rename): `RunConfig`, `RunResult`, `RunLog`, `SIM_VERSION`, `contentHash(levelId)` ([01 §7.6](./01-architecture.md)); `InlineSimDriver` ([01 §9.2](./01-architecture.md)); `verifyRun` ([01 §14](./01-architecture.md)); `.pkr` replay file `PKR1` ([02 §4.6](./02-simulation.md)); `bucketForPlayers`, `BucketId` (`'solo' | 'duo' | 'squad' | 'party'`).
-6. Difficulty: `'snack' | 'meal' | 'feast'` exists in the sim ([02 §15.3](./02-simulation.md)); **only `meal` and `feast` are ranked**. `snack` runs are never submitted (the client hides the submit step) and the server answers `not_ranked` if one arrives.
+6. Difficulty: `'snack' | 'meal' | 'feast'` exists in the sim ([02 §15.3](./02-simulation.md)); **only `meal` and `feast` are ranked**. `snack` runs, and any run with `RunConfig.assist === true` (the "extended patience" accessibility option, ticket time x1.25, [05](./05-client-ui-input-audio.md)), are **unranked**: the client never submits them and the server answers `not_ranked` if one arrives (section 9.6).
 7. Repo locations (target):
    - `v2/netlify/functions/*.ts` the functions, `v2/netlify/functions/_shared/*.ts` helpers (`db.ts`, `auth.ts`, `ratelimit.ts`, `errors.ts`, `codes.ts`, `store.ts`).
    - `v2/packages/records/` = `@ga/records` (codec, `verifyRun`, submission schema); see [01 §9.5](./01-architecture.md).
@@ -108,6 +108,7 @@ create table if not exists public.v2_runs (
   expired       integer not null default 0,
   wrong         integer not null default 0,
   final_hash    text not null,                   -- RunResult.hash
+  per_slot      jsonb,                           -- optional RunResult.perSlot (server-computed), null when the sim provides none
   team_key      text,                            -- sha256 of sorted participant ids, recomputed on every claim
   first_submitter uuid references public.v2_players(id) on delete set null,
   attempts      smallint not null default 0,     -- verification attempts
@@ -326,11 +327,12 @@ export interface RunStartReq {
   levelId: string;
   players: number;                 // 1..6 total chefs in the run
   seed: number;                    // u32, RunConfig.seed
-  difficulty: 'meal' | 'feast';
+  difficulty: 'snack' | 'meal' | 'feast';   // snack is refused with 422 not_ranked
+  assist?: boolean;                // RunConfig.assist; true is refused with 422 not_ranked
   simVersion: number;              // SIM_VERSION of the client build
 }
 // runToken = base64url( JSON{ pid, lvl, n, seed, diff, sv, t } ) + '.' + base64url( HMAC_SHA256(RUN_START_SECRET, that payload) ), t = ms epoch.
-// Also inserted in v2_run_starts. Refused: 409 stale_client when simVersion != server SIM_VERSION; 404 unknown_level; 422 not_ranked (snack).
+// Also inserted in v2_run_starts. Refused: 409 stale_client when simVersion != server SIM_VERSION; 404 unknown_level; 422 not_ranked (snack or assist).
 
 export interface RunSubmitReq {
   runToken: string;
@@ -345,6 +347,7 @@ export interface RunStatusRes {
   result?: {                       // when verified
     levelId: string; bucket: 'solo' | 'duo' | 'squad' | 'party'; difficulty: 'meal' | 'feast';
     score: number; stars: 0 | 1 | 2 | 3; served: number; expired: number; wrong: number; ticks: number; players: number;
+    perSlot?: SlotResult[];        // only when the sim's RunResult has per-slot counters (section 6.2)
     visible: boolean;              // false when flagged for review
     rank: number | null;           // current board rank, null if not visible
     isPersonalBest: boolean | null;   // for the requesting player if a bearer token is sent
@@ -356,7 +359,7 @@ export interface RunStatusRes {
 `POST /api/runs` algorithm (the whole function, in order):
 1. `requirePlayer`; rate limit `runs_submit` (section 5.2); decode body (cap 400 KB).
 2. Verify `runToken` HMAC and parse; check `t` and `used_at` (section 9.2). Fetch the `v2_run_starts` row; refuse `run_token_used` (409) if the same token was already used **for a different replay**; the same token with the same replay is an idempotent retry.
-3. Decode the `.pkr` header only (no sim yet): magic, size, JSON header. Check `config.simVersion === SIM_VERSION` else `409 stale_client`; `config.contentHash === contentHash(levelId)` else `409 stale_client`; `config` fields equal the token's (`levelId`, `players`, `seed`; `difficulty` equal to `header.difficulty`) else `422 token_mismatch`; `header.ticks <= maxTicks(level)` (section 6.4) else `422 replay_too_long`; `slots` valid (non-empty, unique, each `< players`) else `422 bad_slots`.
+3. Decode the `.pkr` header only (no sim yet): magic, size, JSON header. Check `config.simVersion === SIM_VERSION` else `409 stale_client`; `config.contentHash === contentHash(levelId)` else `409 stale_client`; `config` fields equal the token's (`levelId`, `players`, `seed`, `difficulty`, `assist ?? false`; `header.difficulty` equal to `config.difficulty ?? 'meal'`) else `422 token_mismatch`; `config.assist === true` or difficulty `snack` else-wise unranked: `422 not_ranked`; `header.ticks <= maxTicks(level)` (section 6.4) else `422 replay_too_long`; `slots` valid (non-empty, unique, each `< players`) else `422 bad_slots`.
 4. `replay_key = sha256(canonicalPkr(bytes))` where `canonicalPkr` re-encodes the decoded log with no checkpoints (`@ga/records` `canonicalBytes(log)`). Look up `v2_runs.replay_key`:
    - **Exists**: this is an additional participant (another peer of the same online run, [06 §15](./06-multiplayer.md#15-run-end-and-record-submission-hand-off)). Apply the claim rules (section 9.3). On success insert `v2_run_players` rows for the requested slots (conflict on `(run_id, slot)` = `409 slot_taken`), mark the run token used, and if the run is `verified` call `v2_finalize_run`. Respond `202 { runId, status, deduplicated: true }`.
    - **New**: insert `v2_runs` (`status 'pending'`, placeholder result columns from the *claim header*, which the verifier overwrites; `visible false`), the replay row, the participant rows, mark token used. Then invoke the verifier: `fetch(<site>/.netlify/functions/verify-run-background, { method: 'POST', headers: { 'x-internal-key': INTERNAL_KEY }, body: JSON.stringify({ runId }) })` without awaiting the result (fire and forget, the background function answers `202` immediately). Respond `202 { runId, status: 'pending', deduplicated: false }`.
@@ -372,7 +375,7 @@ export interface RunStatusRes {
 ```ts
 export interface BoardEntry {
   rank: number; runId: string; score: number; stars: 0 | 1 | 2 | 3; served: number; ticks: number; players: number;
-  crew: Array<{ nickname: string; playerId: string | null; slots: number[] }>;   // claimed participants only
+  crew: Array<{ nickname: string; playerId: string | null; slots: number[]; served?: number }>;   // claimed participants only; `served` = sum of perSlot.served over their slots when available
   unclaimedSlots: number;           // players - claimed slots, shown as "+N guests"
   achievedAt: string;
   legacy: boolean;                  // sim_version != current
@@ -495,7 +498,7 @@ Defaults (tunable). Boards GET additionally benefits from the edge cache headers
 | 422 | `invalid_nickname`, `nickname_blocked`, `bad_slots`, `token_mismatch`, `replay_too_long`, `replay_malformed`, `not_ranked`, `cannot_friend_self`, `friend_limit`, `run_too_fast`, `claim_window_closed` | validation |
 | 429 | `rate_limited` | |
 | 503 | `code_space_busy`, `store_unavailable` | |
-Rejection reasons stored in `v2_runs.reject_reason` (set by the verifier): `replay_malformed`, `unknown_level`, `bad_players`, `version_mismatch`, `content_mismatch`, `replay_too_long`, `phase_not_ended`, `hash_mismatch`, `score_mismatch`, `players_mismatch`, `verify_failed`, `removed`.
+Rejection reasons stored in `v2_runs.reject_reason` (set by the verifier): `replay_malformed`, `not_ranked`, `unknown_level`, `bad_players`, `version_mismatch`, `content_mismatch`, `replay_too_long`, `phase_not_ended`, `hash_mismatch`, `score_mismatch`, `players_mismatch`, `verify_failed`, `removed`.
 
 ---
 
@@ -509,29 +512,38 @@ Rejection reasons stored in `v2_runs.reject_reason` (set by the verifier): `repl
 5. Failed network: keep the pending submission in `localStorage['pk2.pendingRuns']` (max 5, 1 MB total) and retry on next launch if the `runToken` is still valid (section 9.2), else drop.
 
 ### 6.2 Replay container format
-This is exactly the `.pkr` format of [02 §4.6](./02-simulation.md): magic `PKR1`, `headerLen u16`, UTF-8 JSON header, then run-length-encoded per-slot input records (5-byte `encodeRushInput`). Header (owned by 02, restated for the server):
+This is exactly the `.pkr` format of [02 §4.6](./02-simulation.md): magic `PKR1`, `headerLen u16`, UTF-8 JSON header, then for each slot in order `u32 recordCount` followed by run-length records `{ runLen u16, 5 bytes encodeRushInput }` (the 5-byte `RushInput` of 02 §4.4). The sum of `runLen` of every slot equals `header.ticks`. Nothing in this doc changes that layout. Header, as 02 defines it:
 ```ts
 export interface PkrHeader {
-  config: RunConfig;             // { simVersion, contentHash, levelId, players, seed }
-  difficulty: 'snack' | 'meal' | 'feast';
+  config: RunConfig;             // { simVersion, contentHash, levelId, players, seed, difficulty?, assist? }
+  difficulty: 'snack' | 'meal' | 'feast';   // 02 §4.6 repeats it at top level; must equal config.difficulty ?? 'meal'
   ticks: number;                 // steps executed
   finalHash: string;             // RunResult.hash
   score: number;                 // RunResult.score as the client computed it
   checkpoints: Array<[number, string]>;   // [tick, hash] every 150 ticks; optional for the server
 }
 ```
+Optional per-slot results: if 02's `RunResult` carries them, the type is
+```ts
+export interface SlotResult { slot: number; served: number; expired?: number; wrong?: number }   // owned by 02; every field beyond `slot` and `served` optional
+// RunResult.perSlot?: SlotResult[]
+```
+The client may use it for the results table ([05 §results](./05-client-ui-input-audio.md)). The **server never reads it from the upload**: the header has no per-slot field, and the verifier takes `perSlot` from its own re-simulation, stores it in `v2_runs.per_slot`, and serves it in `RunStatusRes` and as `BoardEntry.crew[].served`. If the sim provides no `perSlot`, all these fields are simply absent (no schema change needed).
+
 `@ga/records` exports (all pure, Node and browser):
 ```ts
 export function encodePkr(log: RunLog, result: RunResult, difficulty: Difficulty): Uint8Array;
 export function decodePkr(bytes: Uint8Array): { header: PkrHeader; log: RunLog };      // throws PkrError(code) on any malformation
-export function canonicalBytes(log: RunLog, difficulty: Difficulty): Uint8Array;        // PKR1 with header { config, difficulty, ticks } only and no checkpoints: input of replay_key
+/** Server-internal canonical form, still a valid PKR1 file: header { config, difficulty, ticks, finalHash: '', score: 0, checkpoints: [] }, same body. Input of replay_key. */
+export function canonicalBytes(log: RunLog, difficulty: Difficulty): Uint8Array;
 export function replayKey(bytes: Uint8Array): string;                                   // sha256 hex of canonicalBytes(decodePkr(bytes))
 export interface VerifyResult { ok: boolean; reason?: string; result?: RunResult }
-export function verifyRun(log: RunLog, claim: { score: number; hash: string }, opts?: { difficulty?: Difficulty; maxMs?: number; now?: () => number }): VerifyResult;
+/** Signature owned here (01 §14). It is async because `SimDriver.start` returns a promise (01 §9.2); 01 §14 lists it without `Promise` and `opts`, update that line. */
+export function verifyRun(log: RunLog, claim: { score: number; hash: string }, opts?: { maxMs?: number; now?: () => number }): Promise<VerifyResult>;
 ```
-The wire form for upload is the `.pkr` bytes base64-encoded in `replayB64` (about 54 KB for a 40 KB file; hard cap 262,144 raw bytes). `decodePkr` rejects: wrong magic, header length beyond the buffer, header JSON invalid, `players` not 1..6, per-slot run lengths that do not sum to `header.ticks`, `ticks` 0 or above 20,000, trailing bytes.
+The wire form for upload is the `.pkr` bytes base64-encoded in `replayB64` (about 54 KB for a 40 KB file; hard cap 262,144 raw bytes). `decodePkr` rejects: wrong magic, header length beyond the buffer, header JSON invalid, `players` not 1..6, per-slot run lengths that do not sum to `header.ticks`, `ticks` 0 or above 20,000, trailing bytes, `click` bytes other than 0..254 or 255, `header.difficulty` different from `config.difficulty ?? 'meal'`.
 
-Note for [06](./06-multiplayer.md): the online input log is a `RunLog`; the confirmed-frame log of a net run converts to `frames[t][slot]` via `decodeRushInput`; the `.pkr` codec is the single replay codec. If 06 mentions a different container name or `SIM_BUILD_ID`, the names in this section and in 01 §7.6 (`SIM_VERSION`) win.
+Online runs ([06](./06-multiplayer.md)): the `RunLog` comes from each peer's own sim worker (`rush-log-request`), so it is identical on every peer (that is what the lockstep guarantees), and the `.pkr` bytes are the same for everyone apart from checkpoints; `replay_key` ignores them.
 
 ### 6.3 The verifier (`verify-run-background.ts`)
 ```ts
@@ -546,15 +558,15 @@ export default async (req: Request): Promise<Response> => {
 `verifyOne(runId)`:
 1. Atomically claim: `update v2_runs set status='verifying', attempts=attempts+1 where id=$1 and status in ('pending','verifying') returning *`; no row = return (already done).
 2. Load the replay bytes, `decodePkr` -> `{ header, log }`. On `PkrError` -> reject `replay_malformed`.
-3. Check `log.config.simVersion === SIM_VERSION`, `contentHash(levelId) === log.config.contentHash`, level exists (`rushLevelById`), `players` in 1..6 -> else reject `version_mismatch` / `content_mismatch` / `unknown_level` / `bad_players`. (Rejections for version/content mismatch do **not** add a strike.)
-4. `verifyRun(log, { score: header.score, hash: header.finalHash }, { difficulty, maxMs: VERIFY_MAX_MS })`. Inside `verifyRun`:
-   - create `new InlineSimDriver()` and `start({ ...log.config, difficulty }, { kind: 'driven' })` (the same sim code as the client, [01 §9.2](./01-architecture.md));
+3. Check `log.config.assist !== true` and difficulty is not `snack` (else reject `not_ranked`, no strike), `log.config.simVersion === SIM_VERSION`, `contentHash(levelId) === log.config.contentHash`, level exists (`rushLevelById`), `players` in 1..6 -> else reject `version_mismatch` / `content_mismatch` / `unknown_level` / `bad_players`. (Rejections for version/content mismatch do **not** add a strike.)
+4. `verifyRun(log, { score: header.score, hash: header.finalHash }, { maxMs: VERIFY_MAX_MS })`. Inside `verifyRun`:
+   - create `new InlineSimDriver()` and `start(log.config, 'driven')` (`log.config` already holds `difficulty`; the signature is `start(config: RunConfig, clock: RushClock)` from 01 §9.2) (the same sim code as the client, [01 §9.2](./01-architecture.md));
    - for `t` in `0 .. log.frames.length - 1`: `driver.advance(1, [log.frames[t]])`; every 256 ticks check `now() - t0 <= maxMs`, else return `{ ok: false, reason: 'verify_timeout' }` (the caller retries, section 6.3 step 8);
    - after the last frame require `phase === 'ended'` (`phase_not_ended`) and that no frame was supplied after the `TimeUp` tick (extra frames are rejected: `replay_too_long`);
    - compute `RunResult` (`levelId, bucket, score, stars, served, expired, wrong, ticks, hash`) from the sim;
    - compare `result.hash === claim.hash` (`hash_mismatch`) and `result.score === claim.score` (`score_mismatch`); compare `result.ticks === header.ticks`.
 5. `bucket` in the result comes from the sim's `bucketForPlayers(level, players)` (the client cannot choose it).
-6. On `ok`: one SQL update sets `status='verified'`, `verified_at=now()`, `bucket, score, stars, served, expired, wrong, ticks, final_hash` from the **server's** `RunResult`, `verify_ms`, then the human-rate heuristics (section 9.4) may set `flag`; then `select v2_finalize_run($1)`.
+6. On `ok`: one SQL update sets `status='verified'`, `verified_at=now()`, `bucket, score, stars, served, expired, wrong, ticks, final_hash` and `per_slot` (when present) from the **server's** `RunResult`, `verify_ms`, then the human-rate heuristics (section 9.4) may set `flag`; then `select v2_finalize_run($1)`.
 7. On a definitive failure (`hash_mismatch`, `score_mismatch`, `players_mismatch`, `phase_not_ended`, `replay_*`, `*_mismatch`): `status='rejected'`, `reject_reason=<code>`, `visible=false`; if the reason is `hash_mismatch` or `score_mismatch` increment `strikes` of the first submitter (section 9.5).
 8. On `verify_timeout` or an exception: leave `status='pending'` (so `verify-sweep` retries) and log; after `attempts >= 3` the sweeper rejects with `verify_failed`.
 
@@ -669,7 +681,13 @@ A flagged run is **verified but not visible**; the owner sees it as "Pending rev
 - Manual `ban_player`: `banned = true`; the player's runs stay but become invisible; the token returns `403 banned`.
 - Honest desync bugs must not punish: telemetry (section 6.5) lets us spot sim bugs, and a `SIM_VERSION` bump or a hotfix plus an admin "forgive" action (`ban_player` with `action: 'unban'` is allowed in `admin.ts`) resets the window. Add `'unban'` to the admin action union when implementing.
 
-### 9.6 Known limitations (accepted)
+### 9.6 Assisted and unranked runs
+- `RunConfig.assist = true` is set by the client's accessibility option "extended patience" (ticket time x1.25, [05](./05-client-ui-input-audio.md); online it is the **host's** setting, copied to every peer through `runStart.config`, [06 §8.3](./06-multiplayer.md#83-json-messages-on-ctl-reliable)). Assisted runs play normally and show the local score, but are **flagged and not ranked**: no `runs/start`, no submission, no board entry, no personal best. The results screen shows `results.unverified` ([05](./05-client-ui-input-audio.md)).
+- Same for `difficulty: 'snack'`.
+- Server enforcement (defense in depth against a modified client): `POST /api/runs/start` and `POST /api/runs` answer `422 not_ranked` when `assist` is true or difficulty is `snack`; the verifier rejects the same case with `not_ranked` (no strike). Because `assist` is inside `RunConfig`, it is covered by the `.pkr` header and by the re-simulation (the sim applies the x1.25), so clearing the flag in the file changes the replayed result and the hash mismatches.
+- Local personal bests keep separate keys for assisted runs (`pk2.best.<level>.<bucket>.<difficulty>.assist`) so they never mix with ranked ones.
+
+### 9.7 Known limitations (accepted)
 - A tool-assisted or bot player who inputs frame-perfect, human-rate-looking sequences passes. Mitigation is the replay itself: every visible record has a downloadable replay that anyone can watch ("watch the record"), and admin removal.
 - Tokens can be shared; a friend can play under one identity. Not a problem for a no-account game.
 - Teammates cannot be forced to submit; a host's run might list fewer players than played. The board shows "+N guests".

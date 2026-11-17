@@ -1000,7 +1000,7 @@ These names are final. Other docs reuse them verbatim. Owner doc in parentheses;
 - `PeerId`, `RunTransport`, `SignalingClient`, `SignalPayload`, `RoomInfo`, `RoomMember`, `NetSession`, `allocateSlots`
 
 **Records (`@ga/records`)**
-- `verifyRun` (signature owned by `07`: `verifyRun(log: RunLog, claim: { score: number; hash: string }): VerifyResult`), `RunLog`, `RunResult`
+- `verifyRun` (signature owned by `07`: `verifyRun(log: RunLog, claim: { score: number; hash: string }, opts?: VerifyOptions): Promise<VerifyResult>; see 07 §6`), `RunLog`, `RunResult`
 
 **Render asset boundary (`@ga/render`)**
 - `ArtStyle`, `AssetKind`, `AssetId`, `AssetEntry`, `AssetManifest`, `AssetBackend`, `createAssetBackend`, `Visual`, `ItemLike` (exists), `ItemVisual`, `StationVisual`, `StationVisualState`, `ChefLook`, `ChefPose`, `ChefVisual`, `CustomerKind`, `CustomerVisual`, `PropVisual`, `StyleProfile`
